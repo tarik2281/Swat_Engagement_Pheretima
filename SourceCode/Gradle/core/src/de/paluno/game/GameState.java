@@ -7,9 +7,7 @@ public enum GameState {
 	GAMEOVERPLAYERONEWON,
 	GAMEOVERPLAYERTWOWON;
 	
-	private GameState() {
-		// TODO Auto-generated constructor stub
-	}
+	
 	
 	
 }

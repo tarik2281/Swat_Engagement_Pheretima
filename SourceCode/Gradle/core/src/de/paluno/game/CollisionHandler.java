@@ -1,17 +1,11 @@
 package de.paluno.game;
 
-import org.w3c.dom.UserDataHandler;
-
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
-
-import de.paluno.game.gameobjects.Ground;
 import de.paluno.game.gameobjects.Projectile;
-import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
@@ -31,11 +25,13 @@ public class CollisionHandler implements ContactListener {
 	@Override
 	public void beginContact(Contact contact) {
 		Projectile projectile = null;
-		Worm worm = null;
-		Ground ground = null;
+		
 		
 		Fixture a = contact.getFixtureA();
 		Fixture b = contact.getFixtureB();
+		
+		a.setUserData(projectile);
+		
 		
 		if (a == null || b == null) {
 			return;
@@ -45,15 +41,7 @@ public class CollisionHandler implements ContactListener {
 		}
 		System.out.println("Collision!");
 		
-		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground && a.isSensor()) {
-			worm = (Worm) a.getUserData();
-			ground = (Ground) b.getUserData();
-			
-		}
-		
-		
-		
-		
+	
 
 	}
 
