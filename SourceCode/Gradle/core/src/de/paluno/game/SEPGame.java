@@ -1,13 +1,16 @@
 package de.paluno.game;
 
-public class SEPGame {
+import com.badlogic.gdx.Game;
+import de.paluno.game.screens.PlayScreen;
+
+public class SEPGame extends Game {
 	
 	public SEPGame() {
-		// TODO Auto-generated constructor stub
-	}
-	
-	void create() {
-		
+
 	}
 
+	@Override
+	public void create() {
+		setScreen(new PlayScreen(this));
+	}
 }
