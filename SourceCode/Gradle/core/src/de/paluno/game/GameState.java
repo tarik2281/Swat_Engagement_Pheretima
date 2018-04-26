@@ -11,4 +11,6 @@ public enum GameState {
 	private GameState() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	
 }

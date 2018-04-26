@@ -2,27 +2,36 @@ package de.paluno.game;
 
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 
-public class CollisionHandler {
+public class CollisionHandler implements ContactListener {
  
 	public CollisionHandler() {
 		// TODO Auto-generated constructor stub
 	}
-	
-	void beginContact(Contact beginContact) {
+
+	@Override
+	public void beginContact(Contact contact) {
+		// TODO Auto-generated method stub
 		
 	}
-	
-	void endContact(Contact endContact){
+
+	@Override
+	public void endContact(Contact contact) {
+		// TODO Auto-generated method stub
 		
 	}
-	
-	void preSolve(Contact preContact, Manifold preMani){
+
+	@Override
+	public void preSolve(Contact contact, Manifold oldManifold) {
+		// TODO Auto-generated method stub
 		
 	}
-	
-	void postSolve(Contact postContact, ContactImpulse postContactImpuls) {
+
+	@Override
+	public void postSolve(Contact contact, ContactImpulse impulse) {
+		// TODO Auto-generated method stub
 		
 	}
 	
