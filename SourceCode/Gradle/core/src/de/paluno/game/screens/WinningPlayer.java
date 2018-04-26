@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package de.paluno.game.screens;
 
 public enum WinningPlayer {
 
@@ -11,3 +11,4 @@ public enum WinningPlayer {
 	}
 	
 }
+// EJDBEJFH
