@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
 
-public class ShotDirectionIndicator {
+public class ShotDirectionIndicator implements Updatable,Renderable {
 	
 	public ShotDirectionIndicator(int x, Worm worm, PlayScreen screen) {
 		
