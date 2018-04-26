@@ -5,19 +5,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
 
-public class ShotDirectionIndicator implements Updatable,Renderable {
+public class ShotDirectionIndicator {
 	
-	public ShotDirectionIndicator(int x, Worm worm, PlayScreen screen) {
+	public ShotDirectionIndicator(int playerNumber, Worm worm, PlayScreen playScreen) {
 		
 	}
 	
-	@Override
-	public void update(float delta, GameState state) {
+	public void update(float delta, GameState gamestate) {
 		
 	}
 	
-	@Override
-	public void render(SpriteBatch spriBatch, float delta) {
+	public void render(com.badlogic.gdx.graphics.g2d.SpriteBatch batch, float delta){
 		
 	}
 }
