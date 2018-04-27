@@ -6,6 +6,7 @@ public enum GameState {
 	SHOOTING,
 	GAMEOVERPLAYERONEWON,
 	GAMEOVERPLAYERTWOWON;
+	 
 	
 	
 	

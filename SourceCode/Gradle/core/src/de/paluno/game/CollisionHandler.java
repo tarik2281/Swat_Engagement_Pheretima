@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import de.paluno.game.gameobjects.Projectile;
+import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
@@ -25,12 +26,14 @@ public class CollisionHandler implements ContactListener {
 	@Override
 	public void beginContact(Contact contact) {
 		Projectile projectile = null;
+		Worm worm = null;
 		
 		
 		Fixture a = contact.getFixtureA();
 		Fixture b = contact.getFixtureB();
 		
 		a.setUserData(projectile);
+		b.setUserData(worm);
 		
 		
 		if (a == null || b == null) {
