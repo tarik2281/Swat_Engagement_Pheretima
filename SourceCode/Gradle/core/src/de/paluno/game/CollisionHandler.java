@@ -10,6 +10,16 @@ import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
+	
+	public static void main(String[] args) {
+		
+		int [] array1 = new int [5];
+		int [] array2 = new int [5];
+		for (int i = 0, j = 5; i < array1.length; i++, j--) {
+			array1[i] = i;
+			array2[i] = j;
+		}
+	}
 
 	public CollisionHandler() {
 		// TODO Auto-generated constructor stub
@@ -27,22 +37,64 @@ public class CollisionHandler implements ContactListener {
 	public void beginContact(Contact contact) {
 		Projectile projectile = null;
 		Worm worm = null;
+		Ground ground = null;
 		
 		
 		Fixture a = contact.getFixtureA();
 		Fixture b = contact.getFixtureB();
-		
-		a.setUserData(projectile);
-		b.setUserData(worm);
-		
-		
+			
 		if (a == null || b == null) {
 			return;
 		}
 		if (a.getUserData() == null || b.getUserData() == null) {
 			return;
 		}
+		
 		System.out.println("Collision!");
+		
+		// Projectile -> Worm -> Projectile explode && Worm Die
+		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Projectile) {
+			worm = (Worm) a.getUserData();
+			projectile = (Projectile) b.getUserData();
+		}else if (b.getUserData() instanceof Worm && a.getUserData() instanceof Projectile) {
+			worm = (Worm) b.getUserData();
+			projectile = (Projectile) a.getUserData();
+		}
+		
+		if (worm != null && projectile != null) {
+			projectile.explode();
+			worm.die();
+		}
+		
+		// Projectile -> Ground -> Projectile explode
+		
+		if (a.getUserData() instanceof Projectile && b.getUserData() instanceof Ground) {
+			worm = (Worm) a.getUserData();
+			projectile = (Projectile) b.getUserData();
+		}else if (b.getUserData() instanceof Projectile && a.getUserData() instanceof Ground) {
+			worm = (Worm) b.getUserData();
+			projectile = (Projectile) a.getUserData();
+		}
+		
+		if (projectile!= null && worm != null) {
+			projectile.explode();
+		}
+		
+		
+		// Worm -> Ground -> Worm jump ??
+		
+		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground) {
+			worm = (Worm) a.getUserData();
+			ground = (Ground) b.getUserData();
+		}else if (b.getUserData() && instanceof Worm && a.getUserData() instanceof Ground) {
+			worm = (Worm) b.getUserData();
+			ground = (Ground) a.getUserData();
+		}
+		
+		if (worm != null && ground != null) {
+			worm.setStandsOnGround(true);
+		}
+	
 		
 	
 
@@ -50,8 +102,27 @@ public class CollisionHandler implements ContactListener {
 
 	@Override
 	public void endContact(Contact contact) {
-		// TODO Auto-generated method stub
+		Worm worm = null;
+		Ground ground = null;
+		
+		Fixture a = contact.getFixtureA();
+		Fixture b = contact.getFixtureB();
+		
+		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground) {
+			worm = (Worm) a.getUserData();
+			ground = (Ground) b.getUserData();
+		}else if (b.getUserData() instanceof Worm && a.getUserData() instanceof Ground) {
+			worm = (Worm) b.getUserData();
+			ground = (Ground) a.getUserData();
+		}
+		
+		if (worm != null && ground != null) {
+			worm.setStandsOnGround(false);
+		}
+		
 	}
+	
+	
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
