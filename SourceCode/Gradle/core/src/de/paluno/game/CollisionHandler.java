@@ -11,16 +11,6 @@ import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
 	
-	public static void main(String[] args) {
-		
-		int [] array1 = new int [5];
-		int [] array2 = new int [5];
-		for (int i = 0, j = 5; i < array1.length; i++, j--) {
-			array1[i] = i;
-			array2[i] = j;
-		}
-	}
-
 	public CollisionHandler() {
 		// TODO Auto-generated constructor stub
 
@@ -64,6 +54,7 @@ public class CollisionHandler implements ContactListener {
 		if (worm != null && projectile != null) {
 			projectile.explode();
 			worm.die();
+			System.out.println("Worm dead!");
 		}
 		
 		// Projectile -> Ground -> Projectile explode
@@ -78,6 +69,7 @@ public class CollisionHandler implements ContactListener {
 		
 		if (projectile!= null && worm != null) {
 			projectile.explode();
+			
 		}
 		
 		
@@ -93,6 +85,7 @@ public class CollisionHandler implements ContactListener {
 		
 		if (worm != null && ground != null) {
 			worm.setStandsOnGround(true);
+			System.out.println("Worm back on Ground!");
 		}
 	
 		
@@ -118,6 +111,7 @@ public class CollisionHandler implements ContactListener {
 		
 		if (worm != null && ground != null) {
 			worm.setStandsOnGround(false);
+			System.out.println("Worm jumped!");
 		}
 		
 	}
