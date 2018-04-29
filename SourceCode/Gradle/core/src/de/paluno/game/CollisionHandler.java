@@ -1,5 +1,7 @@
 package de.paluno.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -39,6 +41,7 @@ public class CollisionHandler implements ContactListener {
 		if (a.getUserData() == null || b.getUserData() == null) {
 			return;
 		}
+		
 		
 		System.out.println("Collision!");
 		
