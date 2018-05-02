@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.physics.box2d.World;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
@@ -16,9 +17,9 @@ import java.util.LinkedList;
 
 public class PlayScreen extends ScreenAdapter {
 
-    private SEPGame game;
-
-    private SpriteBatch spriteBatch;
+    
+	private SEPGame game;
+	private SpriteBatch spriteBatch;
 
     private World world;
     private GameState gameState;
@@ -77,7 +78,7 @@ public class PlayScreen extends ScreenAdapter {
 
     public void renderPhase(float delta) {
         for (Renderable renderable : renderableObjects) {
-            renderable.render(spriteBatch, delta);
+        	//renderable.render(spriteBatch, delta);
         }
     }
 

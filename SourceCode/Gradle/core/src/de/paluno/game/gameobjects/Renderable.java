@@ -1,7 +1,9 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 public interface Renderable {
 	
-public void render(com.badlogic.gdx.graphics.g2d.SpriteBatch batch, float delta) ;
+public void render(SpriteBatch batch, float delta) ;
 
 }
