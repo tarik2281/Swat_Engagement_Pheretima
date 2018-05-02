@@ -3,6 +3,7 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
@@ -17,6 +18,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private Body body;
 	private Fixture fixture;
 	
+	private GameState currentState;
+	
 	public Worm(int num, PlayScreen screen) {
 		this.playerNumber = num;
 		this.screen = screen;
@@ -25,7 +28,32 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public void update(float delta, GameState state) {
+		this.update(delta, state, 0, false);
+	}
+	
+	public void update(float delta, GameState state, int movement, boolean jump) {
 		if(this.body == null) return;
+		
+		this.currentState = state;
+		
+		if(jump && this.canJump()) {
+			this.body.applyForceToCenter(0.0f, 2.0f, true);
+			this.setStandsOnGround(false);
+		}
+		
+		if(movement != 0) {
+			Vector2 currentPos = this.body.getPosition();
+			Vector2 currentVel = this.body.getLinearVelocity();
+			
+			if(movement == 1 && currentVel.x < 20) {
+				if(currentPos.x > 0) this.body.applyLinearImpulse(0.5f, 0.0f, currentPos.x, currentPos.y, true);
+				else this.body.setLinearVelocity(0.0f, currentVel.y);
+			}
+			else if(movement == -1 && currentVel.x > -20) {
+				if(currentPos.x < 100) this.body.applyLinearImpulse(-0.5f, 0.0f, currentPos.x, currentPos.y, true);
+				else this.body.setLinearVelocity(0.0f, currentVel.y);
+			}
+		}
 	}
 	
 	public void render(SpriteBatch batch, float delta) {
@@ -42,12 +70,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void setupBody() {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(10, 50);
+		// TODO: Change spawning player and world-size dependent.
 		bodyDef.type = BodyType.DynamicBody;
 		
 		this.body = this.screen.getWorld().createBody(bodyDef);
 		
 		PolygonShape bodyRect = new PolygonShape();
 		bodyRect.setAsBox(5, 10);
+		// TODO: Maybe finetune hitbox
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
@@ -65,6 +95,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public void setBodyToNullReference() {
+		this.fixture = null;
 		this.body = null;
 	}
 	
@@ -79,9 +110,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	public boolean canJump() {
 		return this.canJump() && (
-				(this.playerNumber == 1 && this.screen.getGameState() == GameState.PLAYERONETURN)
+				(this.playerNumber == 1 && this.currentState == GameState.PLAYERONETURN)
 				||
-				(this.playerNumber == 2 && this.screen.getGameState() == GameState.PLAYERTWOTURN));
+				(this.playerNumber == 2 && this.currentState == GameState.PLAYERTWOTURN));
 	}
 	
 	public boolean isStandsOnGround() {
