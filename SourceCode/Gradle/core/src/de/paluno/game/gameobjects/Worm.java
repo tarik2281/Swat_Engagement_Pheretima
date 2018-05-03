@@ -17,6 +17,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	private Body body;
 	private Fixture fixture;
+	private Texture texture;
 	
 	private GameState currentState;
 	
@@ -25,6 +26,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.screen = screen;
 		
 		this.setupBody();
+		
+		this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
 	}
 	
 	public void update(float delta, GameState state) {
@@ -59,11 +62,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void render(SpriteBatch batch, float delta) {
 		if(this.body == null) return;
 		
-		Texture texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
 		// TODO: Rename textures. 
 		
 		batch.begin();
-		batch.draw(texture, 10, 10);
+		batch.draw(this.texture, 10, 10);
 		batch.end();
 	}
 	
