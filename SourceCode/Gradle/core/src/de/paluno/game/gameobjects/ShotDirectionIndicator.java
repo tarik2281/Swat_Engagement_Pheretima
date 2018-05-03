@@ -21,7 +21,6 @@ public class ShotDirectionIndicator extends java.lang.Object implements Renderab
 	public void render(SpriteBatch batch, float delta){
 		this.batch = batch;
 		batch = new SpriteBatch();
-		batch.begin();
 		
 	}
 	
