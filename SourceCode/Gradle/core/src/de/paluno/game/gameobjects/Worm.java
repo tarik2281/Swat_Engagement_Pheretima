@@ -100,6 +100,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public void die() {
+		this.screen.getWorld().destroyBody(this.body);
 		this.setBodyToNullReference();
 		if(this.playerNumber == 1) {
 			this.screen.setGameState(GameState.GAMEOVERPLAYERTWOWON);
