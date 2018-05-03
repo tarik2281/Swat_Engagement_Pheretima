@@ -98,6 +98,7 @@ public class CollisionHandler implements ContactListener {
 
 	@Override
 	public void endContact(Contact contact) {
+		
 		Worm worm = null;
 		Ground ground = null;
 		
@@ -114,7 +115,7 @@ public class CollisionHandler implements ContactListener {
 		
 		if (worm != null && ground != null) {
 			worm.setStandsOnGround(false);
-			System.out.println("Worm jumped!");
+			System.out.println("Worm jumped");
 		}
 		
 	}
