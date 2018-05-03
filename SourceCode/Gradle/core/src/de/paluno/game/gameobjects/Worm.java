@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
+import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
 
@@ -19,18 +20,17 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private Fixture fixture;
 	private Texture texture;
 	
+	private Vector2 spawnPosition;
+	
 	private GameState currentState;
 	
 	private int movement = 0;
 	private boolean jump = false;
 	
-	public static final int MOVEMENT_LEFT = -1;
-	public static final int MOVEMENT_RIGHT = 1;
-	public static final int MOVEMENT_NO_MOVEMENT = 0;
-	
-	public Worm(int num, PlayScreen screen) {
+	public Worm(int num, PlayScreen screen, Vector2 position) {
 		this.playerNumber = num;
 		this.screen = screen;
+		this.spawnPosition = position;
 		
 		this.setupBody();
 		
@@ -47,15 +47,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			this.setStandsOnGround(false);
 		}
 		
-		if(this.movement != MOVEMENT_NO_MOVEMENT) {
+		if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			Vector2 currentPos = this.body.getPosition();
 			Vector2 currentVel = this.body.getLinearVelocity();
 			
-			if(movement == MOVEMENT_RIGHT && currentVel.x < 20) {
+			if(movement == Constants.MOVEMENT_RIGHT && currentVel.x < Constants.MAX_VELOCITY) {
 				if(currentPos.x > 0) this.body.applyLinearImpulse(0.5f, 0.0f, currentPos.x, currentPos.y, true);
 				else this.body.setLinearVelocity(0.0f, currentVel.y);
 			}
-			else if(movement == MOVEMENT_LEFT && currentVel.x > -20) {
+			else if(movement == Constants.MOVEMENT_LEFT && currentVel.x > -Constants.MAX_VELOCITY) {
 				if(currentPos.x < 100) this.body.applyLinearImpulse(-0.5f, 0.0f, currentPos.x, currentPos.y, true);
 				else this.body.setLinearVelocity(0.0f, currentVel.y);
 			}
@@ -76,14 +76,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	public void setupBody() {
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(10, 50);
+		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
 		// TODO: Change spawning player and world-size dependent.
 		bodyDef.type = BodyType.DynamicBody;
 		
 		this.body = this.screen.getWorld().createBody(bodyDef);
 		
 		PolygonShape bodyRect = new PolygonShape();
-		bodyRect.setAsBox(5, 10);
+		bodyRect.setAsBox(5 * Constants.WORLD_SCALE, 10 * Constants.WORLD_SCALE);
 		// TODO: Maybe finetune hitbox
 		
 		FixtureDef fixtureDef = new FixtureDef();

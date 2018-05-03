@@ -15,6 +15,14 @@ public class Constants {
 	// number of iterations for the physics simulation
 	public static final int VELOCITY_ITERATIONS = 8;
 	public static final int POSITION_ITERATIONS = 3;
+	
+	// Worm movement code constants
+	public static final int MOVEMENT_LEFT = -1;
+	public static final int MOVEMENT_RIGHT = 1;
+	public static final int MOVEMENT_NO_MOVEMENT = 0;
+	
+	// Worm movement modifier constant
+	public static final float MAX_VELOCITY = 20.0f;
 
 	private Constants() {
 		// An instance should not be created of this class
