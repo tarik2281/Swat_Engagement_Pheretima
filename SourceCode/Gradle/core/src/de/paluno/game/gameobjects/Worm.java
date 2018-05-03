@@ -24,6 +24,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private int movement = 0;
 	private boolean jump = false;
 	
+	public static final int MOVEMENT_LEFT = -1;
+	public static final int MOVEMENT_RIGHT = 1;
+	public static final int MOVEMENT_NO_MOVEMENT = 0;
+	
 	public Worm(int num, PlayScreen screen) {
 		this.playerNumber = num;
 		this.screen = screen;
@@ -43,15 +47,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			this.setStandsOnGround(false);
 		}
 		
-		if(this.movement != 0) {
+		if(this.movement != MOVEMENT_NO_MOVEMENT) {
 			Vector2 currentPos = this.body.getPosition();
 			Vector2 currentVel = this.body.getLinearVelocity();
 			
-			if(movement == 1 && currentVel.x < 20) {
+			if(movement == MOVEMENT_RIGHT && currentVel.x < 20) {
 				if(currentPos.x > 0) this.body.applyLinearImpulse(0.5f, 0.0f, currentPos.x, currentPos.y, true);
 				else this.body.setLinearVelocity(0.0f, currentVel.y);
 			}
-			else if(movement == -1 && currentVel.x > -20) {
+			else if(movement == MOVEMENT_LEFT && currentVel.x > -20) {
 				if(currentPos.x < 100) this.body.applyLinearImpulse(-0.5f, 0.0f, currentPos.x, currentPos.y, true);
 				else this.body.setLinearVelocity(0.0f, currentVel.y);
 			}
@@ -61,10 +65,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void render(SpriteBatch batch, float delta) {
 		if(this.body == null) return;
 		
+		Vector2 currentPos = this.body.getPosition();
+		
 		// TODO: Rename textures. 
 		
 		batch.begin();
-		batch.draw(this.texture, 10, 10);
+		batch.draw(this.texture, currentPos.x, currentPos.y);
 		batch.end();
 	}
 	
