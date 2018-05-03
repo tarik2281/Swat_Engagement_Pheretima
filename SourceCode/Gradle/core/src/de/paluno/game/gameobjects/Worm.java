@@ -65,13 +65,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void render(SpriteBatch batch, float delta) {
 		if(this.body == null) return;
 		
-		Vector2 currentPos = this.body.getPosition();
+		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
 		
 		// TODO: Rename textures. 
 		
-		batch.begin();
 		batch.draw(this.texture, currentPos.x, currentPos.y);
-		batch.end();
 	}
 	
 	public void setupBody() {
