@@ -7,6 +7,8 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
+
+import de.paluno.game.gameobjects.Ground;
 import de.paluno.game.gameobjects.Projectile;
 import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
@@ -81,7 +83,7 @@ public class CollisionHandler implements ContactListener {
 		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground) {
 			worm = (Worm) a.getUserData();
 			ground = (Ground) b.getUserData();
-		}else if (b.getUserData() && instanceof Worm && a.getUserData() instanceof Ground) {
+		}else if (b.getUserData() instanceof Worm && a.getUserData() instanceof Ground) {
 			worm = (Worm) b.getUserData();
 			ground = (Ground) a.getUserData();
 		}
