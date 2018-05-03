@@ -63,10 +63,10 @@ public class CollisionHandler implements ContactListener {
 		// Projectile -> Ground -> Projectile explode
 		
 		if (a.getUserData() instanceof Projectile && b.getUserData() instanceof Ground) {
-			worm = (Worm) a.getUserData();
+			ground = (Ground) b.getUserData();
 			projectile = (Projectile) b.getUserData();
 		}else if (b.getUserData() instanceof Projectile && a.getUserData() instanceof Ground) {
-			worm = (Worm) b.getUserData();
+			ground = (Ground) a.getUserData();
 			projectile = (Projectile) a.getUserData();
 		}
 		
