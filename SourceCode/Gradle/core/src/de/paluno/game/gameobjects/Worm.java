@@ -115,7 +115,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public boolean canJump() {
-		return this.canJump() && (
+		return this.isStandsOnGround() && (
 				(this.playerNumber == 1 && this.currentState == GameState.PLAYERONETURN)
 				||
 				(this.playerNumber == 2 && this.currentState == GameState.PLAYERTWOTURN));
