@@ -21,6 +21,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	private GameState currentState;
 	
+	private int movement = 0;
+	private boolean jump = false;
+	
 	public Worm(int num, PlayScreen screen) {
 		this.playerNumber = num;
 		this.screen = screen;
@@ -31,20 +34,16 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public void update(float delta, GameState state) {
-		this.update(delta, state, 0, false);
-	}
-	
-	public void update(float delta, GameState state, int movement, boolean jump) {
 		if(this.body == null) return;
 		
 		this.currentState = state;
 		
-		if(jump && this.canJump()) {
+		if(this.jump && this.canJump()) {
 			this.body.applyForceToCenter(0.0f, 2.0f, true);
 			this.setStandsOnGround(false);
 		}
 		
-		if(movement != 0) {
+		if(this.movement != 0) {
 			Vector2 currentPos = this.body.getPosition();
 			Vector2 currentVel = this.body.getLinearVelocity();
 			
@@ -124,5 +123,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	public void setStandsOnGround(boolean onGround) {
 		this.standsOnGround = onGround;
+	}
+	
+	public void setMovement(int newMovementCode) {
+		this.movement = newMovementCode;
+	}
+	public void setJump(boolean newJump) {
+		this.jump = newJump;
 	}
 }
