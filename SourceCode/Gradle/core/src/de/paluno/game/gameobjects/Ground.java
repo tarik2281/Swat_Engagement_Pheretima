@@ -2,9 +2,9 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -19,6 +19,7 @@ public class Ground implements PhysicsObject, Renderable {
     private PlayScreen screen;
     private Texture texture;
     private TextureRegion textureRegion;
+    private Sprite sprite;
 
     public Ground(PlayScreen screen){
         this.screen = screen;
@@ -27,13 +28,16 @@ public class Ground implements PhysicsObject, Renderable {
         texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
         textureRegion = new TextureRegion(texture);
-        // TODO: ground width and height
+        // TODO: texture disposal
         textureRegion.setRegion(0, 0, Constants.GROUND_WIDTH, Constants.GROUND_HEIGHT);
+        sprite = new Sprite(textureRegion);
+        sprite.setOriginCenter();
+        sprite.setOriginBasedPosition(0, 0);
     }
 
     @Override
     public void render(SpriteBatch batch, float delta) {
-        batch.draw(textureRegion, 0, 0);
+        sprite.draw(batch);
     }
 
     @Override
@@ -45,14 +49,13 @@ public class Ground implements PhysicsObject, Renderable {
     public void setupBody() {
         // TODO Auto-generated method stub
 
-        Vector2 position = Constants.getWorldSpaceVector(new Vector2(Constants.GROUND_WIDTH / 2.0f, Constants.GROUND_HEIGHT / 2.0f));
-
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.position.set(position);
+        bodyDef.position.set(0, 0);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(position.x, position.y);
+        shape.setAsBox(Constants.GROUND_WIDTH * Constants.WORLD_SCALE / 2,
+                Constants.GROUND_HEIGHT * Constants.WORLD_SCALE / 2);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;

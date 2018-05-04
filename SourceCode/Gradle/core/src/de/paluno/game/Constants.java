@@ -1,5 +1,6 @@
 package de.paluno.game;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 
 public class Constants {
@@ -19,11 +20,15 @@ public class Constants {
 	// Worm movement code constants
 	public static final int MOVEMENT_LEFT = -1;
 	public static final int MOVEMENT_RIGHT = 1;
+	public static final int MOVEMENT_UP = 1;
+	public static final int MOVEMENT_DOWN = -1;
 	public static final int MOVEMENT_NO_MOVEMENT = 0;
 	
 	// Worm movement modifier constant
 	public static final float MOVE_VELOCITY = 1.0f; // m/s
 	public static final float JUMP_VELOCITY = 4.0f; // m/s
+
+	public static final float CAMERA_MOVE_VELOCITY = 3.0f; // m/s
 
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
@@ -31,8 +36,21 @@ public class Constants {
 	/**
 	 * ground width in pixels
 	 */
-	public static final int GROUND_WIDTH = 2000;
+	public static final int GROUND_WIDTH = 750;
 	public static final int GROUND_HEIGHT = 100;
+
+	// key bindings
+    public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;
+    public static final int KEY_MOVE_RIGHT = Input.Keys.RIGHT;
+    public static final int KEY_JUMP = Input.Keys.SPACE;
+
+    // debug key bindings
+    public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;
+    public static final int KEY_MOVE_CAMERA_RIGHT = Input.Keys.D;
+    public static final int KEY_MOVE_CAMERA_UP = Input.Keys.W;
+    public static final int KEY_MOVE_CAMERA_DOWN = Input.Keys.S;
+    public static final int KEY_TOGGLE_CAMERA_FOCUS = Input.Keys.F;
+    public static final int KEY_TOGGLE_DEBUG_RENDER = Input.Keys.Y;
 
 	private Constants() {
 		// An instance should not be created of this class
