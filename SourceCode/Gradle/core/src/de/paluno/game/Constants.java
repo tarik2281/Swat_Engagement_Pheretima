@@ -22,17 +22,27 @@ public class Constants {
 	public static final int MOVEMENT_NO_MOVEMENT = 0;
 	
 	// Worm movement modifier constant
-	public static final float MAX_VELOCITY = 20.0f;
+	public static final float MOVE_VELOCITY = 1.0f; // m/s
+	public static final float JUMP_VELOCITY = 4.0f; // m/s
+
+	public static final int PLAYER_NUMBER_1 = 0;
+	public static final int PLAYER_NUMBER_2 = 1;
+
+	/**
+	 * ground width in pixels
+	 */
+	public static final int GROUND_WIDTH = 2000;
+	public static final int GROUND_HEIGHT = 100;
 
 	private Constants() {
 		// An instance should not be created of this class
 	}
 
 	public static Vector2 getScreenSpaceVector(Vector2 v) {
-		return v.scl(SCREEN_SCALE);
+		return new Vector2(v).scl(SCREEN_SCALE);
 	}
 
 	public static Vector2 getWorldSpaceVector(Vector2 v) {
-		return v.scl(WORLD_SCALE);
+		return new Vector2(v).scl(WORLD_SCALE);
 	}
 }

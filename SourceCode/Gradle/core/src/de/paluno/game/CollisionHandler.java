@@ -2,11 +2,7 @@ package de.paluno.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.physics.box2d.Contact;
-import com.badlogic.gdx.physics.box2d.ContactImpulse;
-import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Ground;
 import de.paluno.game.gameobjects.Projectile;
@@ -34,8 +30,8 @@ public class CollisionHandler implements ContactListener {
 		Ground ground = null;
 		
 		
-		Fixture a = contact.getFixtureA();
-		Fixture b = contact.getFixtureB();
+		Body a = contact.getFixtureA().getBody();
+		Body b = contact.getFixtureB().getBody();
 			
 		if (a == null || b == null) {
 			return;
@@ -104,8 +100,8 @@ public class CollisionHandler implements ContactListener {
 		Worm worm = null;
 		Ground ground = null;
 		
-		Fixture a = contact.getFixtureA();
-		Fixture b = contact.getFixtureB();
+		Body a = contact.getFixtureA().getBody();
+		Body b = contact.getFixtureB().getBody();
 		
 		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground) {
 			worm = (Worm) a.getUserData();

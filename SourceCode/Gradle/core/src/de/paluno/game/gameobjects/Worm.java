@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
+import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
@@ -17,49 +18,78 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private int playerNumber;
 	
 	private Body body;
-	private Fixture fixture;
-	private Texture texture;
+	//private Fixture fixture;
+	//private Texture texture;
 	
 	private Vector2 spawnPosition;
 	
 	private GameState currentState;
+	private AnimatedSprite idleAnimation;
+	private AnimatedSprite walkAnimation;
 	
 	private int movement = 0;
 	private boolean jump = false;
-	
+
 	public Worm(int num, PlayScreen screen, Vector2 position) {
 		this.playerNumber = num;
 		this.screen = screen;
 		this.spawnPosition = position;
 		
-		this.setupBody();
+		//this.setupBody();
 		
-		this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
+		//this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
+		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
+		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
 	}
 	
 	public void update(float delta, GameState state) {
 		if(this.body == null) return;
 		
 		this.currentState = state;
-		
+
+        Vector2 currentPos = body.getWorldCenter();
+
 		if(this.jump && this.canJump()) {
-			this.body.applyForceToCenter(0.0f, 2.0f, true);
-			this.setStandsOnGround(false);
+		    // TODO: maybe jump and landing animations
+			this.body.applyLinearImpulse(0.0f, body.getMass() * 4.0f, currentPos.x, currentPos.y, true);
+			jump = false;
 		}
-		
-		if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
+
+		// http://www.iforce2d.net/b2dtut/constant-speed
+		Vector2 currentVel = body.getLinearVelocity();
+		float desiredVel = 0;
+
+		switch (movement) {
+            case Constants.MOVEMENT_LEFT:
+                desiredVel = -Constants.MOVE_VELOCITY;
+                break;
+            case Constants.MOVEMENT_NO_MOVEMENT:
+                desiredVel = 0;
+                break;
+            case Constants.MOVEMENT_RIGHT:
+                desiredVel = Constants.MOVE_VELOCITY;
+                break;
+        }
+
+        float velChange = desiredVel - currentVel.x;
+		float impulse = body.getMass() * velChange;
+		body.applyLinearImpulse(impulse, 0, currentPos.x, currentPos.y, true);
+
+		/*if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			Vector2 currentPos = this.body.getPosition();
 			Vector2 currentVel = this.body.getLinearVelocity();
+
+			float impulse = body.getMass() * 10.0f * Constants.WORLD_SCALE;
 			
-			if(movement == Constants.MOVEMENT_RIGHT && currentVel.x < Constants.MAX_VELOCITY) {
-				if(currentPos.x > 0) this.body.applyLinearImpulse(0.5f, 0.0f, currentPos.x, currentPos.y, true);
+			if(movement == Constants.MOVEMENT_RIGHT && currentVel.x < Constants.MOVE_VELOCITY) {
+				if(currentPos.x > 0) this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 				else this.body.setLinearVelocity(0.0f, currentVel.y);
 			}
-			else if(movement == Constants.MOVEMENT_LEFT && currentVel.x > -Constants.MAX_VELOCITY) {
-				if(currentPos.x < 100) this.body.applyLinearImpulse(-0.5f, 0.0f, currentPos.x, currentPos.y, true);
+			else if(movement == Constants.MOVEMENT_LEFT && currentVel.x > -Constants.MOVE_VELOCITY) {
+				if(currentPos.x < 100) this.body.applyLinearImpulse(-impulse, 0.0f, currentPos.x, currentPos.y, true);
 				else this.body.setLinearVelocity(0.0f, currentVel.y);
 			}
-		}
+		}*/
 	}
 	
 	public void render(SpriteBatch batch, float delta) {
@@ -68,8 +98,21 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
 		
 		// TODO: Rename textures. 
-		
-		batch.draw(this.texture, currentPos.x, currentPos.y);
+
+        AnimatedSprite sprite = null;
+
+        if (movement == Constants.MOVEMENT_NO_MOVEMENT) {
+            sprite = idleAnimation;
+        }
+        else {
+            sprite = walkAnimation;
+            // walk animation is only for moving left
+            walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
+        }
+
+        sprite.setPosition(currentPos);
+        sprite.draw(batch, delta);
+		//batch.draw(this.texture, currentPos.x, currentPos.y);
 	}
 	
 	public void setupBody() {
@@ -79,18 +122,20 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		bodyDef.type = BodyType.DynamicBody;
 		
 		this.body = this.screen.getWorld().createBody(bodyDef);
+		body.setFixedRotation(true);
 		
 		PolygonShape bodyRect = new PolygonShape();
-		bodyRect.setAsBox(5 * Constants.WORLD_SCALE, 10 * Constants.WORLD_SCALE);
+		// TODO: hardcoded worm hitbox size
+		bodyRect.setAsBox(18.0f / 2 * Constants.WORLD_SCALE, 25.0f / 2.0f * Constants.WORLD_SCALE);
 		// TODO: Maybe finetune hitbox
 		
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
 		fixtureDef.density = 0.5f;
 		fixtureDef.friction = 0.8f;
-		fixtureDef.restitution = 0.2f;
+		fixtureDef.restitution = 0.0f;
 		
-		this.fixture = this.body.createFixture(fixtureDef);
+		this.body.createFixture(fixtureDef);
 		
 		bodyRect.dispose();
 	}
@@ -100,11 +145,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public void setBodyToNullReference() {
-		this.fixture = null;
+		//this.fixture = null;
 		this.body = null;
 	}
 	
 	public void die() {
+	    // TODO: proper object removing through PlayScreen
 		this.screen.getWorld().destroyBody(this.body);
 		this.setBodyToNullReference();
 		if(this.playerNumber == 1) {
@@ -116,9 +162,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	public boolean canJump() {
 		return this.isStandsOnGround() && (
-				(this.playerNumber == 1 && this.currentState == GameState.PLAYERONETURN)
+				(this.playerNumber == Constants.PLAYER_NUMBER_1 && this.currentState == GameState.PLAYERONETURN)
 				||
-				(this.playerNumber == 2 && this.currentState == GameState.PLAYERTWOTURN));
+				(this.playerNumber == Constants.PLAYER_NUMBER_2 && this.currentState == GameState.PLAYERTWOTURN));
 	}
 	
 	public boolean isStandsOnGround() {
@@ -131,7 +177,17 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	public void setMovement(int newMovementCode) {
 		this.movement = newMovementCode;
+
+		// reset all animations since they will change
+		idleAnimation.reset();
+		walkAnimation.reset();
+
+		if (Constants.MOVEMENT_NO_MOVEMENT != movement) {
+		    idleAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
+		    walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
+        }
 	}
+
 	public void setJump(boolean newJump) {
 		this.jump = newJump;
 	}

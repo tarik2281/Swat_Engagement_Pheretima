@@ -1,0 +1,8 @@
+<AnimatedSprite>
+    <Texture>wbrth1.png</Texture>
+    <Columns>1</Columns>
+    <Rows>20</Rows>
+    <FrameInterval>0.065</FrameInterval>
+    <SpriteOffset>0</SpriteOffset>
+    <PlayMode>LoopPingPong</PlayMode>
+</AnimatedSprite>

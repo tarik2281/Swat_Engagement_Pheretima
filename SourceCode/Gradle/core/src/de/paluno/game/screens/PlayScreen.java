@@ -1,6 +1,7 @@
 package de.paluno.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
@@ -40,8 +41,15 @@ public class PlayScreen extends ScreenAdapter {
     private OrthographicCamera camera;
     private PhysicsObject cameraFocus;
 
+    private float screenWidth;
+    private float screenHeight;
+
+    private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
     private OrthographicCamera debugCamera;
+
+    private int moveCameraHorizontal = 0;
+    private int moveCameraVertical = 0;
 
     private InputAdapter inputAdapter = new InputAdapter() {
         // TODO: input handling
@@ -65,11 +73,61 @@ public class PlayScreen extends ScreenAdapter {
 
         @Override
         public boolean keyUp(int keycode) {
+            switch (keycode) {
+                case Input.Keys.LEFT:
+                case Input.Keys.RIGHT:
+                    playerWorms[Constants.PLAYER_NUMBER_1].setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+                    break;
+                case Input.Keys.A:
+                case Input.Keys.D:
+                    moveCameraHorizontal = 0;
+                    return true;
+                case Input.Keys.W:
+                case Input.Keys.S:
+                    moveCameraVertical = 0;
+                    return true;
+            }
+
             return super.keyUp(keycode);
         }
 
         @Override
         public boolean keyDown(int keycode) {
+            switch (keycode) {
+                // TODO: hardcoded keybindings
+                case Input.Keys.LEFT:
+                    playerWorms[Constants.PLAYER_NUMBER_1].setMovement(Constants.MOVEMENT_LEFT);
+                    //TODO: move left
+                    return true;
+                case Input.Keys.RIGHT:
+                    playerWorms[Constants.PLAYER_NUMBER_1].setMovement(Constants.MOVEMENT_RIGHT);
+                    //TODO: move right
+                    return true;
+                case Input.Keys.SPACE:
+                    if (playerWorms[Constants.PLAYER_NUMBER_1].isStandsOnGround())
+                    playerWorms[Constants.PLAYER_NUMBER_1].setJump(true);
+                    // TODO: jump
+                    return true;
+                case Input.Keys.A:
+                    moveCameraHorizontal = -1;
+                    return true;
+                case Input.Keys.D:
+                    moveCameraHorizontal = 1;
+                    return true;
+                case Input.Keys.W:
+                    moveCameraVertical = 1;
+                    return true;
+                case Input.Keys.S:
+                    moveCameraVertical = -1;
+                    return true;
+                case Input.Keys.Y:
+                    isRenderDebug = !isRenderDebug;
+                    return true;
+                case Input.Keys.F:
+                    setCameraFocus(cameraFocus == null ? playerWorms[Constants.PLAYER_NUMBER_1] : null);
+                    break;
+            }
+
             return super.keyDown(keycode);
         }
     };
@@ -95,20 +153,33 @@ public class PlayScreen extends ScreenAdapter {
     public void show() {
         Gdx.input.setInputProcessor(inputAdapter);
 
-        registerAfterUpdate(new Projectile(this, new Vector2(200, 200), new Vector2(1.0f, 0.0f)));
+        screenWidth = Gdx.graphics.getWidth();
+        screenHeight = Gdx.graphics.getHeight();
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setToOrtho(false, screenWidth, screenHeight);
 
         debugRenderer = new Box2DDebugRenderer();
         debugCamera = new OrthographicCamera();
 
-        float debugWidth = Gdx.graphics.getWidth() * Constants.WORLD_SCALE;
-        float debugHeight = Gdx.graphics.getHeight() * Constants.WORLD_SCALE;
+        float debugWidth = screenWidth * Constants.WORLD_SCALE;
+        float debugHeight = screenHeight * Constants.WORLD_SCALE;
 
         debugCamera.setToOrtho(false, debugWidth, debugHeight);
-        debugCamera.lookAt(debugWidth / 2, debugHeight / 2, 0);
+        debugCamera.position.set(debugWidth / 2, debugHeight / 2, 0);
         debugCamera.update();
+
+        registerAfterUpdate(new Ground(this));
+
+        playerWorms[Constants.PLAYER_NUMBER_1] = new Worm(Constants.PLAYER_NUMBER_1,
+                this, Constants.getWorldSpaceVector(new Vector2(100, 100)));
+        playerWorms[Constants.PLAYER_NUMBER_2] = new Worm(Constants.PLAYER_NUMBER_2,
+                this, Constants.getWorldSpaceVector(new Vector2(300, 100)));
+        registerAfterUpdate(playerWorms[Constants.PLAYER_NUMBER_1]);
+        //registerAfterUpdate(playerWorms[Constants.PLAYER_NUMBER_2]);
+        collisionHandler = new CollisionHandler(this);
+        world.setContactListener(collisionHandler);
+        setCameraFocus(playerWorms[Constants.PLAYER_NUMBER_1]);
     }
 
     @Override
@@ -140,17 +211,25 @@ public class PlayScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        debugRenderer.render(world, debugCamera.combined);
-
         if (cameraFocus != null) {
-            Vector2 position = Constants.getScreenSpaceVector(cameraFocus.getBody().getPosition());
-            camera.lookAt(position.x, position.y, 0);
+            Vector2 worldPosition = cameraFocus.getBody().getPosition();
+            Vector2 screenPosition = Constants.getScreenSpaceVector(cameraFocus.getBody().getPosition());
+            camera.position.set(screenPosition.x, Math.max(screenPosition.y, screenHeight / 2), 0);
+            camera.update();
+
+            debugCamera.position.set(worldPosition.x, Math.max(worldPosition.y, screenHeight * Constants.WORLD_SCALE / 2), 0);
+            debugCamera.update();
+        }
+        else {
+            camera.position.add(moveCameraHorizontal * 20.0f, moveCameraVertical * 20.0f, 0.0f);
             camera.update();
         }
 
+        if (isRenderDebug)
+            debugRenderer.render(world, debugCamera.combined);
+
+        spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        spriteBatch.setProjectionMatrix(camera.projection);
-        spriteBatch.setTransformMatrix(camera.view);
 
         for (Renderable renderable : renderableObjects) {
             renderable.render(spriteBatch, delta);
@@ -204,6 +283,7 @@ public class PlayScreen extends ScreenAdapter {
             if (gameObject instanceof PhysicsObject) {
                 PhysicsObject physicsObject = (PhysicsObject)gameObject;
                 physicsObject.setupBody();
+                physicsObject.getBody().setUserData(gameObject);
             }
             if (gameObject instanceof Renderable) {
                 renderableObjects.add((Renderable)gameObject);
