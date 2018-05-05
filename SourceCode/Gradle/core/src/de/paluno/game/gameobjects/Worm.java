@@ -40,9 +40,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
 		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
 		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
-		
-		
-		
 	}
 	
 	public void update(float delta, GameState state) {
@@ -56,19 +53,19 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		    // TODO: maybe jump and landing animations
 			this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
 					currentPos.x, currentPos.y, true);
-			jump = false;
+			this.jump = false;
 		}
 
 		// http://www.iforce2d.net/b2dtut/constant-speed
 		Vector2 currentVel = body.getLinearVelocity();
-		float desiredVel = 0;
+		float desiredVel = 0.0f;
 
 		switch (movement) {
             case Constants.MOVEMENT_LEFT:
                 desiredVel = -Constants.MOVE_VELOCITY;
                 break;
             case Constants.MOVEMENT_NO_MOVEMENT:
-                desiredVel = 0;
+                desiredVel = 0.0f;
                 break;
             case Constants.MOVEMENT_RIGHT:
                 desiredVel = Constants.MOVE_VELOCITY;
@@ -77,8 +74,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
         float velChange = desiredVel - currentVel.x;
 		float impulse = body.getMass() * velChange;
-		body.applyLinearImpulse(impulse, 0, currentPos.x, currentPos.y, true);
+		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
+		
+		//TODO: boundary check?
 
+		// Old version
 		/*if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			Vector2 currentPos = this.body.getPosition();
 			Vector2 currentVel = this.body.getLinearVelocity();
@@ -100,8 +100,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if(this.body == null) return;
 		
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
-		
-		// TODO: Rename textures. 
 
         AnimatedSprite sprite = null;
 
@@ -122,7 +120,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void setupBody() {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
-		// TODO: Change spawning player and world-size dependent.
 		bodyDef.type = BodyType.DynamicBody;
 		
 		this.body = this.screen.getWorld().createBody(bodyDef);
@@ -144,7 +141,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fix.setUserData("Worm");
 		
 		bodyRect.dispose();
-		
 	}
 	
 	public Body getBody() {
@@ -201,5 +197,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	public void setJump(boolean newJump) {
 		this.jump = newJump;
+	}
+	
+	public boolean getJump() {
+		return this.jump;
 	}
 }
