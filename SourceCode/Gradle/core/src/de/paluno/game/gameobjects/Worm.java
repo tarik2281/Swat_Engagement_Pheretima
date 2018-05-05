@@ -40,6 +40,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
 		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
 		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
+		
+		
+		
 	}
 	
 	public void update(float delta, GameState state) {
@@ -135,9 +138,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.friction = 0.8f;
 		fixtureDef.restitution = 0.0f;
 		
-		this.body.createFixture(fixtureDef);
+		Fixture fix = this.body.createFixture(fixtureDef);
+		// CollisionHandler Identifier
+		fix.setUserData("Worm");
 		
 		bodyRect.dispose();
+		
 	}
 	
 	public Body getBody() {

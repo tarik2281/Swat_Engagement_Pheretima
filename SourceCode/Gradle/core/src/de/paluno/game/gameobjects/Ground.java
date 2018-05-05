@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import de.paluno.game.Constants;
@@ -29,6 +30,8 @@ public class Ground implements PhysicsObject, Renderable {
         textureRegion = new TextureRegion(texture);
         // TODO: ground width and height
         textureRegion.setRegion(0, 0, Constants.GROUND_WIDTH, Constants.GROUND_HEIGHT);
+        
+    
     }
 
     @Override
@@ -58,7 +61,10 @@ public class Ground implements PhysicsObject, Renderable {
         fixtureDef.shape = shape;
 
         this.body = screen.getWorld().createBody(bodyDef);
-        body.createFixture(fixtureDef);
+        
+        Fixture fix = body.createFixture(fixtureDef);
+        // CollisionHandler Identifier
+        fix.setUserData("Ground");
 
         shape.dispose();
     }

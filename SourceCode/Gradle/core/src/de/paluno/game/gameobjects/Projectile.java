@@ -34,7 +34,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
-    }
+        
+        }
 
     @Override
     public void update(float delta, GameState gameState) {
@@ -68,14 +69,18 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
         body = world.createBody(bodyDef);
 
-        body.createFixture(fixtureDef);
+        Fixture fix = body.createFixture(fixtureDef);
 
         body.setGravityScale(0.0f);
         body.setUserData(this);
 
         body.applyLinearImpulse(direction, body.getPosition(), true);
 
+        // CollisionHandler Identifier
+        fix.setUserData("Projectile");
         shape.dispose();
+        
+
     }
 
     @Override

@@ -2,6 +2,7 @@ package de.paluno.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Ground;
@@ -10,7 +11,7 @@ import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
-	
+
 	public CollisionHandler() {
 		// TODO Auto-generated constructor stub
 
@@ -25,100 +26,127 @@ public class CollisionHandler implements ContactListener {
 
 	@Override
 	public void beginContact(Contact contact) {
-		Projectile projectile = null;
-		Worm worm = null;
-		Ground ground = null;
+
+		Fixture fixA = contact.getFixtureA();
+		Fixture fixB = contact.getFixtureB();
 		
+		Body bodyA = fixA.getBody();
+		Body bodyB = fixB.getBody();
 		
-		Body a = contact.getFixtureA().getBody();
-		Body b = contact.getFixtureB().getBody();
+		Object o1 = bodyA.getUserData();
+		Object o2 = bodyB.getUserData();
+		
+
+		if (fixA == null || fixB == null) {
+			return;
+		}
+		if (o1 == null || o2 == null) {
+			return;
+		}
+		// Worm -> Ground
+		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
+			Worm worm = (Worm) o1;
+			worm.setStandsOnGround(true);
 			
-		if (a == null || b == null) {
-			return;
+			System.out.println("Worm = BodyA");
+			System.out.println("Ground = BodyB");
+			
+		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
+			Worm worm = (Worm) o2;
+			worm.setStandsOnGround(true);
+			
+			System.out.println("Worm = BodyB");
+			System.out.println("Ground = BodyA");
+			
 		}
-		if (a.getUserData() == null || b.getUserData() == null) {
-			return;
-		}
-		
-		
-		System.out.println("Collision!");
-		
-		// Projectile -> Worm -> Projectile explode && Worm Die
-		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Projectile) {
-			worm = (Worm) a.getUserData();
-			projectile = (Projectile) b.getUserData();
-		}else if (b.getUserData() instanceof Worm && a.getUserData() instanceof Projectile) {
-			worm = (Worm) b.getUserData();
-			projectile = (Projectile) a.getUserData();
-		}
-		
-		if (worm != null && projectile != null) {
+
+		// Projectile -> Worm
+
+		if ((fixB.getUserData() == "Projectile" && fixA.getUserData() == "Worm")) {
+			Worm worm = (Worm) o1;
+			Projectile projectile = (Projectile) o2;
 			projectile.explode();
 			worm.die();
-			System.out.println("Worm dead!");
+			
+			System.out.println("Worm = BodyA");
+			System.out.println("Projectile = BodyB");
+			
+		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Projectile")) {
+			Worm worm = (Worm) o2;
+			Projectile projectile = (Projectile) o1;
+			projectile.explode();
+			worm.die();
+			
+			System.out.println("Worm = BodyB");
+			System.out.println("Projectile = BodyA");
 		}
 		
-		// Projectile -> Ground -> Projectile explode
 		
-		if (a.getUserData() instanceof Projectile && b.getUserData() instanceof Ground) {
-			ground = (Ground) b.getUserData();
-			projectile = (Projectile) b.getUserData();
-		}else if (b.getUserData() instanceof Projectile && a.getUserData() instanceof Ground) {
-			ground = (Ground) a.getUserData();
-			projectile = (Projectile) a.getUserData();
-		}
+		// Projectile -> Ground
 		
-		if (projectile!= null && worm != null) {
+
+		if ((fixB.getUserData() == "Projectile" && fixA.getUserData() == "Ground")) {
+			
+			Projectile projectile = (Projectile) o2;
 			projectile.explode();
 			
+			System.out.println("Ground = BodyA");
+			System.out.println("Projectile = BodyB");
+			
+		} else if ((fixB.getUserData() == "Ground" && fixA.getUserData() == "Projectile")) {
+		
+			Projectile projectile = (Projectile) o1;
+			projectile.explode();
+			
+			System.out.println("Ground = BodyB");
+			System.out.println("Projectile = BodyA");
 		}
 		
-		
-		// Worm -> Ground -> Worm jump ??
-		
-		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground) {
-			worm = (Worm) a.getUserData();
-			ground = (Ground) b.getUserData();
-		}else if (b.getUserData() instanceof Worm && a.getUserData() instanceof Ground) {
-			worm = (Worm) b.getUserData();
-			ground = (Ground) a.getUserData();
 		}
 		
-		if (worm != null && ground != null) {
-			worm.setStandsOnGround(true);
-			System.out.println("Worm back on Ground!");
-		}
-	
-		
-	
-
-	}
 
 	@Override
 	public void endContact(Contact contact) {
+
+		Fixture fixA = contact.getFixtureA();
+		Fixture fixB = contact.getFixtureB();
 		
-		Worm worm = null;
-		Ground ground = null;
+		Body bodyA = fixA.getBody();
+		Body bodyB = fixB.getBody();
 		
-		Body a = contact.getFixtureA().getBody();
-		Body b = contact.getFixtureB().getBody();
+		Object o1 = bodyA.getUserData();
+		Object o2 = bodyB.getUserData();
 		
-		if (a.getUserData() instanceof Worm && b.getUserData() instanceof Ground) {
-			worm = (Worm) a.getUserData();
-			ground = (Ground) b.getUserData();
-		}else if (b.getUserData() instanceof Worm && a.getUserData() instanceof Ground) {
-			worm = (Worm) b.getUserData();
-			ground = (Ground) a.getUserData();
+
+		if (fixA == null || fixB == null) {
+			return;
+		}
+		if (o1 == null || o2 == null) {
+			return;
 		}
 		
-		if (worm != null && ground != null) {
+		
+		// Worm -> jump || fall -> Ground
+		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
+			Worm worm = (Worm) o1;
 			worm.setStandsOnGround(false);
-			System.out.println("Worm jumped");
+			
+			
+			System.out.println("Worm = BodyA");
+			System.out.println("Ground = BodyB");
+			
+		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
+			Worm worm = (Worm) o2;
+			worm.setStandsOnGround(false);
+			
+			System.out.println("Worm = BodyB");
+			System.out.println("Ground = BodyA");
+			
 		}
+
 		
+
 	}
-	
-	
 
 	@Override
 	public void preSolve(Contact contact, Manifold oldManifold) {
