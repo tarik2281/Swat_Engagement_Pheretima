@@ -48,15 +48,13 @@ public class CollisionHandler implements ContactListener {
 			Worm worm = (Worm) o1;
 			worm.setStandsOnGround(true);
 			
-			System.out.println("Worm = BodyA");
-			System.out.println("Ground = BodyB");
+			System.out.println("Worm on Ground");
 			
 		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
 			Worm worm = (Worm) o2;
 			worm.setStandsOnGround(true);
 			
-			System.out.println("Worm = BodyB");
-			System.out.println("Ground = BodyA");
+			System.out.println("Worm on Ground!");
 			
 		}
 
@@ -68,8 +66,8 @@ public class CollisionHandler implements ContactListener {
 			projectile.explode();
 			worm.die();
 			
-			System.out.println("Worm = BodyA");
-			System.out.println("Projectile = BodyB");
+			System.out.println("Projectile collided with Worm!");
+			System.out.println("Worm died!");
 			
 		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Projectile")) {
 			Worm worm = (Worm) o2;
@@ -77,8 +75,8 @@ public class CollisionHandler implements ContactListener {
 			projectile.explode();
 			worm.die();
 			
-			System.out.println("Worm = BodyB");
-			System.out.println("Projectile = BodyA");
+			System.out.println("Projectile collided with Worm!");
+			System.out.println("Worm died!");
 		}
 		
 		
@@ -90,16 +88,14 @@ public class CollisionHandler implements ContactListener {
 			Projectile projectile = (Projectile) o2;
 			projectile.explode();
 			
-			System.out.println("Ground = BodyA");
-			System.out.println("Projectile = BodyB");
+			System.out.println("Projectile collided with Ground");
 			
 		} else if ((fixB.getUserData() == "Ground" && fixA.getUserData() == "Projectile")) {
 		
 			Projectile projectile = (Projectile) o1;
 			projectile.explode();
 			
-			System.out.println("Ground = BodyB");
-			System.out.println("Projectile = BodyA");
+			System.out.println("Projectile collided with Ground");
 		}
 		
 		}
@@ -132,17 +128,34 @@ public class CollisionHandler implements ContactListener {
 			worm.setStandsOnGround(false);
 			
 			
-			System.out.println("Worm = BodyA");
-			System.out.println("Ground = BodyB");
+			System.out.println("Worm not on the Ground!");
 			
 		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
 			Worm worm = (Worm) o2;
 			worm.setStandsOnGround(false);
 			
-			System.out.println("Worm = BodyB");
-			System.out.println("Ground = BodyA");
+			System.out.println("Worm not on the Ground!");
+			
 			
 		}
+		
+		// Worm -> fell off World
+		
+//		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
+//			Worm worm = (Worm) o1;
+//			worm.setStandsOnGround(false);
+//			
+//			
+//			System.out.println("Worm fell off World!");
+//			
+//		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
+//			Worm worm = (Worm) o2;
+//			worm.setStandsOnGround(false);
+//			
+//			System.out.println("Worm fell off World!");
+//			
+//			
+//		}
 
 		
 

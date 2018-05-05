@@ -54,7 +54,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		if(this.jump && this.canJump()) {
 		    // TODO: maybe jump and landing animations
-			this.body.applyLinearImpulse(0.0f, body.getMass() * 4.0f, currentPos.x, currentPos.y, true);
+			this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
+					currentPos.x, currentPos.y, true);
 			jump = false;
 		}
 
@@ -109,7 +110,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
         else {
             sprite = walkAnimation;
-            // walk animation is only for moving left
+            // walk animation is only for moving left, so flip it
             walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
         }
 
@@ -193,6 +194,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		    walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
         }
 	}
+
+	public int getMovement() {
+	    return movement;
+    }
 
 	public void setJump(boolean newJump) {
 		this.jump = newJump;
