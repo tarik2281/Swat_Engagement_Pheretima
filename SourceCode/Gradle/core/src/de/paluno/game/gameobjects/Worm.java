@@ -51,20 +51,21 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		if(this.jump && this.canJump()) {
 		    // TODO: maybe jump and landing animations
-			this.body.applyLinearImpulse(0.0f, body.getMass() * 4.0f, currentPos.x, currentPos.y, true);
-			jump = false;
+			this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
+					currentPos.x, currentPos.y, true);
+			this.jump = false;
 		}
 
 		// http://www.iforce2d.net/b2dtut/constant-speed
 		Vector2 currentVel = body.getLinearVelocity();
-		float desiredVel = 0;
+		float desiredVel = 0.0f;
 
 		switch (movement) {
             case Constants.MOVEMENT_LEFT:
                 desiredVel = -Constants.MOVE_VELOCITY;
                 break;
             case Constants.MOVEMENT_NO_MOVEMENT:
-                desiredVel = 0;
+                desiredVel = 0.0f;
                 break;
             case Constants.MOVEMENT_RIGHT:
                 desiredVel = Constants.MOVE_VELOCITY;
@@ -73,8 +74,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
         float velChange = desiredVel - currentVel.x;
 		float impulse = body.getMass() * velChange;
-		body.applyLinearImpulse(impulse, 0, currentPos.x, currentPos.y, true);
+		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
+		
+		//TODO: boundary check?
 
+		// Old version
 		/*if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			Vector2 currentPos = this.body.getPosition();
 			Vector2 currentVel = this.body.getLinearVelocity();
@@ -96,8 +100,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if(this.body == null) return;
 		
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
-		
-		// TODO: Rename textures. 
 
         AnimatedSprite sprite = null;
 
@@ -106,7 +108,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
         else {
             sprite = walkAnimation;
-            // walk animation is only for moving left
+            // walk animation is only for moving left, so flip it
             walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
         }
 
@@ -118,7 +120,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void setupBody() {
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
-		// TODO: Change spawning player and world-size dependent.
 		bodyDef.type = BodyType.DynamicBody;
 		
 		this.body = this.screen.getWorld().createBody(bodyDef);
@@ -135,7 +136,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.friction = 0.8f;
 		fixtureDef.restitution = 0.0f;
 		
-		this.body.createFixture(fixtureDef);
+		Fixture fix = this.body.createFixture(fixtureDef);
+		// CollisionHandler Identifier
+		fix.setUserData("Worm");
 		
 		bodyRect.dispose();
 	}
@@ -188,7 +191,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
 	}
 
+	public int getMovement() {
+	    return movement;
+    }
+
 	public void setJump(boolean newJump) {
 		this.jump = newJump;
+	}
+	
+	public boolean getJump() {
+		return this.jump;
 	}
 }
