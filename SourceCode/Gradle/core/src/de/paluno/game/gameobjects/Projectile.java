@@ -89,6 +89,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public void explode() {
-
+     
+    	this.playScreen.getWorld().destroyBody(this.body);
+    	this.setBodyToNullReference();
+    	playScreen.advanceGameState();
     }
 }

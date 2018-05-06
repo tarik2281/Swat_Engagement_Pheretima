@@ -15,6 +15,6 @@ public class SEPGame extends Game {
 
 	@Override
 	public void create() {
-		setScreen(new GameOverScreen(this, WinningPlayer.PLAYERONE));
+		setScreen(new PlayScreen(this));
 	}
 }

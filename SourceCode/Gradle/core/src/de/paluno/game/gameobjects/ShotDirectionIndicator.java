@@ -1,7 +1,10 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -37,7 +40,7 @@ public class ShotDirectionIndicator extends java.lang.Object implements Renderab
 		texture2 = new Texture(Gdx.files.internal("Pfeil.png"));
 		sprite = new Sprite(texture);
 		sprite2 = new Sprite(texture2);
-		
+				
 	}
 
 	public void update(float delta, GameState gamestate) {
@@ -47,15 +50,14 @@ public class ShotDirectionIndicator extends java.lang.Object implements Renderab
 	public void render(SpriteBatch batch, float delta){
 		positionX = worm.getBody().getPosition().x;
 	    positionY = worm.getBody().getPosition().y;
-		
-	//	mousePositionX = 0;
-	//	mousePositionY = 0;
+	    
+	    mousePositionX = Gdx.input.getX();
+	    mousePositionY = Gdx.input.getY();
 		
 		batch.begin();
 		batch.draw(texture, positionX + 3, positionY + 3);
 		batch.end();
-		
 		}
 		
 	}
-}
+
