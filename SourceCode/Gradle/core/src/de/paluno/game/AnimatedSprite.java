@@ -23,6 +23,7 @@ public class AnimatedSprite {
     private int tileHalfHeight;
 
     private float stateTime;
+    private boolean reverse;
 
     private Vector2 origin;
     private boolean flipX;
@@ -39,7 +40,9 @@ public class AnimatedSprite {
         String playMode = element.get("PlayMode");
 
         this.playMode = Animation.PlayMode.NORMAL;
-        if (playMode.equals("LoopPingPong"))
+        if (playMode.equals("Loop"))
+            this.playMode = Animation.PlayMode.LOOP;
+        else if (playMode.equals("LoopPingPong"))
             this.playMode = Animation.PlayMode.LOOP_PINGPONG;
 
         tileHalfWidth = spriteSheet.getWidth() / numColumns;
@@ -79,18 +82,38 @@ public class AnimatedSprite {
      */
     public void reset() {
         stateTime = 0;
+        reverse = false;
+    }
+
+    public void reverse() {
+        reverse = true;
+    }
+
+    public boolean isAnimationFinished() {
+        if (reverse)
+            return stateTime <= 0;
+        else
+            return stateTime >= animation.getAnimationDuration();
     }
 
     public void draw(SpriteBatch batch, float delta) {
-        stateTime += delta;
+        stateTime += !reverse ? delta : -delta;
         // create loop effect by resetting stateTime
-        if (playMode == Animation.PlayMode.LOOP_PINGPONG) {
-            if (stateTime >= animation.getAnimationDuration() * 2)
-                stateTime -= animation.getAnimationDuration() * 2;
-        }
-        else {
-            if (stateTime >= animation.getAnimationDuration())
-                stateTime -= animation.getAnimationDuration();
+        switch (playMode) {
+            case NORMAL:
+                if (!reverse && stateTime >= animation.getAnimationDuration())
+                    stateTime = animation.getAnimationDuration();
+                else if (reverse && stateTime <= 0)
+                    stateTime = 0;
+                break;
+            case LOOP:
+                if (stateTime >= animation.getAnimationDuration())
+                    stateTime -= animation.getAnimationDuration();
+                break;
+            case LOOP_PINGPONG:
+                if (stateTime >= animation.getAnimationDuration() * 2)
+                    stateTime -= animation.getAnimationDuration() * 2;
+                break;
         }
 
         // sprite sheets already involve worm movement offset, so remove that from there
@@ -99,7 +122,7 @@ public class AnimatedSprite {
         if (flipX)
             offset *= -1.0f;
 
-        TextureRegion region = animation.getKeyFrame(stateTime, true);
+        TextureRegion region = animation.getKeyFrame(stateTime, playMode != Animation.PlayMode.NORMAL);
 
         if (flipX && !region.isFlipX())
             region.flip(true, false);

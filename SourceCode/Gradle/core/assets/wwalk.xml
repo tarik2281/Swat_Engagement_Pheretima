@@ -4,5 +4,5 @@
     <Rows>15</Rows>
     <FrameInterval>0.04</FrameInterval>
     <SpriteOffset>10</SpriteOffset>
-    <PlayMode>Normal</PlayMode>
+    <PlayMode>Loop</PlayMode>
 </AnimatedSprite>

@@ -12,8 +12,6 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 	
 	protected Sprite sprite;
 	private SpriteBatch batch;
-	private Texture sp1won;
-	private Texture sp2won;
 	private WinningPlayer winningPlayer;
 	
 	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
@@ -22,33 +20,31 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 	}
 	
 	public void show() {
-		sprite = new Sprite();
 		batch = new SpriteBatch();
 		
-		if (winningPlayer == WinningPlayer.PLAYERONE) {
-			sp1won = new Texture(Gdx.files.internal("Spieler1Win.png"));
-		}else{
-			sp2won = new Texture(Gdx.files.internal("Spieler2Win.png"));
+		Texture texture = null;
+		
+		switch (winningPlayer) {
+		case PLAYERONE:
+			texture = new Texture(Gdx.files.internal("Spieler1Win.png"));
+			break;
+		case PLAYERTWO:
+			texture = new Texture(Gdx.files.internal("Spieler2Win.png"));
+			break;
 		}
+		
+		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	
 	public void render(float delta) {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		if (winningPlayer == WinningPlayer.PLAYERONE) {
-			batch.draw(sp1won, 0, 0);
-		}else{
-			batch.draw(sp2won, 0, 0);
-		}
+		sprite.draw(batch);
 		batch.end();
 	}
 	
 	public void hide(){
 		batch.dispose();
-		if(winningPlayer == WinningPlayer.PLAYERONE){
-			sp1won.dispose();
-		}else{
-			sp2won.dispose();
-		}
+		sprite.getTexture().dispose();
 	}
 }
