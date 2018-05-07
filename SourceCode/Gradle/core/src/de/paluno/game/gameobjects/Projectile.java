@@ -14,7 +14,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     // in meters
     private static final float PROJECTILE_RADIUS = 3.0f;
-    private static final float PROJECTILE_DENSITY = 10.0f;
+    private static final float PROJECTILE_DENSITY = 0.1f;
 
     private PlayScreen playScreen;
     private Vector2 origin;
@@ -34,12 +34,12 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
-        
-        }
+    }
 
     @Override
     public void update(float delta, GameState gameState) {
-
+        if (!playScreen.getWorldBounds().contains(body.getPosition()))
+            explode();
     }
 
     @Override
@@ -56,8 +56,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        Vector2 position = Constants.getWorldSpaceVector(origin);
-        bodyDef.position.set(position.x, position.y);
+        //Vector2 position = Constants.getWorldSpaceVector(origin);
+        bodyDef.position.set(origin.x, origin.y);
         bodyDef.bullet = true;
 
         CircleShape shape = new CircleShape();
@@ -74,7 +74,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         body.setGravityScale(0.0f);
         body.setUserData(this);
 
-        body.applyLinearImpulse(direction, body.getPosition(), true);
+        Vector2 impulse = direction;
+        body.applyLinearImpulse(impulse, body.getPosition(), true);
 
         // CollisionHandler Identifier
         fix.setUserData("Projectile");
@@ -94,9 +95,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public void explode() {
-     
-    	this.playScreen.getWorld().destroyBody(this.body);
-    	this.setBodyToNullReference();
+        playScreen.forgetAfterUpdate(this);
+    	//this.playScreen.getWorld().destroyBody(this.body);
+    	//this.setBodyToNullReference();
     	playScreen.advanceGameState();
     }
 }

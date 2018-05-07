@@ -1,11 +1,7 @@
 package de.paluno.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 
-import de.paluno.game.gameobjects.Ground;
 import de.paluno.game.gameobjects.Projectile;
 import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
@@ -29,20 +25,21 @@ public class CollisionHandler implements ContactListener {
 
 		Fixture fixA = contact.getFixtureA();
 		Fixture fixB = contact.getFixtureB();
-		
+
+		if (fixA == null || fixB == null) {
+			return;
+		}
+
 		Body bodyA = fixA.getBody();
 		Body bodyB = fixB.getBody();
 		
 		Object o1 = bodyA.getUserData();
 		Object o2 = bodyB.getUserData();
-		
 
-		if (fixA == null || fixB == null) {
-			return;
-		}
 		if (o1 == null || o2 == null) {
 			return;
 		}
+
 		// Worm -> Ground
 		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
 			Worm worm = (Worm) o1;
@@ -64,7 +61,7 @@ public class CollisionHandler implements ContactListener {
 			Worm worm = (Worm) o1;
 			Projectile projectile = (Projectile) o2;
 			projectile.explode();
-			worm.die();
+			worm.takeDamage(Constants.PROJECTILE_DAMAGE);
 			
 			System.out.println("Projectile collided with Worm!");
 			System.out.println("Worm died!");
@@ -73,7 +70,7 @@ public class CollisionHandler implements ContactListener {
 			Worm worm = (Worm) o2;
 			Projectile projectile = (Projectile) o1;
 			projectile.explode();
-			worm.die();
+			worm.takeDamage(Constants.PROJECTILE_DAMAGE);
 			
 			System.out.println("Projectile collided with Worm!");
 			System.out.println("Worm died!");

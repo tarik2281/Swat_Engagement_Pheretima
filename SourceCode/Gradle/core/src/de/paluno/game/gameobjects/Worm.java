@@ -1,7 +1,6 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -26,9 +25,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private GameState currentState;
 	private AnimatedSprite idleAnimation;
 	private AnimatedSprite walkAnimation;
+	private AnimatedSprite equipGunAnimation;
 	
 	private int movement = 0;
 	private boolean jump = false;
+
+	private boolean gunEquipped;
+	private boolean gunUnequipping;
+
+	private int health;
 
 	public Worm(int num, PlayScreen screen, Vector2 position) {
 		this.playerNumber = num;
@@ -38,8 +43,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//this.setupBody();
 		
 		//this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
+		// TODO: load assets with AssetManager
 		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
 		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
+		equipGunAnimation = new AnimatedSprite(Gdx.files.internal("whgnlnk.xml"));
+
+		gunEquipped = false;
+		gunUnequipping = false;
+
+		health = Constants.WORM_MAX_HEALTH;
 	}
 	
 	public void update(float delta, GameState state) {
@@ -77,6 +89,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 		
 		//TODO: boundary check?
+		if (!screen.getWorldBounds().contains(body.getPosition()))
+			die();
 
 		// Old version
 		/*if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
@@ -104,7 +118,18 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         AnimatedSprite sprite = null;
 
         if (movement == Constants.MOVEMENT_NO_MOVEMENT) {
-            sprite = idleAnimation;
+            if (gunUnequipping && equipGunAnimation.isAnimationFinished()) {
+                gunEquipped = false;
+                gunUnequipping = false;
+                equipGunAnimation.reset();
+            }
+
+            if (gunEquipped) {
+                sprite = equipGunAnimation;
+            }
+            else {
+                sprite = idleAnimation;
+            }
         }
         else {
             sprite = walkAnimation;
@@ -133,7 +158,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
 		fixtureDef.density = 0.5f;
-		fixtureDef.friction = 0.8f;
+		fixtureDef.friction = 1.0f;
 		fixtureDef.restitution = 0.0f;
 		
 		Fixture fix = this.body.createFixture(fixtureDef);
@@ -151,16 +176,44 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//this.fixture = null;
 		this.body = null;
 	}
-	
+
+	public int getPlayerNumber() {
+		return playerNumber;
+	}
+
+	public void equipGun() {
+	    gunEquipped = true;
+    }
+
+    public void unequipGun() {
+        gunUnequipping = true;
+        equipGunAnimation.reverse();
+    }
+
+	public void takeDamage(int damage) {
+		health -= damage;
+
+		if (health <= 0) {
+			health = 0;
+			die();
+		}
+	}
+
+	public int getHealth() {
+		return health;
+	}
+
 	public void die() {
 	    // TODO: proper object removing through PlayScreen
-		this.screen.getWorld().destroyBody(this.body);
+		screen.forgetAfterUpdate(this);
+		screen.wormDied(this); // TODO: use EventManager to handle worm death
+		/*this.screen.getWorld().destroyBody(this.body);
 		this.setBodyToNullReference();
 		if(this.playerNumber == 1) {
 			this.screen.setGameState(GameState.GAMEOVERPLAYERTWOWON);
 		} else {
 			this.screen.setGameState(GameState.GAMEOVERPLAYERONEWON);
-		}
+		}*/
 	}
 	
 	public boolean canJump() {
@@ -179,15 +232,20 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public void setMovement(int newMovementCode) {
+	    if (movement == newMovementCode)
+	        return;
 		this.movement = newMovementCode;
 
 		// reset all animations since they will change
 		idleAnimation.reset();
 		walkAnimation.reset();
+		equipGunAnimation.reset();
+		// TODO: proper handling of animation switches and resets
 
 		if (Constants.MOVEMENT_NO_MOVEMENT != movement) {
 		    idleAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
 		    walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
+		    equipGunAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
         }
 	}
 

@@ -1,6 +1,7 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 public class Constants {
@@ -23,7 +24,10 @@ public class Constants {
 	public static final int MOVEMENT_UP = 1;
 	public static final int MOVEMENT_DOWN = -1;
 	public static final int MOVEMENT_NO_MOVEMENT = 0;
-	
+
+	public static final int WORM_MAX_HEALTH = 100;
+	public static final int PROJECTILE_DAMAGE = 40;
+
 	// Worm movement modifier constant
 	public static final float MOVE_VELOCITY = 1.0f; // m/s
 	public static final float JUMP_VELOCITY = 4.0f; // m/s
@@ -33,16 +37,28 @@ public class Constants {
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
 
+	public static final Color PLAYER_1_COLOR = Color.TEAL;
+	public static final Color PLAYER_2_COLOR = Color.FIREBRICK;
+
+	public static final float MESSAGE_DURATION = 2.0f; // in seconds
+
 	/**
 	 * ground width in pixels
 	 */
 	public static final int GROUND_WIDTH = 750;
 	public static final int GROUND_HEIGHT = 100;
 
+	/**
+	 * in world space
+	 */
+	public static final float WORLD_WIDTH = 20;
+	public static final float WORLD_HEIGHT = 10;
+
 	// key bindings
     public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;
     public static final int KEY_MOVE_RIGHT = Input.Keys.RIGHT;
     public static final int KEY_JUMP = Input.Keys.SPACE;
+    public static final int KEY_DO_ACTION = Input.Keys.ENTER;
 
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;
