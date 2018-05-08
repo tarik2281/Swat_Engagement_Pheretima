@@ -18,6 +18,10 @@ public class Constants {
 	public static final int VELOCITY_ITERATIONS = 8;
 	public static final int POSITION_ITERATIONS = 3;
 	
+	// Worm orientation constants
+	public static final int WORM_DIRECTION_LEFT = -1;
+	public static final int WORM_DIRECTION_RIGHT = 1;
+	
 	// Worm movement code constants
 	public static final int MOVEMENT_LEFT = -1;
 	public static final int MOVEMENT_RIGHT = 1;

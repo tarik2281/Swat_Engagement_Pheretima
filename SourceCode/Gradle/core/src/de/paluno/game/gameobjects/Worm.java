@@ -17,8 +17,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private int playerNumber;
 	
 	private Body body;
-	//private Fixture fixture;
-	//private Texture texture;
 	
 	private Vector2 spawnPosition;
 	
@@ -28,6 +26,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private AnimatedSprite equipGunAnimation;
 	
 	private int movement = 0;
+	private int orientation = Constants.WORM_DIRECTION_LEFT;
 	private boolean jump = false;
 
 	private boolean gunEquipped;
@@ -36,38 +35,48 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private int health;
 
 	public Worm(int num, PlayScreen screen, Vector2 position) {
+		// Set given starting parameters
 		this.playerNumber = num;
 		this.screen = screen;
 		this.spawnPosition = position;
 		
-		//this.setupBody();
+		// Body will be setup from PlayScreen
 		
-		//this.texture = new Texture(Gdx.files.internal("waccuse1_blank.png"));
+		// Setup animation Sprites once for later use
 		// TODO: load assets with AssetManager
 		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
 		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
 		equipGunAnimation = new AnimatedSprite(Gdx.files.internal("whgnlnk.xml"));
 
+		// By default no Worm has a weapon equipped, until it's officially his turn
 		gunEquipped = false;
 		gunUnequipping = false;
 
+		// And of course we have limited health
 		health = Constants.WORM_MAX_HEALTH;
 	}
 	
 	public void update(float delta, GameState state) {
+		/** Update method - apply all logic and physics changes */
+		// No body anymore? Shouldn't happen, catch
 		if(this.body == null) return;
 		
+		// Update gamestate
 		this.currentState = state;
 
-        Vector2 currentPos = body.getWorldCenter();
+        // Now we apply movements - therefor we need our current position
+		Vector2 currentPos = body.getWorldCenter();
 
 		if(this.jump && this.canJump()) {
-		    // TODO: maybe jump and landing animations
+		    // We shall jump - AND are allowed to - so let's apply some vertical impulse
+			// TODO: maybe jump and landing animations
 			this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
 					currentPos.x, currentPos.y, true);
+			// Jumping is a one-time action, so remove the order
 			this.jump = false;
 		}
 
+		// Now we calculate the new movement speed based on current movement impulses
 		// http://www.iforce2d.net/b2dtut/constant-speed
 		Vector2 currentVel = body.getLinearVelocity();
 		float desiredVel = 0.0f;
@@ -85,138 +94,135 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
 
         float velChange = desiredVel - currentVel.x;
+        // Finally we calculate the actual impulse force, based on body mass
 		float impulse = body.getMass() * velChange;
 		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 		
-		//TODO: boundary check?
-		if (!screen.getWorldBounds().contains(body.getPosition()))
-			die();
-
-		// Old version
-		/*if(this.movement != Constants.MOVEMENT_NO_MOVEMENT) {
-			Vector2 currentPos = this.body.getPosition();
-			Vector2 currentVel = this.body.getLinearVelocity();
-
-			float impulse = body.getMass() * 10.0f * Constants.WORLD_SCALE;
-			
-			if(movement == Constants.MOVEMENT_RIGHT && currentVel.x < Constants.MOVE_VELOCITY) {
-				if(currentPos.x > 0) this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
-				else this.body.setLinearVelocity(0.0f, currentVel.y);
-			}
-			else if(movement == Constants.MOVEMENT_LEFT && currentVel.x > -Constants.MOVE_VELOCITY) {
-				if(currentPos.x < 100) this.body.applyLinearImpulse(-impulse, 0.0f, currentPos.x, currentPos.y, true);
-				else this.body.setLinearVelocity(0.0f, currentVel.y);
-			}
-		}*/
+		// Worm fell off the world rim? Is ded.
+		if (!screen.getWorldBounds().contains(body.getPosition())) die();
 	}
 	
 	public void render(SpriteBatch batch, float delta) {
+		/** render method - make it nicely visual */
+		// No body? Shouldn't happen, catch
 		if(this.body == null) return;
 		
+		// Again we need the current position, so we know where to draw our animations
+		// (Based on real size <-> world size calculations)
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
 
         AnimatedSprite sprite = null;
 
         if (movement == Constants.MOVEMENT_NO_MOVEMENT) {
-            if (gunUnequipping && equipGunAnimation.isAnimationFinished()) {
-                gunEquipped = false;
+            // No movement order - that means we either just idle or, if it's our turn, have a weapon equipped
+        	if (gunUnequipping && equipGunAnimation.isAnimationFinished()) {
+                // The weapon should be uneuqipping and is finished with that - update
+        		gunEquipped = false;
                 gunUnequipping = false;
                 equipGunAnimation.reset();
             }
 
             if (gunEquipped) {
-                sprite = equipGunAnimation;
+                // Gun should be equipped? Show that animation
+            	sprite = equipGunAnimation;
             }
             else {
-                sprite = idleAnimation;
+                // No weapon? Idle it is then
+            	sprite = idleAnimation;
             }
         }
-        else {
-            sprite = walkAnimation;
-            // walk animation is only for moving left, so flip it
-            walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
-        }
+        // Or we have some movement, show that
+        else sprite = walkAnimation;
 
+        // And finally draw it
         sprite.setPosition(currentPos);
         sprite.draw(batch, delta);
-		//batch.draw(this.texture, currentPos.x, currentPos.y);
 	}
 	
 	public void setupBody() {
+		/** Setup method - create the physics body of the character */
+		// Blueprint with spawning position and BodyType
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
 		bodyDef.type = BodyType.DynamicBody;
 		
+		// Create the actual physics body in our current game world
 		this.body = this.screen.getWorld().createBody(bodyDef);
 		body.setFixedRotation(true);
 		
+		// Now we add some hitboxes - Worm is easy, just a rectangle
 		PolygonShape bodyRect = new PolygonShape();
 		// TODO: hardcoded worm hitbox size
 		bodyRect.setAsBox(18.0f / 2 * Constants.WORLD_SCALE, 25.0f / 2.0f * Constants.WORLD_SCALE);
 		// TODO: Maybe finetune hitbox
 		
+		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
 		fixtureDef.density = 0.5f;
 		fixtureDef.friction = 1.0f;
 		fixtureDef.restitution = 0.0f;
 		
+		// Create, apply, done
 		Fixture fix = this.body.createFixture(fixtureDef);
 		// CollisionHandler Identifier
 		fix.setUserData("Worm");
 		
+		// Get rid of temporary material properly
 		bodyRect.dispose();
 	}
 	
 	public Body getBody() {
+		/** Getter method - Body */
 		return this.body;
 	}
 	
 	public void setBodyToNullReference() {
-		//this.fixture = null;
+		/** Null Setter Method - Body (if it's dead, remove it) */
 		this.body = null;
 	}
 
 	public int getPlayerNumber() {
+		/** Getter Method - playerNumber */
 		return playerNumber;
 	}
 
 	public void equipGun() {
-	    gunEquipped = true;
+	    /** True Setter Method - equipGun animation */
+		gunEquipped = true;
     }
 
     public void unequipGun() {
-        gunUnequipping = true;
+        /** Setter Method - unequipGun trigger */
+    	gunUnequipping = true;
         equipGunAnimation.reverse();
     }
 
 	public void takeDamage(int damage) {
+		/** Calculate new health after hit */
 		health -= damage;
 
 		if (health <= 0) {
+			// Is ded, kill it
 			health = 0;
 			die();
 		}
 	}
 
 	public int getHealth() {
+		/** Getter Method - health */
 		return health;
 	}
 
 	public void die() {
-	    // TODO: proper object removing through PlayScreen
+	    /** Death handler */
+		//Tell the screen - there, where all the magic happens - that this character is no more
 		screen.forgetAfterUpdate(this);
 		screen.wormDied(this); // TODO: use EventManager to handle worm death
-		/*this.screen.getWorld().destroyBody(this.body);
-		this.setBodyToNullReference();
-		if(this.playerNumber == 1) {
-			this.screen.setGameState(GameState.GAMEOVERPLAYERTWOWON);
-		} else {
-			this.screen.setGameState(GameState.GAMEOVERPLAYERONEWON);
-		}*/
 	}
 	
 	public boolean canJump() {
+		/** Getter Method - Can player jump right now? */
 		return this.isStandsOnGround() && (
 				(this.playerNumber == Constants.PLAYER_NUMBER_1 && this.currentState == GameState.PLAYERONETURN)
 				||
@@ -224,40 +230,55 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	}
 	
 	public boolean isStandsOnGround() {
+		/** Getter Method - Does this player stand on the ground right now? */
 		return this.standsOnGround;
 	}
 	
 	public void setStandsOnGround(boolean onGround) {
+		/** Setter Method - Does player stand on ground? */
 		this.standsOnGround = onGround;
 	}
 	
 	public void setMovement(int newMovementCode) {
-	    if (movement == newMovementCode)
-	        return;
+	    /** Setter Method - apply new movement order and pre-handle animation changes */
+		// Same code? Nothing to go here!
+		if (movement == newMovementCode) return;
 		this.movement = newMovementCode;
 
-		// reset all animations since they will change
+		// If we got this far - something WILL change, so reset the animations just in case
 		idleAnimation.reset();
 		walkAnimation.reset();
 		equipGunAnimation.reset();
 		// TODO: proper handling of animation switches and resets
 
 		if (Constants.MOVEMENT_NO_MOVEMENT != movement) {
-		    idleAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
-		    walkAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
-		    equipGunAnimation.setFlipX(movement == Constants.MOVEMENT_RIGHT);
+		    // The new movementCode is a move-order? Update orientation and - if needed - flip animations
+			if(this.orientation != this.movement) {
+				idleAnimation.setFlipX(orientation == Constants.WORM_DIRECTION_RIGHT);
+			    walkAnimation.setFlipX(orientation == Constants.WORM_DIRECTION_RIGHT);
+			    equipGunAnimation.setFlipX(orientation == Constants.WORM_DIRECTION_RIGHT);
+		    }
+		    this.orientation = this.movement;
         }
 	}
 
 	public int getMovement() {
-	    return movement;
+	    /** Getter Method - Current movement order */
+		return movement;
     }
 
 	public void setJump(boolean newJump) {
+		/** Setter Method - New jump order */
 		this.jump = newJump;
 	}
 	
 	public boolean getJump() {
+		/** Getter Method - Current jump order */
 		return this.jump;
+	}
+	
+	public int getOrientation() {
+		/** Getter Method - Current orientation */
+		return this.orientation;
 	}
 }
