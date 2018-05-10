@@ -12,6 +12,7 @@ import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
+
 	private boolean standsOnGround;
 	private PlayScreen screen;
 	private int playerNumber;
@@ -21,11 +22,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private Vector2 spawnPosition;
 	
 	private GameState currentState;
+
 	private AnimatedSprite idleAnimation;
 	private AnimatedSprite walkAnimation;
 	private AnimatedSprite equipGunAnimation;
+
+	private AnimatedSprite currentAnimation;
 	
-	private int movement = 0;
+	private int movement = Constants.MOVEMENT_NO_MOVEMENT;
 	private int orientation = Constants.WORM_DIRECTION_LEFT;
 	private boolean jump = false;
 
@@ -54,6 +58,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		// And of course we have limited health
 		health = Constants.WORM_MAX_HEALTH;
+
+		// setup the animation
+		updateAnimation();
 	}
 	
 	public void update(float delta, GameState state) {
@@ -108,35 +115,19 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if(this.body == null) return;
 		
 		// Again we need the current position, so we know where to draw our animations
-		// (Based on real size <-> world size calculations)
+		// (Based on screen size <-> world size calculations)
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
 
-        AnimatedSprite sprite = null;
-
-        if (movement == Constants.MOVEMENT_NO_MOVEMENT) {
-            // No movement order - that means we either just idle or, if it's our turn, have a weapon equipped
-        	if (gunUnequipping && equipGunAnimation.isAnimationFinished()) {
-                // The weapon should be uneuqipping and is finished with that - update
-        		gunEquipped = false;
-                gunUnequipping = false;
-                equipGunAnimation.reset();
-            }
-
-            if (gunEquipped) {
-                // Gun should be equipped? Show that animation
-            	sprite = equipGunAnimation;
-            }
-            else {
-                // No weapon? Idle it is then
-            	sprite = idleAnimation;
-            }
-        }
-        // Or we have some movement, show that
-        else sprite = walkAnimation;
+        if (gunUnequipping && equipGunAnimation.isAnimationFinished()) {
+			// The weapon should be uneuqipping and is finished with that - update
+        	gunEquipped = false;
+        	gunUnequipping = false;
+        	updateAnimation();
+		}
 
         // And finally draw it
-        sprite.setPosition(currentPos);
-        sprite.draw(batch, delta);
+		currentAnimation.setPosition(currentPos);
+		currentAnimation.draw(batch, delta);
 	}
 	
 	public void setupBody() {
@@ -152,10 +143,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
 		PolygonShape bodyRect = new PolygonShape();
-		// TODO: hardcoded worm hitbox size
-		bodyRect.setAsBox(18.0f / 2 * Constants.WORLD_SCALE, 25.0f / 2.0f * Constants.WORLD_SCALE);
-		// TODO: Maybe finetune hitbox
-		
+		bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
+
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
@@ -190,12 +179,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void equipGun() {
 	    /** True Setter Method - equipGun animation */
 		gunEquipped = true;
+		updateAnimation();
     }
 
     public void unequipGun() {
         /** Setter Method - unequipGun trigger */
-    	gunUnequipping = true;
-        equipGunAnimation.reverse();
+        if (gunEquipped) {
+			gunUnequipping = true;
+			updateAnimation();
+		}
     }
 
 	public void takeDamage(int damage) {
@@ -243,23 +235,49 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	    /** Setter Method - apply new movement order and pre-handle animation changes */
 		// Same code? Nothing to go here!
 		if (movement == newMovementCode) return;
+
 		this.movement = newMovementCode;
 
-		// If we got this far - something WILL change, so reset the animations just in case
-		idleAnimation.reset();
-		walkAnimation.reset();
-		equipGunAnimation.reset();
-		// TODO: proper handling of animation switches and resets
+		if (movement != Constants.MOVEMENT_NO_MOVEMENT) {
+			// The new movementCode is a move-order? Update orientation
+			switch (movement) {
+				case Constants.MOVEMENT_LEFT:
+					orientation = Constants.WORM_DIRECTION_LEFT;
+					break;
+				case Constants.MOVEMENT_RIGHT:
+					orientation = Constants.WORM_DIRECTION_RIGHT;
+					break;
+			}
+		}
 
-		if (Constants.MOVEMENT_NO_MOVEMENT != movement) {
-		    // The new movementCode is a move-order? Update orientation and - if needed - flip animations
-			if(this.orientation != this.movement) {
-				idleAnimation.setFlipX(orientation == Constants.WORM_DIRECTION_RIGHT);
-			    walkAnimation.setFlipX(orientation == Constants.WORM_DIRECTION_RIGHT);
-			    equipGunAnimation.setFlipX(orientation == Constants.WORM_DIRECTION_RIGHT);
-		    }
-		    this.orientation = this.movement;
-        }
+		// If we got this far - something WILL change, so reset the animations just in case
+		updateAnimation();
+	}
+
+	private void updateAnimation() {
+		switch (movement) {
+			case Constants.MOVEMENT_LEFT:
+			case Constants.MOVEMENT_RIGHT:
+				// We have some movement, show that
+				currentAnimation = walkAnimation;
+				break;
+			case Constants.MOVEMENT_NO_MOVEMENT:
+				// No movement order - that means we either just idle or, if it's our turn, have a weapon equipped
+				if (gunEquipped)
+					// Gun should be equipped? Show that animation
+					currentAnimation = equipGunAnimation;
+				else
+					// No weapon? Idle it is then
+					currentAnimation = idleAnimation;
+				break;
+		}
+
+		// flip the animation if needed since the animations are only for the left direction
+		currentAnimation.setFlipHorizontal(orientation == Constants.WORM_DIRECTION_RIGHT);
+		currentAnimation.reset();
+
+		if (currentAnimation == equipGunAnimation && gunUnequipping)
+			currentAnimation.reverse();
 	}
 
 	public int getMovement() {

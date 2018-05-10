@@ -23,6 +23,7 @@ public class HealthBar implements Renderable {
         this.worm = worm;
 
         font = new BitmapFont();
+        // the text moves shaky if we use integer positions
         font.setUseIntegerPositions(false);
 
         layout = new GlyphLayout();
@@ -32,6 +33,7 @@ public class HealthBar implements Renderable {
     public void render(SpriteBatch batch, float delta) {
         Body body = worm.getBody();
         if (body == null) {
+            // the worm associated with this HealthBar does not exist anymore so just remove this object from the game
             screen.forgetAfterUpdate(this);
             return;
         }

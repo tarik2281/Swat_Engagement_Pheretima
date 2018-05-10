@@ -30,12 +30,12 @@ public class Ground implements PhysicsObject, Renderable {
 
         textureRegion = new TextureRegion(texture);
         // TODO: texture disposal
-        textureRegion.setRegion(0, 0, Constants.GROUND_WIDTH, Constants.GROUND_HEIGHT);
+        textureRegion.setRegion(0, 0, (int)(Constants.GROUND_WIDTH * Constants.SCREEN_SCALE),
+                (int)(Constants.GROUND_HEIGHT * Constants.SCREEN_SCALE));
 
         sprite = new Sprite(textureRegion);
         sprite.setOriginCenter();
         sprite.setOriginBasedPosition(0, 0);
-
     }
 
     @Override
@@ -50,15 +50,13 @@ public class Ground implements PhysicsObject, Renderable {
 
     @Override
     public void setupBody() {
-        // TODO Auto-generated method stub
-
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
         bodyDef.position.set(0, 0);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(Constants.GROUND_WIDTH * Constants.WORLD_SCALE / 2,
-                Constants.GROUND_HEIGHT * Constants.WORLD_SCALE / 2);
+        shape.setAsBox(Constants.GROUND_WIDTH / 2,
+                Constants.GROUND_HEIGHT / 2);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;

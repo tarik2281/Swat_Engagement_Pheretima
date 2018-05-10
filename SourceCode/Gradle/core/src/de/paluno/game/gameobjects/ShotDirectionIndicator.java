@@ -1,24 +1,23 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
 
-public class ShotDirectionIndicator extends java.lang.Object implements Renderable, Updatable{
-	
+public class ShotDirectionIndicator implements Renderable, Updatable{
+
+	private static final float MOVEMENT_SPEED = 2.0f; // in degrees
+
 	private PlayScreen playScreen;
 	private Worm worm;
 	private int playerNumber;
-	private static float positionX;
-	private static float positionY;
 	private float degrees = 0;
 	private Sprite sprite;
-	private GameState gamestate;
 	private Texture texture;
 	private int movement;
 	
@@ -27,30 +26,28 @@ public class ShotDirectionIndicator extends java.lang.Object implements Renderab
 		this.playerNumber = playerNumber;
 		this.worm = worm;
 		this.playScreen = playScreen;
-		
-		texture = new Texture(Gdx.files.internal("Pfeil3.png"));
+
+		texture = new Texture(Gdx.files.internal("Arrow.png"));
 		sprite = new Sprite(texture);
-		sprite.setSize(30, 30);
-		
 	}
 
 	public void update(float delta, GameState gamestate) {
-		this.gamestate = gamestate;
-		
-		positionX = worm.getBody().getPosition().x * Constants.SCREEN_SCALE;
-	    positionY = (worm.getBody().getPosition().y * Constants.SCREEN_SCALE) + 50;
-	    
-		if(movement == -1){
-			degrees -= 1;
-		}else if(movement == 1) {
-			degrees += 1;
-		}else {}
+		switch (movement) {
+			case Constants.MOVEMENT_UP:
+				degrees += MOVEMENT_SPEED;
+				break;
+			case Constants.MOVEMENT_DOWN:
+				degrees -= MOVEMENT_SPEED;
+				break;
+		}
 	}
 	
 	public void render(SpriteBatch batch, float delta){
+		Vector2 position = Constants.getScreenSpaceVector(worm.getBody().getPosition());
+
 	    sprite.setOriginCenter();
 		sprite.setRotation(degrees);
-		sprite.setOriginBasedPosition(positionX, positionY);
+		sprite.setOriginBasedPosition(position.x, position.y);
 	    
 	    sprite.draw(batch);	
 	}

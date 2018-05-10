@@ -7,9 +7,10 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.XmlReader;
 
-public class AnimatedSprite {
+public class AnimatedSprite implements Disposable {
 
     private Texture spriteSheet;
     private int numColumns;
@@ -19,19 +20,20 @@ public class AnimatedSprite {
     private Animation.PlayMode playMode;
 
     private Animation<TextureRegion> animation;
-    private int tileHalfWidth;
-    private int tileHalfHeight;
+    private int frameHalfWidth;
+    private int frameHalfHeight;
 
     private float stateTime;
     private boolean reverse;
 
-    private Vector2 origin;
-    private boolean flipX;
+    private Vector2 position;
+    private boolean flipHorizontal;
 
     public AnimatedSprite(FileHandle fileHandle) {
         XmlReader reader = new XmlReader();
         XmlReader.Element element = reader.parse(fileHandle);
 
+        // read animation data from xml file
         spriteSheet = new Texture(Gdx.files.internal(element.get("Texture")));
         numColumns = element.getInt("Columns");
         numRows = element.getInt("Rows");
@@ -45,14 +47,17 @@ public class AnimatedSprite {
         else if (playMode.equals("LoopPingPong"))
             this.playMode = Animation.PlayMode.LOOP_PINGPONG;
 
-        tileHalfWidth = spriteSheet.getWidth() / numColumns;
-        tileHalfHeight = spriteSheet.getHeight() / numRows;
+        // calculate the frame size based on the size of the sprite sheet and its structure
+        int frameWidth = spriteSheet.getWidth() / numColumns;
+        int frameHeight = spriteSheet.getHeight() / numRows;
 
-        TextureRegion[][] tmp = TextureRegion.split(spriteSheet, tileHalfWidth, tileHalfHeight);
+        // generate TextureRegions for each frame in the sprite sheet
+        TextureRegion[][] tmp = TextureRegion.split(spriteSheet, frameWidth, frameHeight);
 
-        tileHalfWidth /= 2;
-        tileHalfHeight /= 2;
+        frameHalfWidth = frameWidth / 2;
+        frameHalfHeight = frameHeight / 2;
 
+        // convert two-dimensional array to one-dimensional array
         TextureRegion[] frames = new TextureRegion[numColumns * numRows];
         int index = 0;
         for (int i = 0; i < numRows; i++) {
@@ -61,20 +66,25 @@ public class AnimatedSprite {
             }
         }
 
+        // create libGDX animation with the TextureRegions as frames
         animation = new Animation<TextureRegion>(frameInterval, frames);
         animation.setPlayMode(this.playMode);
 
         stateTime = 0.0f;
 
-        origin = new Vector2();
+        position = new Vector2();
     }
 
+    /**
+     * sets the position where this sprite will be drawn
+     * @param position
+     */
     public void setPosition(Vector2 position) {
-        origin.set(position);
+        this.position.set(position);
     }
 
-    public void setFlipX(boolean flipX) {
-        this.flipX = flipX;
+    public void setFlipHorizontal(boolean flip) {
+        this.flipHorizontal = flip;
     }
 
     /**
@@ -85,10 +95,18 @@ public class AnimatedSprite {
         reverse = false;
     }
 
+    /**
+     * play the animation backwards - only usable with a PlayMode.NORMAL animation
+     */
     public void reverse() {
         reverse = true;
+        stateTime = animation.getAnimationDuration();
     }
 
+    /**
+     * checks if this animation has finished playing
+     * @return true if the animation finished, otherwise false
+     */
     public boolean isAnimationFinished() {
         if (reverse)
             return stateTime <= 0;
@@ -97,7 +115,7 @@ public class AnimatedSprite {
     }
 
     public void draw(SpriteBatch batch, float delta) {
-        stateTime += !reverse ? delta : -delta;
+        stateTime += playMode != Animation.PlayMode.NORMAL || !reverse ? delta : -delta;
         // create loop effect by resetting stateTime
         switch (playMode) {
             case NORMAL:
@@ -119,16 +137,25 @@ public class AnimatedSprite {
         // sprite sheets already involve worm movement offset, so remove that from there
         float pct = stateTime / animation.getAnimationDuration();
         float offset = spriteOffset * pct;
-        if (flipX)
+        if (flipHorizontal)
             offset *= -1.0f;
 
         TextureRegion region = animation.getKeyFrame(stateTime, playMode != Animation.PlayMode.NORMAL);
 
-        if (flipX && !region.isFlipX())
+        if (flipHorizontal && !region.isFlipX())
             region.flip(true, false);
-        else if (!flipX && region.isFlipX())
+        else if (!flipHorizontal && region.isFlipX())
             region.flip(true, false);
 
-        batch.draw(region, origin.x - tileHalfWidth + offset, origin.y - tileHalfHeight);
+        // we have the origin in the center of the object so subtract half of the frame size
+        batch.draw(region, position.x - frameHalfWidth + offset, position.y - frameHalfHeight);
+    }
+
+    @Override
+    public void dispose() {
+        if (spriteSheet != null) {
+            spriteSheet.dispose();
+            spriteSheet = null;
+        }
     }
 }

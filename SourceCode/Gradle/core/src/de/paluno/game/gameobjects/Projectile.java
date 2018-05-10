@@ -38,6 +38,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     @Override
     public void update(float delta, GameState gameState) {
+        // check if the projectile is inside our world - if not, destroy it
         if (!playScreen.getWorldBounds().contains(body.getPosition()))
             explode();
     }
@@ -56,7 +57,6 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        //Vector2 position = Constants.getWorldSpaceVector(origin);
         bodyDef.position.set(origin.x, origin.y);
         bodyDef.bullet = true;
 
@@ -71,17 +71,16 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
         Fixture fix = body.createFixture(fixtureDef);
 
+        // the projectile should not be affected by gravity
         body.setGravityScale(0.0f);
-        body.setUserData(this);
 
-        Vector2 impulse = direction;
+        // apply an impulse to the body so it flies in the direction we chose
+        Vector2 impulse = new Vector2(direction).scl(0.001f);
         body.applyLinearImpulse(impulse, body.getPosition(), true);
 
         // CollisionHandler Identifier
         fix.setUserData("Projectile");
         shape.dispose();
-        
-
     }
 
     @Override
@@ -96,8 +95,6 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     public void explode() {
         playScreen.forgetAfterUpdate(this);
-    	//this.playScreen.getWorld().destroyBody(this.body);
-    	//this.setBodyToNullReference();
     	playScreen.advanceGameState();
     }
 }

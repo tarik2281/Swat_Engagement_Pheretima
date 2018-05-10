@@ -21,8 +21,13 @@ public class GameCamera {
     private int verticalMovement;
 
     // in world space
-    private float bottomBorder;
+    private float bottomLimit;
 
+    /**
+     *
+     * @param viewportWidth in pixels
+     * @param viewportHeight in pixels
+     */
     public GameCamera(float viewportWidth, float viewportHeight) {
         this.viewportWidth = viewportWidth;
         this.viewportHeight = viewportHeight;
@@ -47,11 +52,12 @@ public class GameCamera {
     }
 
     /**
-     *
-     * @param bottom the bottom border in screen space
+     * sets the lower vertical movement limit of the camera
+     * @param bottom the bottom limit in world space
      */
-    public void setBottomBorder(float bottom) {
-        bottomBorder = (bottom + viewportHeight / 2.0f) * Constants.WORLD_SCALE;
+    public void setBottomLimit(float bottom) {
+        // the position of the camera refers to the center of the screen, so add that offset to the limit
+        bottomLimit = bottom + viewportHeight / 2.0f * Constants.WORLD_SCALE;
     }
 
     public void setHorizontalMovement(int movement) {
@@ -77,7 +83,8 @@ public class GameCamera {
         debugPosition.add(horizontalMovement * Constants.CAMERA_MOVE_VELOCITY * delta,
                 verticalMovement * Constants.CAMERA_MOVE_VELOCITY * delta);
 
-        debugPosition.y = Math.max(debugPosition.y, bottomBorder);
+        // limit the vertical camera position so it does not go under the bottom limit
+        debugPosition.y = Math.max(debugPosition.y, bottomLimit);
         position.set(Constants.getScreenSpaceVector(debugPosition));
 
         debugCamera.position.set(debugPosition, 0);
