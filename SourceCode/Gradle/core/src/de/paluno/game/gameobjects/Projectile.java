@@ -13,11 +13,11 @@ import de.paluno.game.screens.PlayScreen;
 public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     // in meters
-    private static final float PROJECTILE_RADIUS = 3.0f;
+    private static final float PROJECTILE_RADIUS = 0.03f;
     private static final float PROJECTILE_DENSITY = 0.1f;
 
     private PlayScreen playScreen;
-    private Vector2 origin;
+    private Vector2 position;
     private Vector2 direction;
 
     private Body body;
@@ -25,9 +25,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private Texture texture;
     private Sprite sprite;
 
-    public Projectile(PlayScreen playScreen, Vector2 origin, Vector2 direction) {
+    public Projectile(PlayScreen playScreen, Vector2 position, Vector2 direction) {
         this.playScreen = playScreen;
-        this.origin = origin;
+        this.position = position;
         this.direction = direction;
 
         texture = new Texture(Gdx.files.internal("Projectile.png"));
@@ -57,11 +57,11 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(origin.x, origin.y);
+        bodyDef.position.set(position.x, position.y);
         bodyDef.bullet = true;
 
         CircleShape shape = new CircleShape();
-        shape.setRadius(PROJECTILE_RADIUS * Constants.WORLD_SCALE);
+        shape.setRadius(PROJECTILE_RADIUS);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;

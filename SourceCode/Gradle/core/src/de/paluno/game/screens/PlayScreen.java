@@ -185,8 +185,8 @@ public class PlayScreen extends ScreenAdapter {
     public void show() {
         Gdx.input.setInputProcessor(inputAdapter);
 
-        float screenWidth = Gdx.graphics.getWidth()/1.5f;
-        float screenHeight = Gdx.graphics.getHeight()/1.5f;
+        float screenWidth = Gdx.graphics.getWidth();
+        float screenHeight = Gdx.graphics.getHeight();
 
         camera = new GameCamera(screenWidth, screenHeight);
         uiLayer = new PlayUILayer(screenWidth, screenHeight);

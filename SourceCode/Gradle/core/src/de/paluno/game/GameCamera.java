@@ -7,7 +7,9 @@ import de.paluno.game.gameobjects.PhysicsObject;
 
 public class GameCamera {
 
+    // normal camera used for drawing sprites, etc., metrics given in pixels
     private OrthographicCamera camera;
+    // debug camera used for drawing hitboxes, metrics given in meters
     private OrthographicCamera debugCamera;
     private PhysicsObject cameraFocus;
 
@@ -20,7 +22,7 @@ public class GameCamera {
     private int horizontalMovement;
     private int verticalMovement;
 
-    // in world space
+    // in world space (in meters)
     private float bottomLimit;
 
     /**
@@ -32,6 +34,7 @@ public class GameCamera {
         this.viewportWidth = viewportWidth;
         this.viewportHeight = viewportHeight;
 
+        // initialize the cameras according to the window size
         camera = new OrthographicCamera();
         camera.setToOrtho(false, viewportWidth, viewportHeight);
 
@@ -43,6 +46,7 @@ public class GameCamera {
         position = new Vector2();
     }
 
+    // set the object the camera will follow, or null to follow nothing
     public void setCameraFocus(PhysicsObject object) {
         cameraFocus = object;
     }
@@ -78,18 +82,24 @@ public class GameCamera {
 
     public void update(float delta) {
         if (cameraFocus != null)
+            // if we have a camera focus then we center the camera on the given object
             debugPosition.set(cameraFocus.getBody().getPosition());
 
+        // move the camera according to user input
         debugPosition.add(horizontalMovement * Constants.CAMERA_MOVE_VELOCITY * delta,
                 verticalMovement * Constants.CAMERA_MOVE_VELOCITY * delta);
 
         // limit the vertical camera position so it does not go under the bottom limit
         debugPosition.y = Math.max(debugPosition.y, bottomLimit);
+
+        // since we calculated the camera position in meters for debug drawing, convert that to pixels for normal drawing
         position.set(Constants.getScreenSpaceVector(debugPosition));
 
+        // apply the new camera position to the camera objects
         debugCamera.position.set(debugPosition, 0);
         camera.position.set(position, 0);
 
+        // let the Camera class calculate its new projection matrices
         debugCamera.update();
         camera.update();
     }
@@ -99,6 +109,7 @@ public class GameCamera {
     }
 
     public Matrix4 getScreenProjection() {
+        // return the camera matrix to be used with a SpriteBatch
         return camera.combined;
     }
 }
