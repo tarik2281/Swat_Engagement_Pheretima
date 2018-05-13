@@ -19,6 +19,11 @@ public class CollisionHandler implements ContactListener {
 		this.playScreen = playScreen;
 
 	}
+	
+	  /**
+    *
+    * treats the contact of colliding fixtures
+    */
 
 	@Override
 	public void beginContact(Contact contact) {
@@ -29,12 +34,9 @@ public class CollisionHandler implements ContactListener {
 		if (fixA == null || fixB == null) {
 			return;
 		}
-
-		Body bodyA = fixA.getBody();
-		Body bodyB = fixB.getBody();
 		
-		Object o1 = bodyA.getUserData();
-		Object o2 = bodyB.getUserData();
+		Object o1 = fixA.getBody().getUserData();
+		Object o2 = fixB.getBody().getUserData();
 
 		if (o1 == null || o2 == null) {
 			return;
@@ -64,7 +66,7 @@ public class CollisionHandler implements ContactListener {
 			worm.takeDamage(Constants.PROJECTILE_DAMAGE);
 			
 			System.out.println("Projectile collided with Worm!");
-			System.out.println("Worm died!");
+			System.out.println("Worms life = " + worm.getHealth());
 			
 		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Projectile")) {
 			Worm worm = (Worm) o2;
@@ -73,7 +75,7 @@ public class CollisionHandler implements ContactListener {
 			worm.takeDamage(Constants.PROJECTILE_DAMAGE);
 			
 			System.out.println("Projectile collided with Worm!");
-			System.out.println("Worm died!");
+			System.out.println("Worms life = " + worm.getHealth());
 		}
 		
 		
@@ -96,7 +98,11 @@ public class CollisionHandler implements ContactListener {
 		}
 		
 		}
-		
+	
+	  /**
+    *
+    * treats the contact of fixtures which separate from each other
+    */	
 
 	@Override
 	public void endContact(Contact contact) {
@@ -104,22 +110,20 @@ public class CollisionHandler implements ContactListener {
 		Fixture fixA = contact.getFixtureA();
 		Fixture fixB = contact.getFixtureB();
 		
-		Body bodyA = fixA.getBody();
-		Body bodyB = fixB.getBody();
-		
-		Object o1 = bodyA.getUserData();
-		Object o2 = bodyB.getUserData();
-		
-
 		if (fixA == null || fixB == null) {
 			return;
 		}
+		
+		Object o1 = fixA.getBody().getUserData();
+		Object o2 = fixB.getBody().getUserData();
+		
+
 		if (o1 == null || o2 == null) {
 			return;
 		}
 		
 		
-		// Worm -> jump || fall -> Ground
+		// Worm -> jump || Worm -> out of world
 		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
 			Worm worm = (Worm) o1;
 			worm.setStandsOnGround(false);
@@ -135,25 +139,6 @@ public class CollisionHandler implements ContactListener {
 			
 			
 		}
-		
-		// Worm -> fell off World
-		
-//		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
-//			Worm worm = (Worm) o1;
-//			worm.setStandsOnGround(false);
-//			
-//			
-//			System.out.println("Worm fell off World!");
-//			
-//		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
-//			Worm worm = (Worm) o2;
-//			worm.setStandsOnGround(false);
-//			
-//			System.out.println("Worm fell off World!");
-//			
-//			
-//		}
-
 		
 
 	}
