@@ -15,6 +15,7 @@ public class PlayUILayer {
 
     private OrthographicCamera camera;
     private BitmapFont font;
+    // messageDisplayTime is used as a timer for how long the message should be shown
     private float messageDisplayTime;
 
     private GlyphLayout messageLayout;
@@ -40,10 +41,12 @@ public class PlayUILayer {
     }
 
     public void render(SpriteBatch batch, float delta) {
+        // apply the ui camera to the SpriteBatch
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
         if (messageDisplayTime < Constants.MESSAGE_DURATION) {
+            // message should be displayed for as long as our given duration
             messageDisplayTime += delta;
             font.draw(batch, messageLayout, viewportWidth / 2, MESSAGE_POSITION_Y);
         }
@@ -51,10 +54,11 @@ public class PlayUILayer {
         batch.end();
     }
 
-    public void showMessage(CharSequence message, Color color) {
+    public void showMessage(String message, Color color) {
         if (message == null)
             return;
 
+        // setup the new message
         messageDisplayTime = 0.0f;
         messageLayout.setText(font, message, color, 0, Align.center, false);
     }
@@ -63,6 +67,7 @@ public class PlayUILayer {
         String message = null;
         Color color = null;
 
+        // set the message and message color according to the current GameState
         switch (gameState) {
             case PLAYERONETURN:
                 message = "Spieler 1 ist am Zug!";
