@@ -13,32 +13,31 @@ import de.paluno.game.screens.PlayScreen;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
-	private boolean standsOnGround;
-	private PlayScreen screen;
-	private int playerNumber;
+	private int characterNumber;
 	
+	private World world;
 	private Body body;
+	private PlayScreen screen;
+	private Player player;
+	private AssetManager assets;
 	
 	private Vector2 spawnPosition;
 	
 	private GameState currentState;
-
-	private AnimatedSprite idleAnimation;
-	private AnimatedSprite walkAnimation;
-	private AnimatedSprite equipGunAnimation;
 
 	private AnimatedSprite currentAnimation;
 	
 	private int movement = Constants.MOVEMENT_NO_MOVEMENT;
 	private int orientation = Constants.WORM_DIRECTION_LEFT;
 	private boolean jump = false;
+	private boolean standsOnGround;
 
-	private boolean gunEquipped;
-	private boolean gunUnequipping;
+	private boolean gunEquipped = false;
+	private boolean gunUnequipping = false;
 
 	private int health;
 
-	public Worm(int num, PlayScreen screen, Vector2 position) {
+	/*public Worm(int num, PlayScreen screen, Vector2 position) {
 		// Set given starting parameters
 		this.playerNumber = num;
 		this.screen = screen;
@@ -61,10 +60,38 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		// setup the animation
 		updateAnimation();
+	}*/
+	/**
+	 * Constructor
+	 * @param player - reference to the player we belong to
+	 * @param charNum - Our character number
+	 */
+	public Worm(Player player, int charNum) {
+		// Link references
+		this.player = player;
+		this.characterNumber = charNum;
+		this.world = player.getWorld();
+		this.assets = player.getAssets();
+		
+		// Get our spawning position
+		this.spawnPosition = world.generateSpawnposition();
+		
+		// Generate our physics body
+		this.setupBody();
+		
+		// Health is limited
+		this.health = Constants.WORM_MAX_HEALTH;
+		
+		// Finally setup Animations
+		updateAnimation();
 	}
 	
+	/**
+	 * Handler method for Game Loop's Update phase
+	 * @param delta - Time since last update in seconds
+	 * @param state - GameState we are in this round
+	 */
 	public void update(float delta, GameState state) {
-		/** Update method - apply all logic and physics changes */
 		// No body anymore? Shouldn't happen, catch
 		if(this.body == null) return;
 		
@@ -92,7 +119,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
             case Constants.MOVEMENT_LEFT:
                 desiredVel = -Constants.MOVE_VELOCITY;
                 break;
-            case Constants.MOVEMENT_NO_MOVEMENT:
+            case Constants.MOVEMENT_NO_MOVEMENT: default:
                 desiredVel = 0.0f;
                 break;
             case Constants.MOVEMENT_RIGHT:
@@ -109,8 +136,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (!screen.getWorldBounds().contains(body.getPosition())) die();
 	}
 	
+	/**
+	 * Handler method for Game Loop's Render phase
+	 * @param batch - Reference to our SpriteBatch used for rendering
+	 * @param delta - Time since last update in seconds
+	 */
 	public void render(SpriteBatch batch, float delta) {
-		/** render method - make it nicely visual */
 		// No body? Shouldn't happen, catch
 		if(this.body == null) return;
 		
@@ -118,7 +149,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// (Based on screen size <-> world size calculations)
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
 
-        if (gunUnequipping && equipGunAnimation.isAnimationFinished()) {
+        if (gunUnequipping && currentAnimation.isAnimationFinished()) {
 			// The weapon should be uneuqipping and is finished with that - update
         	gunEquipped = false;
         	gunUnequipping = false;
@@ -130,16 +161,18 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		currentAnimation.draw(batch, delta);
 	}
 	
+	/**
+	 * Method to setup our actual physics body
+	 */
 	public void setupBody() {
-		/** Setup method - create the physics body of the character */
 		// Blueprint with spawning position and BodyType
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
 		bodyDef.type = BodyType.DynamicBody;
 		
 		// Create the actual physics body in our current game world
-		this.body = this.screen.getWorld().createBody(bodyDef);
-		body.setFixedRotation(true);
+		this.body = this.world.createBody(bodyDef);
+		//body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
 		PolygonShape bodyRect = new PolygonShape();
@@ -161,37 +194,42 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		bodyRect.dispose();
 	}
 	
-	public Body getBody() {
-		/** Getter method - Body */
-		return this.body;
-	}
-	
-	public void setBodyToNullReference() {
-		/** Null Setter Method - Body (if it's dead, remove it) */
-		this.body = null;
-	}
-
-	public int getPlayerNumber() {
-		/** Getter Method - playerNumber */
-		return playerNumber;
-	}
-
+	/**
+	 * Getter method for our physics body
+	 * @return body
+	 */
+	public Body getBody() {return this.body;}
+	/**
+	 * Soft setter method for our physics body - set to null on death
+	 */
+	public void setBodyToNullReference() {this.body = null;}
+	/**
+	 * Getter reference to parents (player) player Number
+	 * @return player.playerNumber
+	 */
+	public int getPlayerNumber() {return this.player.getPlayerNumber();}
+	/**
+	 * Soft setter method for animation state - set animation to equipGun
+	 */
 	public void equipGun() {
-	    /** True Setter Method - equipGun animation */
 		gunEquipped = true;
 		updateAnimation();
     }
-
+	/**
+	 * Soft setter method for animation state - reverse gun animation
+	 */
     public void unequipGun() {
-        /** Setter Method - unequipGun trigger */
         if (gunEquipped) {
 			gunUnequipping = true;
 			updateAnimation();
 		}
     }
-
+    
+    /**
+     * Damage handler method - calculate remaining life and death
+     * @param damage - The damage taken as integer
+     */
 	public void takeDamage(int damage) {
-		/** Calculate new health after hit */
 		health -= damage;
 
 		if (health <= 0) {
@@ -200,39 +238,48 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			die();
 		}
 	}
+	/**
+	 * Getter method for our character's health
+	 * @return health
+	 */
+	public int getHealth() {return health;}
 
-	public int getHealth() {
-		/** Getter Method - health */
-		return health;
-	}
-
+	/**
+	 * Method to handle characters death - cleanup and stuff
+	 */
 	public void die() {
-	    /** Death handler */
 		//Tell the screen - there, where all the magic happens - that this character is no more
-		screen.forgetAfterUpdate(this);
-		screen.wormDied(this); // TODO: use EventManager to handle worm death
+		//screen.forgetAfterUpdate(this);
+		//screen.wormDied(this);
+		this.player.characterDied(this.characterNumber);
+		this.setBodyToNullReference();
 	}
 	
+	/**
+	 * Getter method for character's jump status
+	 * @return Character on ground and allowed to move?
+	 */
 	public boolean canJump() {
-		/** Getter Method - Can player jump right now? */
-		return this.isStandsOnGround() && (
-				(this.playerNumber == Constants.PLAYER_NUMBER_1 && this.currentState == GameState.PLAYERONETURN)
-				||
-				(this.playerNumber == Constants.PLAYER_NUMBER_2 && this.currentState == GameState.PLAYERTWOTURN));
+		return this.isStandsOnGround() &&
+				this.player.isPlayerTurn() &&
+				this.characterNumber == this.player.getTurn();
 	}
 	
-	public boolean isStandsOnGround() {
-		/** Getter Method - Does this player stand on the ground right now? */
-		return this.standsOnGround;
-	}
-	
-	public void setStandsOnGround(boolean onGround) {
-		/** Setter Method - Does player stand on ground? */
-		this.standsOnGround = onGround;
-	}
-	
+	/**
+	 * Getter method for character's ground status
+	 * @return standsOnGround
+	 */
+	public boolean isStandsOnGround() {return this.standsOnGround;}
+	/**
+	 * Setter method for character's ground status
+	 * @param onGround - Is the character on the ground now?
+	 */
+	public void setStandsOnGround(boolean onGround) {this.standsOnGround = onGround;}
+	/**
+	 * Setter method for character's movement orders and orientation
+	 * @param newMovementCode - Constant based movement code for left, right or stop
+	 */
 	public void setMovement(int newMovementCode) {
-	    /** Setter Method - apply new movement order and pre-handle animation changes */
 		// Same code? Nothing to go here!
 		if (movement == newMovementCode) return;
 
@@ -253,7 +300,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// If we got this far - something WILL change, so reset the animations just in case
 		updateAnimation();
 	}
-
+	
+	/**
+	 * Method to update our character's animation state
+	 */
 	private void updateAnimation() {
 		switch (movement) {
 			case Constants.MOVEMENT_LEFT:
@@ -268,35 +318,36 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 					currentAnimation = equipGunAnimation;
 				else
 					// No weapon? Idle it is then
-					currentAnimation = idleAnimation;
+					currentAnimation = this.assets.getAnimation('idle');
 				break;
 		}
 
 		// flip the animation if needed since the animations are only for the left direction
-		currentAnimation.setFlipHorizontal(orientation == Constants.WORM_DIRECTION_RIGHT);
+		currentAnimation.setOrientation(orientation);
 		currentAnimation.reset();
 
-		if (currentAnimation == equipGunAnimation && gunUnequipping)
-			currentAnimation.reverse();
-	}
-
-	public int getMovement() {
-	    /** Getter Method - Current movement order */
-		return movement;
-    }
-
-	public void setJump(boolean newJump) {
-		/** Setter Method - New jump order */
-		this.jump = newJump;
+		if (assets.isAnimationType(currentAnimation, 'weapon') && gunUnequipping)
+			currentAnimation.reverse(true);
 	}
 	
-	public boolean getJump() {
-		/** Getter Method - Current jump order */
-		return this.jump;
-	}
-	
-	public int getOrientation() {
-		/** Getter Method - Current orientation */
-		return this.orientation;
-	}
+	/**
+	 * Getter method for character's current movement order
+	 * @return movement
+	 */
+	public int getMovement() {return movement;}
+	/**
+	 * Setter method for character's jump order
+	 * @param newJump - Shall character jump?
+	 */
+	public void setJump(boolean newJump) {this.jump = newJump;}
+	/**
+	 * Getter method for character's current jump order
+	 * @return jump
+	 */
+	public boolean getJump() {return this.jump;}
+	/**
+	 * Getter method for character's current orientation
+	 * @return orientation
+	 */
+	public int getOrientation() {return this.orientation;}
 }
