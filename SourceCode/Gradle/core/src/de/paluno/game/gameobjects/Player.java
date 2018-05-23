@@ -109,4 +109,10 @@ public class Player {
 				||
 				(this.playerNum == 2 && this.gameState == GameState.PLAYERTWOTURN);
 	}
+	
+	/**
+	 * Getter method for the character whose turn it currently is
+	 * @return Worm
+	 */
+	public Worm getCurrentWorm() {return this.characters[this.turn-1];}
 }

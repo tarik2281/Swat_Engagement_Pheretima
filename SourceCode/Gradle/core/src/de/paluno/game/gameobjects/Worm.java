@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
+import de.paluno.game.WeaponType;
 import de.paluno.game.screens.PlayScreen;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
@@ -36,6 +37,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private boolean gunUnequipping = false;
 
 	private int health;
+	
+	private Weapon[] weapons;
 
 	/*public Worm(int num, PlayScreen screen, Vector2 position) {
 		// Set given starting parameters
@@ -79,6 +82,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Generate our physics body
 		this.setupBody();
 		
+		// Generate our deadly arsenal
+		this.setupWeapons();
+		
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
 		
@@ -97,6 +103,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		
 		// Update gamestate
 		this.currentState = state;
+		this.player.setGameState(state);
 
         // Now we apply movements - therefor we need our current position
 		Vector2 currentPos = body.getWorldCenter();
@@ -192,6 +199,42 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		
 		// Get rid of temporary material properly
 		bodyRect.dispose();
+	}
+	
+	protected void setupWeapons() {
+		// TODO: Outsource weapon stats and make retrieval more dynamic
+		/*Object[][][] weaponStats = new Object[][][] {
+			{
+				{"Rakentenwerfer",
+				 "Verschieß eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Flächenschaden an allen Objekten verursacht.",
+				 null}
+			},
+			{
+				{"Sturmgewehr",
+				 "Verschießt ein schnelles, aber dafür schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an Würmern verursacht.",
+				 null}
+			},
+			{
+				{"Handgranate",
+				 "Eine geworfene Handgranate, die umherhüpft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.",
+				 null}
+			}
+		};
+		int i, j = 0, k = 0;
+		WeaponType type;
+		
+		this.weapons = new Weapon[Constants.WEAPON_ARSENAL_SIZE];
+		for(i = 0; i < Constants.WEAPON_ARSENAL_SIZE && k < 3; i++) {
+			switch(k) {
+				default: case 0: type = WeaponType.WEAPON_PROJECTILE; break;
+				case 1: type = WeaponType.WEAPON_PROJECTILE; break;
+				case 2: type = WeaponType.WEAPON_PROJECTILE; break;
+			}
+		}*/
+		this.weapons = new Weapon[Constants.WEAPON_ARSENAL_SIZE];
+		this.weapons[0] = new Weapon(this, WeaponType.WEAPON_PROJECTILE, "Raketenwerfer", "Verschieß eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Flächenschaden an allen Objekten verursacht.", null);
+		this.weapons[1] = new Weapon(this, WeaponType.WEAPON_RIFLE, "Sturmgewehr", "Verschießt ein schnelles, aber dafür schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an Würmern verursacht.", null, Constants.WEAPON_AMMO_RIFLE);
+		this.weapons[2] = new Weapon(this, WeaponType.WEAPON_THROWABLE, "Handgranate", "Eine geworfene Handgranate, die umherhüpft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.", null, Constants.WEAPON_AMMO_THROWABLE);
 	}
 	
 	/**
@@ -350,4 +393,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @return orientation
 	 */
 	public int getOrientation() {return this.orientation;}
+	/**
+	 * Getter method for global Asset Manager
+	 * @return AssetManager
+	 */
+	public AssetManager getAssets() {return this.assets;}
 }
