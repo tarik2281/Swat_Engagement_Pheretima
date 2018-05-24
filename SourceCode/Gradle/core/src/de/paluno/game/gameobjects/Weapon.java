@@ -12,7 +12,7 @@ public class Weapon {
 	private int maxAmmo;
 	private int currentAmmo;
 	
-	private boolean affectedByGravity;
+	private boolean explode;
 	private boolean bounce;
 	private float speed;
 	private boolean special;
@@ -22,6 +22,7 @@ public class Weapon {
 	private String name;
 	private String description;
 	private Sprite icon;
+	private boolean selectable = true;
 	
 	private Worm worm;
 	private Projectile projectile = null;
@@ -71,7 +72,7 @@ public class Weapon {
 			default: case WEAPON_RIFLE:
 				this.speed = Constants.WEAPON_RIFLE_SPEED;
 				this.bounce = false;
-				this.affectedByGravity = false;
+				this.explode = false;
 				this.special = false;
 				
 				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponRifle));
@@ -79,7 +80,7 @@ public class Weapon {
 			case WEAPON_PROJECTILE:
 				this.speed = Constants.WEAPON_PROJECTILE_SPEED;
 				this.bounce = false;
-				this.affectedByGravity = true;
+				this.explode = true;
 				this.special = false;
 				
 				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponLauncher));
@@ -87,7 +88,7 @@ public class Weapon {
 			case WEAPON_THROWABLE:
 				this.speed = Constants.WEAPON_THROWABLE_SPEED;
 				this.bounce = true;
-				this.affectedByGravity = true;
+				this.explode = true;
 				this.special = false;
 				
 				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponGrenade));
@@ -95,7 +96,7 @@ public class Weapon {
 			case WEAPON_SPECIAL:
 				this.speed = Constants.WEAPON_RIFLE_SPEED;
 				this.bounce = false;
-				this.affectedByGravity = false;
+				this.explode = false;
 				this.special = true;
 				
 				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponRifle));
@@ -115,6 +116,7 @@ public class Weapon {
 			if(this.currentAmmo > 0) {
 				this.projectile = new Projectile(null, null, null);
 				this.currentAmmo--;
+				if(this.currentAmmo == 0) this.selectable = false;
 			}
 		}
 	}
@@ -135,9 +137,9 @@ public class Weapon {
 	public boolean getBounce() {return this.bounce;}
 	/**
 	 * Getter method for the projectile's gravity affection of this weapon
-	 * @return affectedByGravity
+	 * @return explode
 	 */
-	public boolean getAffectedByGravity() {return this.affectedByGravity;}
+	public boolean getExplode() {return this.explode;}
 	/**
 	 * Getter method for the projectile's special state of this weapon
 	 * @return special
@@ -145,9 +147,9 @@ public class Weapon {
 	public boolean getSpecialState() {return this.special;}
 	/**
 	 * Shortcut getter method to return all projectile stats in one mixed array
-	 * @return Array<Mixed> speed, bounce, affectedByGravity, special
+	 * @return Array<Mixed> speed, bounce, explode, special
 	 */
-	public Object[] getProjectileStats() {return new Object[] {speed, bounce, affectedByGravity, special};}
+	public Object[] getProjectileStats() {return new Object[] {speed, bounce, explode, special};}
 	
 	/**
 	 * Getter method for the weapon's name
@@ -165,10 +167,15 @@ public class Weapon {
 	 */
 	public Sprite getIcon() {return this.icon;}
 	/**
-	 * Shortcut getter method for every weapon stat
-	 * @return Array<Mixed> name, description, icon
+	 * Getter method for the weapon's availability
+	 * @return selectable
 	 */
-	public Object[] getWeaponStats() {return new Object[] {name, description, icon};}
+	public boolean getSelectable() {return this.selectable;}
+	/**
+	 * Shortcut getter method for every weapon stat
+	 * @return Array<Mixed> name, description, icon, selectable
+	 */
+	public Object[] getWeaponStats() {return new Object[] {name, description, icon, selectable};}
 	
 	/**
 	 * Getter method for this weapon's animation
