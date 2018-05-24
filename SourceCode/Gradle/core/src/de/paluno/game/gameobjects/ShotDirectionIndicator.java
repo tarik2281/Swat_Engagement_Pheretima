@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
@@ -27,7 +28,7 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 		this.worm = worm;
 		this.playScreen = playScreen;
 
-		texture = new Texture(Gdx.files.internal("Arrow.png"));
+		texture = playScreen.getAssetManager().get(Assets.arrow);
 		sprite = new Sprite(texture);
 	}
 

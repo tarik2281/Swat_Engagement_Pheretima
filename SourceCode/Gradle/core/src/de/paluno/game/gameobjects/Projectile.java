@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
@@ -30,7 +31,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         this.position = position;
         this.direction = direction;
 
-        texture = new Texture(Gdx.files.internal("Projectile.png"));
+        texture = playScreen.getAssetManager().get(Assets.projectile);
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
