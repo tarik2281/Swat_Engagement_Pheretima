@@ -319,7 +319,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public boolean canShoot() {
 		return this.player.isPlayerTurn() &&
 				this.characterNumber == this.player.getTurn() &&
-				this.currentState = GameState.SHOOTING;
+				this.currentState == GameState.SHOOTING;
 	}
 	
 	/**

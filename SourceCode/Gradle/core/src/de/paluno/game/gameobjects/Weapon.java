@@ -14,6 +14,7 @@ public class Weapon {
 	private boolean affectedByGravity;
 	private boolean bounce;
 	private float speed;
+	private boolean special;
 	
 	private AnimatedSprite animationSet;
 	
@@ -70,6 +71,7 @@ public class Weapon {
 				this.speed = Constants.WEAPON_RIFLE_SPEED;
 				this.bounce = false;
 				this.affectedByGravity = false;
+				this.special = false;
 				
 				this.animationSet = this.worm.getAssets().getAnimation("weapon_rifle");
 				break;
@@ -77,6 +79,7 @@ public class Weapon {
 				this.speed = Constants.WEAPON_PROJECTILE_SPEED;
 				this.bounce = false;
 				this.affectedByGravity = true;
+				this.special = false;
 				
 				this.animationSet = this.worm.getAssets().getAnimation("weapon_launcher");
 				break;
@@ -84,8 +87,17 @@ public class Weapon {
 				this.speed = Constants.WEAPON_THROWABLE_SPEED;
 				this.bounce = true;
 				this.affectedByGravity = true;
+				this.special = false;
 				
 				this.animationSet = this.worm.getAssets().getAnimation("weapon_grenade");
+				break;
+			case WEAPON_SPECIAL:
+				this.speed = Constants.WEAPON_RIFLE_SPEED;
+				this.bounce = false;
+				this.affectedByGravity = false;
+				this.special = true;
+				
+				this.animationSet = this.worm.getAssets().getAnimation("weapon_rifle");
 				break;
 		}
 	}
@@ -94,7 +106,7 @@ public class Weapon {
 	 * Method to generate a projectile if allowed to
 	 */
 	public void shoot() {
-		// The still is a projectile - don't spawn another one!
+		// There still is a projectile - don't spawn another one!
 		if(this.projectile != null) return;
 		
 		// Only fire if we have ammo left!
@@ -108,7 +120,7 @@ public class Weapon {
 	/**
 	 * Null-setter Method to remove a projectile upon hit
 	 */
-	public void destroy() {this.projectile = null;}
+	public void hit() {this.projectile = null;}
 	
 	/**
 	 * Getter method for the projectile speed of this weapon
@@ -126,10 +138,15 @@ public class Weapon {
 	 */
 	public boolean getAffectedByGravity() {return this.affectedByGravity;}
 	/**
-	 * Shortcut getter method to return all projectile stats in one mixed array
-	 * @return Array<Mixed> speed, bounce, affectedByGravity
+	 * Getter method for the projectile's special state of this weapon
+	 * @return special
 	 */
-	public Object[] getProjectileStats() {return new Object[] {speed, bounce, affectedByGravity};}
+	public boolean getSpecialState() {return this.special;}
+	/**
+	 * Shortcut getter method to return all projectile stats in one mixed array
+	 * @return Array<Mixed> speed, bounce, affectedByGravity, special
+	 */
+	public Object[] getProjectileStats() {return new Object[] {speed, bounce, affectedByGravity, special};}
 	
 	/**
 	 * Getter method for the weapon's name
