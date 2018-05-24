@@ -44,6 +44,11 @@ public class AnimatedSprite {
         this.position.set(position);
     }
 
+
+    public void setOrientation(int orientation) {
+        this.flipHorizontal = orientation == Constants.WORM_DIRECTION_RIGHT;
+    }
+
     public void setFlipHorizontal(boolean flip) {
         this.flipHorizontal = flip;
     }
