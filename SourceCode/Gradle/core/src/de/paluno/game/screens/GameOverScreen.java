@@ -26,14 +26,14 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 		
 		switch (winningPlayer) {
 		case PLAYERONE:
-			texture = new Texture(Gdx.files.internal("GameOverPlayer1.png"));
+			texture = new Texture(Gdx.files.internal("GameOverPlay1.png"));
 			break;
 		case PLAYERTWO:
-			texture = new Texture(Gdx.files.internal("GameOverPlayer2.png"));
+			texture = new Texture(Gdx.files.internal("GameOverPlay2.png"));
 			break;
 		}
 		
-		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
 	}
 	
 	public void render(float delta) {
