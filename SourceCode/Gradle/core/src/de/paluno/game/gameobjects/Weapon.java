@@ -151,4 +151,10 @@ public class Weapon {
 	 * @return Array<Mixed> name, description, icon
 	 */
 	public Object[] getWeaponStats() {return new Object[] {name, description, icon};}
+	
+	/**
+	 * Getter method for this weapon's animation
+	 * @return AnimatedSprite
+	 */
+	public AnimatedSprite getAnimation() {return this.animationSet;}
 }

@@ -115,4 +115,18 @@ public class Player {
 	 * @return Worm
 	 */
 	public Worm getCurrentWorm() {return this.characters[this.turn-1];}
+	
+	/**
+	 * Passthrough method to give move order to the currently moveable worm
+	 * @param code - Constants.MOVEMENT_... integer for the movement code
+	 */
+	public void setMovement(int code) {if(getCurrentWorm() != null) getCurrentWorm().setMovement(code);}
+	/**
+	 * Passthrough method to give a jump order to the currently moveable worm
+	 */
+	public void jump() {if(getCurrentWorm() != null) getCurrentWorm().setJump(true);}
+	/**
+	 * Passthrough method to give a shoot order to the currently moveable worm
+	 */
+	public void shoot() {if(getCurrentWorm() != null) getCurrentWorm().shoot();}
 }
