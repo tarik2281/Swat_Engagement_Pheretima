@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.AnimatedSprite;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
@@ -47,10 +48,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Body will be setup from PlayScreen
 		
 		// Setup animation Sprites once for later use
-		// TODO: load assets with AssetManager
-		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
-		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
-		equipGunAnimation = new AnimatedSprite(Gdx.files.internal("whgnlnk.xml"));
+		idleAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormBreath));
+		walkAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormWalk));
+		equipGunAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormEquipGun));
 
 		// By default no Worm has a weapon equipped, until it's officially his turn
 		gunEquipped = false;
@@ -129,7 +129,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		currentAnimation.setPosition(currentPos);
 		currentAnimation.draw(batch, delta);
 	}
-	
+
 	public void setupBody() {
 		/** Setup method - create the physics body of the character */
 		// Blueprint with spawning position and BodyType

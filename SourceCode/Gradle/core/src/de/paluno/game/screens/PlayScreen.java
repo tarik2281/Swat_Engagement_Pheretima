@@ -3,19 +3,24 @@ package de.paluno.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class PlayScreen extends ScreenAdapter {
+public class PlayScreen extends ScreenAdapter implements Loadable {
 
 	private SEPGame game;
 	private SpriteBatch spriteBatch;
@@ -279,6 +284,22 @@ public class PlayScreen extends ScreenAdapter {
         return world;
     }
 
+    public AssetManager getAssetManager() {
+        return game.getAssetManager();
+    }
+
+    @Override
+    public boolean load(AssetManager manager) {
+        manager.load(Assets.wormWalk);
+        manager.load(Assets.wormBreath);
+        manager.load(Assets.wormEquipGun);
+        manager.load(Assets.arrow);
+        manager.load(Assets.projectile);
+        manager.load(Assets.ground);
+
+        return false;
+    }
+
     public void setGameState(GameState gameState) {
         oldGameState = this.gameState;
 
@@ -412,6 +433,9 @@ public class PlayScreen extends ScreenAdapter {
             }
             if (gameObject instanceof Renderable) {
                 renderableObjects.remove((Renderable)gameObject);
+            }
+            if (gameObject instanceof Disposable) {
+                ((Disposable)gameObject).dispose();
             }
 
             if (gameObject == camera.getCameraFocus())
