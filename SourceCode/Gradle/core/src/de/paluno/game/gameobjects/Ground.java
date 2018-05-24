@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.screens.PlayScreen;
 
@@ -25,7 +26,7 @@ public class Ground implements PhysicsObject, Renderable {
     public Ground(PlayScreen screen){
         this.screen = screen;
 
-        texture = new Texture(Gdx.files.internal("Stone-0233.jpg"));
+        texture = screen.getAssetManager().get(Assets.ground);
         texture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
         textureRegion = new TextureRegion(texture);

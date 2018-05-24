@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.AnimatedSprite;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.WeaponType;
@@ -21,7 +22,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private PlayScreen screen;
 	private Player player;
 	private AssetManager assets;
-	
+
 	private Vector2 spawnPosition;
 	
 	private GameState currentState;
@@ -39,7 +40,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private boolean gunUnequipping = false;
 
 	private int health;
-	
+
 	private Weapon[] weapons;
 	private Weapon currentWeapon = null;
 
@@ -52,10 +53,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Body will be setup from PlayScreen
 		
 		// Setup animation Sprites once for later use
-		// TODO: load assets with AssetManager
-		idleAnimation = new AnimatedSprite(Gdx.files.internal("wbrth1.xml"));
-		walkAnimation = new AnimatedSprite(Gdx.files.internal("wwalk.xml"));
-		equipGunAnimation = new AnimatedSprite(Gdx.files.internal("whgnlnk.xml"));
+		idleAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormBreath));
+		walkAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormWalk));
+		equipGunAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormEquipGun));
 
 		// By default no Worm has a weapon equipped, until it's officially his turn
 		gunEquipped = false;
@@ -78,19 +78,19 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.characterNumber = charNum;
 		this.world = player.getWorld();
 		this.assets = player.getAssets();
-		
+
 		// Get our spawning position
 		this.spawnPosition = world.generateSpawnposition();
-		
+
 		// Generate our physics body
 		this.setupBody();
-		
+
 		// Generate our deadly arsenal
 		this.setupWeapons();
-		
+
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
-		
+
 		// Finally setup Animations
 		updateAnimation();
 	}
@@ -172,7 +172,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		currentAnimation.setPosition(currentPos);
 		currentAnimation.draw(batch, delta);
 	}
-	
+
 	/**
 	 * Method to setup our actual physics body
 	 */
@@ -211,23 +211,23 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		/*Object[][][] weaponStats = new Object[][][] {
 			{
 				{"Rakentenwerfer",
-				 "Verschieß eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Flächenschaden an allen Objekten verursacht.",
+				 "Verschieï¿½ eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Flï¿½chenschaden an allen Objekten verursacht.",
 				 null}
 			},
 			{
 				{"Sturmgewehr",
-				 "Verschießt ein schnelles, aber dafür schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an Würmern verursacht.",
+				 "Verschieï¿½t ein schnelles, aber dafï¿½r schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an Wï¿½rmern verursacht.",
 				 null}
 			},
 			{
 				{"Handgranate",
-				 "Eine geworfene Handgranate, die umherhüpft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.",
+				 "Eine geworfene Handgranate, die umherhï¿½pft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.",
 				 null}
 			}
 		};
 		int i, j = 0, k = 0;
 		WeaponType type;
-		
+
 		this.weapons = new Weapon[Constants.WEAPON_ARSENAL_SIZE];
 		for(i = 0; i < Constants.WEAPON_ARSENAL_SIZE && k < 3; i++) {
 			switch(k) {
@@ -237,11 +237,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			}
 		}*/
 		this.weapons = new Weapon[Constants.WEAPON_ARSENAL_SIZE];
-		this.weapons[0] = new Weapon(this, WeaponType.WEAPON_PROJECTILE, "Raketenwerfer", "Verschieß eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Flächenschaden an allen Objekten verursacht.", null);
-		this.weapons[1] = new Weapon(this, WeaponType.WEAPON_RIFLE, "Sturmgewehr", "Verschießt ein schnelles, aber dafür schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an Würmern verursacht.", null, Constants.WEAPON_AMMO_RIFLE);
-		this.weapons[2] = new Weapon(this, WeaponType.WEAPON_THROWABLE, "Handgranate", "Eine geworfene Handgranate, die umherhüpft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.", null, Constants.WEAPON_AMMO_THROWABLE);
+		this.weapons[0] = new Weapon(this, WeaponType.WEAPON_PROJECTILE, "Raketenwerfer", "Verschieï¿½ eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Flï¿½chenschaden an allen Objekten verursacht.", null);
+		this.weapons[1] = new Weapon(this, WeaponType.WEAPON_RIFLE, "Sturmgewehr", "Verschieï¿½t ein schnelles, aber dafï¿½r schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an Wï¿½rmern verursacht.", null, Constants.WEAPON_AMMO_RIFLE);
+		this.weapons[2] = new Weapon(this, WeaponType.WEAPON_THROWABLE, "Handgranate", "Eine geworfene Handgranate, die umherhï¿½pft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.", null, Constants.WEAPON_AMMO_THROWABLE);
 	}
-	
+
 	/**
 	 * Getter method for our physics body
 	 * @return body
@@ -272,7 +272,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			updateAnimation();
 		}
     }
-    
+
     /**
      * Damage handler method - calculate remaining life and death
      * @param damage - The damage taken as integer
@@ -380,10 +380,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 				}
 				break;
 		}
-		
+
 		updateAnimation();
 	}
-	
+
 	/**
 	 * Method to update our character's animation state
 	 */
@@ -404,7 +404,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 					currentAnimation = this.assets.getAnimation('idle');
 				break;
 		}*/
-		
+
 		if(!isStandsOnGround) currentAnimation = this.assets.getAnimation('jump');
 		else if(moveLeft || moveRight) currentAnimation = this.assets.getAnimation('walk');
 		else {
@@ -419,7 +419,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (currentAnimation.isAnimationType('weapon') && gunUnequipping)
 			currentAnimation.reverse(true);
 	}
-	
+
 	/**
 	 * Getter method for character's current movement order
 	 * @return movement
@@ -459,7 +459,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @return current Weapon
 	 */
 	public Weapon getCurrentWeapon() {return currentWeapon;}
-	
+
 	/**
 	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
 	 */
