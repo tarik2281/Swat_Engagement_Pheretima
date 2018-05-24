@@ -3,6 +3,7 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
 import de.paluno.game.AnimatedSprite;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.WeaponType;
 
@@ -73,7 +74,7 @@ public class Weapon {
 				this.affectedByGravity = false;
 				this.special = false;
 				
-				this.animationSet = this.worm.getAssets().getAnimation("weapon_rifle");
+				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponRifle));
 				break;
 			case WEAPON_PROJECTILE:
 				this.speed = Constants.WEAPON_PROJECTILE_SPEED;
@@ -81,7 +82,7 @@ public class Weapon {
 				this.affectedByGravity = true;
 				this.special = false;
 				
-				this.animationSet = this.worm.getAssets().getAnimation("weapon_launcher");
+				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponLauncher));
 				break;
 			case WEAPON_THROWABLE:
 				this.speed = Constants.WEAPON_THROWABLE_SPEED;
@@ -89,7 +90,7 @@ public class Weapon {
 				this.affectedByGravity = true;
 				this.special = false;
 				
-				this.animationSet = this.worm.getAssets().getAnimation("weapon_grenade");
+				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponGrenade));
 				break;
 			case WEAPON_SPECIAL:
 				this.speed = Constants.WEAPON_RIFLE_SPEED;
@@ -97,7 +98,7 @@ public class Weapon {
 				this.affectedByGravity = false;
 				this.special = true;
 				
-				this.animationSet = this.worm.getAssets().getAnimation("weapon_rifle");
+				this.animationSet = new AnimatedSprite(this.worm.getAssets().get(Assets.weaponRifle));
 				break;
 		}
 	}

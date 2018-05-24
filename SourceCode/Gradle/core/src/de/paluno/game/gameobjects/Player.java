@@ -1,5 +1,7 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.assets.AssetManager;
+
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 

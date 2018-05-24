@@ -1,6 +1,7 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -28,6 +29,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private GameState currentState;
 
 	private AnimatedSprite currentAnimation;
+	private AnimatedSprite idleAnimation;
+	private AnimatedSprite walkAnimation;
+	private AnimatedSprite jumpAnimation;
 	
 	private int movement = Constants.MOVEMENT_NO_MOVEMENT;
 	private boolean moveLeft = false;
@@ -78,6 +82,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.characterNumber = charNum;
 		this.world = player.getWorld();
 		this.assets = player.getAssets();
+		
+		this.walkAnimation = new AnimatedSprite(this.assets.get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(this.assets.get(Assets.wormBreath));
+		this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
 
 		// Get our spawning position
 		this.spawnPosition = world.generateSpawnposition();
@@ -405,11 +413,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 				break;
 		}*/
 
-		if(!isStandsOnGround) currentAnimation = this.assets.getAnimation('jump');
-		else if(moveLeft || moveRight) currentAnimation = this.assets.getAnimation('walk');
+		if(!isStandsOnGround) currentAnimation = jumpAnimation;
+		else if(moveLeft || moveRight) currentAnimation = walkAnimation;
 		else {
 			if(gunEquipped) currentAnimation = getCurrentWeapon().getAnimation();
-			else currentAnimation = this.assets.getAnimation('idle');
+			else currentAnimation = idleAnimation;
 		}
 
 		// flip the animation if needed since the animations are only for the left direction
