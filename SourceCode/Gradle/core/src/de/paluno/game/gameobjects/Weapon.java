@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
-import de.paluno.game.WeaponType;
+  
 
 public class Weapon {
 	private WeaponType type;
