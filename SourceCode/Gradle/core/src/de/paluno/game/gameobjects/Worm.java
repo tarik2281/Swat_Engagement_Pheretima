@@ -36,7 +36,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private int movement = Constants.MOVEMENT_NO_MOVEMENT;
 	private boolean moveLeft = false;
 	private boolean moveRight = false;
-	private int orientation = Constants.WORM_DIRECTION_LEFT;
+	private int orientation;;
 	private boolean jump = false;
 	private boolean standsOnGround;
 
@@ -72,6 +72,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		updateAnimation();
 	}*/
 	/**
+	 * Empty constructor for cloning purposes
+	 */
+	public Worm() {}
+	/**
 	 * Constructor
 	 * @param player - reference to the player we belong to
 	 * @param charNum - Our character number
@@ -82,6 +86,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.characterNumber = charNum;
 		this.world = player.getWorld();
 		this.assets = player.getAssets();
+		
+		int o = Math.round((float)Math.random());
+		if(o == 0) this.orientation = Constants.WORM_DIRECTION_LEFT;
+		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
 		
 		this.walkAnimation = new AnimatedSprite(this.assets.get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(this.assets.get(Assets.wormBreath));
@@ -114,7 +122,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		
 		// Update gamestate
 		this.currentState = state;
-		this.player.setGameState(state);
 
         // Now we apply movements - therefor we need our current position
 		Vector2 currentPos = body.getWorldCenter();
@@ -413,7 +420,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 				break;
 		}*/
 
-		if(!isStandsOnGround) currentAnimation = jumpAnimation;
+		if(!standsOnGround) currentAnimation = jumpAnimation;
 		else if(moveLeft || moveRight) currentAnimation = walkAnimation;
 		else {
 			if(gunEquipped) currentAnimation = getCurrentWeapon().getAnimation();
@@ -424,8 +431,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		currentAnimation.setOrientation(orientation);
 		currentAnimation.reset();
 
-		if (currentAnimation.isAnimationType('weapon') && gunUnequipping)
-			currentAnimation.reverse(true);
+		if (gunEquipped && gunUnequipping)
+			currentAnimation.reverse();
 	}
 
 	/**
@@ -472,4 +479,44 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
 	 */
 	public void shoot() {if(canShoot() && currentWeapon != null) currentWeapon.shoot();}
+	
+	public Worm clone() {
+		Worm clone = new Worm();
+		clone.setCloningParameters(this);
+		return clone;
+	}
+	
+	public void setCloningParameters(Worm copy) {
+		this.characterNumber = copy.characterNumber;
+		
+		this.world = copy.world;
+		this.body = copy.body;
+		this.screen = copy.screen;
+		this.player = copy.player;
+		this.assets = copy.assets;
+
+		this.spawnPosition = copy.spawnPosition;
+		
+		this.currentState = copy.currentState;
+
+		this.currentAnimation = copy.currentAnimation;
+		this.idleAnimation = copy.idleAnimation;
+		this.walkAnimation = copy.walkAnimation;
+		this.jumpAnimation = copy.jumpAnimation;
+		
+		this.movement = copy.movement;
+		this.moveLeft = copy.moveLeft;
+		this.moveRight = copy.moveRight;
+		this.orientation = copy.orientation;
+		this.jump = copy.jump;
+		this.standsOnGround = copy.standsOnGround;
+
+		this.gunEquipped = copy.gunEquipped;
+		this.gunUnequipping = copy.gunUnequipping;
+
+		this.health = copy.health;
+
+		this.weapons = copy.weapons;
+		this.currentWeapon = copy.currentWeapon;
+	}
 }

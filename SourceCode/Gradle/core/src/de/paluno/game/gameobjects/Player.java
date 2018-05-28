@@ -5,7 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 
-public class Player {
+public class Player implements Updatable {
 	private int playerNum;
 	
 	private int characterNum;
@@ -17,6 +17,10 @@ public class Player {
 	
 	private GameState gameState;
 	
+	/**
+	 * Empty constructor for cloning purposes
+	 */
+	public Player() {}
 	/**
 	 * Constructor
 	 * @param charNum - Number of characters this player begins with
@@ -38,6 +42,13 @@ public class Player {
 		
 		this.assets = assets;
 	}
+	/**
+	 * Handler for GameLoop's update cycle - needed from Interface updatable
+	 * This dependency is just to update the GameState for the players directly, instead of having 5 cross-communications with it's Worms
+	 * @param delta - Time since last update in seconds
+	 * @param state - Current GameState
+	 */
+	public void update(float delta, GameState state) {this.gameState = state;}
 	
 	/**
 	 * Getter method for this player's player number
@@ -119,16 +130,35 @@ public class Player {
 	public Worm getCurrentWorm() {return this.characters[this.turn-1];}
 	
 	/**
-	 * Passthrough method to give move order to the currently moveable worm
+	 * Passthrough method to give move order to the currently movable worm
 	 * @param code - Constants.MOVEMENT_... integer for the movement code
 	 */
 	public void setMovement(int code) {if(getCurrentWorm() != null) getCurrentWorm().setMovement(code);}
 	/**
-	 * Passthrough method to give a jump order to the currently moveable worm
+	 * Passthrough method to give a jump order to the currently movable worm
 	 */
 	public void jump() {if(getCurrentWorm() != null) getCurrentWorm().setJump(true);}
 	/**
-	 * Passthrough method to give a shoot order to the currently moveable worm
+	 * Passthrough method to give a shoot order to the currently movable worm
 	 */
 	public void shoot() {if(getCurrentWorm() != null) getCurrentWorm().shoot();}
+	
+	public Player clone() {
+		Player clone = new Player();
+		clone.setCloningParameters(this);
+		return clone;
+	}
+	
+	public void setCloningParameters(Player copy) {
+		this.playerNum = copy.playerNum;
+		
+		this.characterNum = copy.characterNum;
+		this.characters = copy.characters;
+		this.turn = copy.turn;
+		
+		this.world = copy.world;
+		this.assets = copy.assets;
+		
+		this.gameState = this.gameState;
+	}
 }
