@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.math.Vector2;
 
 import de.paluno.game.gameobjects.ShotDirectionIndicator;
 import de.paluno.game.gameobjects.Worm;
@@ -26,12 +28,16 @@ public class InputHandler extends InputAdapter {
 	private HashMap<Integer, ArrayList<Method>> registeredHandlersDown = new HashMap();
 	private ArrayList<Integer> registeredKeyCodesUp = new ArrayList();
 	private HashMap<Integer, ArrayList<Method>> registeredHandlersUp = new HashMap();
+	private ArrayList<Method> registeredMouseListeners = new ArrayList();
+	
+	private static InputHandler instance = null;
 	
 	/**
 	 * Empty constructor for use with new register handling mechanic
 	 */
 	public InputHandler() {
-		
+		//instance = this;
+		//Gdx.input.setInputProcessor(instance);
 	}
 	/**
 	 * Constructor
@@ -54,7 +60,7 @@ public class InputHandler extends InputAdapter {
 		// If not, we don't need to bother with it anymore, just pop an error message to inform the caller.
 		Method method;
 		try {
-			method = target.getClass().getMethod(handler, Input.Keys.class);
+			method = target.getClass().getMethod(handler, Integer.class);
 		} catch(SecurityException e) {System.err.println("Security violation on input registration - target method not public!"); return false;}
 		catch(NoSuchMethodException e) {System.err.println("Method to be registered not found or with invalid parameters!"); return false;}
 		
@@ -95,9 +101,11 @@ public class InputHandler extends InputAdapter {
 	 * @return Successfully removed something?
 	 */
 	public boolean deregisterHandler(Integer keycode, Object target, String handler, boolean up) {
+		// Try to get the target's method, to see if it actually exists.
+		// If not, we don't need to bother with it anymore, just pop an error message to inform the caller.
 		Method method;
 		try {
-			method = target.getClass().getMethod(handler, Input.Keys.class);
+			method = target.getClass().getMethod(handler, Integer.class);
 		} catch(SecurityException e) {System.err.println("Security violation on input deregistration - target method not public!"); return false;}
 		catch(NoSuchMethodException e) {System.err.println("Method to be deregistered not found or with invalid parameters!"); return false;}
 		
@@ -129,6 +137,46 @@ public class InputHandler extends InputAdapter {
 		}
 		return true;
 	}
+	/**
+	 * Method to add a mouseListener, receiving all updates of the cursor's position
+	 * @param target - Object to send the data to
+	 * @param handler - Name of the function that should receive it
+	 * @return - Was this listener added successfully?
+	 */
+	public boolean registerMouseListener(Object target, String handler) {
+		// Try to get the target's method, to see if it actually exists.
+		// If not, we don't need to bother with it anymore, just pop an error message to inform the caller.
+		Method method;
+		try {
+			method = target.getClass().getMethod(handler, Vector2.class);
+		} catch(SecurityException e) {System.err.println("Security violation on mouse registration - target method not public!"); return false;}
+		catch(NoSuchMethodException e) {System.err.println("Method to be registered not found or with invalid parameters!"); return false;}
+		
+		if(!registeredMouseListeners.contains(method)) registeredMouseListeners.add(method);
+		else return false;
+		
+		return true;
+	}
+	/**
+	 * Method to remove a mouseListener
+	 * @param target - Object to lookup the method from
+	 * @param handler - Name of the function that should be removed
+	 * @return - Was this listener removed successfully?
+	 */
+	public boolean deregisterMouseListener(Object target, String handler) {
+		// Try to get the target's method, to see if it actually exists.
+		// If not, we don't need to bother with it anymore, just pop an error message to inform the caller.
+		Method method;
+		try {
+			method = target.getClass().getMethod(handler, Vector2.class);
+		} catch(SecurityException e) {System.err.println("Security violation on mouse deregistration - target method not public!"); return false;}
+		catch(NoSuchMethodException e) {System.err.println("Method to be deregistered not found or with invalid parameters!"); return false;}
+		
+		if(registeredMouseListeners.contains(method)) registeredMouseListeners.remove(method);
+		else return false;
+		
+		return true;
+	}
 	
 	/**
 	 * Super placeholder for parent's "Mouseclick" function
@@ -146,7 +194,18 @@ public class InputHandler extends InputAdapter {
 	 * Super placeholder for parent's "Mouse moved" function
 	 */
 	public boolean mouseMoved(int screenX, int screenY) {
-        return super.mouseMoved(screenX, screenY);
+		boolean handled = false;
+		for(Method m : registeredMouseListeners) {
+    		try {
+        		m.invoke(this, new Vector2(screenX, screenY));
+        		handled = true;
+        	} catch(InvocationTargetException e) {System.err.println("Invocation target invalid!");}
+        	catch(IllegalArgumentException e) {System.err.println("Parameter on handler call not accepted!");}
+        	catch(IllegalAccessException e) {System.err.println("Illegal access on handler call!");}
+    	}
+		
+		if(handled) return true;
+		else return super.mouseMoved(screenX, screenY);
     }
 	
 	/**
@@ -336,5 +395,17 @@ public class InputHandler extends InputAdapter {
 		if(LoR == 'l' || LoR == 'L') return ctrlL;
 		else if(LoR == 'r' || LoR == 'R') return ctrlR;
 		else return false;
+	}
+	
+	/**
+	 * Static reference to the InputHandler, to make it globally available
+	 * @return this
+	 */
+	public static InputHandler getInstance() {
+		if(instance == null) {
+			instance = new InputHandler();
+			Gdx.input.setInputProcessor(instance);
+		}
+		return instance;
 	}
 }
