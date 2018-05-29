@@ -134,4 +134,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         playScreen.forgetAfterUpdate(this);
     	playScreen.advanceGameState();
     }
+
+	public void setCloningParameters(Projectile clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }

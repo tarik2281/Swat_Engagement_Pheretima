@@ -1,7 +1,10 @@
 package de.paluno.game.screens;
 
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 
+import de.paluno.game.WeaponType;
 import de.paluno.game.WindDirectionIndicator;
 import de.paluno.game.gameobjects.Ground;
 import de.paluno.game.gameobjects.HealthBar;
@@ -23,7 +26,13 @@ public class Snapshot implements Cloneable {
     Virus virus;
     Weapon weapon;
     WindDirectionIndicator winddirectionindicator;
-    
+    PlayScreen playscreen;
+    WeaponType weapontype;
+    int zahl;
+    private Vector2 position;
+    private Vector2 direction;
+    private AssetManager assets;
+    int playernum;
     
 	public Snapshot(World world) {
 		this.world=world;
@@ -51,72 +60,48 @@ public class Snapshot implements Cloneable {
 		
 	}
 	public Player makesnapshotplayer() {
-		try {
-			return (Player)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return player;
-		}
 		
+		 Player clone = new Player(playernum,world,assets);
+			clone.setCloningParameters(player);
+		return clone;
 	}
-	public Projectile makesnapshotprojectile() {
-		try {
-			return (Projectile)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return projectile;
-		}
+	public Projectile cloneprojectile() {
+		 Projectile clone = new Projectile(playscreen,position,direction);
+			clone.setCloningParameters(projectile);
+		return clone;
+		 
 	
 		
 	}
-	public ShotDirectionIndicator makesnapshotshotdirectionindicator() {
-		try {
-			return (ShotDirectionIndicator)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return shotdirectionindicator;
-		}
+	public ShotDirectionIndicator cloneshotdirectionindicator() {
 		
+		 ShotDirectionIndicator clone = new ShotDirectionIndicator(zahl,worm,playscreen);
+			clone.setCloningParameters(shotdirectionindicator);
+		return clone;
+		 
 	}
-	public Worm makesnapshotwurm() {
-		return worm.clone;
-		
-		
-		
-	}
-	public Virus makesnapshotvirus() {
-		try {
-			return (Virus)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return virus;
-		}
-		
-	}
-	public WindDirectionIndicator  makesnapshotwinddirectionindicator() {
-		try {
-			return (WindDirectionIndicator)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return winddirectionindicator;
-		}
-		
-	}
-	public Weapon makesnapshotweapon() {
-		try {
-			return (Weapon)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return weapon;
-		}
+	 public Virus clonevirus() {
+		 Virus clone = new Virus(worm,playscreen);
+			clone.setCloningParameters(virus);
+		return clone;
+		 
+	 }
 	
-
-}
+	
+	public WindDirectionIndicator  clonewinddirectionindicator() {
+		 
+			 WindDirectionIndicator clone = new WindDirectionIndicator();
+				clone.setCloningParameters(winddirectionindicator);
+			return clone;
+			 
+		 }
+		
+	
+	 public Weapon cloneweapon() {
+		 Weapon clone = new Weapon(worm,weapontype);
+			clone.setCloningParameters(weapon);
+		return clone;
+		 
+	 }
 	
 }	
