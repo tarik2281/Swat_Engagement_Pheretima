@@ -1,0 +1,8 @@
+<AnimatedSprite>
+    <Texture>wwalk.png</Texture>
+    <Columns>1</Columns>
+    <Rows>15</Rows>
+    <FrameInterval>0.04</FrameInterval>
+    <SpriteOffset>10</SpriteOffset>
+    <PlayMode>Loop</PlayMode>
+</AnimatedSprite>
