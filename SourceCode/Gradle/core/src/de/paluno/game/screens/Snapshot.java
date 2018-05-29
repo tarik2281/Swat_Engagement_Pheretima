@@ -39,32 +39,27 @@ public class Snapshot implements Cloneable {
 	}
 	
 	public Ground makesnapshotground() {
-		try {
-			return (Ground)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return ground;
-		}
 		
+		 Ground clone = new Ground(playscreen);
+			clone.setCloningParameters(ground);
+		return clone;
 		
 	}
 	public HealthBar makesnapshotHealhtbar() {
-		try {
-			return (HealthBar)super.clone();
-			
-		} catch (CloneNotSupportedException e) {
-			// TODO: handle exception
-			return healthbar;
-		}
-		
+
+		 HealthBar clone = new HealthBar(playscreen, worm);
+			clone.setCloningParameters(healthbar);
+		return clone;
 	}
-	public Player makesnapshotplayer() {
+		
+	
+	public Player cloneplayer() {
 		
 		 Player clone = new Player(playernum,world,assets);
 			clone.setCloningParameters(player);
 		return clone;
 	}
+	
 	public Projectile cloneprojectile() {
 		 Projectile clone = new Projectile(playscreen,position,direction);
 			clone.setCloningParameters(projectile);
