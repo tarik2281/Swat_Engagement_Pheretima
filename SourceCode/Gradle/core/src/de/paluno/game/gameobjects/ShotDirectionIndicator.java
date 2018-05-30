@@ -48,8 +48,8 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	    sprite.setOriginCenter();
 		sprite.setRotation(degrees);
 		sprite.setOriginBasedPosition(position.x, position.y);
-	    
-	    sprite.draw(batch);	
+
+	    sprite.draw(batch);
 	}
 	
 	public void setRotate(int movement) {

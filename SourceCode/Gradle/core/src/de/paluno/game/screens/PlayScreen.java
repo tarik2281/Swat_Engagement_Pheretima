@@ -5,6 +5,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -193,7 +194,7 @@ public class PlayScreen extends ScreenAdapter {
 
         debugRenderer = new Box2DDebugRenderer();
 
-        registerAfterUpdate(new Ground(this));
+        registerAfterUpdate(new Ground(this, new TmxMapLoader().load("unbenannt.tmx")));
         camera.setBottomLimit(-Constants.GROUND_HEIGHT / 2.0f);
 
         worldBounds = new Rectangle(-Constants.WORLD_WIDTH / 2.0f, -Constants.GROUND_HEIGHT / 2.0f,
@@ -206,6 +207,10 @@ public class PlayScreen extends ScreenAdapter {
         world.setContactListener(collisionHandler);
 
         setGameState(GameState.PLAYERONETURN);
+    }
+
+    public GameCamera getCamera() {
+        return camera;
     }
 
     @Override
@@ -234,13 +239,11 @@ public class PlayScreen extends ScreenAdapter {
     }
 
     public void renderPhase(float delta) {
-        Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update(delta);
 
-        if (isRenderDebug)
-            debugRenderer.render(world, camera.getDebugProjection());
 
         spriteBatch.setProjectionMatrix(camera.getScreenProjection());
         spriteBatch.begin();
@@ -250,6 +253,9 @@ public class PlayScreen extends ScreenAdapter {
         }
 
         spriteBatch.end();
+
+        if (isRenderDebug)
+            debugRenderer.render(world, camera.getDebugProjection());
 
         // UI drawing
         uiLayer.render(spriteBatch, delta);

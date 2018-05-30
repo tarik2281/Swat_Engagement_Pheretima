@@ -106,7 +106,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 		
 		// Worm fell off the world rim? Is ded.
-		if (!screen.getWorldBounds().contains(body.getPosition())) die();
+		//if (!screen.getWorldBounds().contains(body.getPosition())) die();
 	}
 	
 	public void render(SpriteBatch batch, float delta) {
@@ -142,14 +142,16 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
+		CircleShape circle = new CircleShape();
+		circle.setRadius(0.1f);
 		PolygonShape bodyRect = new PolygonShape();
 		bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
 
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
-		fixtureDef.shape = bodyRect;
+		fixtureDef.shape = circle;
 		fixtureDef.density = 0.5f;
-		fixtureDef.friction = 1.0f;
+		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;
 		
 		// Create, apply, done

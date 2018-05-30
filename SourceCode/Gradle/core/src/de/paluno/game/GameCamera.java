@@ -112,4 +112,8 @@ public class GameCamera {
         // return the camera matrix to be used with a SpriteBatch
         return camera.combined;
     }
+
+    public OrthographicCamera getOrthoCamera() {
+        return camera;
+    }
 }
