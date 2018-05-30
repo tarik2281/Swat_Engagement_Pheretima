@@ -1,4 +1,4 @@
-package de.paluno.game.gameobjects;
+package de.paluno.game.gameobjects.ground;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
@@ -15,6 +15,10 @@ import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
+import de.paluno.game.gameobjects.PhysicsObject;
+import de.paluno.game.gameobjects.Renderable;
+import de.paluno.game.gameobjects.ShapeFactory;
+import de.paluno.game.gameobjects.Updatable;
 import de.paluno.game.screens.PlayScreen;
 
 import java.util.ArrayList;

@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.*;
+import de.paluno.game.gameobjects.ground.Ground;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
