@@ -16,4 +16,9 @@ public class WindDirectionIndicator implements Updatable, Renderable {
     public void render(SpriteBatch batch, float delta) {
 
     }
+
+	public void setCloningParameters(WindDirectionIndicator clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }

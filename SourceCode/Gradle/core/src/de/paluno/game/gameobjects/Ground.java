@@ -75,4 +75,9 @@ public class Ground implements PhysicsObject, Renderable {
     public Body getBody() {
         return this.body;
     }
+
+	public void setCloningParameters(Ground clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }

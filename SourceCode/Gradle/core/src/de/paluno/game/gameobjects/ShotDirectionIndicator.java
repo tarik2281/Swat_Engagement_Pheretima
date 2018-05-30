@@ -60,4 +60,16 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	public float getRotate() {
 		return degrees;
 	}
+
+	public void setCloningParameters(ShotDirectionIndicator clone) {
+		// TODO Auto-generated method stub
+		this.playerNumber = clone.playerNumber;
+		this.playScreen=clone.playScreen;
+		this.degrees= clone.degrees;
+		this.worm= clone.worm;
+		this.sprite=clone.sprite;
+		this.texture= clone.texture;
+		this.movement= clone.movement;
+		
+	}
 }

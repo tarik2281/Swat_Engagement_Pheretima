@@ -62,4 +62,9 @@ public class Virus implements PhysicsObject{
 	public Body getBody() {
 		return body;
 	}
+
+	public void setCloningParameters(Virus clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }

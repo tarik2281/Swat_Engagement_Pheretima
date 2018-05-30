@@ -138,5 +138,14 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 	public void setCloningParameters(Projectile clone) {
 		// TODO Auto-generated method stub
 		
+		this.body = clone.body;
+		this.playScreen = clone.playScreen;
+		
+		this.type= clone.type;
+		this.texture= clone.texture;
+		this.sprite= clone.sprite;
+		this.position= clone.position;
+		this.direction= clone.direction;
+
 	}
 }
