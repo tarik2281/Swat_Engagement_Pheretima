@@ -142,14 +142,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
-		CircleShape circle = new CircleShape();
-		circle.setRadius(0.1f);
 		PolygonShape bodyRect = new PolygonShape();
 		bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
 
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
-		fixtureDef.shape = circle;
+		fixtureDef.shape = bodyRect;
 		fixtureDef.density = 0.5f;
 		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;

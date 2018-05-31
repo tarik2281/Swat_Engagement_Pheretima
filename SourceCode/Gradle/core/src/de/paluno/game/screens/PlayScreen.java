@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.*;
+import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
 
 import java.util.ArrayList;
@@ -45,6 +46,9 @@ public class PlayScreen extends ScreenAdapter {
 
     private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
+
+    private Ground ground;
+    private ExplosionMaskRenderer maskRenderer;
 
     // receive user input events and handle them
     private InputAdapter inputAdapter = new InputAdapter() {
@@ -195,7 +199,11 @@ public class PlayScreen extends ScreenAdapter {
 
         debugRenderer = new Box2DDebugRenderer();
 
-        registerAfterUpdate(new Ground(this, new TmxMapLoader().load("unbenannt.tmx")));
+        maskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
+        ground = new Ground(this, new TmxMapLoader().load("unbenannt.tmx"), maskRenderer);
+        maskRenderer.setGround(ground);
+
+        registerAfterUpdate(ground);
         camera.setBottomLimit(-Constants.GROUND_HEIGHT / 2.0f);
 
         worldBounds = new Rectangle(-Constants.WORLD_WIDTH / 2.0f, -Constants.GROUND_HEIGHT / 2.0f,
@@ -239,12 +247,17 @@ public class PlayScreen extends ScreenAdapter {
         world.step(timeStep, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
     }
 
+    public void addExplosion(Vector2 center, float radius) {
+        ground.addExplosion(center, radius);
+    }
+
     public void renderPhase(float delta) {
         Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update(delta);
 
+        maskRenderer.renderDepthMask();
 
         spriteBatch.setProjectionMatrix(camera.getScreenProjection());
         spriteBatch.begin();

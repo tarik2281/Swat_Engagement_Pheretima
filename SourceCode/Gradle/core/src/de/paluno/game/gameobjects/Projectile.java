@@ -94,6 +94,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public void explode() {
+        playScreen.addExplosion(body.getPosition(), 0.2f);
+
         playScreen.forgetAfterUpdate(this);
     	playScreen.advanceGameState();
     }

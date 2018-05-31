@@ -116,4 +116,8 @@ public class GameCamera {
     public OrthographicCamera getOrthoCamera() {
         return camera;
     }
+
+    public OrthographicCamera getWorldCamera() {
+        return debugCamera;
+    }
 }
