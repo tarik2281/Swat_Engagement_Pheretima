@@ -106,7 +106,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 		
 		// Worm fell off the world rim? Is ded.
-		//if (!screen.getWorldBounds().contains(body.getPosition())) die();
+		if (!screen.getWorldBounds().contains(body.getPosition())) die();
 	}
 	
 	public void render(SpriteBatch batch, float delta) {

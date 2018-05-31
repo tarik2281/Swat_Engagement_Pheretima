@@ -4,12 +4,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
+import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.gameobjects.PhysicsObject;
 import de.paluno.game.gameobjects.Renderable;
@@ -18,6 +20,7 @@ import de.paluno.game.screens.PlayScreen;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class Ground implements PhysicsObject, Renderable, Updatable {
 
@@ -33,7 +36,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     private ArrayList<CollisionObject> collisionObjects;
     private ArrayList<CollisionObject> queriedObjects;
 
-    private ArrayList<Rectangle> spawnAreas;
+    private ArrayList<Vector2> spawnPoints;
 
     private ArrayList<Explosion> explosions;
     private LinkedList<Explosion> explosionQueue;
@@ -65,6 +68,19 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
         explosions = new ArrayList<Explosion>();
         explosionQueue = new LinkedList<Explosion>();
+
+        spawnPoints = new ArrayList<>();
+
+        MapLayer spawnLayer = tiledMap.getLayers().get("SpawnPositions");
+        if (spawnLayer != null) {
+            for (MapObject object : spawnLayer.getObjects()) {
+                if (object instanceof RectangleMapObject) {
+                    Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+                    spawnPoints.add(new Vector2(rectangle.getX() * Constants.WORLD_SCALE,
+                            rectangle.getY() * Constants.WORLD_SCALE + Constants.WORM_HEIGHT / 2.0f));
+                }
+            }
+        }
     }
 
     public void addExplosion(Vector2 center, float radius) {
@@ -152,6 +168,12 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
                 }
             }
         }
+    }
+
+    public Vector2 getRandomSpawnPosition() {
+        Random random = new Random();
+        int index = random.nextInt(spawnPoints.size());
+        return spawnPoints.remove(index);
     }
 
     @Override

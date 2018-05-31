@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="2018.05.24" orientation="orthogonal" renderorder="right-up" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="14">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextobjectid="20">
  <tileset firstgid="1" source="OverWorldTiles.tsx"/>
- <layer id="1" name="TileLayer" width="100" height="100">
+ <layer name="TileLayer" width="100" height="100">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -105,16 +105,28 @@
 88,89,90,91,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="2" name="CollisionLayer">
+ <objectgroup name="CollisionLayer">
   <object id="1" x="0" y="1536" width="64" height="64"/>
   <object id="2" x="144" y="1360" width="64" height="64"/>
   <object id="3" x="128" y="1504">
    <polygon points="0,0 0,32 16,48 48,48 64,32 64,0 48,-16 16,-16"/>
   </object>
  </objectgroup>
- <objectgroup id="3" name="SpawnPositions">
-  <object id="5" x="0" y="1520" width="64" height="16"/>
-  <object id="6" x="144" y="1472" width="32" height="16"/>
-  <object id="7" x="144" y="1344" width="64" height="16"/>
+ <objectgroup name="SpawnPositions">
+  <object id="14" x="16" y="1536">
+   <point/>
+  </object>
+  <object id="15" x="48" y="1536">
+   <point/>
+  </object>
+  <object id="16" x="160" y="1488">
+   <point/>
+  </object>
+  <object id="17" x="160" y="1360">
+   <point/>
+  </object>
+  <object id="18" x="192" y="1360">
+   <point/>
+  </object>
  </objectgroup>
 </map>

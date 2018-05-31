@@ -55,7 +55,7 @@ class Explosion {
 
     public float[] getPolygonVertices() {
         if (polygonVertices == null) {
-            int segments = getNumSegments() - 1;
+            int segments = getNumSegments();
 
             polygonVertices = new float[2 * segments];
             float angle = 2 * MathUtils.PI / segments;

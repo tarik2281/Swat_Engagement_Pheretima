@@ -209,8 +209,8 @@ public class PlayScreen extends ScreenAdapter {
         worldBounds = new Rectangle(-Constants.WORLD_WIDTH / 2.0f, -Constants.GROUND_HEIGHT / 2.0f,
                 Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
 
-        initializePlayer(Constants.PLAYER_NUMBER_1, new Vector2(0.0f, 1.0f));
-        initializePlayer(Constants.PLAYER_NUMBER_2, new Vector2(1.0f, 1.0f));
+        initializePlayer(Constants.PLAYER_NUMBER_1, ground.getRandomSpawnPosition());
+        initializePlayer(Constants.PLAYER_NUMBER_2, ground.getRandomSpawnPosition());
 
         collisionHandler = new CollisionHandler(this);
         world.setContactListener(collisionHandler);
