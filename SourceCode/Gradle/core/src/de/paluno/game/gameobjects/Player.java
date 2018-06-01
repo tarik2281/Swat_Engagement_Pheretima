@@ -1,7 +1,6 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.physics.box2d.World;
 
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;

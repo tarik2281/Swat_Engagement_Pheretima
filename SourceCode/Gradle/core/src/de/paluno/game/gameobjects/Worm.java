@@ -96,7 +96,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
 
 		// Get our spawning position
-		this.spawnPosition = world.generateSpawnposition();
+		this.spawnPosition = world.generateSpawnPosition();
 
 		// Generate our physics body
 		this.setupBody();

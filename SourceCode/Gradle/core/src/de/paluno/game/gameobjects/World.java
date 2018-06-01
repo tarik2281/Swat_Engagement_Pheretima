@@ -1,16 +1,13 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
-import de.paluno.game.CollisionHandler;
-import de.paluno.game.Constants;
-import de.paluno.game.GameCamera;
-import de.paluno.game.GameState;
+import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
 import de.paluno.game.screens.PlayScreen;
@@ -61,7 +58,7 @@ public class World {
         camera.setBottomLimit(0.0f);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
-        ground = new Ground(this, new TmxMapLoader().load("unbenannt.tmx"), explosionMaskRenderer);
+        ground = new Ground(this, screen.getAssetManager().get(Assets.map), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
@@ -72,16 +69,19 @@ public class World {
         playerWorms = new Worm[Constants.NUM_PLAYERS];
         shotDirectionIndicators = new ShotDirectionIndicator[Constants.NUM_PLAYERS];
 
-        initializePlayer(Constants.PLAYER_NUMBER_1, generateSpawnPosition());
-        initializePlayer(Constants.PLAYER_NUMBER_2, generateSpawnPosition());
+        initializePlayer(Constants.PLAYER_NUMBER_1);
+        initializePlayer(Constants.PLAYER_NUMBER_2);
 
         registerAfterUpdate(ground);
 
         setGameState(GameState.PLAYERONETURN);
     }
 
-    private void initializePlayer(int playerNumber, Vector2 wormPosition) {
-        Worm worm = new Worm(playerNumber, this, wormPosition);
+    private void initializePlayer(int playerNumber) {
+        Player player = new Player(playerNumber, this, getAssetManager());
+        // TODO: add worms
+
+        /*Worm worm = new Worm(playerNumber, this, wormPosition);
         ShotDirectionIndicator indicator = new ShotDirectionIndicator(playerNumber, worm, this);
         HealthBar healthBar = new HealthBar(this, worm);
 
@@ -89,7 +89,7 @@ public class World {
         shotDirectionIndicators[playerNumber] = indicator;
 
         registerAfterUpdate(worm);
-        registerAfterUpdate(healthBar);
+        registerAfterUpdate(healthBar);*/
     }
 
     public void toggleDebugRender() {
@@ -163,6 +163,10 @@ public class World {
 
     public GameCamera getCamera() {
         return camera;
+    }
+
+    public AssetManager getAssetManager() {
+        return screen.getAssetManager();
     }
 
     public void setGameState(GameState gameState) {
@@ -254,6 +258,7 @@ public class World {
         Vector2 direction = new Vector2(1, 0).rotate(indicator.getRotate());
 
         // add an offset to the starting position, so the projectile does not collide with the shooting worm
+        // TODO: projectile spawns inside ChainShape
         position.add(direction.x * Constants.PROJECTILE_SPAWN_OFFSET,
                 direction.y * Constants.PROJECTILE_SPAWN_OFFSET);
         Projectile projectile = new Projectile(this, position, direction);

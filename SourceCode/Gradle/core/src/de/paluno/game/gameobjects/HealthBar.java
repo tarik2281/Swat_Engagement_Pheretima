@@ -21,6 +21,7 @@ public class HealthBar implements Renderable {
         this.world = world;
         this.worm = worm;
 
+        // TODO: load font from AssetManager
         font = new BitmapFont();
         // the text moves shaky if we use integer positions
         font.setUseIntegerPositions(false);

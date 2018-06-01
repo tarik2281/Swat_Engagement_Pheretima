@@ -5,6 +5,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import de.paluno.game.screens.GameOverScreen;
 import de.paluno.game.screens.Loadable;
 import de.paluno.game.screens.PlayScreen;
@@ -17,6 +19,7 @@ public class SEPGame extends Game {
 	public SEPGame() {
 		assetManager = new AssetManager();
         assetManager.setLoader(AnimationData.class, new AnimationData.Loader(new InternalFileHandleResolver()));
+        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
 	}
 
 	@Override
@@ -38,6 +41,7 @@ public class SEPGame extends Game {
 	}
 
 	public void setNextScreen(Screen screen) {
+		// TODO: maybe loading screen
 		if (screen instanceof Loadable) {
 			((Loadable) screen).load(assetManager);
 			assetManager.finishLoading();

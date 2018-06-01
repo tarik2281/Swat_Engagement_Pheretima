@@ -1,6 +1,5 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,8 +8,8 @@ import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
-import de.paluno.game.screens.PlayScreen;
 import de.paluno.game.WeaponType;
+
 public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     // in meters
@@ -31,7 +30,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         this.position = position;
         this.direction = direction;
 
-        texture = playScreen.getAssetManager().get(Assets.projectile);
+        texture = world.getAssetManager().get(Assets.projectile);
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
@@ -136,7 +135,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 		// TODO Auto-generated method stub
 
 		this.body = clone.body;
-		this.playScreen = clone.playScreen;
+		this.world = clone.world;
 
 		this.type= clone.type;
 		this.texture= clone.texture;
