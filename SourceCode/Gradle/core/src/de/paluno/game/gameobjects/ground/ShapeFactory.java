@@ -6,15 +6,14 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.ChainShape;
 import de.paluno.game.Constants;
 
 class ShapeFactory {
 
-    private static Polygon polygon = new Polygon();
-    private static PolygonShape polygonShape = new PolygonShape();
+    private static Vector2 distanceCheckVector = new Vector2();
 
-    public static float[] createVertices(MapObject object) {
+    static float[] createVertices(MapObject object) {
         if (object instanceof RectangleMapObject)
             return createVertices((RectangleMapObject)object);
         else if (object instanceof PolygonMapObject)
@@ -23,7 +22,7 @@ class ShapeFactory {
         return null;
     }
 
-    public static float[] createVertices(RectangleMapObject object) {
+    static float[] createVertices(RectangleMapObject object) {
         Rectangle rect = object.getRectangle();
 
         float[] vertices = new float[2 * 4];
@@ -38,27 +37,37 @@ class ShapeFactory {
         return vertices;
     }
 
-    public static float[] createVertices(PolygonMapObject object) {
+    static float[] createVertices(PolygonMapObject object) {
         Polygon polygon = object.getPolygon();
         polygon.setPosition(polygon.getX() * Constants.WORLD_SCALE, polygon.getY() * Constants.WORLD_SCALE);
         polygon.setScale(Constants.WORLD_SCALE, Constants.WORLD_SCALE);
         return polygon.getTransformedVertices();
     }
 
-    public static PolygonShape createRectangleShape(RectangleMapObject object, Vector2 center) {
-        polygonShape.setAsBox(object.getRectangle().width * Constants.WORLD_SCALE / 2.0f,
-                object.getRectangle().height * Constants.WORLD_SCALE / 2.0f,
-                center, 0.0f);
-        return polygonShape;
+    static ChainShape createChainShape(float[] v) {
+        ChainShape shape = new ChainShape();
+
+        float[] escapedVertices = new float[v.length];
+        int size = 0;
+
+        for (int i = 0; i < v.length; i+=2) {
+            if (i == 0 || checkDistance(escapedVertices[size-2], escapedVertices[size-1], v[i], v[i+1])) {
+                if (i == v.length - 2 && !checkDistance(v[i], v[i+1], v[0], v[1]))
+                    continue;
+
+                escapedVertices[size++] = v[i];
+                escapedVertices[size++] = v[i+1];
+            }
+        }
+
+        shape.createLoop(escapedVertices, 0, size);
+
+        return shape;
     }
 
-    public static PolygonShape createPolygonShape(PolygonMapObject object, Vector2 center) {
-        Rectangle bounding = object.getPolygon().getBoundingRectangle();
-        polygon.setVertices(object.getPolygon().getVertices());
-        polygon.setScale(Constants.WORLD_SCALE, Constants.WORLD_SCALE);
-        polygon.setPosition(center.x - bounding.width / 2 * Constants.WORLD_SCALE, center.y - bounding.height / 2 * Constants.WORLD_SCALE);
-        polygonShape.set(polygon.getTransformedVertices());
-        return polygonShape;
+    private static boolean checkDistance(float x1, float y1, float x2, float y2) {
+        distanceCheckVector.set(x1, y1);
+        return distanceCheckVector.dst2(x2, y2) > 0.005f * 0.005f;
     }
 
 }
