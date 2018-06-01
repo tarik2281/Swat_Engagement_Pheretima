@@ -48,7 +48,7 @@ class Explosion {
 
     int getNumSegments() {
         if (numSegments == 0)
-            numSegments = Math.max(1, (int) (6 * (float) Math.cbrt(radius * 100.0f)));
+            numSegments = Math.max(1, (int) (6 * (float) Math.cbrt(radius * Constants.SCREEN_SCALE)));
 
         return numSegments;
     }

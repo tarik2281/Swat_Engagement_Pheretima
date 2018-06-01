@@ -8,20 +8,20 @@ class ClipperWrapper {
     private Clipper clipper;
     private Paths result;
 
-    public ClipperWrapper() {
+    ClipperWrapper() {
         clipper = new DefaultClipper();
         result = new Paths();
     }
 
-    public void addSubjectPolygon(float[] vertices) {
+    void addSubjectPolygon(float[] vertices) {
         clipper.addPath(verticesToPath(vertices), Clipper.PolyType.SUBJECT, true);
     }
 
-    public void addClipPolygon(float[] vertices) {
+    void addClipPolygon(float[] vertices) {
         clipper.addPath(verticesToPath(vertices), Clipper.PolyType.CLIP, true);
     }
 
-    public void clearPolygons() {
+    void clearPolygons() {
         clipper.clear();
     }
 
@@ -56,7 +56,7 @@ class ClipperWrapper {
         return l / PRECISION_SCALE;
     }
 
-    public float[][] clip() {
+    float[][] clip() {
         result.clear();
 
         clipper.execute(Clipper.ClipType.DIFFERENCE, result);

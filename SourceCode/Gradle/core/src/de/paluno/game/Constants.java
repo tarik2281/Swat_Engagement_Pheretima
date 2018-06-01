@@ -20,6 +20,9 @@ public class Constants {
 	public static final Color PLAYER_1_COLOR = Color.TEAL;
 	public static final Color PLAYER_2_COLOR = Color.FIREBRICK;
 
+	public static final String COLLISION_LAYER = "CollisionLayer";
+	public static final String SPAWN_LAYER = "SpawnPositions";
+
 	// !!! all constants and parameters in methods and constructors should be given in world space (in meters),
 	//     unless explicitly stated !!!
 	public static final float SCREEN_SCALE = 100.0f;

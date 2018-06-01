@@ -1,11 +1,8 @@
 package de.paluno.game.gameobjects.ground;
 
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-
-import java.util.ArrayList;
 
 class CollisionObject {
     private float[] vertices;

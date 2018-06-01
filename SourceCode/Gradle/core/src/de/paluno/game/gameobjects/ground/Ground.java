@@ -2,7 +2,6 @@ package de.paluno.game.gameobjects.ground;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -71,16 +70,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
         spawnPoints = new ArrayList<>();
 
-        MapLayer spawnLayer = tiledMap.getLayers().get("SpawnPositions");
-        if (spawnLayer != null) {
-            for (MapObject object : spawnLayer.getObjects()) {
-                if (object instanceof RectangleMapObject) {
-                    Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
-                    spawnPoints.add(new Vector2(rectangle.getX() * Constants.WORLD_SCALE,
-                            rectangle.getY() * Constants.WORLD_SCALE + Constants.WORM_HEIGHT / 2.0f));
-                }
-            }
-        }
+        loadSpawnPositions();
     }
 
     public void addExplosion(Vector2 center, float radius) {
@@ -157,17 +147,12 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
         body = screen.getWorld().createBody(bodyDef);
 
-        MapLayers layers = tiledMap.getLayers();
-        for (MapLayer layer : layers) {
-            if ("CollisionLayer".equals(layer.getName())) {
-                for (MapObject object : layer.getObjects()) {
-                    float[] vertices = ShapeFactory.createVertices(object);
+        loadCollisions();
+    }
 
-                    if (vertices != null)
-                        addCollisionObject(new CollisionObject(vertices));
-                }
-            }
-        }
+    @Override
+    public Body getBody() {
+        return this.body;
     }
 
     public Vector2 getRandomSpawnPosition() {
@@ -176,8 +161,28 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         return spawnPoints.remove(index);
     }
 
-    @Override
-    public Body getBody() {
-        return this.body;
+    private void loadSpawnPositions() {
+        MapLayer spawnLayer = tiledMap.getLayers().get(Constants.SPAWN_LAYER);
+        if (spawnLayer != null) {
+            for (MapObject object : spawnLayer.getObjects()) {
+                if (object instanceof RectangleMapObject) {
+                    Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+                    spawnPoints.add(new Vector2(rectangle.getX() * Constants.WORLD_SCALE,
+                            rectangle.getY() * Constants.WORLD_SCALE + Constants.WORM_HEIGHT / 2.0f));
+                }
+            }
+        }
+    }
+
+    private void loadCollisions() {
+        MapLayer collisionLayer = tiledMap.getLayers().get(Constants.COLLISION_LAYER);
+        if (collisionLayer != null) {
+            for (MapObject object : collisionLayer.getObjects()) {
+                float[] vertices = ShapeFactory.createVertices(object);
+
+                if (vertices != null)
+                    addCollisionObject(new CollisionObject(vertices));
+            }
+        }
     }
 }

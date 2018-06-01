@@ -39,7 +39,9 @@ public class ExplosionMaskRenderer {
         shapeRenderer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         for (Explosion explosion : ground.getExplosions()) {
-            shapeRenderer.circle(explosion.getCenter().x * Constants.SCREEN_SCALE, explosion.getCenter().y * Constants.SCREEN_SCALE, explosion.getRadius() * Constants.SCREEN_SCALE, explosion.getNumSegments());
+            shapeRenderer.circle(explosion.getCenter().x * Constants.SCREEN_SCALE,
+                    explosion.getCenter().y * Constants.SCREEN_SCALE,
+                    explosion.getRadius() * Constants.SCREEN_SCALE, explosion.getNumSegments());
         }
 
         shapeRenderer.end();
