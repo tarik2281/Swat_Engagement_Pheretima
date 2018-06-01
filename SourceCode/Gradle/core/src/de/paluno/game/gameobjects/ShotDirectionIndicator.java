@@ -13,7 +13,7 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 
 	private static final float MOVEMENT_SPEED = 2.0f; // in degrees
 
-	private PlayScreen playScreen;
+	private World world;
 	private Worm worm;
 	private int playerNumber;
 	private float degrees = 0;
@@ -22,10 +22,10 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	private int movement;
 	
 	
-	public ShotDirectionIndicator(int playerNumber, Worm worm, PlayScreen playScreen) {
+	public ShotDirectionIndicator(int playerNumber, Worm worm, World world) {
 		this.playerNumber = playerNumber;
 		this.worm = worm;
-		this.playScreen = playScreen;
+		this.world = world;
 
 		texture = new Texture(Gdx.files.internal("Arrow.png"));
 		sprite = new Sprite(texture);

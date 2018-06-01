@@ -16,7 +16,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private static final float PROJECTILE_RADIUS = 0.03f;
     private static final float PROJECTILE_DENSITY = 0.1f;
 
-    private PlayScreen playScreen;
+    private World world;
     private Vector2 position;
     private Vector2 direction;
 
@@ -25,8 +25,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private Texture texture;
     private Sprite sprite;
 
-    public Projectile(PlayScreen playScreen, Vector2 position, Vector2 direction) {
-        this.playScreen = playScreen;
+    public Projectile(World world, Vector2 position, Vector2 direction) {
+        this.world = world;
         this.position = position;
         this.direction = direction;
 
@@ -39,7 +39,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     @Override
     public void update(float delta, GameState gameState) {
         // check if the projectile is inside our world - if not, destroy it
-        if (!playScreen.getWorldBounds().contains(body.getPosition()))
+        if (!world.getWorldBounds().contains(body.getPosition()))
             explode();
     }
 
@@ -53,8 +53,6 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     @Override
     public void setupBody() {
-        World world = playScreen.getWorld();
-
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
@@ -94,9 +92,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public void explode() {
-        playScreen.addExplosion(body.getPosition(), 0.2f);
+        world.addExplosion(body.getPosition(), 0.2f);
 
-        playScreen.forgetAfterUpdate(this);
-    	playScreen.advanceGameState();
+        world.forgetAfterUpdate(this);
+    	world.advanceGameState();
     }
 }

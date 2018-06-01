@@ -5,17 +5,21 @@ import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
 
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.QueryCallback;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.gameobjects.PhysicsObject;
 import de.paluno.game.gameobjects.Renderable;
 import de.paluno.game.gameobjects.Updatable;
-import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.gameobjects.World;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -24,7 +28,7 @@ import java.util.Random;
 public class Ground implements PhysicsObject, Renderable, Updatable {
 
     private Body body;
-    private PlayScreen screen;
+    private World world;
 
     private ClipperWrapper clipper;
 
@@ -54,8 +58,8 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         }
     };
 
-    public Ground(PlayScreen screen, TiledMap tiledMap, ExplosionMaskRenderer renderer) {
-        this.screen = screen;
+    public Ground(World world, TiledMap tiledMap, ExplosionMaskRenderer renderer) {
+        this.world = world;
 
         this.tiledMap = tiledMap;
 
@@ -79,7 +83,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
     private void executeExplosion(Explosion explosion) {
         queriedObjects.clear();
-        screen.getWorld().QueryAABB(explosionQueryCallback, explosion.getLowerX(),
+        world.getWorld().QueryAABB(explosionQueryCallback, explosion.getLowerX(),
                 explosion.getLowerY(), explosion.getUpperX(), explosion.getUpperY());
 
         for (CollisionObject object : queriedObjects) {
@@ -112,6 +116,24 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         return explosions;
     }
 
+    public float getWorldOriginX() {
+        return 0.0f;
+    }
+
+    public float getWorldOriginY() {
+        return 0.0f;
+    }
+
+    public float getWorldWidth() {
+        TiledMapTileLayer tileLayer = (TiledMapTileLayer)tiledMap.getLayers().get(Constants.TILE_LAYER);
+        return tileLayer.getWidth() * tileLayer.getTileWidth() * Constants.WORLD_SCALE;
+    }
+
+    public float getWorldHeight() {
+        TiledMapTileLayer tileLayer = (TiledMapTileLayer)tiledMap.getLayers().get(Constants.TILE_LAYER);
+        return tileLayer.getHeight() * tileLayer.getTileHeight() * Constants.WORLD_SCALE;
+    }
+
     @Override
     public void update(float delta, GameState gamestate) {
         while (!explosionQueue.isEmpty())
@@ -127,7 +149,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
         maskRenderer.enableMask();
 
-        mapRenderer.setView(screen.getCamera().getOrthoCamera());
+        mapRenderer.setView(world.getCamera().getOrthoCamera());
         mapRenderer.render();
 
         maskRenderer.disableMask();
@@ -145,7 +167,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
-        body = screen.getWorld().createBody(bodyDef);
+        body = world.createBody(bodyDef);
 
         loadCollisions();
     }

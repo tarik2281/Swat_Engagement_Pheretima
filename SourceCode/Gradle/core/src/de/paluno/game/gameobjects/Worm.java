@@ -9,12 +9,11 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
-import de.paluno.game.screens.PlayScreen;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	private boolean standsOnGround;
-	private PlayScreen screen;
+	private World world;
 	private int playerNumber;
 	
 	private Body body;
@@ -38,10 +37,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	private int health;
 
-	public Worm(int num, PlayScreen screen, Vector2 position) {
+	public Worm(int num, World world, Vector2 position) {
 		// Set given starting parameters
 		this.playerNumber = num;
-		this.screen = screen;
+		this.world = world;
 		this.spawnPosition = position;
 		
 		// Body will be setup from PlayScreen
@@ -106,7 +105,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 		
 		// Worm fell off the world rim? Is ded.
-		if (!screen.getWorldBounds().contains(body.getPosition())) die();
+		if (!world.getWorldBounds().contains(body.getPosition())) die();
 	}
 	
 	public void render(SpriteBatch batch, float delta) {
@@ -138,7 +137,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		bodyDef.type = BodyType.DynamicBody;
 		
 		// Create the actual physics body in our current game world
-		this.body = this.screen.getWorld().createBody(bodyDef);
+		this.body = this.world.createBody(bodyDef);
 		body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
@@ -209,8 +208,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void die() {
 	    /** Death handler */
 		//Tell the screen - there, where all the magic happens - that this character is no more
-		screen.forgetAfterUpdate(this);
-		screen.wormDied(this); // TODO: use EventManager to handle worm death
+		world.forgetAfterUpdate(this);
+		world.wormDied(this); // TODO: use EventManager to handle worm death
 	}
 	
 	public boolean canJump() {

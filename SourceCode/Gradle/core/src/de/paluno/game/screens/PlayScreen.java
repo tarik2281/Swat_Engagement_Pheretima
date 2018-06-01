@@ -5,50 +5,21 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.World;
-import de.paluno.game.*;
-import de.paluno.game.gameobjects.*;
-import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
-import de.paluno.game.gameobjects.ground.Ground;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
+import de.paluno.game.Constants;
+import de.paluno.game.GameState;
+import de.paluno.game.SEPGame;
+import de.paluno.game.gameobjects.ShotDirectionIndicator;
+import de.paluno.game.gameobjects.World;
+import de.paluno.game.gameobjects.Worm;
 
 public class PlayScreen extends ScreenAdapter {
 
 	private SEPGame game;
 	private SpriteBatch spriteBatch;
 
-    private World world;
-    private GameState oldGameState;
-    private GameState gameState;
-
-    private Rectangle worldBounds;
-
-    private LinkedList<Object> objectRegisterQueue;
-    private LinkedList<Object> objectForgetQueue;
-
-    private ArrayList<Renderable> renderableObjects;
-    private ArrayList<Updatable> updatableObjects;
-
-    private Worm[] playerWorms;
-    private ShotDirectionIndicator[] shotDirectionIndicators;
-
-    private CollisionHandler collisionHandler;
-
-    private GameCamera camera;
+	private World world;
 
     private PlayUILayer uiLayer;
-
-    private boolean isRenderDebug = false;
-    private Box2DDebugRenderer debugRenderer;
-
-    private Ground ground;
-    private ExplosionMaskRenderer maskRenderer;
 
     // receive user input events and handle them
     private InputAdapter inputAdapter = new InputAdapter() {
@@ -72,8 +43,8 @@ public class PlayScreen extends ScreenAdapter {
 
         @Override
         public boolean keyDown(int keycode) {
-            Worm worm = getCurrentWorm();
-            ShotDirectionIndicator indicator = getCurrentIndicator();
+            Worm worm = world.getCurrentWorm();
+            ShotDirectionIndicator indicator = world.getCurrentIndicator();
 
             switch (keycode) {
                 // gameplay key events
@@ -91,7 +62,7 @@ public class PlayScreen extends ScreenAdapter {
                     return true;
                 case Constants.KEY_DO_ACTION:
                     if (worm != null && indicator != null && worm.isStandsOnGround() && isPlayerTurn())
-                        fireProjectile(worm, indicator.getRotate());
+                        world.shootProjectile();
                     return true;
                 case Constants.KEY_ROTATE_INDICATOR_UP:
                     if (indicator != null)
@@ -104,22 +75,22 @@ public class PlayScreen extends ScreenAdapter {
 
                 // debugging key events
                 case Constants.KEY_MOVE_CAMERA_LEFT:
-                    camera.setHorizontalMovement(Constants.MOVEMENT_LEFT);
+                    //camera.setHorizontalMovement(Constants.MOVEMENT_LEFT);
                     return true;
                 case Constants.KEY_MOVE_CAMERA_RIGHT:
-                    camera.setHorizontalMovement(Constants.MOVEMENT_RIGHT);
+                    //camera.setHorizontalMovement(Constants.MOVEMENT_RIGHT);
                     return true;
                 case Constants.KEY_MOVE_CAMERA_UP:
-                    camera.setVerticalMovement(Constants.MOVEMENT_UP);
+                    //camera.setVerticalMovement(Constants.MOVEMENT_UP);
                     return true;
                 case Constants.KEY_MOVE_CAMERA_DOWN:
-                    camera.setVerticalMovement(Constants.MOVEMENT_DOWN);
+                    //camera.setVerticalMovement(Constants.MOVEMENT_DOWN);
                     return true;
                 case Constants.KEY_TOGGLE_DEBUG_RENDER:
-                    isRenderDebug = !isRenderDebug;
+                    world.toggleDebugRender();
                     return true;
                 case Constants.KEY_TOGGLE_CAMERA_FOCUS:
-                    setCameraFocus(camera.getCameraFocus() == null ? getCurrentWorm() : null);
+                    //setCameraFocus(camera.getCameraFocus() == null ? getCurrentWorm() : null);
                     break;
             }
 
@@ -128,7 +99,7 @@ public class PlayScreen extends ScreenAdapter {
 
         @Override
         public boolean keyUp(int keycode) {
-            Worm worm = getCurrentWorm();
+            Worm worm = world.getCurrentWorm();
 
             switch (keycode) {
                 // gameplay key events
@@ -142,26 +113,26 @@ public class PlayScreen extends ScreenAdapter {
                     return true;
                 case Constants.KEY_ROTATE_INDICATOR_UP:
                 case Constants.KEY_ROTATE_INDICATOR_DOWN:
-                    if (getCurrentIndicator() != null)
-                	    getCurrentIndicator().setRotate(0);
+                    if (world.getCurrentIndicator() != null)
+                	    world.getCurrentIndicator().setRotate(0);
                 	return true;
 
                 // debugging key events
                 case Constants.KEY_MOVE_CAMERA_LEFT:
-                    if (camera.getHorizontalMovement() == Constants.MOVEMENT_LEFT)
-                        camera.setHorizontalMovement(Constants.MOVEMENT_NO_MOVEMENT);
+                    //if (camera.getHorizontalMovement() == Constants.MOVEMENT_LEFT)
+                    //    camera.setHorizontalMovement(Constants.MOVEMENT_NO_MOVEMENT);
                     return true;
                 case Constants.KEY_MOVE_CAMERA_RIGHT:
-                    if (camera.getHorizontalMovement() == Constants.MOVEMENT_RIGHT)
-                        camera.setHorizontalMovement(Constants.MOVEMENT_NO_MOVEMENT);
+                    //if (camera.getHorizontalMovement() == Constants.MOVEMENT_RIGHT)
+                    //    camera.setHorizontalMovement(Constants.MOVEMENT_NO_MOVEMENT);
                     return true;
                 case Constants.KEY_MOVE_CAMERA_UP:
-                    if (camera.getVerticalMovement() == Constants.MOVEMENT_UP)
-                        camera.setVerticalMovement(Constants.MOVEMENT_NO_MOVEMENT);
+                    //if (camera.getVerticalMovement() == Constants.MOVEMENT_UP)
+                    //    camera.setVerticalMovement(Constants.MOVEMENT_NO_MOVEMENT);
                     return true;
                 case Constants.KEY_MOVE_CAMERA_DOWN:
-                    if (camera.getVerticalMovement() == Constants.MOVEMENT_DOWN)
-                        camera.setVerticalMovement(Constants.MOVEMENT_NO_MOVEMENT);
+                    //if (camera.getVerticalMovement() == Constants.MOVEMENT_DOWN)
+                    //    camera.setVerticalMovement(Constants.MOVEMENT_NO_MOVEMENT);
                     return true;
             }
 
@@ -173,18 +144,6 @@ public class PlayScreen extends ScreenAdapter {
         this.game = game;
 
         spriteBatch = new SpriteBatch();
-        gameState = GameState.PLAYERONETURN;
-
-        world = new World(Constants.GRAVITY, true);
-
-        objectRegisterQueue = new LinkedList<Object>();
-        objectForgetQueue = new LinkedList<Object>();
-
-        renderableObjects = new ArrayList<Renderable>();
-        updatableObjects = new ArrayList<Updatable>();
-
-        playerWorms = new Worm[Constants.NUM_PLAYERS];
-        shotDirectionIndicators = new ShotDirectionIndicator[Constants.NUM_PLAYERS];
     }
 
     @Override
@@ -194,46 +153,26 @@ public class PlayScreen extends ScreenAdapter {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
-        camera = new GameCamera(screenWidth, screenHeight);
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
-        debugRenderer = new Box2DDebugRenderer();
-
-        maskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
-        ground = new Ground(this, new TmxMapLoader().load("unbenannt.tmx"), maskRenderer);
-        maskRenderer.setGround(ground);
-
-        registerAfterUpdate(ground);
-        camera.setBottomLimit(-Constants.GROUND_HEIGHT / 2.0f);
-
-        worldBounds = new Rectangle(-Constants.WORLD_WIDTH / 2.0f, -Constants.GROUND_HEIGHT / 2.0f,
-                Constants.WORLD_WIDTH, Constants.WORLD_HEIGHT);
-
-        initializePlayer(Constants.PLAYER_NUMBER_1, ground.getRandomSpawnPosition());
-        initializePlayer(Constants.PLAYER_NUMBER_2, ground.getRandomSpawnPosition());
-
-        collisionHandler = new CollisionHandler(this);
-        world.setContactListener(collisionHandler);
-
-        setGameState(GameState.PLAYERONETURN);
-    }
-
-    public GameCamera getCamera() {
-        return camera;
+        world = new World(this);
     }
 
     @Override
     public void render(float delta) {
-        // game loop
-        registerObjects();
+        Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // game loop
         Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
 
-        updatePhase(delta);
-        physicsPhase(delta);
-        renderPhase(delta);
+        world.doGameLoop(spriteBatch, delta);
 
-        forgetObjects();
+        renderPhase(delta);
+    }
+
+    public void renderPhase(float delta) {
+        uiLayer.render(spriteBatch, delta);
     }
 
     @Override
@@ -241,240 +180,15 @@ public class PlayScreen extends ScreenAdapter {
         Gdx.input.setInputProcessor(null);
     }
 
-    public void physicsPhase(float delta) {
-        float timeStep = 1.0f / 60.0f;
-        // TODO: constant time step for consistent physics simulation
-        world.step(timeStep, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
-    }
-
-    public void addExplosion(Vector2 center, float radius) {
-        ground.addExplosion(center, radius);
-    }
-
-    public void renderPhase(float delta) {
-        Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        camera.update(delta);
-
-        maskRenderer.renderDepthMask();
-
-        spriteBatch.setProjectionMatrix(camera.getScreenProjection());
-        spriteBatch.begin();
-
-        for (Renderable renderable : renderableObjects) {
-        	renderable.render(spriteBatch, delta);
-        }
-
-        spriteBatch.end();
-
-        if (isRenderDebug)
-            debugRenderer.render(world, camera.getDebugProjection());
-
-        // UI drawing
-        uiLayer.render(spriteBatch, delta);
-    }
-
-    public void updatePhase(float delta) {
-        for (Updatable updatable : updatableObjects) {
-            updatable.update(delta, gameState);
-        }
-    }
-
-    public void registerAfterUpdate(Object gameObject) {
-        // add object to queue
-        objectRegisterQueue.add(gameObject);
-    }
-
-    public void forgetAfterUpdate(Object gameObject) {
-        // add object to queue
-        objectForgetQueue.add(gameObject);
-    }
-
-    public void setCameraFocus(PhysicsObject gameObject) {
-        camera.setCameraFocus(gameObject);
-    }
-
-    public World getWorld() {
-        return world;
-    }
-
     public void setGameState(GameState gameState) {
-        oldGameState = this.gameState;
-
-        Worm worm = getCurrentWorm();
-        if (worm != null)
-            worm.setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-
-        this.gameState = gameState;
-
         uiLayer.setGameState(gameState);
-
-        switch (gameState) {
-            case PLAYERONETURN:
-                getCurrentWorm().equipGun();
-                registerAfterUpdate(getCurrentIndicator());
-                break;
-            case PLAYERTWOTURN:
-                getCurrentWorm().equipGun();
-                registerAfterUpdate(getCurrentIndicator());
-                break;
-            case GAMEOVERPLAYERONEWON:
-                game.setGameOver(WinningPlayer.PLAYERONE);
-                break;
-            case GAMEOVERPLAYERTWOWON:
-                game.setGameOver(WinningPlayer.PLAYERTWO);
-                break;
-        }
-
-        if (gameState != GameState.SHOOTING)
-            setCameraFocus(getCurrentWorm());
     }
 
-    public void advanceGameState() {
-        switch (gameState) {
-            case PLAYERONETURN:
-                setGameState(GameState.SHOOTING);
-                break;
-            case PLAYERTWOTURN:
-                setGameState(GameState.SHOOTING);
-                break;
-            case SHOOTING:
-                switch (oldGameState) {
-                    case PLAYERONETURN:
-                        setGameState(GameState.PLAYERTWOTURN);
-                        break;
-                    case PLAYERTWOTURN:
-                        setGameState(GameState.PLAYERONETURN);
-                        break;
-                }
-                break;
-        }
-    }
-
-    public Rectangle getWorldBounds() {
-        return worldBounds;
-    }
-
-    public void wormDied(Worm worm) {
-        switch (worm.getPlayerNumber()) {
-            case Constants.PLAYER_NUMBER_1:
-                setGameState(GameState.GAMEOVERPLAYERTWOWON);
-                break;
-            case Constants.PLAYER_NUMBER_2:
-                setGameState(GameState.GAMEOVERPLAYERONEWON);
-                break;
-        }
-    }
-
-    private void initializePlayer(int playerNumber, Vector2 wormPosition) {
-        Worm worm = new Worm(playerNumber, this, wormPosition);
-        ShotDirectionIndicator indicator = new ShotDirectionIndicator(playerNumber, worm, this);
-        HealthBar healthBar = new HealthBar(this, worm);
-
-        playerWorms[playerNumber] = worm;
-        shotDirectionIndicators[playerNumber] = indicator;
-
-        registerAfterUpdate(worm);
-        registerAfterUpdate(healthBar);
-    }
-
-    private void fireProjectile(Worm worm, float angle) {
-        Vector2 position = new Vector2(worm.getBody().getPosition());
-        Vector2 direction = new Vector2(1, 0).rotate(angle);
-
-        // add an offset to the starting position, so the projectile does not collide with the shooting worm
-        position.add(direction.x * Constants.PROJECTILE_SPAWN_OFFSET,
-                direction.y * Constants.PROJECTILE_SPAWN_OFFSET);
-
-        Projectile projectile = new Projectile(PlayScreen.this, position,
-                new Vector2(1, 0).rotate(angle));
-
-        registerAfterUpdate(projectile);
-        forgetAfterUpdate(getCurrentIndicator());
-
-        worm.unequipGun();
-
-        advanceGameState();
-        setCameraFocus(projectile);
-    }
-
-    private void registerObjects() {
-        // add all objects from queue
-        for (Object gameObject : objectRegisterQueue) {
-            if (gameObject instanceof Updatable) {
-                updatableObjects.add((Updatable)gameObject);
-            }
-            if (gameObject instanceof PhysicsObject) {
-                PhysicsObject physicsObject = (PhysicsObject)gameObject;
-                physicsObject.setupBody();
-                physicsObject.getBody().setUserData(gameObject);
-            }
-            if (gameObject instanceof Renderable) {
-                renderableObjects.add((Renderable)gameObject);
-            }
-        }
-
-        objectRegisterQueue.clear();
-    }
-
-    private void forgetObjects() {
-        // remove all objects from queue
-        for (Object gameObject : objectForgetQueue) {
-            if (gameObject instanceof Updatable) {
-                updatableObjects.remove((Updatable)gameObject);
-            }
-            if (gameObject instanceof PhysicsObject) {
-                PhysicsObject physicsObject = (PhysicsObject)gameObject;
-                if (physicsObject.getBody() != null)
-                    world.destroyBody(physicsObject.getBody());
-                physicsObject.setBodyToNullReference();
-            }
-            if (gameObject instanceof Renderable) {
-                renderableObjects.remove((Renderable)gameObject);
-            }
-
-            if (gameObject == camera.getCameraFocus())
-                setCameraFocus(null);
-        }
-
-        objectForgetQueue.clear();
-    }
-
-    private Worm getCurrentWorm() {
-        int player = getCurrentPlayer();
-        if (player >= 0)
-            return playerWorms[player];
-
-        return null;
-    }
-
-    private ShotDirectionIndicator getCurrentIndicator() {
-        int player = getCurrentPlayer();
-        if (player >= 0)
-            return shotDirectionIndicators[player];
-
-        return null;
-    }
-
-    private int getCurrentPlayer() {
-        int player = -1;
-
-        switch (gameState) {
-            case PLAYERONETURN:
-            case GAMEOVERPLAYERONEWON:
-                player = Constants.PLAYER_NUMBER_1;
-                break;
-            case PLAYERTWOTURN:
-            case GAMEOVERPLAYERTWOWON:
-                player = Constants.PLAYER_NUMBER_2;
-                break;
-        }
-
-        return player;
+    public void setGameOver(WinningPlayer winningPlayer) {
+        game.setGameOver(winningPlayer);
     }
 
     private boolean isPlayerTurn() {
-        return gameState == GameState.PLAYERTWOTURN || gameState == GameState.PLAYERONETURN;
+        return world.getGameState() == GameState.PLAYERTWOTURN || world .getGameState() == GameState.PLAYERONETURN;
     }
 }
