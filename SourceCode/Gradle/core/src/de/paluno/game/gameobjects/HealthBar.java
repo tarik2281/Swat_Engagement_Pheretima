@@ -62,4 +62,9 @@ public class HealthBar implements Renderable {
 
         return color;
     }
+
+	public void setCloningParameters(HealthBar clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }

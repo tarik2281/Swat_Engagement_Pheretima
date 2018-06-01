@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
@@ -27,7 +28,7 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 		this.worm = worm;
 		this.world = world;
 
-		texture = new Texture(Gdx.files.internal("Arrow.png"));
+		texture = playScreen.getAssetManager().get(Assets.arrow);
 		sprite = new Sprite(texture);
 	}
 
@@ -58,5 +59,17 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	
 	public float getRotate() {
 		return degrees;
+	}
+
+	public void setCloningParameters(ShotDirectionIndicator clone) {
+		// TODO Auto-generated method stub
+		this.playerNumber = clone.playerNumber;
+		this.playScreen=clone.playScreen;
+		this.degrees= clone.degrees;
+		this.worm= clone.worm;
+		this.sprite=clone.sprite;
+		this.texture= clone.texture;
+		this.movement= clone.movement;
+		
 	}
 }

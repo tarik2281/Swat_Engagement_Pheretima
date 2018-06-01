@@ -11,6 +11,7 @@ public class Constants {
 
 	// game play constants
 	public static final int NUM_PLAYERS = 2;
+	public static final int MAX_CHAR_NUM = 5;
 	public static final int WORM_MAX_HEALTH = 100;
 	public static final int PROJECTILE_DAMAGE = 40;
 
@@ -75,6 +76,22 @@ public class Constants {
     public static final int KEY_MOVE_CAMERA_DOWN = Input.Keys.S;
     public static final int KEY_TOGGLE_CAMERA_FOCUS = Input.Keys.F;
     public static final int KEY_TOGGLE_DEBUG_RENDER = Input.Keys.Y;
+    
+    // Weapon constants
+    public static final int WEAPON_AMMO_INF = -1;
+    public static final int WEAPON_AMMO_RIFLE = 10;
+    public static final int WEAPON_AMMO_THROWABLE = 5;
+    public static final int WEAPON_AMMO_SPECIAL = 1;
+    
+    public static final float WEAPON_RIFLE_SPEED = 5.0f;
+    public static final float WEAPON_PROJECTILE_SPEED = 2.0f;
+    public static final float WEAPON_THROWABLE_SPEED = 1.0f;
+    public static final int WEAPON_THROWABLE_TIMER = 5; // seconds
+    
+    public static final int WEAPON_ARSENAL_SIZE = 3;
+    public static final int WEAPON_ARSENAL_RIFLE = 1;
+    public static final int WEAPON_ARSENAL_PROJECTILE = 1;
+    public static final int WEAPON_ARSENAL_THROWABLE = 1;
 
 	private Constants() {
 		// An instance should not be created of this class

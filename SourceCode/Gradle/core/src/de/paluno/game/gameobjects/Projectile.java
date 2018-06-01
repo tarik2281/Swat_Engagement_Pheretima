@@ -6,10 +6,11 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.screens.PlayScreen;
-
+import de.paluno.game.WeaponType;
 public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     // in meters
@@ -19,7 +20,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private World world;
     private Vector2 position;
     private Vector2 direction;
-
+    private WeaponType type;
     private Body body;
 
     private Texture texture;
@@ -30,7 +31,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         this.position = position;
         this.direction = direction;
 
-        texture = new Texture(Gdx.files.internal("Projectile.png"));
+        texture = playScreen.getAssetManager().get(Assets.projectile);
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
@@ -58,6 +59,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         bodyDef.position.set(position.x, position.y);
         bodyDef.bullet = true;
 
+        if (type == WeaponType.WEAPON_RIFLE) {
+
         CircleShape shape = new CircleShape();
         shape.setRadius(PROJECTILE_RADIUS);
 
@@ -79,8 +82,39 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         // CollisionHandler Identifier
         fix.setUserData("Projectile");
         shape.dispose();
-    }
 
+
+    }else if (type == WeaponType.WEAPON_PROJECTILE) {
+    	PolygonShape shape = new PolygonShape();
+    	shape.setAsBox(0.4f,0.1f);
+    	 FixtureDef fixtureDef = new FixtureDef();
+         fixtureDef.shape = shape;
+         fixtureDef.density= 2;
+         body = world.createBody(bodyDef);
+         Fixture fix = body.createFixture(fixtureDef);
+         body.setGravityScale(2.7f);
+         Vector2 impulse = new Vector2(direction).scl(0.011f);
+         body.applyLinearImpulse(impulse, body.getPosition(), true);
+         fix.setUserData("Projectile");
+         shape.dispose();
+
+    }else if(type == WeaponType.WEAPON_THROWABLE) {
+
+    	PolygonShape shape = new PolygonShape();
+    	shape.setAsBox(0.4f,0.1f);
+    	 FixtureDef fixtureDef = new FixtureDef();
+         fixtureDef.shape = shape;
+         fixtureDef.density= 9;
+         fixtureDef.isSensor=true;
+         body = world.createBody(bodyDef);
+         Fixture fix = body.createFixture(fixtureDef);
+         body.setGravityScale(8.7f);
+         Vector2 impulse = new Vector2(direction).scl(0.04f);
+         body.applyLinearImpulse(impulse, body.getPosition(), true);
+         fix.setUserData("Projectile");
+         shape.dispose();
+    }
+    }
     @Override
     public Body getBody() {
         return body;
@@ -97,4 +131,18 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         world.forgetAfterUpdate(this);
     	world.advanceGameState();
     }
+
+	public void setCloningParameters(Projectile clone) {
+		// TODO Auto-generated method stub
+
+		this.body = clone.body;
+		this.playScreen = clone.playScreen;
+
+		this.type= clone.type;
+		this.texture= clone.texture;
+		this.sprite= clone.sprite;
+		this.position= clone.position;
+		this.direction= clone.direction;
+
+	}
 }
