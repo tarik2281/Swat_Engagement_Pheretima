@@ -480,12 +480,18 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public void shoot() {if(canShoot() && currentWeapon != null) currentWeapon.shoot();}
 	
+	/**
+	 * Method to return a clone of this obejct
+	 */
 	public Worm clone() {
 		Worm clone = new Worm();
 		clone.setCloningParameters(this);
 		return clone;
 	}
-	
+	/**
+	 * Method to copy over all variables from a second Worm - used for cloning
+	 * @param copy - The reference to the Worm to copy from
+	 */
 	public void setCloningParameters(Worm copy) {
 		this.characterNumber = copy.characterNumber;
 		

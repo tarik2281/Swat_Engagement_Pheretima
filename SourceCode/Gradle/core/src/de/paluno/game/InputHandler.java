@@ -24,11 +24,15 @@ public class InputHandler extends InputAdapter {
 	private boolean ctrlL = false;
 	private boolean ctrlR = false;
 	
+	private int mouseX = -1;
+	private int mouseY = -1;
+	
 	private ArrayList<Integer> registeredKeyCodesDown = new ArrayList();
 	private HashMap<Integer, ArrayList<Method>> registeredHandlersDown = new HashMap();
 	private ArrayList<Integer> registeredKeyCodesUp = new ArrayList();
 	private HashMap<Integer, ArrayList<Method>> registeredHandlersUp = new HashMap();
 	private ArrayList<Method> registeredMouseListeners = new ArrayList();
+	private ArrayList<Method> registeredMouseHandlers = new ArrayList();
 	
 	private static InputHandler instance = null;
 	
@@ -177,12 +181,66 @@ public class InputHandler extends InputAdapter {
 		
 		return true;
 	}
+	/**
+	 * Method to add a mouseListener, receiving all mousebutton clicks
+	 * @param target - Object to send the data to
+	 * @param handler - Name of the function that should receive it
+	 * @return - Was this handler registered successfully?
+	 */
+	public boolean registerMouseHandler(Object target, String handler) {
+		// Try to get the target's method, to see if it actually exists.
+		// If not, we don't need to bother with it anymore, just pop an error message to inform the caller.
+		Method method;
+		try {
+			method = target.getClass().getMethod(handler, Integer.class);
+		} catch(SecurityException e) {System.err.println("Security violation on mouse registration - target method not public!"); return false;}
+		catch(NoSuchMethodException e) {System.err.println("Method to be registered not found or with invalid parameters!"); return false;}
+		
+		if(!registeredMouseHandlers.contains(method)) registeredMouseHandlers.add(method);
+		else return false;
+		
+		return true;
+	}
+	/**
+	 * Method to remove a mouseListener
+	 * @param target - Object to lookup the method from
+	 * @param handler - Name of the function that should be removed
+	 * @return - Was this listener removed successfully?
+	 */
+	public boolean deregisterMouseHandler(Object target, String handler) {
+		// Try to get the target's method, to see if it actually exists.
+		// If not, we don't need to bother with it anymore, just pop an error message to inform the caller.
+		Method method;
+		try {
+			method = target.getClass().getMethod(handler, Integer.class);
+		} catch(SecurityException e) {System.err.println("Security violation on mouse deregistration - target method not public!"); return false;}
+		catch(NoSuchMethodException e) {System.err.println("Method to be deregistered not found or with invalid parameters!"); return false;}
+		
+		if(registeredMouseHandlers.contains(method)) registeredMouseHandlers.remove(method);
+		else return false;
+		
+		return true;
+	}
 	
 	/**
 	 * Super placeholder for parent's "Mouseclick" function
 	 */
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		return super.touchDown(screenX, screenY, pointer, button);
+		mouseX = screenX;
+		mouseY = screenY;
+		
+		boolean handled = false;
+		for(Method m : registeredMouseHandlers) {
+    		try {
+        		m.invoke(this, button);
+        		handled = true;
+        	} catch(InvocationTargetException e) {System.err.println("Invocation target invalid!");}
+        	catch(IllegalArgumentException e) {System.err.println("Parameter on handler call not accepted!");}
+        	catch(IllegalAccessException e) {System.err.println("Illegal access on handler call!");}
+    	}
+		
+		if(handled) return true;
+		else return super.touchDown(screenX, screenY, pointer, button);
 	}
 	/**
 	 * Super placeholder for parent's "Mouseup" function
@@ -194,6 +252,9 @@ public class InputHandler extends InputAdapter {
 	 * Super placeholder for parent's "Mouse moved" function
 	 */
 	public boolean mouseMoved(int screenX, int screenY) {
+		mouseX = screenX;
+		mouseY = screenY;
+		
 		boolean handled = false;
 		for(Method m : registeredMouseListeners) {
     		try {
@@ -396,6 +457,11 @@ public class InputHandler extends InputAdapter {
 		else if(LoR == 'r' || LoR == 'R') return ctrlR;
 		else return false;
 	}
+	/**
+	 * Getter method for the cursors current (or last known) position
+	 * @return Vector mouseX, mouseY
+	 */
+	public Vector2 getMousePosition() {return new Vector2(mouseX, mouseY);}
 	
 	/**
 	 * Static reference to the InputHandler, to make it globally available
