@@ -11,13 +11,18 @@ public class WindHandler implements Updatable {
     private Random rand = new Random();
 
     private Projectile projectile;
-    private int x = rand.nextInt(14) - 7;
+
+    public int getX() {
+        return x;
+    }
+
+    private int x = rand.nextInt(12) - 6;
     private float degreeWind;
     private  Vector2 wind;
 
     // generates the random wind (x - coordinate)
     public void setNextWind() {
-        this.x = rand.nextInt(14) - 7;
+        this.x = rand.nextInt(12) - 6;
     }
 
     public void setProjectile(Projectile projectile) {

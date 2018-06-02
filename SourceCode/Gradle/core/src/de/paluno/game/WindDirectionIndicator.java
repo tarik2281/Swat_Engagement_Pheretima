@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.Renderable;
 import de.paluno.game.gameobjects.Updatable;
+import de.paluno.game.gameobjects.World;
 import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
 
@@ -17,6 +18,7 @@ public class WindDirectionIndicator implements Renderable {
     private Texture texture;
     private Sprite sprite;  // Graphical object which implements a texture to draw the object
     private WindHandler windHandler;
+    private World world;
 
     public WindDirectionIndicator(int playerNumber, PlayScreen playScreen, Worm worm, WindHandler windHandler) {
         this.playScreen = playScreen;
@@ -27,7 +29,18 @@ public class WindDirectionIndicator implements Renderable {
         texture = new Texture(Gdx.files.internal("wind.png"));
         sprite = new Sprite(texture);
 
+        if ((windHandler.getX() >= 0 && windHandler.getX() <= 2) || (windHandler.getX() <= 0 && windHandler.getX() >= -2)){
+            texture = world.getAssetManager().get(Assets.windGreen);
+        }else if ((windHandler.getX() >= 2 && windHandler.getX() <= 4) ||
+        (windHandler.getX() <= -2 && windHandler.getX() >= -4)){
+            texture = world.getAssetManager().get(Assets.windOrange);
+        }else{
+            texture = world.getAssetManager().get(Assets.windRed);
+        }
+
     }
+
+
 
 
     @Override
