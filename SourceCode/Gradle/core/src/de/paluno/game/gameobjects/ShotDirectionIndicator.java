@@ -1,6 +1,5 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,13 +7,12 @@ import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
-import de.paluno.game.screens.PlayScreen;
 
 public class ShotDirectionIndicator implements Renderable, Updatable{
 
 	private static final float MOVEMENT_SPEED = 2.0f; // in degrees
 
-	private PlayScreen playScreen;
+	private World world;
 	private Worm worm;
 	private int playerNumber;
 	private float degrees = 0;
@@ -23,12 +21,12 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	private int movement;
 	
 	
-	public ShotDirectionIndicator(int playerNumber, Worm worm, PlayScreen playScreen) {
+	public ShotDirectionIndicator(int playerNumber, Worm worm, World world) {
 		this.playerNumber = playerNumber;
 		this.worm = worm;
-		this.playScreen = playScreen;
+		this.world = world;
 
-		texture = playScreen.getAssetManager().get(Assets.arrow);
+		texture = world.getAssetManager().get(Assets.arrow);
 		sprite = new Sprite(texture);
 	}
 
@@ -49,8 +47,8 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	    sprite.setOriginCenter();
 		sprite.setRotation(degrees);
 		sprite.setOriginBasedPosition(position.x, position.y);
-	    
-	    sprite.draw(batch);	
+
+	    sprite.draw(batch);
 	}
 	
 	public void setRotate(int movement) {
@@ -59,5 +57,17 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	
 	public float getRotate() {
 		return degrees;
+	}
+
+	public void setCloningParameters(ShotDirectionIndicator clone) {
+		// TODO Auto-generated method stub
+		this.playerNumber = clone.playerNumber;
+		this.world=clone.world;
+		this.degrees= clone.degrees;
+		this.worm= clone.worm;
+		this.sprite=clone.sprite;
+		this.texture= clone.texture;
+		this.movement= clone.movement;
+		
 	}
 }

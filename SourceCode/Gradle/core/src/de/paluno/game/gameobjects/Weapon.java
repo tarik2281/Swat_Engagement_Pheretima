@@ -6,6 +6,7 @@ import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.WeaponType;
+  
 
 public class Weapon {
 	private WeaponType type;
@@ -182,4 +183,23 @@ public class Weapon {
 	 * @return AnimatedSprite
 	 */
 	public AnimatedSprite getAnimation() {return this.animationSet;}
+	
+	public void setCloningParameters(Weapon clone) {
+		// TODO Auto-generated method stub
+		this.worm= clone.worm;
+		this.maxAmmo = clone.maxAmmo;
+		this.currentAmmo= clone.currentAmmo;
+		this.type= clone.type;
+		this.explode= clone.explode;
+		this.bounce= clone.bounce;
+		this.speed= clone.speed;
+		this.special=clone.special;
+		this.animationSet= clone.animationSet;
+		this.name= clone.name;
+		this.description= clone.description;
+		this.icon=  clone.icon;
+		this.selectable= clone.selectable;
+		this.projectile= clone.projectile;
+		
+	}
 }

@@ -8,20 +8,20 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Align;
 import de.paluno.game.Constants;
-import de.paluno.game.screens.PlayScreen;
 
 public class HealthBar implements Renderable {
 
-    private PlayScreen screen;
+    private World world;
     private Worm worm;
 
     private BitmapFont font;
     private GlyphLayout layout;
 
-    public HealthBar(PlayScreen screen, Worm worm) {
-        this.screen = screen;
+    public HealthBar(World world, Worm worm) {
+        this.world = world;
         this.worm = worm;
 
+        // TODO: load font from AssetManager
         font = new BitmapFont();
         // the text moves shaky if we use integer positions
         font.setUseIntegerPositions(false);
@@ -34,7 +34,7 @@ public class HealthBar implements Renderable {
         Body body = worm.getBody();
         if (body == null) {
             // the worm associated with this HealthBar does not exist anymore so just remove this object from the game
-            screen.forgetAfterUpdate(this);
+            world.forgetAfterUpdate(this);
             return;
         }
 
@@ -63,4 +63,9 @@ public class HealthBar implements Renderable {
 
         return color;
     }
+
+	public void setCloningParameters(HealthBar clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -2,8 +2,12 @@ package de.paluno.game;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 
 public class Assets {
+    public static final AssetDescriptor<TiledMap> map =
+            new AssetDescriptor<TiledMap>("map.tmx", TiledMap.class);
+
     public static final AssetDescriptor<Texture> ground =
             new AssetDescriptor<Texture>("Stone-0233.jpg", Texture.class);
     public static final AssetDescriptor<Texture> arrow =

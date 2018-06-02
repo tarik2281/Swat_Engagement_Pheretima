@@ -9,6 +9,7 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1350;
 		config.height = 900;
+		config.foregroundFPS = LwjglApplicationConfiguration.getDesktopDisplayMode().refreshRate;
 		new LwjglApplication(new SEPGame(), config);
 	}
 }

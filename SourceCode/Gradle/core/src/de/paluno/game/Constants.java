@@ -21,6 +21,10 @@ public class Constants {
 	public static final Color PLAYER_1_COLOR = Color.TEAL;
 	public static final Color PLAYER_2_COLOR = Color.FIREBRICK;
 
+	public static final String TILE_LAYER = "TileLayer";
+	public static final String COLLISION_LAYER = "CollisionLayer";
+	public static final String SPAWN_LAYER = "SpawnPositions";
+
 	// !!! all constants and parameters in methods and constructors should be given in world space (in meters),
 	//     unless explicitly stated !!!
 	public static final float SCREEN_SCALE = 100.0f;
@@ -52,12 +56,9 @@ public class Constants {
 	/**
 	 * game object attributes in world space (in meters)
 	 */
-	public static final float WORLD_WIDTH = 20.0f;
-	public static final float WORLD_HEIGHT = 10.0f;
-	public static final float GROUND_WIDTH = 7.5f;
-	public static final float GROUND_HEIGHT = 1.0f;
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
+	public static final float WORM_RADIUS_SQUARE = WORM_WIDTH * WORM_WIDTH / 4 + WORM_HEIGHT * WORM_HEIGHT / 4;
 
 	public static final float PROJECTILE_SPAWN_OFFSET = 25.0f * WORLD_SCALE;
 

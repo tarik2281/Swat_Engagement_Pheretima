@@ -17,7 +17,7 @@ import de.paluno.game.screens.PlayScreen;
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	private int characterNumber;
-	
+
 	private World world;
 	private Body body;
 	private PlayScreen screen;
@@ -51,7 +51,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	/*public Worm(int num, PlayScreen screen, Vector2 position) {
 		// Set given starting parameters
 		this.playerNumber = num;
-		this.screen = screen;
+		this.world = world;
 		this.spawnPosition = position;
 		
 		// Body will be setup from PlayScreen
@@ -86,17 +86,17 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.characterNumber = charNum;
 		this.world = player.getWorld();
 		this.assets = player.getAssets();
-		
+
 		int o = Math.round((float)Math.random());
 		if(o == 0) this.orientation = Constants.WORM_DIRECTION_LEFT;
 		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
-		
+
 		this.walkAnimation = new AnimatedSprite(this.assets.get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(this.assets.get(Assets.wormBreath));
 		this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
 
 		// Get our spawning position
-		this.spawnPosition = world.generateSpawnposition();
+		this.spawnPosition = world.generateSpawnPosition();
 
 		// Generate our physics body
 		this.setupBody();
@@ -160,7 +160,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
 		
 		// Worm fell off the world rim? Is ded.
-		if (!screen.getWorldBounds().contains(body.getPosition())) die();
+		if (!world.getWorldBounds().contains(body.getPosition())) die();
 	}
 	
 	/**
@@ -209,7 +209,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
 		fixtureDef.density = 0.5f;
-		fixtureDef.friction = 1.0f;
+		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;
 		
 		// Create, apply, done
@@ -481,7 +481,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void shoot() {if(canShoot() && currentWeapon != null) currentWeapon.shoot();}
 	
 	/**
-	 * Method to return a clone of this obejct
+	 * Method to return a clone of this object
 	 */
 	public Worm clone() {
 		Worm clone = new Worm();
@@ -494,7 +494,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public void setCloningParameters(Worm copy) {
 		this.characterNumber = copy.characterNumber;
-		
+
 		this.world = copy.world;
 		this.body = copy.body;
 		this.screen = copy.screen;
@@ -502,14 +502,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.assets = copy.assets;
 
 		this.spawnPosition = copy.spawnPosition;
-		
+
 		this.currentState = copy.currentState;
 
 		this.currentAnimation = copy.currentAnimation;
 		this.idleAnimation = copy.idleAnimation;
 		this.walkAnimation = copy.walkAnimation;
 		this.jumpAnimation = copy.jumpAnimation;
-		
+
 		this.movement = copy.movement;
 		this.moveLeft = copy.moveLeft;
 		this.moveRight = copy.moveRight;

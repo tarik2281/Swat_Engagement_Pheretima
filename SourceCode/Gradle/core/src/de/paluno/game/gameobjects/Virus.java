@@ -9,19 +9,16 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
 import de.paluno.game.Constants;
-import de.paluno.game.screens.PlayScreen;
 
 public class Virus implements PhysicsObject{
 	
 	private Body body;
 	private Worm worm;
-	private PlayScreen playScreen;
-	private Object world;
+	private World world;
 	
-	
-	public Virus(Worm worm, PlayScreen playScreen) {
+	public Virus(Worm worm, World world) {
 		this.worm = worm;
-		this.playScreen = playScreen;
+		this.world = world;
 	}
 
 	@Override
@@ -35,7 +32,7 @@ public class Virus implements PhysicsObject{
 		bodyDef.position.set(worm.getBody().getPosition());
 		bodyDef.type = BodyType.DynamicBody;
 		
-		this.body = playScreen.getWorld().createBody(bodyDef);
+		this.body = world.createBody(bodyDef);
 		
 		CircleShape circle = new CircleShape();
 		circle.setRadius(10 * Constants.WORLD_SCALE);
@@ -53,7 +50,7 @@ public class Virus implements PhysicsObject{
 		jointDef.localAnchorA.set(worm.getBody().getLocalCenter());
 		jointDef.localAnchorB.set(this.body.getLocalCenter());
 		
-		playScreen.getWorld().createJoint(jointDef);
+		world.createJoint(jointDef);
 		
 		circle.dispose();	
 	}
@@ -61,5 +58,10 @@ public class Virus implements PhysicsObject{
 	@Override
 	public Body getBody() {
 		return body;
+	}
+
+	public void setCloningParameters(Virus clone) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Projectile;
 import de.paluno.game.gameobjects.Worm;
+import de.paluno.game.gameobjects.ground.Ground;
 import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
@@ -43,13 +44,13 @@ public class CollisionHandler implements ContactListener {
 		}
 
 		// Worm -> Ground
-		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
+		if ((fixA.getUserData() == "Worm" && o2 instanceof Ground)) {
 			Worm worm = (Worm) o1;
 			worm.setStandsOnGround(true);
 			
 			System.out.println("Worm on Ground");
 			
-		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
+		} else if ((fixB.getUserData() == "Worm" && o1 instanceof Ground)) {
 			Worm worm = (Worm) o2;
 			worm.setStandsOnGround(true);
 			
@@ -82,14 +83,14 @@ public class CollisionHandler implements ContactListener {
 		// Projectile -> Ground
 		
 
-		if ((fixB.getUserData() == "Projectile" && fixA.getUserData() == "Ground")) {
+		if ((fixB.getUserData() == "Projectile" && o1 instanceof Ground)) {
 			
 			Projectile projectile = (Projectile) o2;
 			projectile.explode();
 			
 			System.out.println("Projectile collided with Ground");
 			
-		} else if ((fixB.getUserData() == "Ground" && fixA.getUserData() == "Projectile")) {
+		} else if ((o2 instanceof Ground && fixA.getUserData() == "Projectile")) {
 		
 			Projectile projectile = (Projectile) o1;
 			projectile.explode();
