@@ -14,9 +14,7 @@ public class Assets {
     public static final AssetDescriptor<AnimationData> wormBreath =
             new AssetDescriptor<AnimationData>("WormBreath.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> wormWalk =
-            new AssetDescriptor<AnimationData>("wwalk.xml", AnimationData.class);
-    public static final AssetDescriptor<AnimationData> wormEquipGun =
-            new AssetDescriptor<AnimationData>("whgnlnk.xml", AnimationData.class);
+            new AssetDescriptor<AnimationData>("WormWalk.xml", AnimationData.class);
     //WindIndicator
     public static final AssetDescriptor<Texture> windGreen =
             new AssetDescriptor<Texture>("Green", Texture.class);
@@ -26,7 +24,6 @@ public class Assets {
 
     public static final AssetDescriptor<Texture> windRed =
             new AssetDescriptor<Texture>("Red", Texture.class);
-            new AssetDescriptor<AnimationData>("WormWalk.xml", AnimationData.class);
 
     public static final AssetDescriptor<Texture> iconGun =
             new AssetDescriptor<Texture>("IconGun.png", Texture.class);

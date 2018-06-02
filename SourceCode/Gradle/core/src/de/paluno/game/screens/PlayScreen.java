@@ -192,13 +192,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         for (AssetDescriptor asset : Assets.PlayScreenAssets) {
             manager.load(asset);
         }
-        manager.load(Assets.map);
-        manager.load(Assets.wormWalk);
-        manager.load(Assets.wormBreath);
-        manager.load(Assets.wormEquipGun);
-        manager.load(Assets.arrow);
-        manager.load(Assets.projectile);
-        manager.load(Assets.ground);
+
         manager.load(Assets.windGreen);
         manager.load(Assets.windOrange);
         manager.load(Assets.windRed);
