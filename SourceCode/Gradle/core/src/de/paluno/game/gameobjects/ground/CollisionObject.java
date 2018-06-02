@@ -12,11 +12,15 @@ class CollisionObject {
         this.vertices = vertices;
     }
 
-    void createFixture(Body body) {
+    boolean createFixture(Body body) {
         ChainShape shape = ShapeFactory.createChainShape(vertices);
-        fixture = body.createFixture(shape, 0.0f);
-        fixture.setUserData(this);
-        shape.dispose();
+        if (shape != null) {
+            fixture = body.createFixture(shape, 0.0f);
+            fixture.setUserData(this);
+            shape.dispose();
+        }
+
+        return shape != null;
     }
 
     void destroyFixture() {

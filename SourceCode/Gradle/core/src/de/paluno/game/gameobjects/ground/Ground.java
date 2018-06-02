@@ -103,8 +103,8 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
 
     private void addCollisionObject(CollisionObject object) {
-        object.createFixture(body);
-        collisionObjects.add(object);
+        if (object.createFixture(body))
+            collisionObjects.add(object);
     }
 
     private void removeCollisionObject(CollisionObject object) {

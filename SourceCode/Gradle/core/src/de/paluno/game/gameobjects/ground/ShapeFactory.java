@@ -45,8 +45,6 @@ class ShapeFactory {
     }
 
     static ChainShape createChainShape(float[] v) {
-        ChainShape shape = new ChainShape();
-
         float[] escapedVertices = new float[v.length];
         int size = 0;
 
@@ -60,7 +58,12 @@ class ShapeFactory {
             }
         }
 
-        shape.createLoop(escapedVertices, 0, size);
+        ChainShape shape = null;
+
+        if (size / 2 > 2) {
+            shape = new ChainShape();
+            shape.createLoop(escapedVertices, 0, size);
+        }
 
         return shape;
     }
