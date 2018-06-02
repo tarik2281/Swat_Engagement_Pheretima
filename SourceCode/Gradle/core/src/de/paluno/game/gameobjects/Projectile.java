@@ -25,7 +25,12 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private Texture texture;
     private Sprite sprite;
 
-    public Projectile(World world, Vector2 position, Vector2 direction) {
+    private boolean exploded = false;
+
+    private Worm shootingWorm;
+    private boolean wormContactEnded = false;
+
+    public Projectile(World world, Worm shootingWorm, Vector2 position, Vector2 direction) {
         this.world = world;
         this.position = position;
         this.direction = direction;
@@ -34,6 +39,16 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
+
+        this.shootingWorm = shootingWorm;
+    }
+
+    public Worm getShootingWorm() {
+        return shootingWorm;
+    }
+
+    public boolean isWormContactEnded() {
+        return wormContactEnded;
     }
 
     @Override
@@ -41,6 +56,12 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         // check if the projectile is inside our world - if not, destroy it
         if (!world.getWorldBounds().contains(body.getPosition()))
             explode();
+
+        if (!wormContactEnded) {
+            float distanceSQ = shootingWorm.getBody().getPosition().dst2(body.getPosition());
+            if (distanceSQ > Constants.WORM_RADIUS_SQUARE + PROJECTILE_RADIUS * PROJECTILE_RADIUS)
+                wormContactEnded = true;
+        }
     }
 
     @Override
@@ -125,10 +146,13 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public void explode() {
-        world.addExplosion(body.getPosition(), 0.2f);
+        if (!exploded) {
+            exploded = true;
+            world.addExplosion(body.getPosition(), 0.2f);
 
-        world.forgetAfterUpdate(this);
-    	world.advanceGameState();
+            world.forgetAfterUpdate(this);
+            world.advanceGameState();
+        }
     }
 
 	public void setCloningParameters(Projectile clone) {

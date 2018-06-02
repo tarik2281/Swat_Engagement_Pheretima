@@ -41,6 +41,24 @@ public class World {
     private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
 
+    private ContactFilter contactFilter = new ContactFilter() {
+        @Override
+        public boolean shouldCollide(Fixture fixtureA, Fixture fixtureB) {
+            if (fixtureA.getUserData() == "Worm" && fixtureB.getUserData() == "Projectile") {
+                Projectile projectile = (Projectile)fixtureB.getBody().getUserData();
+                if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureA.getBody().getUserData())
+                    return false;
+            }
+            else if (fixtureB.getUserData() == "Worm" && fixtureA.getUserData() == "Projectile") {
+                Projectile projectile = (Projectile)fixtureA.getBody().getUserData();
+                if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureB.getBody().getUserData())
+                    return false;
+            }
+
+            return true;
+        }
+    };
+
     public World(PlayScreen screen) {
         this.screen = screen;
 
@@ -51,6 +69,7 @@ public class World {
 
         world = new com.badlogic.gdx.physics.box2d.World(Constants.GRAVITY, true);
         world.setContactListener(new CollisionHandler());
+        world.setContactFilter(contactFilter);
 
         worldBounds = new Rectangle();
 
@@ -258,10 +277,9 @@ public class World {
         Vector2 direction = new Vector2(1, 0).rotate(indicator.getRotate());
 
         // add an offset to the starting position, so the projectile does not collide with the shooting worm
-        // TODO: projectile spawns inside ChainShape
-        position.add(direction.x * Constants.PROJECTILE_SPAWN_OFFSET,
-                direction.y * Constants.PROJECTILE_SPAWN_OFFSET);
-        Projectile projectile = new Projectile(this, position, direction);
+        //position.add(direction.x * Constants.PROJECTILE_SPAWN_OFFSET,
+        //        direction.y * Constants.PROJECTILE_SPAWN_OFFSET);
+        Projectile projectile = new Projectile(this, worm, position, direction);
 
         registerAfterUpdate(projectile);
         forgetAfterUpdate(indicator);
