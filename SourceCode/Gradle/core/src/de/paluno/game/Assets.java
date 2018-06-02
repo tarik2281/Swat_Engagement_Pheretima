@@ -8,17 +8,37 @@ public class Assets {
     public static final AssetDescriptor<TiledMap> map =
             new AssetDescriptor<TiledMap>("map.tmx", TiledMap.class);
 
-    public static final AssetDescriptor<Texture> ground =
-            new AssetDescriptor<Texture>("Stone-0233.jpg", Texture.class);
     public static final AssetDescriptor<Texture> arrow =
             new AssetDescriptor<Texture>("Arrow.png", Texture.class);
-    public static final AssetDescriptor<Texture> projectile =
-            new AssetDescriptor<Texture>("Projectile.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> wormBreath =
-            new AssetDescriptor<AnimationData>("wbrth1.xml", AnimationData.class);
+            new AssetDescriptor<AnimationData>("WormBreath.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> wormWalk =
-            new AssetDescriptor<AnimationData>("wwalk.xml", AnimationData.class);
-    public static final AssetDescriptor<AnimationData> wormEquipGun =
-            new AssetDescriptor<AnimationData>("whgnlnk.xml", AnimationData.class);
+            new AssetDescriptor<AnimationData>("WormWalk.xml", AnimationData.class);
+
+    public static final AssetDescriptor<Texture> iconGun =
+            new AssetDescriptor<Texture>("IconGun.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconGrenade =
+            new AssetDescriptor<Texture>("IconGrenade.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconBazooka =
+            new AssetDescriptor<Texture>("IconBazooka.png", Texture.class);
+
+    public static final AssetDescriptor<Texture> projectileGun =
+            new AssetDescriptor<Texture>("ProjectileGun.png", Texture.class);
+    public static final AssetDescriptor<Texture> projectileGrenade =
+            new AssetDescriptor<Texture>("ProjectileGrenade.png", Texture.class);
+    public static final AssetDescriptor<Texture> projectileBazooka =
+            new AssetDescriptor<Texture>("ProjectileBazooka.png", Texture.class);
+
+    public static final AssetDescriptor<AnimationData> weaponGun =
+            new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
+    public static final AssetDescriptor<AnimationData> weaponGrenade =
+            new AssetDescriptor<AnimationData>("WeaponGrenade.xml", AnimationData.class);
+    public static final AssetDescriptor<AnimationData> weaponBazooka =
+            new AssetDescriptor<AnimationData>("WeaponBazooka.xml", AnimationData.class);
+
+    public static final AssetDescriptor[] PlayScreenAssets = new AssetDescriptor[] {
+            map, arrow, wormBreath, wormWalk, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
+            weaponGun, weaponGrenade, weaponBazooka
+    };
 }

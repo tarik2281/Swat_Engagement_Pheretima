@@ -35,7 +35,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         this.position = position;
         this.direction = direction;
 
-        texture = world.getAssetManager().get(Assets.projectile);
+        texture = world.getAssetManager().get(Assets.projectileGun);
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();

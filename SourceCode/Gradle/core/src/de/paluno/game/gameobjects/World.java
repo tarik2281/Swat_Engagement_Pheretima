@@ -31,7 +31,7 @@ public class World {
     private com.badlogic.gdx.physics.box2d.World world;
     private Rectangle worldBounds;
 
-    private Worm[] playerWorms;
+    private Player[] players;
     private ShotDirectionIndicator[] shotDirectionIndicators;
 
     private Ground ground;
@@ -85,7 +85,7 @@ public class World {
 
         debugRenderer = new Box2DDebugRenderer();
 
-        playerWorms = new Worm[Constants.NUM_PLAYERS];
+        players = new Player[Constants.NUM_PLAYERS];
         shotDirectionIndicators = new ShotDirectionIndicator[Constants.NUM_PLAYERS];
 
         initializePlayer(Constants.PLAYER_NUMBER_1);
@@ -97,7 +97,7 @@ public class World {
     }
 
     private void initializePlayer(int playerNumber) {
-        Player player = new Player(playerNumber, this, getAssetManager());
+        players[playerNumber] = new Player(playerNumber, this, getAssetManager());
         // TODO: add worms
 
         /*Worm worm = new Worm(playerNumber, this, wormPosition);
@@ -223,9 +223,11 @@ public class World {
     public void advanceGameState() {
         switch (gameState) {
             case PLAYERONETURN:
+                getCurrentPlayer().shiftTurn();
                 setGameState(GameState.SHOOTING);
                 break;
             case PLAYERTWOTURN:
+                getCurrentPlayer().shiftTurn();
                 setGameState(GameState.SHOOTING);
                 break;
             case SHOOTING:
@@ -254,17 +256,17 @@ public class World {
     }
 
     public Worm getCurrentWorm() {
-        int player = getCurrentPlayer();
-        if (player >= 0)
-            return playerWorms[player];
+        Player player = getCurrentPlayer();
+        if (player != null)
+            return player.getCurrentWorm();
 
         return null;
     }
 
     public ShotDirectionIndicator getCurrentIndicator() {
-        int player = getCurrentPlayer();
-        if (player >= 0)
-            return shotDirectionIndicators[player];
+        Player player = getCurrentPlayer();
+        if (player != null)
+            return shotDirectionIndicators[player.getPlayerNumber()];
 
         return null;
     }
@@ -346,20 +348,16 @@ public class World {
         objectForgetQueue.clear();
     }
 
-    private int getCurrentPlayer() {
-        int player = -1;
-
+    private Player getCurrentPlayer() {
         switch (gameState) {
             case PLAYERONETURN:
             case GAMEOVERPLAYERONEWON:
-                player = Constants.PLAYER_NUMBER_1;
-                break;
+                return players[Constants.PLAYER_NUMBER_1];
             case PLAYERTWOTURN:
             case GAMEOVERPLAYERTWOWON:
-                player = Constants.PLAYER_NUMBER_2;
-                break;
+                return players[Constants.PLAYER_NUMBER_2];
         }
 
-        return player;
+        return null;
     }
 }

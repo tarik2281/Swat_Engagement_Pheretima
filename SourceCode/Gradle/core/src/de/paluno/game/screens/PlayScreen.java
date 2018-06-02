@@ -3,6 +3,7 @@ package de.paluno.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -188,13 +189,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-        manager.load(Assets.map);
-        manager.load(Assets.wormWalk);
-        manager.load(Assets.wormBreath);
-        manager.load(Assets.wormEquipGun);
-        manager.load(Assets.arrow);
-        manager.load(Assets.projectile);
-        manager.load(Assets.ground);
+        for (AssetDescriptor asset : Assets.PlayScreenAssets) {
+            manager.load(asset);
+        }
 
         return false;
     }
