@@ -1,5 +1,5 @@
 <AnimatedSprite>
-    <Texture>whgnlnk.png</Texture>
+    <Texture>WeaponGrenade.png</Texture>
     <Columns>1</Columns>
     <Rows>10</Rows>
     <FrameInterval>0.06</FrameInterval>

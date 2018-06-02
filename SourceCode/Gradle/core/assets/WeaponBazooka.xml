@@ -1,0 +1,8 @@
+<AnimatedSprite>
+    <Texture>WeaponBazooka.png</Texture>
+    <Columns>1</Columns>
+    <Rows>7</Rows>
+    <FrameInterval>0.06</FrameInterval>
+    <SpriteOffset>0</SpriteOffset>
+    <PlayMode>Normal</PlayMode>
+</AnimatedSprite>
