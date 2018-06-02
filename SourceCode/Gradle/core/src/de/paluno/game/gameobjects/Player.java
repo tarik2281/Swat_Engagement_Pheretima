@@ -4,6 +4,7 @@ import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
+import de.paluno.game.InputHandler;
 
 public class Player implements Updatable {
 	private int playerNum;
@@ -14,6 +15,7 @@ public class Player implements Updatable {
 	
 	private World world;
 	private AssetManager assets;
+	private InputHandler input;
 	
 	private GameState gameState;
 	
@@ -38,9 +40,12 @@ public class Player implements Updatable {
 		
 		for(int i = 0; i < characterNum; i++) {
 			characters[i] = new Worm(this, i+1);
+			world.registerAfterUpdate(characters[i]);
 		}
 		
 		this.assets = assets;
+		this.input = InputHandler.getInstance();
+		input.registerHandler(Constants.KEY_DO_ACTION, this, "handleAction", false);
 	}
 	/**
 	 * Handler for GameLoop's update cycle - needed from Interface updatable
@@ -143,12 +148,19 @@ public class Player implements Updatable {
 	 */
 	public void shoot() {if(getCurrentWorm() != null) getCurrentWorm().shoot();}
 	
+	/**
+	 * Method to return a clone of this object
+	 * @return clone
+	 */
 	public Player clone() {
 		Player clone = new Player();
 		clone.setCloningParameters(this);
 		return clone;
 	}
-	
+	/**
+	 * Method to copy over all variables from a second Worm - used for cloning
+	 * @param copy - The reference to the Worm to copy from
+	 */
 	public void setCloningParameters(Player copy) {
 		this.playerNum = copy.playerNum;
 		
@@ -160,5 +172,16 @@ public class Player implements Updatable {
 		this.assets = copy.assets;
 		
 		this.gameState = this.gameState;
+	}
+	
+	/**
+	 * Method to handle the DO_ACTION Key being pressed, based on current game situation
+	 * @param keycode - Forced parameter, in this case not used.
+	 */
+	public void handleAction(int keycode) {
+		if(keycode != Constants.KEY_DO_ACTION) return;
+		
+		if(this.gameState == GameState.SHOOTING) this.shoot();
+		else if(this.isPlayerTurn()) this.getCurrentWorm().showWeaponSelector();
 	}
 }

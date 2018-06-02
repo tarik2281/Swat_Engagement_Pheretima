@@ -23,6 +23,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private PlayScreen screen;
 	private Player player;
 	private AssetManager assets;
+	private WeaponSelector selector;
 
 	private Vector2 spawnPosition;
 	
@@ -87,10 +88,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.world = player.getWorld();
 		this.assets = player.getAssets();
 
+		// Set a random spawning direction, so not every Worm looks the same
 		int o = Math.round((float)Math.random());
 		if(o == 0) this.orientation = Constants.WORM_DIRECTION_LEFT;
 		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
 
+		// Load animations
 		this.walkAnimation = new AnimatedSprite(this.assets.get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(this.assets.get(Assets.wormBreath));
 		this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
@@ -106,6 +109,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
+		
+		// Setup our weapon selector
+		this.selector = new WeaponSelector(this);
+		for(int i = 0; i < this.weapons.length; i++) {
+			this.selector.registerWeapon(this.weapons[i].getWeaponStats());
+		}
 
 		// Finally setup Animations
 		updateAnimation();
@@ -482,6 +491,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	/**
 	 * Method to return a clone of this object
+	 * @return clone
 	 */
 	public Worm clone() {
 		Worm clone = new Worm();
@@ -524,5 +534,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		this.weapons = copy.weapons;
 		this.currentWeapon = copy.currentWeapon;
+	}
+	
+	/**
+	 * Method to call the WeaponsSelector's show() method, to make it visible and be able to select weapons
+	 */
+	public void showWeaponSelector() {
+		this.selector.show();
 	}
 }
