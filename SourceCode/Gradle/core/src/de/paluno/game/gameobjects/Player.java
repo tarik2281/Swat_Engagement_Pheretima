@@ -3,10 +3,7 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
-import de.paluno.game.Constants;
-import de.paluno.game.GameState;
-import de.paluno.game.InputHandler;
-import de.paluno.game.WeaponType;
+import de.paluno.game.*;
 
 public class Player implements Updatable {
 	private int playerNum;
@@ -15,6 +12,8 @@ public class Player implements Updatable {
 	public Worm[] characters;
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
+	private WindDirectionIndicator windDirectionIndicator;
+	private WindHandler windHandler;
 	private int turn = 1;
 	
 	private World world;
@@ -98,13 +97,15 @@ public class Player implements Updatable {
 
         setupWeapons();
         setupWorms();
-
+        windHandler = new WindHandler();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
+		this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
 	}
 
 	public ShotDirectionIndicator getShotDirectionIndicator() {
 		return shotDirectionIndicator;
 	}
+	public WindDirectionIndicator getWindDirectionIndicator(){ return windDirectionIndicator; }
 
 	private void setupWorms() {
         this.characters = new Worm[characterNum];
@@ -156,8 +157,9 @@ public class Player implements Updatable {
 
 	public void onBeginTurn() {
 		world.registerAfterUpdate(getShotDirectionIndicator());
+		world.registerAfterUpdate(getWindDirectionIndicator());
 		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
-
+		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
 		getCurrentWorm().equipWeapon(weapons[2]);
 
 		this.input = InputHandler.getInstance();
@@ -174,6 +176,7 @@ public class Player implements Updatable {
 
 	public void onEndTurn() {
         world.forgetAfterUpdate(getShotDirectionIndicator());
+        world.forgetAfterUpdate(getWindDirectionIndicator());
 
 		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 		getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);

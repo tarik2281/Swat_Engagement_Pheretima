@@ -37,7 +37,7 @@ public class WindHandler implements Updatable {
         // scl = magnitude which manages the speed
         wind.scl(0.0001f);
         // System.out.println("Angle: " + degreeWind);
-        //System.out.println("X: " + this.x);
+        System.out.println("X: " + this.x);
 
         // angle in degree of this vector 0° || 180°
         // for indicator to rotate the arrow in the direction the wind is applied

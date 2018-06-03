@@ -12,33 +12,41 @@ import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.screens.PlayScreen;
 
 public class WindDirectionIndicator implements Renderable {
-    private PlayScreen playScreen;
-   private Worm worm;
+
+
     private int playerNumber;
     private Texture texture;
     private Sprite sprite;  // Graphical object which implements a texture to draw the object
     private WindHandler windHandler;
     private World world;
+    private Worm worm;
 
-    public WindDirectionIndicator(int playerNumber, PlayScreen playScreen, Worm worm, WindHandler windHandler) {
-        this.playScreen = playScreen;
+    public WindDirectionIndicator(int playerNumber, World world, WindHandler windHandler) {
+        this.world = world;
         this.playerNumber = playerNumber;
-        this.worm = worm;
+
         this.windHandler = windHandler;
 
-        texture = new Texture(Gdx.files.internal("wind.png"));
-        sprite = new Sprite(texture);
+
 
         if ((windHandler.getX() >= 0 && windHandler.getX() <= 2) || (windHandler.getX() <= 0 && windHandler.getX() >= -2)){
             texture = world.getAssetManager().get(Assets.windGreen);
+            System.out.println(windHandler.getX());
         }else if ((windHandler.getX() >= 2 && windHandler.getX() <= 4) ||
         (windHandler.getX() <= -2 && windHandler.getX() >= -4)){
             texture = world.getAssetManager().get(Assets.windOrange);
+            System.out.println(windHandler.getX());
         }else{
             texture = world.getAssetManager().get(Assets.windRed);
+            System.out.println(windHandler.getX());
         }
 
+        sprite = new Sprite(texture);
+
     }
+        public void attachToWorm(Worm worm) {
+            this.worm = worm;
+        }
 
 
 
