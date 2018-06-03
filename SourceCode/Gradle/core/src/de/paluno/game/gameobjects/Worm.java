@@ -14,39 +14,33 @@ import de.paluno.game.GameState;
 import de.paluno.game.WeaponType;
 import de.paluno.game.screens.PlayScreen;
 
+import java.util.ArrayList;
+
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
-	private int characterNumber;
+    private int characterNumber;
 
 	private World world;
 	private Body body;
-	private PlayScreen screen;
 	private Player player;
-	private AssetManager assets;
-	private WeaponSelector selector;
 
 	private Vector2 spawnPosition;
-	
-	private GameState currentState;
 
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
 	private AnimatedSprite walkAnimation;
 	private AnimatedSprite jumpAnimation;
+	private AnimatedSprite weaponAnimation;
 	
 	private int movement = Constants.MOVEMENT_NO_MOVEMENT;
-	private boolean moveLeft = false;
-	private boolean moveRight = false;
-	private int orientation;;
+	private int orientation;
 	private boolean jump = false;
-	private boolean standsOnGround;
+	private int groundContacts = 0;
 
-	private boolean gunEquipped = false;
 	private boolean gunUnequipping = false;
 
 	private int health;
 
-	private Weapon[] weapons;
 	private Weapon currentWeapon = null;
 
 	/*public Worm(int num, PlayScreen screen, Vector2 position) {
@@ -82,11 +76,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param charNum - Our character number
 	 */
 	public Worm(Player player, int charNum) {
+	    characterNumber = charNum;
+
 		// Link references
 		this.player = player;
-		this.characterNumber = charNum;
 		this.world = player.getWorld();
-		this.assets = player.getAssets();
 
 		// Set a random spawning direction, so not every Worm looks the same
 		int o = Math.round((float)Math.random());
@@ -94,27 +88,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
 
 		// Load animations
-		this.walkAnimation = new AnimatedSprite(this.assets.get(Assets.wormWalk));
-		this.idleAnimation = new AnimatedSprite(this.assets.get(Assets.wormBreath));
-		this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
+		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
+		//this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
 
 		// Get our spawning position
 		this.spawnPosition = world.generateSpawnPosition();
 
-		// Generate our physics body
-		this.setupBody();
-
-		// Generate our deadly arsenal
-		this.setupWeapons();
-
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
-		
-		// Setup our weapon selector
-		this.selector = new WeaponSelector(this);
-		for(int i = 0; i < this.weapons.length; i++) {
-			this.selector.registerWeapon(this.weapons[i].getWeaponStats());
-		}
 
 		// Finally setup Animations
 		updateAnimation();
@@ -128,18 +110,17 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void update(float delta, GameState state) {
 		// No body anymore? Shouldn't happen, catch
 		if(this.body == null) return;
-		
-		// Update gamestate
-		this.currentState = state;
 
         // Now we apply movements - therefor we need our current position
 		Vector2 currentPos = body.getWorldCenter();
 
-		if(this.jump && this.canJump()) {
-		    // We shall jump - AND are allowed to - so let's apply some vertical impulse
-			// TODO: maybe jump and landing animations
-			this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
-					currentPos.x, currentPos.y, true);
+		if(this.jump) {
+			if (canJump()) {
+				// We shall jump - AND are allowed to - so let's apply some vertical impulse
+				// TODO: maybe jump and landing animations
+				this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
+						currentPos.x, currentPos.y, true);
+			}
 		}
 		// Whether or not we actually jumped, remove the order.
 		if(getJump()) this.jump = false;
@@ -149,19 +130,21 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		Vector2 currentVel = body.getLinearVelocity();
 		float desiredVel = 0.0f;
 
-		/*switch (movement) {
+		switch (movement) {
             case Constants.MOVEMENT_LEFT:
                 desiredVel = -Constants.MOVE_VELOCITY;
                 break;
-            case Constants.MOVEMENT_NO_MOVEMENT: default:
-                desiredVel = 0.0f;
+            case Constants.MOVEMENT_NO_MOVEMENT:
+            default:
+                //if (isStandsOnGround())
+                    desiredVel = 0.0f;
+                //else
+                    //desiredVel = (orientation == Constants.WORM_DIRECTION_LEFT) ? -Constants.MOVE_VELOCITY : Constants.MOVE_VELOCITY;
                 break;
             case Constants.MOVEMENT_RIGHT:
                 desiredVel = Constants.MOVE_VELOCITY;
                 break;
-        }*/
-		if(moveLeft) desiredVel = -Constants.MOVE_VELOCITY;
-		else if(moveRight) desiredVel = Constants.MOVE_VELOCITY;
+        }
 
         float velChange = desiredVel - currentVel.x;
         // Finally we calculate the actual impulse force, based on body mass
@@ -185,21 +168,24 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// (Based on screen size <-> world size calculations)
 		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
 
-        if (gunUnequipping && currentAnimation.isAnimationFinished()) {
-			// The weapon should be uneuqipping and is finished with that - update
-        	gunEquipped = false;
-        	gunUnequipping = false;
-        	updateAnimation();
-		}
+		if (currentAnimation != null) {
+			if (gunUnequipping && currentAnimation.isAnimationFinished()) {
+				// The weapon should be uneuqipping and is finished with that - update
+				currentWeapon = null;
+				gunUnequipping = false;
+				updateAnimation();
+			}
 
-        // And finally draw it
-		currentAnimation.setPosition(currentPos);
-		currentAnimation.draw(batch, delta);
+			// And finally draw it
+			currentAnimation.setPosition(currentPos);
+			currentAnimation.draw(batch, delta);
+		}
 	}
 
 	/**
 	 * Method to setup our actual physics body
 	 */
+	@Override
 	public void setupBody() {
 		// Blueprint with spawning position and BodyType
 		BodyDef bodyDef = new BodyDef();
@@ -207,10 +193,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		bodyDef.type = BodyType.DynamicBody;
 		
 		// Create the actual physics body in our current game world
-		this.body = this.world.createBody(bodyDef);
-		//body.setFixedRotation(true);
+		this.body = world.createBody(bodyDef);
+		body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
+        CircleShape shape = new CircleShape();
+        shape.setRadius(Constants.WORM_HEIGHT / 2.0f);
 		PolygonShape bodyRect = new PolygonShape();
 		bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
 
@@ -229,42 +217,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Get rid of temporary material properly
 		bodyRect.dispose();
 	}
-	
-	protected void setupWeapons() {
-		// TODO: Outsource weapon stats and make retrieval more dynamic
-		/*Object[][][] weaponStats = new Object[][][] {
-			{
-				{"Rakentenwerfer",
-				 "Verschie� eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Fl�chenschaden an allen Objekten verursacht.",
-				 null}
-			},
-			{
-				{"Sturmgewehr",
-				 "Verschie�t ein schnelles, aber daf�r schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an W�rmern verursacht.",
-				 null}
-			},
-			{
-				{"Handgranate",
-				 "Eine geworfene Handgranate, die umherh�pft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.",
-				 null}
-			}
-		};
-		int i, j = 0, k = 0;
-		WeaponType type;
 
-		this.weapons = new Weapon[Constants.WEAPON_ARSENAL_SIZE];
-		for(i = 0; i < Constants.WEAPON_ARSENAL_SIZE && k < 3; i++) {
-			switch(k) {
-				default: case 0: type = WeaponType.WEAPON_PROJECTILE; break;
-				case 1: type = WeaponType.WEAPON_PROJECTILE; break;
-				case 2: type = WeaponType.WEAPON_PROJECTILE; break;
-			}
-		}*/
-		this.weapons = new Weapon[Constants.WEAPON_ARSENAL_SIZE];
-		this.weapons[0] = new Weapon(this, WeaponType.WEAPON_PROJECTILE, "Raketenwerfer", "Verschie� eine langsame, ungelenkte Rakete, die von der Schwerkraft und von Wind beeinfluss wird und explosiven Fl�chenschaden an allen Objekten verursacht.", null);
-		this.weapons[1] = new Weapon(this, WeaponType.WEAPON_RIFLE, "Sturmgewehr", "Verschie�t ein schnelles, aber daf�r schwaches Projektil, dass stur geradeaus fliegt und nur Schaden an W�rmern verursacht.", null, Constants.WEAPON_AMMO_RIFLE);
-		this.weapons[2] = new Weapon(this, WeaponType.WEAPON_THROWABLE, "Handgranate", "Eine geworfene Handgranate, die umherh�pft und nach "+Constants.WEAPON_THROWABLE_TIMER+" Sekunden detoniert.", null, Constants.WEAPON_AMMO_THROWABLE);
-	}
+	public void equipWeapon(Weapon weapon) {
+	    currentWeapon = weapon;
+	    weaponAnimation = weapon.createAnimatedSprite();
+
+	    gunUnequipping = false;
+	    updateAnimation();
+    }
 
 	/**
 	 * Getter method for our physics body
@@ -281,17 +241,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public int getPlayerNumber() {return this.player.getPlayerNumber();}
 	/**
-	 * Soft setter method for animation state - set animation to equipGun
-	 */
-	public void equipGun() {
-		gunEquipped = true;
-		updateAnimation();
-    }
-	/**
 	 * Soft setter method for animation state - reverse gun animation
 	 */
     public void unequipGun() {
-        if (gunEquipped) {
+        if (currentWeapon != null) {
 			gunUnequipping = true;
 			updateAnimation();
 		}
@@ -324,7 +277,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//screen.forgetAfterUpdate(this);
 		//screen.wormDied(this);
 		this.player.characterDied(this.characterNumber);
-		this.setBodyToNullReference();
+		//this.setBodyToNullReference();
 	}
 	
 	/**
@@ -342,20 +295,35 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public boolean canShoot() {
 		return this.player.isPlayerTurn() &&
-				this.characterNumber == this.player.getTurn() &&
-				this.currentState == GameState.SHOOTING;
+				this.characterNumber == this.player.getTurn();
 	}
 	
 	/**
 	 * Getter method for character's ground status
 	 * @return standsOnGround
 	 */
-	public boolean isStandsOnGround() {return this.standsOnGround;}
-	/**
-	 * Setter method for character's ground status
-	 * @param onGround - Is the character on the ground now?
-	 */
-	public void setStandsOnGround(boolean onGround) {this.standsOnGround = onGround;}
+	public boolean isStandsOnGround() {
+	    if (getBody() == null) return true;
+	    return getBody().getLinearVelocity().y > -0.1f && getBody().getLinearVelocity().y < 0.1f;
+	}
+
+	public void beginContact() {
+		boolean stoodOnGround = isStandsOnGround();
+
+		groundContacts++;
+
+		if (!stoodOnGround)
+			updateAnimation();
+	}
+
+	public void endContact() {
+	    if (--groundContacts < 0)
+	        throw new IllegalStateException("Already ended all contacts");
+
+		if (!isStandsOnGround())
+			updateAnimation();
+	}
+
 	/**
 	 * Setter method for character's movement orders and orientation
 	 * @param newMovementCode - Constant based movement code for left, right or stop
@@ -366,7 +334,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		this.movement = newMovementCode;
 
-		if (movement != Constants.MOVEMENT_NO_MOVEMENT) {
+		if (isStandsOnGround() && movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			// The new movementCode is a move-order? Update orientation
 			switch (movement) {
 				case Constants.MOVEMENT_LEFT:
@@ -379,32 +347,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		}
 
 		// If we got this far - something WILL change, so reset the animations just in case
-		updateAnimation();
-	}
-	public void setMovement(int newMovementCode, boolean set) {
-		switch(newMovementCode) {
-			case Constants.MOVEMENT_LEFT:
-				if(set) {
-					if(moveLeft) return;
-					moveLeft = true;
-					orientation = Constants.WORM_DIRECTION_LEFT;
-				} else {
-					if(!moveLeft) return;
-					moveLeft = false;
-				}
-				break;
-			case Constants.MOVEMENT_RIGHT:
-				if(set) {
-					if(moveRight) return;
-					moveRight = true;
-					orientation = Constants.WORM_DIRECTION_RIGHT;
-				} else {
-					if(!moveRight) return;
-					moveRight = false;
-				}
-				break;
-		}
-
 		updateAnimation();
 	}
 
@@ -429,19 +371,21 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 				break;
 		}*/
 
-		if(!standsOnGround) currentAnimation = jumpAnimation;
-		else if(moveLeft || moveRight) currentAnimation = walkAnimation;
+		if(!isStandsOnGround()) currentAnimation = jumpAnimation;
+		else if(movement != Constants.MOVEMENT_NO_MOVEMENT) currentAnimation = walkAnimation;
 		else {
-			if(gunEquipped) currentAnimation = getCurrentWeapon().getAnimation();
+			if(getCurrentWeapon() != null) currentAnimation = weaponAnimation;
 			else currentAnimation = idleAnimation;
 		}
 
 		// flip the animation if needed since the animations are only for the left direction
-		currentAnimation.setOrientation(orientation);
-		currentAnimation.reset();
+		if (currentAnimation != null) {
+			currentAnimation.setOrientation(orientation);
+			currentAnimation.reset();
 
-		if (gunEquipped && gunUnequipping)
-			currentAnimation.reverse();
+			if (currentWeapon != null && gunUnequipping)
+				currentAnimation.reverse();
+		}
 	}
 
 	/**
@@ -468,16 +412,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Getter method for global Asset Manager
 	 * @return AssetManager
 	 */
-	public AssetManager getAssets() {return this.assets;}
-	/**
-	 * Soft setter method for the character's currently selected weapon
-	 * @param weaponId - int 0 - WEAPON_ARSENAL_SIZE-1 number of the weapon to select
-	 */
-	public void setCurrentWeapon(int weaponId) {
-		if(weaponId < 0) weaponId = 0;
-		else if(weaponId >= Constants.WEAPON_ARSENAL_SIZE) weaponId = Constants.WEAPON_ARSENAL_SIZE - 1;
-		this.currentWeapon = weapons[weaponId];
-	}
+	public AssetManager getAssets() {return player.getAssets();}
 	/**
 	 * Getter method for the currently selected weapon
 	 * @return current Weapon
@@ -487,7 +422,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	/**
 	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
 	 */
-	public void shoot() {if(canShoot() && currentWeapon != null) currentWeapon.shoot();}
+	public void shoot() {
+	    if(canShoot() && currentWeapon != null)
+	        currentWeapon.shoot();
+	}
 	
 	/**
 	 * Method to return a clone of this object
@@ -507,13 +445,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		this.world = copy.world;
 		this.body = copy.body;
-		this.screen = copy.screen;
 		this.player = copy.player;
-		this.assets = copy.assets;
 
 		this.spawnPosition = copy.spawnPosition;
-
-		this.currentState = copy.currentState;
 
 		this.currentAnimation = copy.currentAnimation;
 		this.idleAnimation = copy.idleAnimation;
@@ -521,25 +455,20 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.jumpAnimation = copy.jumpAnimation;
 
 		this.movement = copy.movement;
-		this.moveLeft = copy.moveLeft;
-		this.moveRight = copy.moveRight;
 		this.orientation = copy.orientation;
 		this.jump = copy.jump;
-		this.standsOnGround = copy.standsOnGround;
 
-		this.gunEquipped = copy.gunEquipped;
 		this.gunUnequipping = copy.gunUnequipping;
 
 		this.health = copy.health;
 
-		this.weapons = copy.weapons;
 		this.currentWeapon = copy.currentWeapon;
-	}
-	
-	/**
+}
+
+    /**
 	 * Method to call the WeaponsSelector's show() method, to make it visible and be able to select weapons
 	 */
 	public void showWeaponSelector() {
-		this.selector.show();
+		//this.selector.show();
 	}
 }

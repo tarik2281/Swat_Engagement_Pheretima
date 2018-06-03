@@ -46,13 +46,16 @@ public class CollisionHandler implements ContactListener {
 		// Worm -> Ground
 		if ((fixA.getUserData() == "Worm" && o2 instanceof Ground)) {
 			Worm worm = (Worm) o1;
-			worm.setStandsOnGround(true);
+			worm.beginContact();
+			//worm.setStandsOnGround(true);
+
 			
 			System.out.println("Worm on Ground");
 			
 		} else if ((fixB.getUserData() == "Worm" && o1 instanceof Ground)) {
 			Worm worm = (Worm) o2;
-			worm.setStandsOnGround(true);
+			worm.beginContact();
+			//worm.setStandsOnGround(true);
 			
 			System.out.println("Worm on Ground!");
 			
@@ -63,8 +66,10 @@ public class CollisionHandler implements ContactListener {
 		if ((fixB.getUserData() == "Projectile" && fixA.getUserData() == "Worm")) {
 			Worm worm = (Worm) o1;
 			Projectile projectile = (Projectile) o2;
-			projectile.explode();
-			worm.takeDamage(Constants.PROJECTILE_DAMAGE);
+			if (projectile.explodeOnCollision()) {
+				projectile.explode();
+				worm.takeDamage(Constants.PROJECTILE_DAMAGE);
+			}
 			
 			System.out.println("Projectile collided with Worm!");
 			System.out.println("Worms life = " + worm.getHealth());
@@ -72,8 +77,11 @@ public class CollisionHandler implements ContactListener {
 		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Projectile")) {
 			Worm worm = (Worm) o2;
 			Projectile projectile = (Projectile) o1;
-			projectile.explode();
-			worm.takeDamage(Constants.PROJECTILE_DAMAGE);
+
+			if (projectile.explodeOnCollision()) {
+				projectile.explode();
+				worm.takeDamage(Constants.PROJECTILE_DAMAGE);
+			}
 			
 			System.out.println("Projectile collided with Worm!");
 			System.out.println("Worms life = " + worm.getHealth());
@@ -86,6 +94,7 @@ public class CollisionHandler implements ContactListener {
 		if ((fixB.getUserData() == "Projectile" && o1 instanceof Ground)) {
 			
 			Projectile projectile = (Projectile) o2;
+			if (projectile.explodeOnCollision())
 			projectile.explode();
 			
 			System.out.println("Projectile collided with Ground");
@@ -93,6 +102,7 @@ public class CollisionHandler implements ContactListener {
 		} else if ((o2 instanceof Ground && fixA.getUserData() == "Projectile")) {
 		
 			Projectile projectile = (Projectile) o1;
+			if (projectile.explodeOnCollision())
 			projectile.explode();
 			
 			System.out.println("Projectile collided with Ground");
@@ -125,16 +135,18 @@ public class CollisionHandler implements ContactListener {
 		
 		
 		// Worm -> jump || Worm -> out of world
-		if ((fixA.getUserData() == "Worm" && fixB.getUserData() == "Ground")) {
+		if ((fixA.getUserData() == "Worm" && o2 instanceof Ground)) {
 			Worm worm = (Worm) o1;
-			worm.setStandsOnGround(false);
+			worm.endContact();
+			//worm.setStandsOnGround(false);
 			
 			
 			System.out.println("Worm not on the Ground!");
 			
-		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Ground")) {
+		} else if ((fixB.getUserData() == "Worm" && o1 instanceof Ground)) {
 			Worm worm = (Worm) o2;
-			worm.setStandsOnGround(false);
+			worm.endContact();
+			//worm.setStandsOnGround(false);
 			
 			System.out.println("Worm not on the Ground!");
 			

@@ -32,7 +32,6 @@ public class World {
     private Rectangle worldBounds;
 
     private Player[] players;
-    private ShotDirectionIndicator[] shotDirectionIndicators;
 
     private Ground ground;
     private ExplosionMaskRenderer explosionMaskRenderer;
@@ -41,22 +40,31 @@ public class World {
     private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
 
-    private ContactFilter contactFilter = new ContactFilter() {
-        @Override
-        public boolean shouldCollide(Fixture fixtureA, Fixture fixtureB) {
-            if (fixtureA.getUserData() == "Worm" && fixtureB.getUserData() == "Projectile") {
-                Projectile projectile = (Projectile)fixtureB.getBody().getUserData();
-                if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureA.getBody().getUserData())
-                    return false;
+    private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
+        if (keyDown) {
+            switch (keyCode) {
+                case Constants.KEY_TOGGLE_DEBUG_RENDER:
+                    toggleDebugRender();
+                    return true;
             }
-            else if (fixtureB.getUserData() == "Worm" && fixtureA.getUserData() == "Projectile") {
-                Projectile projectile = (Projectile)fixtureA.getBody().getUserData();
-                if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureB.getBody().getUserData())
-                    return false;
-            }
-
-            return true;
         }
+
+        return true;
+    };
+
+    private ContactFilter contactFilter = (fixtureA, fixtureB) -> {
+        if (fixtureA.getUserData() == "Worm" && fixtureB.getUserData() == "Projectile") {
+            Projectile projectile = (Projectile)fixtureB.getBody().getUserData();
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureA.getBody().getUserData())
+                return false;
+        }
+        else if (fixtureB.getUserData() == "Worm" && fixtureA.getUserData() == "Projectile") {
+            Projectile projectile = (Projectile)fixtureA.getBody().getUserData();
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureB.getBody().getUserData())
+                return false;
+        }
+
+        return true;
     };
 
     public World(PlayScreen screen) {
@@ -86,7 +94,6 @@ public class World {
         debugRenderer = new Box2DDebugRenderer();
 
         players = new Player[Constants.NUM_PLAYERS];
-        shotDirectionIndicators = new ShotDirectionIndicator[Constants.NUM_PLAYERS];
 
         initializePlayer(Constants.PLAYER_NUMBER_1);
         initializePlayer(Constants.PLAYER_NUMBER_2);
@@ -94,21 +101,12 @@ public class World {
         registerAfterUpdate(ground);
 
         setGameState(GameState.PLAYERONETURN);
+
+        InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
     }
 
     private void initializePlayer(int playerNumber) {
         players[playerNumber] = new Player(playerNumber, this, getAssetManager());
-        // TODO: add worms
-
-        /*Worm worm = new Worm(playerNumber, this, wormPosition);
-        ShotDirectionIndicator indicator = new ShotDirectionIndicator(playerNumber, worm, this);
-        HealthBar healthBar = new HealthBar(this, worm);
-
-        playerWorms[playerNumber] = worm;
-        shotDirectionIndicators[playerNumber] = indicator;
-
-        registerAfterUpdate(worm);
-        registerAfterUpdate(healthBar);*/
     }
 
     public void toggleDebugRender() {
@@ -126,6 +124,22 @@ public class World {
     }
 
     public void updatePhase(float delta) {
+        if (gameState == GameState.WAITING) {
+            boolean advance = true;
+
+            for (Player player : players) {
+                for (Worm worm : player.characters) {
+                    if (worm != null && worm.getBody() != null)
+                    if (worm.getBody().getLinearVelocity().len() >= 0.0001f) {
+                        advance = false;
+                    }
+                }
+            }
+
+            if (advance)
+                advanceGameState();
+        }
+
         for (Updatable updatable : updatableObjects) {
             updatable.update(delta, gameState);
         }
@@ -166,6 +180,26 @@ public class World {
 
     public void addExplosion(Vector2 center, float radius) {
         ground.addExplosion(center, radius);
+
+        final ArrayList<Worm> affectedWorms = new ArrayList<>();
+
+        world.QueryAABB((fixture -> {
+            if (fixture.getUserData() == "Worm") {
+                Worm worm = (Worm)fixture.getBody().getUserData();
+
+                if (!affectedWorms.contains(worm))
+                    affectedWorms.add(worm);
+            }
+            return true;
+        }), center.x - radius, center.y - radius, center.x + radius, center.y + radius);
+
+        for (Worm worm : affectedWorms) {
+            Vector2 impulse = new Vector2(worm.getBody().getPosition().x - center.x, worm.getBody().getPosition().y - center.y);
+            float distance = worm.getBody().getPosition().dst(center);
+            impulse.nor();
+            impulse.scl(worm.getBody().getMass() * Math.max(0.0f, (radius - distance) / radius * 10.0f));
+            worm.getBody().applyLinearImpulse(impulse, center, true);
+        }
     }
 
     public Body createBody(BodyDef bodyDef) {
@@ -190,23 +224,16 @@ public class World {
 
     public void setGameState(GameState gameState) {
         oldGameState = this.gameState;
-
-        Worm worm = getCurrentWorm();
-        if (worm != null)
-            worm.setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-
         this.gameState = gameState;
 
         screen.setGameState(gameState);
 
         switch (gameState) {
             case PLAYERONETURN:
-                getCurrentWorm().equipGun();
-                registerAfterUpdate(getCurrentIndicator());
+                getCurrentPlayer().onBeginTurn();
                 break;
             case PLAYERTWOTURN:
-                getCurrentWorm().equipGun();
-                registerAfterUpdate(getCurrentIndicator());
+                getCurrentPlayer().onBeginTurn();
                 break;
             case GAMEOVERPLAYERONEWON:
                 screen.setGameOver(WinningPlayer.PLAYERONE);
@@ -223,14 +250,17 @@ public class World {
     public void advanceGameState() {
         switch (gameState) {
             case PLAYERONETURN:
-                getCurrentPlayer().shiftTurn();
+                getCurrentPlayer().onEndTurn();
                 setGameState(GameState.SHOOTING);
                 break;
             case PLAYERTWOTURN:
-                getCurrentPlayer().shiftTurn();
+                getCurrentPlayer().onEndTurn();
                 setGameState(GameState.SHOOTING);
                 break;
             case SHOOTING:
+                gameState = GameState.WAITING;
+                break;
+            case WAITING:
                 switch (oldGameState) {
                     case PLAYERONETURN:
                         setGameState(GameState.PLAYERTWOTURN);
@@ -266,28 +296,13 @@ public class World {
     public ShotDirectionIndicator getCurrentIndicator() {
         Player player = getCurrentPlayer();
         if (player != null)
-            return shotDirectionIndicators[player.getPlayerNumber()];
+            return player.getShotDirectionIndicator();
 
         return null;
     }
 
-    public void shootProjectile() {
-        Worm worm = getCurrentWorm();
-        ShotDirectionIndicator indicator = getCurrentIndicator();
-
-        Vector2 position = new Vector2(worm.getBody().getPosition());
-        Vector2 direction = new Vector2(1, 0).rotate(indicator.getRotate());
-
-        // add an offset to the starting position, so the projectile does not collide with the shooting worm
-        //position.add(direction.x * Constants.PROJECTILE_SPAWN_OFFSET,
-        //        direction.y * Constants.PROJECTILE_SPAWN_OFFSET);
-        Projectile projectile = new Projectile(this, worm, position, direction);
-
+    public void spawnProjectile(Projectile projectile) {
         registerAfterUpdate(projectile);
-        forgetAfterUpdate(indicator);
-
-        worm.unequipGun();
-
         advanceGameState();
         camera.setCameraFocus(projectile);
     }
@@ -312,6 +327,9 @@ public class World {
             if (gameObject instanceof PhysicsObject) {
                 PhysicsObject physicsObject = (PhysicsObject)gameObject;
                 physicsObject.setupBody();
+                if (physicsObject.getBody() == null) {
+                    System.out.println("We fucked up");
+                }
                 physicsObject.getBody().setUserData(gameObject);
             }
             if (gameObject instanceof Renderable) {

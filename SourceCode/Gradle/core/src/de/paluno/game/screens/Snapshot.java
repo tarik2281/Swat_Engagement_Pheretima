@@ -6,7 +6,6 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import de.paluno.game.WeaponType;
 import de.paluno.game.WindDirectionIndicator;
-import de.paluno.game.gameobjects.Ground;
 import de.paluno.game.gameobjects.HealthBar;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Projectile;
@@ -14,6 +13,7 @@ import de.paluno.game.gameobjects.ShotDirectionIndicator;
 import de.paluno.game.gameobjects.Virus;
 import de.paluno.game.gameobjects.Weapon;
 import de.paluno.game.gameobjects.Worm;
+import de.paluno.game.gameobjects.ground.Ground;
 
 public class Snapshot implements Cloneable {
 	World world;
@@ -40,63 +40,65 @@ public class Snapshot implements Cloneable {
 	
 	public Ground makesnapshotground() {
 		
-		 Ground clone = new Ground(playscreen);
-			clone.setCloningParameters(ground);
-		return clone;
-		
+		 //Ground clone = new Ground(playscreen);
+		//	clone.setCloningParameters(ground);
+		//return clone;
+		return null;
 	}
 	public HealthBar makesnapshotHealhtbar() {
 
-		 HealthBar clone = new HealthBar(playscreen, worm);
-			clone.setCloningParameters(healthbar);
-		return clone;
+		 //HealthBar clone = new HealthBar(playscreen, worm);
+		//	clone.setCloningParameters(healthbar);
+		//return clone;
+        return null;
 	}
 		
 	
 	public Player cloneplayer() {
 		
-		 Player clone = new Player(playernum,world,assets);
-			clone.setCloningParameters(player);
-		return clone;
+		 //Player clone = new Player(playernum,world,assets);
+		//	clone.setCloningParameters(player);
+		//return clone;
+        return null;
 	}
 	
 	public Projectile cloneprojectile() {
-		 Projectile clone = new Projectile(playscreen,position,direction);
-			clone.setCloningParameters(projectile);
-		return clone;
+		 //Projectile clone = new Projectile(playscreen,position,direction);
+		//	clone.setCloningParameters(projectile);
+		//return clone;
 		 
-	
+	return null;
 		
 	}
 	public ShotDirectionIndicator cloneshotdirectionindicator() {
 		
-		 ShotDirectionIndicator clone = new ShotDirectionIndicator(zahl,worm,playscreen);
-			clone.setCloningParameters(shotdirectionindicator);
-		return clone;
-		 
+		 //ShotDirectionIndicator clone = new ShotDirectionIndicator(zahl,worm,playscreen);
+		//	clone.setCloningParameters(shotdirectionindicator);
+		//return clone;
+		 return null;
 	}
 	 public Virus clonevirus() {
-		 Virus clone = new Virus(worm,playscreen);
-			clone.setCloningParameters(virus);
-		return clone;
-		 
+		 //Virus clone = new Virus(worm,playscreen);
+		//	clone.setCloningParameters(virus);
+		//return clone;
+		 return null;
 	 }
 	
 	
 	public WindDirectionIndicator  clonewinddirectionindicator() {
 		 
-			 WindDirectionIndicator clone = new WindDirectionIndicator();
-				clone.setCloningParameters(winddirectionindicator);
-			return clone;
-			 
+			 //WindDirectionIndicator clone = new WindDirectionIndicator();
+			//	clone.setCloningParameters(winddirectionindicator);
+			//return clone;
+			 return null;
 		 }
 		
 	
 	 public Weapon cloneweapon() {
-		 Weapon clone = new Weapon(worm,weapontype);
-			clone.setCloningParameters(weapon);
-		return clone;
-		 
+		 //Weapon clone = new Weapon(worm,weapontype);
+		//	clone.setCloningParameters(weapon);
+		//return clone;
+		 return null;
 	 }
 	
 }	

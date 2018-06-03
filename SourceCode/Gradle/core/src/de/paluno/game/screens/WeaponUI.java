@@ -2,6 +2,8 @@ package de.paluno.game.screens;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import de.paluno.game.Assets;
 import de.paluno.game.gameobjects.Renderable;
 
 public class WeaponUI implements Renderable {
@@ -45,6 +48,7 @@ public class WeaponUI implements Renderable {
         }));
 
         // Grenade
+        buttonGrenade = new ImageButton(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.iconGrenade))));
         buttonGrenade.addListener(new ClickListener() {
 
             @Override
@@ -55,6 +59,7 @@ public class WeaponUI implements Renderable {
 
 
         // Bazooka
+        buttonBazooka = new ImageButton(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.iconBazooka))));
         buttonBazooka.addListener(new ClickListener() {
 
             @Override
@@ -64,6 +69,7 @@ public class WeaponUI implements Renderable {
         });
 
         // Gun
+        buttonGun = new ImageButton(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.iconGun))));
         buttonGun.addListener(new ClickListener() {
 
             @Override
@@ -73,6 +79,7 @@ public class WeaponUI implements Renderable {
         });
 
         // Special Weapon
+        buttonSpecial = new ImageButton(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.iconGrenade))));
         buttonSpecial.addListener(new ClickListener() {
 
             @Override
@@ -91,10 +98,16 @@ public class WeaponUI implements Renderable {
         table.setBackground(image.getDrawable());
         table.setPosition(1260, 120);
         table.add(buttonGun).size(60, 60);
+        table.add(buttonGrenade);
+        table.add(buttonBazooka);
         table.setDebug(false);
         table.setSize(92, 147);
         stage.addActor(table);
 
+    }
+
+    public InputProcessor getInputProcessor() {
+        return stage;
     }
 
 

@@ -17,13 +17,13 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WormWalk.xml", AnimationData.class);
     //WindIndicator
     public static final AssetDescriptor<Texture> windGreen =
-            new AssetDescriptor<Texture>("Green", Texture.class);
+            new AssetDescriptor<Texture>("Green.png", Texture.class);
 
     public static final AssetDescriptor<Texture> windOrange =
-            new AssetDescriptor<Texture>("Orange", Texture.class);
+            new AssetDescriptor<Texture>("Orange.png", Texture.class);
 
     public static final AssetDescriptor<Texture> windRed =
-            new AssetDescriptor<Texture>("Red", Texture.class);
+            new AssetDescriptor<Texture>("Red.png", Texture.class);
 
     public static final AssetDescriptor<Texture> iconGun =
             new AssetDescriptor<Texture>("IconGun.png", Texture.class);

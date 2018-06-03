@@ -25,6 +25,8 @@ public class GameCamera {
     // in world space (in meters)
     private float bottomLimit;
 
+    private Vector2 focusDirectionVector = new Vector2();
+
     /**
      *
      * @param viewportWidth in pixels
@@ -81,9 +83,17 @@ public class GameCamera {
     }
 
     public void update(float delta) {
-        if (cameraFocus != null)
+        if (cameraFocus != null) {
+            // smooth following the object
+            focusDirectionVector.set(cameraFocus.getBody().getPosition()).add(-debugPosition.x, -debugPosition.y);
+            focusDirectionVector.nor();
+            float distance = cameraFocus.getBody().getPosition().dst(debugPosition);
+            focusDirectionVector.scl(distance / Constants.CAMERA_FOCUS_TIME * delta);
+            debugPosition.add(focusDirectionVector);
+
             // if we have a camera focus then we center the camera on the given object
-            debugPosition.set(cameraFocus.getBody().getPosition());
+            //debugPosition.set(cameraFocus.getBody().getPosition());
+        }
 
         // move the camera according to user input
         debugPosition.add(horizontalMovement * Constants.CAMERA_MOVE_VELOCITY * delta,

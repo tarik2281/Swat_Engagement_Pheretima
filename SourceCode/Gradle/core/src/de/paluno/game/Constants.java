@@ -56,6 +56,7 @@ public class Constants {
 	/**
 	 * game object attributes in world space (in meters)
 	 */
+	public static final float CAMERA_FOCUS_TIME = 0.5f;
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
 	public static final float WORM_RADIUS_SQUARE = WORM_WIDTH * WORM_WIDTH / 4 + WORM_HEIGHT * WORM_HEIGHT / 4;

@@ -1,20 +1,21 @@
 package de.paluno.game;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.math.Vector2;
 
-import de.paluno.game.gameobjects.ShotDirectionIndicator;
-import de.paluno.game.gameobjects.Worm;
-
 public class InputHandler extends InputAdapter {
+
+	public interface KeyListener {
+		boolean onKeyEvent(int keyCode, boolean keyDown);
+	}
 
 	//private World world;
 	//TODO: Cleanup
@@ -26,7 +27,9 @@ public class InputHandler extends InputAdapter {
 	
 	private int mouseX = -1;
 	private int mouseY = -1;
-	
+
+	private HashMap<Integer, ArrayList<KeyListener>> keyListenerMap = new HashMap<>();
+
 	private ArrayList<Integer> registeredKeyCodesDown = new ArrayList();
 	private HashMap<Integer, ArrayList<Method>> registeredHandlersDown = new HashMap();
 	private ArrayList<Integer> registeredKeyCodesUp = new ArrayList();
@@ -43,6 +46,19 @@ public class InputHandler extends InputAdapter {
 		//instance = this;
 		//Gdx.input.setInputProcessor(instance);
 	}
+
+	public void registerKeyListener(int keyCode, KeyListener l) {
+		keyListenerMap.computeIfAbsent(keyCode, k -> new ArrayList<>(1)).add(l);
+	}
+
+	public void unregisterKeyListener(int keyCode, KeyListener l) {
+		ArrayList<KeyListener> listeners = keyListenerMap.get(keyCode);
+
+		if (listeners != null) {
+			listeners.remove(l);
+		}
+	}
+
 	/**
 	 * Constructor
 	 * @param world - Reference to the world we are sending our key orders to
@@ -271,13 +287,13 @@ public class InputHandler extends InputAdapter {
 	
 	/**
 	 * Handler function for keyboard keys being pressed
-	 * @param keycode - the Keys.keycode of the key that is pressed
+	 * @param keyCode - the Keys.keycode of the key that is pressed
 	 * @return Was this change processed?
 	 */
-	public boolean keyDown(int keycode) {
+	public boolean keyDown(int keyCode) {
 		
 		boolean handled = false;
-        switch (keycode) {
+        switch (keyCode) {
         	// Common key codes
         	case Keys.SHIFT_LEFT:
         		this.shiftL = true;
@@ -296,74 +312,25 @@ public class InputHandler extends InputAdapter {
         		handled = true;
         		break;
         }
-            
-        if(registeredKeyCodesDown.contains(keycode)) {
-        	// We have (a) handler(s) registered for this key - iterate and execute!
-        	ArrayList<Method> handlers = registeredHandlersDown.get(keycode);
-        	for(Method m : handlers) {
-        		try {
-            		m.invoke(this, keycode);
-            		handled = true;
-            	} catch(InvocationTargetException e) {System.err.println("Invocation target invalid!");}
-            	catch(IllegalArgumentException e) {System.err.println("Parameter on handler call not accepted!");}
-            	catch(IllegalAccessException e) {System.err.println("Illegal access on handler call!");}
-        	}
-        }
-        
-        if(handled) return true;
-        else return super.keyDown(keycode);
-        
-        	/*// Gameplay key codes
-            case Constants.KEY_MOVE_LEFT:
-                world.getCurrentPlayer().setMovement(Constants.MOVEMENT_LEFT, true);
-                return true;
-            case Constants.KEY_MOVE_RIGHT:
-            	world.getCurrentPlayer().setMovement(Constants.MOVEMENT_RIGHT, true);
-                return true;
-            case Constants.KEY_JUMP:
-                world.getCurrentPlayer().jump();
-                return true;
-            case Constants.KEY_DO_ACTION:
-                world.action();
-                return true;
-            case Constants.KEY_ROTATE_INDICATOR_UP:
-                if(world.getShotDirectionIndicator() != null) world.getShotDirectionIndicator().rotate(Constants.MOVEMENT_UP);
-            	return true;
-            case Constants.KEY_ROTATE_INDICATOR_DOWN:
-            	if(world.getShotDirectionIndicator() != null) world.getShotDirectionIndicator().rotate(Constants.MOVEMENT_DOWN);
-            	return true;
 
-            // debugging key events
-            case Constants.KEY_MOVE_CAMERA_LEFT:
-                
-                return true;
-            case Constants.KEY_MOVE_CAMERA_RIGHT:
-                
-                return true;
-            case Constants.KEY_MOVE_CAMERA_UP:
-                
-                return true;
-            case Constants.KEY_MOVE_CAMERA_DOWN:
-                
-                return true;
-            case Constants.KEY_TOGGLE_DEBUG_RENDER:
-                
-                return true;
-            case Constants.KEY_TOGGLE_CAMERA_FOCUS:
-                
-                break;
-            default: return super.keyDown(keycode);
-        }
-        */
+        ArrayList<KeyListener> listeners = keyListenerMap.get(keyCode);
+        if (listeners != null) {
+			for (KeyListener l : listeners) {
+				if (handled = l.onKeyEvent(keyCode, true))
+					break;
+			}
+		}
+
+        return handled;
     }
 	/**
 	 * Handler function for keyboard keys being released
-	 * @param keycode - The Keys.keycode of the key being released
+	 * @param keyCode - The Keys.keycode of the key being released
 	 * @return Was this change processed?
 	 */
-	public boolean keyUp(int keycode) {
+	public boolean keyUp(int keyCode) {
         boolean handled = false;
-		switch (keycode) {
+		switch (keyCode) {
             // Common key codes
 	        case Keys.SHIFT_LEFT:
 	    		this.shiftL = false;
@@ -382,57 +349,16 @@ public class InputHandler extends InputAdapter {
 	    		handled = true;
 	    		break;
 		}
-		
-		if(registeredKeyCodesUp.contains(keycode)) {
-        	// We have (a) handler(s) registered for this keycode - iterate and execute!
-        	ArrayList<Method> handlers = registeredHandlersUp.get(keycode);
-        	for(Method m : handlers) {
-        		try {
-            		m.invoke(this, keycode);
-            		handled = true;
-            	} catch(InvocationTargetException e) {System.err.println("Invocation target invalid!");}
-            	catch(IllegalArgumentException e) {System.err.println("Parameter on handler call not accepted!");}
-            	catch(IllegalAccessException e) {System.err.println("Illegal access on handler call!");}
-        	}
-        }
-        
-        if(handled) return true;
-        else return super.keyUp(keycode);
-        	
-        	/*// gameplay key events
-            case Constants.KEY_MOVE_LEFT:
-            	world.getCurrentPlayer().setMovement(Constants.MOVEMENT_LEFT, false);
-                return true;
-                break;
-            case Constants.KEY_MOVE_RIGHT:
-                world.getCurrentPlayer().setMovement(Constants.MOVEMENT_RIGHT, false);
-                return true;
-                break;
-            case Constants.KEY_ROTATE_INDICATOR_UP:
-            case Constants.KEY_ROTATE_INDICATOR_DOWN:
-            	if(world.getShotDirectionIndicator() != null) world.getShotDirectionIndicator().rotate(Constants.MOVEMENT_NO_MOVEMENT);
-            	return true;
-            	break;
 
-            // debugging key events
-            case Constants.KEY_MOVE_CAMERA_LEFT:
-                
-                return true;
-                break;
-            case Constants.KEY_MOVE_CAMERA_RIGHT:
-                
-                return true;
-                break;
-            case Constants.KEY_MOVE_CAMERA_UP:
-                
-                return true;
-                break;
-            case Constants.KEY_MOVE_CAMERA_DOWN:
-                
-                return true;
-                break;
-            default: return super.keyUp(keycode); break;
-        }*/
+		ArrayList<KeyListener> listeners = keyListenerMap.get(keyCode);
+		if (listeners != null) {
+			for (KeyListener l : listeners) {
+				if (handled = l.onKeyEvent(keyCode, false))
+					break;
+			}
+		}
+
+		return handled;
     }
 	
 	/**

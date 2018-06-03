@@ -10,7 +10,7 @@ import de.paluno.game.GameState;
 
 public class ShotDirectionIndicator implements Renderable, Updatable{
 
-	private static final float MOVEMENT_SPEED = 2.0f; // in degrees
+	private static final float MOVEMENT_SPEED = 90.0f; // in degrees
 
 	private World world;
 	private Worm worm;
@@ -21,41 +21,52 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	private int movement;
 	
 	
-	public ShotDirectionIndicator(int playerNumber, Worm worm, World world) {
+	public ShotDirectionIndicator(int playerNumber, World world) {
 		this.playerNumber = playerNumber;
-		this.worm = worm;
 		this.world = world;
 
 		texture = world.getAssetManager().get(Assets.arrow);
 		sprite = new Sprite(texture);
 	}
 
+	public void attachToWorm(Worm worm) {
+		this.worm = worm;
+	}
+
+	@Override
 	public void update(float delta, GameState gamestate) {
 		switch (movement) {
 			case Constants.MOVEMENT_UP:
-				degrees += MOVEMENT_SPEED;
+				degrees += MOVEMENT_SPEED * delta;
 				break;
 			case Constants.MOVEMENT_DOWN:
-				degrees -= MOVEMENT_SPEED;
+				degrees -= MOVEMENT_SPEED * delta;
 				break;
 		}
 	}
-	
-	public void render(SpriteBatch batch, float delta){
-		Vector2 position = Constants.getScreenSpaceVector(worm.getBody().getPosition());
 
-	    sprite.setOriginCenter();
-		sprite.setRotation(degrees);
-		sprite.setOriginBasedPosition(position.x, position.y);
+	@Override
+	public void render(SpriteBatch batch, float delta) {
+		if (worm != null) {
+			Vector2 position = Constants.getScreenSpaceVector(worm.getBody().getPosition());
 
-	    sprite.draw(batch);
+			sprite.setOriginCenter();
+			sprite.setRotation(degrees);
+			sprite.setOriginBasedPosition(position.x, position.y);
+
+			sprite.draw(batch);
+		}
 	}
 	
-	public void setRotate(int movement) {
+	public void setRotationMovement(int movement) {
 		this.movement = movement;
 	}
-	
-	public float getRotate() {
+
+	public int getRotationMovement() {
+		return this.movement;
+	}
+
+	public float getAngle() {
 		return degrees;
 	}
 

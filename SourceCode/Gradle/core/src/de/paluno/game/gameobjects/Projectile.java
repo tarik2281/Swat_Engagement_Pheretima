@@ -3,9 +3,9 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.WeaponType;
@@ -19,7 +19,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private World world;
     private Vector2 position;
     private Vector2 direction;
-    private WeaponType type;
+    private WeaponType weaponType;
     private Body body;
 
     private Texture texture;
@@ -30,12 +30,16 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private Worm shootingWorm;
     private boolean wormContactEnded = false;
 
-    public Projectile(World world, Worm shootingWorm, Vector2 position, Vector2 direction) {
+    private float timer = 0.0f;
+
+    public Projectile(World world, Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
         this.world = world;
         this.position = position;
         this.direction = direction;
 
-        texture = world.getAssetManager().get(Assets.projectileGun);
+        this.weaponType = weaponType;
+
+        texture = world.getAssetManager().get(weaponType.getProjectileAsset());
         sprite = new Sprite(texture);
 
         sprite.setOriginCenter();
@@ -53,8 +57,10 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     @Override
     public void update(float delta, GameState gameState) {
+        timer += delta;
+
         // check if the projectile is inside our world - if not, destroy it
-        if (!world.getWorldBounds().contains(body.getPosition()))
+        if (!world.getWorldBounds().contains(body.getPosition()) || (weaponType == WeaponType.WEAPON_GRENADE && timer >= 3.0f))
             explode();
 
         if (!wormContactEnded) {
@@ -69,6 +75,18 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         Vector2 position = Constants.getScreenSpaceVector(body.getPosition());
 
         sprite.setOriginBasedPosition(position.x, position.y);
+
+        switch (weaponType) {
+            case WEAPON_BAZOOKA:
+                Vector2 direction = new Vector2(-body.getLinearVelocity().x, body.getLinearVelocity().y);
+                float angle = direction.angle(new Vector2(0, 1));
+                sprite.setRotation(angle);
+                break;
+            case WEAPON_GRENADE:
+                sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
+                break;
+        }
+
         sprite.draw(batch);
     }
 
@@ -79,62 +97,59 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         bodyDef.position.set(position.x, position.y);
         bodyDef.bullet = true;
 
-        if (type == WeaponType.WEAPON_RIFLE) {
-
         CircleShape shape = new CircleShape();
         shape.setRadius(PROJECTILE_RADIUS);
 
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        fixtureDef.density = PROJECTILE_DENSITY;
+        if (weaponType == WeaponType.WEAPON_GUN) {
+            FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = PROJECTILE_DENSITY;
 
-        body = world.createBody(bodyDef);
+            body = world.createBody(bodyDef);
 
-        Fixture fix = body.createFixture(fixtureDef);
+            Fixture fix = body.createFixture(fixtureDef);
 
-        // the projectile should not be affected by gravity
-        body.setGravityScale(0.0f);
+            // the projectile should not be affected by gravity
+            body.setGravityScale(0.0f);
 
-        // apply an impulse to the body so it flies in the direction we chose
-        Vector2 impulse = new Vector2(direction).scl(0.001f);
-        body.applyLinearImpulse(impulse, body.getPosition(), true);
+            // apply an impulse to the body so it flies in the direction we chose
+            Vector2 impulse = new Vector2(direction).scl(0.001f);
+            body.applyLinearImpulse(impulse, body.getPosition(), true);
 
-        // CollisionHandler Identifier
-        fix.setUserData("Projectile");
+            // CollisionHandler Identifier
+            fix.setUserData("Projectile");
+
+
+        } else if (weaponType == WeaponType.WEAPON_BAZOOKA) {
+            FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = 2;
+            body = world.createBody(bodyDef);
+            Fixture fix = body.createFixture(fixtureDef);
+            body.setGravityScale(1.0f);
+            Vector2 impulse = new Vector2(direction).scl(body.getMass() * 7.0f);
+            body.applyLinearImpulse(impulse, body.getPosition(), true);
+            fix.setUserData("Projectile");
+
+        } else if (weaponType == WeaponType.WEAPON_GRENADE) {
+
+            FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = 9;
+            fixtureDef.friction = 0.0f;
+            fixtureDef.restitution = 0.5f;
+            body = world.createBody(bodyDef);
+            Fixture fix = body.createFixture(fixtureDef);
+            body.setGravityScale(1.0f);
+            body.setAngularDamping(2.0f);
+            Vector2 impulse = new Vector2(direction).scl(5.0f * body.getMass());
+            body.applyLinearImpulse(impulse, body.getPosition(), true);
+            body.applyAngularImpulse(-0.01f * body.getMass(), true);
+            fix.setUserData("Projectile");
+        }
         shape.dispose();
-
-
-    }else if (type == WeaponType.WEAPON_PROJECTILE) {
-    	PolygonShape shape = new PolygonShape();
-    	shape.setAsBox(0.4f,0.1f);
-    	 FixtureDef fixtureDef = new FixtureDef();
-         fixtureDef.shape = shape;
-         fixtureDef.density= 2;
-         body = world.createBody(bodyDef);
-         Fixture fix = body.createFixture(fixtureDef);
-         body.setGravityScale(2.7f);
-         Vector2 impulse = new Vector2(direction).scl(0.011f);
-         body.applyLinearImpulse(impulse, body.getPosition(), true);
-         fix.setUserData("Projectile");
-         shape.dispose();
-
-    }else if(type == WeaponType.WEAPON_THROWABLE) {
-
-    	PolygonShape shape = new PolygonShape();
-    	shape.setAsBox(0.4f,0.1f);
-    	 FixtureDef fixtureDef = new FixtureDef();
-         fixtureDef.shape = shape;
-         fixtureDef.density= 9;
-         fixtureDef.isSensor=true;
-         body = world.createBody(bodyDef);
-         Fixture fix = body.createFixture(fixtureDef);
-         body.setGravityScale(8.7f);
-         Vector2 impulse = new Vector2(direction).scl(0.04f);
-         body.applyLinearImpulse(impulse, body.getPosition(), true);
-         fix.setUserData("Projectile");
-         shape.dispose();
     }
-    }
+
     @Override
     public Body getBody() {
         return body;
@@ -145,10 +160,14 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         body = null;
     }
 
+    public boolean explodeOnCollision() {
+        return weaponType != WeaponType.WEAPON_GRENADE;
+    }
+
     public void explode() {
         if (!exploded) {
             exploded = true;
-            world.addExplosion(body.getPosition(), 0.2f);
+            world.addExplosion(body.getPosition(), 0.3f);
 
             world.forgetAfterUpdate(this);
             world.advanceGameState();
@@ -161,11 +180,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 		this.body = clone.body;
 		this.world = clone.world;
 
-		this.type= clone.type;
 		this.texture= clone.texture;
 		this.sprite= clone.sprite;
 		this.position= clone.position;
 		this.direction= clone.direction;
-
 	}
 }

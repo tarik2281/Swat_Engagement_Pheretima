@@ -1,23 +1,81 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.InputHandler;
+import de.paluno.game.WeaponType;
 
 public class Player implements Updatable {
 	private int playerNum;
 	
 	private int characterNum;
-	private Worm[] characters;
+	public Worm[] characters;
+	private Weapon[] weapons;
+	private ShotDirectionIndicator shotDirectionIndicator;
 	private int turn = 1;
 	
 	private World world;
 	private AssetManager assets;
 	private InputHandler input;
-	
-	private GameState gameState;
+
+	private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
+		if (keyDown) {
+			switch (keyCode) {
+				case Constants.KEY_MOVE_LEFT:
+					getCurrentWorm().setMovement(Constants.MOVEMENT_LEFT);
+					break;
+				case Constants.KEY_MOVE_RIGHT:
+					getCurrentWorm().setMovement(Constants.MOVEMENT_RIGHT);
+					break;
+				case Constants.KEY_JUMP:
+					getCurrentWorm().setJump(true);
+					break;
+                case Constants.KEY_DO_ACTION:
+                    shoot();
+                    break;
+				case Constants.KEY_ROTATE_INDICATOR_DOWN:
+					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
+					break;
+				case Constants.KEY_ROTATE_INDICATOR_UP:
+					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
+					break;
+                case Input.Keys.NUM_1:
+                    getCurrentWorm().equipWeapon(weapons[0]);
+                    break;
+                case Input.Keys.NUM_2:
+                    getCurrentWorm().equipWeapon(weapons[1]);
+                    break;
+                case Input.Keys.NUM_3:
+                    getCurrentWorm().equipWeapon(weapons[2]);
+                    break;
+			}
+		}
+		else {
+			switch (keyCode) {
+				case Constants.KEY_MOVE_LEFT:
+					if (getCurrentWorm().getMovement() == Constants.MOVEMENT_LEFT)
+						getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					break;
+				case Constants.KEY_MOVE_RIGHT:
+					if (getCurrentWorm().getMovement() == Constants.MOVEMENT_RIGHT)
+						getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					break;
+				case Constants.KEY_ROTATE_INDICATOR_DOWN:
+					if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_DOWN)
+						getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					break;
+				case Constants.KEY_ROTATE_INDICATOR_UP:
+					if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_UP)
+						getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					break;
+			}
+		}
+
+		return true;
+	};
 	
 	/**
 	 * Empty constructor for cloning purposes
@@ -35,26 +93,47 @@ public class Player implements Updatable {
 		this.characterNum = Constants.MAX_CHAR_NUM;
 		this.playerNum = playerNum;
 		this.world = world;
-		
-		this.characters = new Worm[characterNum];
-		
-		for(int i = 0; i < characterNum; i++) {
-			characters[i] = new Worm(this, i+1);
-			world.registerAfterUpdate(characters[i]);
-		}
-		
+
 		this.assets = assets;
-		this.input = InputHandler.getInstance();
-		input.registerHandler(Constants.KEY_DO_ACTION, this, "handleAction", false);
+
+        setupWeapons();
+        setupWorms();
+
+		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
 	}
+
+	public ShotDirectionIndicator getShotDirectionIndicator() {
+		return shotDirectionIndicator;
+	}
+
+	private void setupWorms() {
+        this.characters = new Worm[characterNum];
+
+        for(int i = 0; i < characterNum; i++) {
+            characters[i] = new Worm(this, i+1);
+            HealthBar healthBar = new HealthBar(world, characters[i]);
+            world.registerAfterUpdate(characters[i]);
+            world.registerAfterUpdate(healthBar);
+        }
+
+    }
+
+	private void setupWeapons() {
+        weapons = new Weapon[WeaponType.NUM_WEAPONS];
+
+        weapons[0] = new Weapon(this, WeaponType.WEAPON_GUN);
+        weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
+        weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
+    }
+
 	/**
 	 * Handler for GameLoop's update cycle - needed from Interface updatable
 	 * This dependency is just to update the GameState for the players directly, instead of having 5 cross-communications with it's Worms
 	 * @param delta - Time since last update in seconds
 	 * @param state - Current GameState
 	 */
-	public void update(float delta, GameState state) {this.gameState = state;}
-	
+	public void update(float delta, GameState state) {}
+
 	/**
 	 * Getter method for this player's player number
 	 * @return - player number
@@ -74,6 +153,46 @@ public class Player implements Updatable {
 		else if(this.turn > Constants.MAX_CHAR_NUM) this.turn = Constants.MAX_CHAR_NUM;
 		else this.turn = turn;
 	}
+
+	public void onBeginTurn() {
+		world.registerAfterUpdate(getShotDirectionIndicator());
+		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
+
+		getCurrentWorm().equipWeapon(weapons[2]);
+
+		this.input = InputHandler.getInstance();
+		input.registerKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
+		input.registerKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
+		input.registerKeyListener(Constants.KEY_DO_ACTION, keyListener);
+		input.registerKeyListener(Constants.KEY_JUMP, keyListener);
+		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
+		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
+		input.registerKeyListener(Input.Keys.NUM_1, keyListener);
+		input.registerKeyListener(Input.Keys.NUM_2, keyListener);
+		input.registerKeyListener(Input.Keys.NUM_3, keyListener);
+	}
+
+	public void onEndTurn() {
+        world.forgetAfterUpdate(getShotDirectionIndicator());
+
+		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+		getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+		getCurrentWorm().unequipGun();
+
+        shiftTurn();
+
+		this.input = InputHandler.getInstance();
+		input.unregisterKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
+		input.unregisterKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
+		input.unregisterKeyListener(Constants.KEY_DO_ACTION, keyListener);
+		input.unregisterKeyListener(Constants.KEY_JUMP, keyListener);
+		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
+		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
+        input.unregisterKeyListener(Input.Keys.NUM_1, keyListener);
+        input.unregisterKeyListener(Input.Keys.NUM_2, keyListener);
+        input.unregisterKeyListener(Input.Keys.NUM_3, keyListener);
+	}
+
 	/**
 	 * Soft setter method for the character's turn
 	 * Shift through all still available characters to find the next one whose turn it is
@@ -101,31 +220,30 @@ public class Player implements Updatable {
 	 */
 	protected void characterDied(int charNum) {
 		// No characters anymore or this one allready dead? Nothing to do here.
-		if(this.characterNum <= 0 || this.characters[charNum-1] == null) return;
+		if(this.characterNum <= 0 || this.characters[charNum-1] == null)
+			return;
+
+		world.forgetAfterUpdate(characters[charNum - 1]);
 		this.characters[charNum-1] = null;
 		this.characterNum--;
 	}
-	
-	//TODO: Make deprecated by managing gamestate globally, e.g. in world.
-	/**
-	 * Setter method for current Game State
-	 * @param newState - New game state
-	 */
-	protected void setGameState(GameState newState) {this.gameState = newState;}
-	/**
-	 * Getter method for current Game State
-	 * @return gameState
-	 */
-	public GameState getGameState() {return this.gameState;}
-	
+
+	public Weapon[] getWeapons() {
+	    return weapons;
+    }
+
+    public void equipWeapon(Weapon weapon) {
+	    getCurrentWorm().equipWeapon(weapon);
+    }
+
 	/**
 	 * Getter method for player's turn status
 	 * @return Is it this player's turn?
 	 */
 	public boolean isPlayerTurn() {
-		return (this.playerNum == 1 && this.gameState == GameState.PLAYERONETURN)
+		return (this.playerNum == Constants.PLAYER_NUMBER_1 && world.getGameState() == GameState.PLAYERONETURN)
 				||
-				(this.playerNum == 2 && this.gameState == GameState.PLAYERTWOTURN);
+				(this.playerNum == Constants.PLAYER_NUMBER_2 && world.getGameState() == GameState.PLAYERTWOTURN);
 	}
 	
 	/**
@@ -170,18 +288,37 @@ public class Player implements Updatable {
 		
 		this.world = copy.world;
 		this.assets = copy.assets;
-		
-		this.gameState = this.gameState;
 	}
-	
+
+	public void moveKeyDown(Integer keyCode) {
+		switch (keyCode) {
+			case Constants.KEY_MOVE_LEFT:
+				getCurrentWorm().setMovement(Constants.MOVEMENT_LEFT);
+				break;
+			case Constants.KEY_MOVE_RIGHT:
+				getCurrentWorm().setMovement(Constants.MOVEMENT_RIGHT);
+				break;
+		}
+	}
+
+	public void moveKeyUp(Integer keyCode) {
+		switch (keyCode) {
+			case Constants.KEY_MOVE_LEFT:
+				if (getCurrentWorm().getMovement() == Constants.MOVEMENT_LEFT)
+					getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+				break;
+			case Constants.KEY_MOVE_RIGHT:
+				if (getCurrentWorm().getMovement() == Constants.MOVEMENT_RIGHT)
+					getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+				break;
+		}
+	}
+
 	/**
 	 * Method to handle the DO_ACTION Key being pressed, based on current game situation
 	 * @param keycode - Forced parameter, in this case not used.
 	 */
 	public void handleAction(int keycode) {
-		if(keycode != Constants.KEY_DO_ACTION) return;
-		
-		if(this.gameState == GameState.SHOOTING) this.shoot();
-		else if(this.isPlayerTurn()) this.getCurrentWorm().showWeaponSelector();
+		this.shoot();
 	}
 }
