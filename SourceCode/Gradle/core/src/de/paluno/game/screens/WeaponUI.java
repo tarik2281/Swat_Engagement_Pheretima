@@ -27,7 +27,7 @@ public class WeaponUI implements Renderable {
     private ImageButton buttonWeaponGun, buttonGrenade,buttonBazooka;
     private Table table;
     private Image image;
-    private Texture textureBackground = new Texture(Gdx.files.internal("weaponpanel.png"));
+    private Texture textureBackground = new Texture(Gdx.files.internal("weaponUI.png"));
 
 
 
@@ -94,7 +94,7 @@ public class WeaponUI implements Renderable {
         //Stage
         stage = new Stage();
         stage.addActor(table);
-        stage.setDebugAll(true);
+        stage.setDebugAll(false);
 
 
 
@@ -102,12 +102,13 @@ public class WeaponUI implements Renderable {
 
         table.setPosition(1150,120);
 
-        table.bottom().right();
+        table.top().right();
         table.add(buttonWeaponGun);
         table.row();
         table.add(buttonGrenade);
         table.row();
         table.add(buttonBazooka);
+        table.pad(7);
 
 
 

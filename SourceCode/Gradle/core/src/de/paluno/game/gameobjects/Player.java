@@ -41,13 +41,13 @@ public class Player implements Updatable {
 				case Constants.KEY_ROTATE_INDICATOR_UP:
 					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
-                case Input.Keys.NUM_1:
+                case Input.Keys.F1:
                     getCurrentWorm().equipWeapon(weapons[0]);
                     break;
-                case Input.Keys.NUM_2:
+                case Input.Keys.F2:
                     getCurrentWorm().equipWeapon(weapons[1]);
                     break;
-                case Input.Keys.NUM_3:
+                case Input.Keys.F3:
                     getCurrentWorm().equipWeapon(weapons[2]);
                     break;
 			}
@@ -99,7 +99,11 @@ public class Player implements Updatable {
         setupWorms();
         windHandler = new WindHandler();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-		this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
+		//this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
+	}
+
+	public void setWindHandler(WindHandler windHandler) {
+		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
 	}
 
 	public ShotDirectionIndicator getShotDirectionIndicator() {
@@ -115,6 +119,7 @@ public class Player implements Updatable {
             HealthBar healthBar = new HealthBar(world, characters[i]);
             world.registerAfterUpdate(characters[i]);
             world.registerAfterUpdate(healthBar);
+            world.registerAfterUpdate(windDirectionIndicator);
         }
 
     }
@@ -169,9 +174,9 @@ public class Player implements Updatable {
 		input.registerKeyListener(Constants.KEY_JUMP, keyListener);
 		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
 		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-		input.registerKeyListener(Input.Keys.NUM_1, keyListener);
-		input.registerKeyListener(Input.Keys.NUM_2, keyListener);
-		input.registerKeyListener(Input.Keys.NUM_3, keyListener);
+		input.registerKeyListener(Input.Keys.F1, keyListener);
+		input.registerKeyListener(Input.Keys.F2, keyListener);
+		input.registerKeyListener(Input.Keys.F3, keyListener);
 	}
 
 	public void onEndTurn() {
@@ -191,9 +196,9 @@ public class Player implements Updatable {
 		input.unregisterKeyListener(Constants.KEY_JUMP, keyListener);
 		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
 		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-        input.unregisterKeyListener(Input.Keys.NUM_1, keyListener);
-        input.unregisterKeyListener(Input.Keys.NUM_2, keyListener);
-        input.unregisterKeyListener(Input.Keys.NUM_3, keyListener);
+        input.unregisterKeyListener(Input.Keys.F1, keyListener);
+        input.unregisterKeyListener(Input.Keys.F2, keyListener);
+        input.unregisterKeyListener(Input.Keys.F3, keyListener);
 	}
 
 	/**
