@@ -194,12 +194,27 @@ public class World {
         }), center.x - radius, center.y - radius, center.x + radius, center.y + radius);
 
         for (Worm worm : affectedWorms) {
-            Vector2 impulse = new Vector2(worm.getBody().getPosition().x - center.x, worm.getBody().getPosition().y - center.y);
-            float distance = worm.getBody().getPosition().dst(center);
-            impulse.nor();
-            impulse.scl(worm.getBody().getMass() * Math.max(0.0f, (radius - distance) / radius * 10.0f));
-            worm.getBody().applyLinearImpulse(impulse, center, true);
+            Vector2 bodyCom = worm.getBody().getWorldCenter();
+
+            if (bodyCom.dst2(center) >= radius * radius)
+                continue;
+
+            applyBlastImpulse(worm.getBody(), center, bodyCom, 0.008f);
         }
+    }
+
+    private void applyBlastImpulse(Body body, Vector2 blastCenter, Vector2 applyPoint, float blastPower) {
+        Vector2 diff = new Vector2(applyPoint).sub(blastCenter);
+        float distance = diff.len();
+
+        if (distance == 0)
+            return;
+
+        float invDistance = 1.0f / distance;
+        diff.scl(invDistance);
+
+        float impulse = blastPower * invDistance * invDistance;
+        body.applyLinearImpulse(diff.scl(impulse), applyPoint, true);
     }
 
     public Body createBody(BodyDef bodyDef) {
