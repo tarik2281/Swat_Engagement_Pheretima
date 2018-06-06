@@ -29,20 +29,6 @@ public class WindDirectionIndicator implements Renderable {
 
 
 
-        if ((windHandler.getX() >= 0 && windHandler.getX() <= 2) || (windHandler.getX() <= 0 && windHandler.getX() >= -2)){
-            texture = world.getAssetManager().get(Assets.windGreen);
-            System.out.println(windHandler.getX());
-        }else if ((windHandler.getX() >= 2 && windHandler.getX() <= 4) ||
-        (windHandler.getX() <= -2 && windHandler.getX() >= -4)){
-            texture = world.getAssetManager().get(Assets.windOrange);
-            System.out.println(windHandler.getX());
-        }else{
-            texture = world.getAssetManager().get(Assets.windRed);
-            System.out.println(windHandler.getX());
-        }
-
-        sprite = new Sprite(texture);
-
     }
         public void attachToWorm(Worm worm) {
             this.worm = worm;
@@ -53,18 +39,35 @@ public class WindDirectionIndicator implements Renderable {
 
     @Override
     public void render(SpriteBatch batch, float delta) {
+
+        if ((windHandler.getX() > 0 && windHandler.getX() <= 2) || (windHandler.getX() < 0 && windHandler.getX() >= -2)){
+            texture = world.getAssetManager().get(Assets.windGreen);
+            System.out.println(windHandler.getX());
+        }else if ((windHandler.getX() > 2 && windHandler.getX() <= 4) ||
+                (windHandler.getX() < -2 && windHandler.getX() >= -4)){
+            texture = world.getAssetManager().get(Assets.windOrange);
+            System.out.println(windHandler.getX());
+        }else{
+            texture = world.getAssetManager().get(Assets.windRed);
+            System.out.println(windHandler.getX());
+        }
+
+        sprite = new Sprite(texture);
+
+
         // sets the indicator at the position of the current worm
         Vector2 windIndicator = Constants.getScreenSpaceVector(this.worm.getBody().getPosition());
 
 
-        sprite.setOriginCenter();
+        //sprite.setOriginCenter();
         sprite.setOriginBasedPosition(windIndicator.x, windIndicator.y + 100);
 
         // rotates the indicator after every turn, based of the random x coordinate
         if (this.windHandler != null) {
-            sprite.setRotation(this.windHandler.getDegreeWind());
+            sprite.setFlip(windHandler.flipped(),false);
         }
         sprite.draw(batch);
+
     }
 
 

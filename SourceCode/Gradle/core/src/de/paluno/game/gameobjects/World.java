@@ -19,6 +19,8 @@ import java.util.LinkedList;
 public class World {
 
     private PlayScreen screen;
+    private WindHandler windHandler;
+    private WindDirectionIndicator windDirectionIndicator;
 
     private GameState oldGameState = GameState.PLAYERONETURN;
     private GameState gameState = GameState.PLAYERONETURN;
@@ -69,6 +71,7 @@ public class World {
 
     public World(PlayScreen screen) {
         this.screen = screen;
+        this.windHandler = new WindHandler();
 
         objectRegisterQueue = new LinkedList<>();
         objectForgetQueue = new LinkedList<>();
@@ -99,6 +102,7 @@ public class World {
         initializePlayer(Constants.PLAYER_NUMBER_2);
 
         registerAfterUpdate(ground);
+        registerAfterUpdate(windHandler);
 
         setGameState(GameState.PLAYERONETURN);
 
@@ -107,6 +111,7 @@ public class World {
 
     private void initializePlayer(int playerNumber) {
         players[playerNumber] = new Player(playerNumber, this);
+        players[playerNumber].setWindHandler(windHandler);
     }
 
     public void toggleDebugRender() {
@@ -245,12 +250,14 @@ public class World {
                     player.setWormsStatic(true);
                 }
                 getCurrentPlayer().onBeginTurn();
+                windHandler.setNextWind();
                 break;
             case PLAYERTWOTURN:
                 for (Player player : players) {
                     player.setWormsStatic(true);
                 }
                 getCurrentPlayer().onBeginTurn();
+                windHandler.setNextWind();
                 break;
             case GAMEOVERPLAYERONEWON:
                 screen.setGameOver(WinningPlayer.PLAYERONE);
@@ -324,6 +331,7 @@ public class World {
     }
 
     public void spawnProjectile(Projectile projectile) {
+        windHandler.setProjectile(projectile);
         registerAfterUpdate(projectile);
         advanceGameState();
         camera.setCameraFocus(projectile);
