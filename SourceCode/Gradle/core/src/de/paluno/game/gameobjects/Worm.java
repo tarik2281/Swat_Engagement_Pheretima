@@ -1,6 +1,5 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -11,12 +10,14 @@ import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
-import de.paluno.game.WeaponType;
-import de.paluno.game.screens.PlayScreen;
-
-import java.util.ArrayList;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
+
+    public class SnapshotData {
+        private int characterNumber;
+        private Vector2 position;
+        private int health;
+    }
 
     private int characterNumber;
 
@@ -29,47 +30,22 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
 	private AnimatedSprite walkAnimation;
-	private AnimatedSprite jumpAnimation;
+	private AnimatedSprite flyAnimation;
 	private AnimatedSprite weaponAnimation;
 	
 	private int movement = Constants.MOVEMENT_NO_MOVEMENT;
 	private int orientation;
 	private boolean jump = false;
-	private int groundContacts = 0;
 
+	private int numContacts = 0;
+	private boolean isStatic = false;
+	private boolean isPlaying;
+
+	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
 
 	private int health;
 
-	private Weapon currentWeapon = null;
-
-	/*public Worm(int num, PlayScreen screen, Vector2 position) {
-		// Set given starting parameters
-		this.playerNumber = num;
-		this.world = world;
-		this.spawnPosition = position;
-		
-		// Body will be setup from PlayScreen
-		
-		// Setup animation Sprites once for later use
-		idleAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormBreath));
-		walkAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormWalk));
-		equipGunAnimation = new AnimatedSprite(screen.getAssetManager().get(Assets.wormEquipGun));
-
-		// By default no Worm has a weapon equipped, until it's officially his turn
-		gunEquipped = false;
-		gunUnequipping = false;
-
-		// And of course we have limited health
-		health = Constants.WORM_MAX_HEALTH;
-
-		// setup the animation
-		updateAnimation();
-	}*/
-	/**
-	 * Empty constructor for cloning purposes
-	 */
-	public Worm() {}
 	/**
 	 * Constructor
 	 * @param player - reference to the player we belong to
@@ -90,7 +66,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Load animations
 		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-		//this.jumpAnimation = new AnimatedSprite(this.assets.get(Assets.wormJump));
+		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
 
 		// Get our spawning position
 		this.spawnPosition = world.generateSpawnPosition();
@@ -101,7 +77,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Finally setup Animations
 		updateAnimation();
 	}
-	
+
 	/**
 	 * Handler method for Game Loop's Update phase
 	 * @param delta - Time since last update in seconds
@@ -127,29 +103,31 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		// Now we calculate the new movement speed based on current movement impulses
 		// http://www.iforce2d.net/b2dtut/constant-speed
-		Vector2 currentVel = body.getLinearVelocity();
-		float desiredVel = 0.0f;
+        if (isPlaying) {
+            Vector2 currentVel = body.getLinearVelocity();
+            float desiredVel = 0.0f;
 
-		switch (movement) {
-            case Constants.MOVEMENT_LEFT:
-                desiredVel = -Constants.MOVE_VELOCITY;
-                break;
-            case Constants.MOVEMENT_NO_MOVEMENT:
-            default:
-                //if (isStandsOnGround())
+            switch (movement) {
+                case Constants.MOVEMENT_LEFT:
+                    desiredVel = -Constants.MOVE_VELOCITY;
+                    break;
+                case Constants.MOVEMENT_NO_MOVEMENT:
+                default:
+                    //if (isStandsOnGround())
                     desiredVel = 0.0f;
-                //else
+                    //else
                     //desiredVel = (orientation == Constants.WORM_DIRECTION_LEFT) ? -Constants.MOVE_VELOCITY : Constants.MOVE_VELOCITY;
-                break;
-            case Constants.MOVEMENT_RIGHT:
-                desiredVel = Constants.MOVE_VELOCITY;
-                break;
-        }
+                    break;
+                case Constants.MOVEMENT_RIGHT:
+                    desiredVel = Constants.MOVE_VELOCITY;
+                    break;
+            }
 
-        float velChange = desiredVel - currentVel.x;
-        // Finally we calculate the actual impulse force, based on body mass
-		float impulse = body.getMass() * velChange;
-		this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
+            float velChange = desiredVel - currentVel.x;
+            // Finally we calculate the actual impulse force, based on body mass
+            float impulse = body.getMass() * velChange;
+            this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
+        }
 		
 		// Worm fell off the world rim? Is ded.
 		if (!world.getWorldBounds().contains(body.getPosition())) die();
@@ -190,65 +168,112 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Blueprint with spawning position and BodyType
 		BodyDef bodyDef = new BodyDef();
 		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
-		bodyDef.type = BodyType.DynamicBody;
+		bodyDef.type = isStatic ? BodyType.StaticBody : BodyType.DynamicBody;
 		
 		// Create the actual physics body in our current game world
 		this.body = world.createBody(bodyDef);
 		body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Worm is easy, just a rectangle
-        CircleShape shape = new CircleShape();
-        shape.setRadius(Constants.WORM_HEIGHT / 2.0f);
-		PolygonShape bodyRect = new PolygonShape();
-		bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
+		//PolygonShape bodyRect = new PolygonShape();
+		//bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
+		CircleShape bodyRect = new CircleShape();
+		bodyRect.setRadius(Constants.WORM_HEIGHT / 2.0f);
+		PolygonShape footRect = new PolygonShape();
+		footRect.setAsBox(Constants.WORM_WIDTH / 4.0f, Constants.WORM_WIDTH / 4.0f, new Vector2(0.0f, -Constants.WORM_HEIGHT / 2.0f), 0.0f);
 
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
 		fixtureDef.density = 0.5f;
-		fixtureDef.friction = 0.0f;
+		fixtureDef.friction = 1.0f;
 		fixtureDef.restitution = 0.0f;
 		
 		// Create, apply, done
 		Fixture fix = this.body.createFixture(fixtureDef);
 		// CollisionHandler Identifier
 		fix.setUserData("Worm");
-		
+
+		fixtureDef.shape = footRect;
+		fixtureDef.isSensor = true;
+		fixtureDef.density = 0.0f;
+		fixtureDef.friction = 0.0f;
+		fixtureDef.restitution = 0.0f;
+		fix = body.createFixture(fixtureDef);
+		fix.setUserData("WormFoot");
+
 		// Get rid of temporary material properly
 		bodyRect.dispose();
+		footRect.dispose();
 	}
-
-	public void equipWeapon(Weapon weapon) {
-	    currentWeapon = weapon;
-	    weaponAnimation = weapon.createAnimatedSprite();
-
-	    gunUnequipping = false;
-	    updateAnimation();
-    }
 
 	/**
 	 * Getter method for our physics body
 	 * @return body
 	 */
-	public Body getBody() {return this.body;}
+	public Body getBody() {
+		return this.body;
+	}
+
 	/**
 	 * Soft setter method for our physics body - set to null on death
 	 */
-	public void setBodyToNullReference() {this.body = null;}
+	public void setBodyToNullReference() {
+		this.body = null;
+	}
+
+	public void setIsPlaying(boolean isPlaying) {
+		this.isPlaying = isPlaying;
+
+		if (isPlaying)
+			setIsStatic(false);
+	}
+
+	public boolean isPlaying() {
+		return isPlaying;
+	}
+
+	public void setIsStatic(boolean isStatic) {
+		this.isStatic = isStatic;
+
+		if (isStatic)
+			numContacts = 0;
+
+		if (body != null)
+			body.setType(isStatic ? BodyType.StaticBody : BodyType.DynamicBody);
+
+		updateAnimation();
+	}
+
+	public boolean isStatic() {
+		return isStatic;
+	}
+
+	public void equipWeapon(Weapon weapon) {
+		currentWeapon = weapon;
+		weaponAnimation = weapon.createAnimatedSprite();
+
+		gunUnequipping = false;
+		updateAnimation();
+	}
+
+	/**
+	 * Soft setter method for animation state - reverse gun animation
+	 */
+	public void unequipWeapon() {
+		if (currentWeapon != null) {
+			gunUnequipping = true;
+			updateAnimation();
+		}
+	}
+
 	/**
 	 * Getter reference to parents (player) player Number
 	 * @return player.playerNumber
 	 */
-	public int getPlayerNumber() {return this.player.getPlayerNumber();}
-	/**
-	 * Soft setter method for animation state - reverse gun animation
-	 */
-    public void unequipGun() {
-        if (currentWeapon != null) {
-			gunUnequipping = true;
-			updateAnimation();
-		}
-    }
+	public int getPlayerNumber() {
+		return this.player.getPlayerNumber();
+	}
 
     /**
      * Damage handler method - calculate remaining life and death
@@ -263,6 +288,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			die();
 		}
 	}
+
 	/**
 	 * Getter method for our character's health
 	 * @return health
@@ -297,30 +323,23 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		return this.player.isPlayerTurn() &&
 				this.characterNumber == this.player.getTurn();
 	}
-	
+
 	/**
 	 * Getter method for character's ground status
 	 * @return standsOnGround
 	 */
 	public boolean isStandsOnGround() {
 	    if (getBody() == null) return true;
-	    return getBody().getLinearVelocity().y > -0.1f && getBody().getLinearVelocity().y < 0.1f;
+	    return numContacts > 0 || isStatic();
 	}
 
 	public void beginContact() {
-		boolean stoodOnGround = isStandsOnGround();
-
-		groundContacts++;
-
-		if (!stoodOnGround)
+		if (numContacts++ == 0)
 			updateAnimation();
 	}
 
 	public void endContact() {
-	    if (--groundContacts < 0)
-	        throw new IllegalStateException("Already ended all contacts");
-
-		if (!isStandsOnGround())
+		if (--numContacts == 0)
 			updateAnimation();
 	}
 
@@ -329,6 +348,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param newMovementCode - Constant based movement code for left, right or stop
 	 */
 	public void setMovement(int newMovementCode) {
+	    if (newMovementCode != Constants.MOVEMENT_LEFT && newMovementCode != Constants.MOVEMENT_RIGHT && newMovementCode != Constants.MOVEMENT_NO_MOVEMENT)
+	        throw new IllegalArgumentException("Movement code must be either MOVEMENT_LEFT, MOVEMENT_RIGHT or MOVEMENT_NO_MOVEMENT");
+
 		// Same code? Nothing to go here!
 		if (movement == newMovementCode) return;
 
@@ -354,38 +376,17 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Method to update our character's animation state
 	 */
 	private void updateAnimation() {
-		/*switch (movement) {
-			case Constants.MOVEMENT_LEFT:
-			case Constants.MOVEMENT_RIGHT:
-				// We have some movement, show that
-				currentAnimation = walkAnimation;
-				break;
-			case Constants.MOVEMENT_NO_MOVEMENT:
-				// No movement order - that means we either just idle or, if it's our turn, have a weapon equipped
-				if (gunEquipped)
-					// Gun should be equipped? Show that animation
-					currentAnimation = equipGunAnimation;
-				else
-					// No weapon? Idle it is then
-					currentAnimation = this.assets.getAnimation('idle');
-				break;
-		}*/
-
-		if(!isStandsOnGround()) currentAnimation = jumpAnimation;
-		else if(movement != Constants.MOVEMENT_NO_MOVEMENT) currentAnimation = walkAnimation;
-		else {
-			if(getCurrentWeapon() != null) currentAnimation = weaponAnimation;
-			else currentAnimation = idleAnimation;
-		}
+		if (!isStandsOnGround()) 								currentAnimation = flyAnimation;
+		else if (movement != Constants.MOVEMENT_NO_MOVEMENT) 	currentAnimation = walkAnimation;
+		else if (getCurrentWeapon() != null) 					currentAnimation = weaponAnimation;
+		else 													currentAnimation = idleAnimation;
 
 		// flip the animation if needed since the animations are only for the left direction
-		if (currentAnimation != null) {
-			currentAnimation.setOrientation(orientation);
-			currentAnimation.reset();
+		currentAnimation.setOrientation(orientation);
+		currentAnimation.reset();
 
-			if (currentWeapon != null && gunUnequipping)
-				currentAnimation.reverse();
-		}
+		if (currentWeapon != null && gunUnequipping)
+			currentAnimation.reverse();
 	}
 
 	/**
@@ -423,8 +424,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
 	 */
 	public void shoot() {
-	    if(canShoot() && currentWeapon != null)
-	        currentWeapon.shoot();
+	    if(canShoot() && currentWeapon != null) {
+			currentWeapon.shoot();
+			unequipWeapon();
+	    }
 	}
 	
 	/**
@@ -432,10 +435,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @return clone
 	 */
 	public Worm clone() {
-		Worm clone = new Worm();
-		clone.setCloningParameters(this);
-		return clone;
+		//Worm clone = new Worm();
+		//clone.setCloningParameters(this);
+		//return clone;
+        return null;
 	}
+
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from
@@ -452,7 +457,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.currentAnimation = copy.currentAnimation;
 		this.idleAnimation = copy.idleAnimation;
 		this.walkAnimation = copy.walkAnimation;
-		this.jumpAnimation = copy.jumpAnimation;
 
 		this.movement = copy.movement;
 		this.orientation = copy.orientation;
@@ -463,12 +467,5 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.health = copy.health;
 
 		this.currentWeapon = copy.currentWeapon;
-}
-
-    /**
-	 * Method to call the WeaponsSelector's show() method, to make it visible and be able to select weapons
-	 */
-	public void showWeaponSelector() {
-		//this.selector.show();
 	}
 }

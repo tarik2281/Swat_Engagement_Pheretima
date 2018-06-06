@@ -106,7 +106,7 @@ public class World {
     }
 
     private void initializePlayer(int playerNumber) {
-        players[playerNumber] = new Player(playerNumber, this, getAssetManager());
+        players[playerNumber] = new Player(playerNumber, this);
     }
 
     public void toggleDebugRender() {
@@ -130,7 +130,7 @@ public class World {
             for (Player player : players) {
                 for (Worm worm : player.characters) {
                     if (worm != null && worm.getBody() != null)
-                    if (worm.getBody().getLinearVelocity().len() >= 0.0001f) {
+                    if (worm.getBody().isAwake()) {
                         advance = false;
                     }
                 }
@@ -222,6 +222,17 @@ public class World {
         return screen.getAssetManager();
     }
 
+    public void playerDefeated(Player player) {
+        switch (player.getPlayerNumber()) {
+            case Constants.PLAYER_NUMBER_1:
+                screen.setGameOver(WinningPlayer.PLAYERTWO);
+                break;
+            case Constants.PLAYER_NUMBER_2:
+                screen.setGameOver(WinningPlayer.PLAYERONE);
+                break;
+        }
+    }
+
     public void setGameState(GameState gameState) {
         oldGameState = this.gameState;
         this.gameState = gameState;
@@ -230,9 +241,15 @@ public class World {
 
         switch (gameState) {
             case PLAYERONETURN:
+                for (Player player : players) {
+                    player.setWormsStatic(true);
+                }
                 getCurrentPlayer().onBeginTurn();
                 break;
             case PLAYERTWOTURN:
+                for (Player player : players) {
+                    player.setWormsStatic(true);
+                }
                 getCurrentPlayer().onBeginTurn();
                 break;
             case GAMEOVERPLAYERONEWON:
@@ -240,6 +257,11 @@ public class World {
                 break;
             case GAMEOVERPLAYERTWOWON:
                 screen.setGameOver(WinningPlayer.PLAYERTWO);
+                break;
+            case SHOOTING:
+                for (Player player : players) {
+                    player.setWormsStatic(false);
+                }
                 break;
         }
 

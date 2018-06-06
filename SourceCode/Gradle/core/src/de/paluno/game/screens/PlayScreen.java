@@ -21,9 +21,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 	private World world;
 
     private PlayUILayer uiLayer;
-    WeaponUI weaponUI;
-
-    private InputMultiplexer inputMultiplexer;
+    private WeaponUI weaponUI;
 
     public PlayScreen(SEPGame game) {
         this.game = game;
@@ -45,7 +43,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         //Gdx.input.setInputProcessor(inputAdapter);
         weaponUI = new WeaponUI(this);
 
-        inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
+        InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
@@ -96,9 +94,5 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     public void setGameOver(WinningPlayer winningPlayer) {
         game.setGameOver(winningPlayer);
-    }
-
-    private boolean isPlayerTurn() {
-        return world.getGameState() == GameState.PLAYERTWOTURN || world .getGameState() == GameState.PLAYERONETURN;
     }
 }

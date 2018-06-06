@@ -10,7 +10,6 @@ import de.paluno.game.screens.PlayScreen;
 public class CollisionHandler implements ContactListener {
 
 	public CollisionHandler() {
-		// TODO Auto-generated constructor stub
 
 	}
 
@@ -21,11 +20,9 @@ public class CollisionHandler implements ContactListener {
 
 	}
 	
-	  /**
-    *
+	/**
     * treats the contact of colliding fixtures
     */
-
 	@Override
 	public void beginContact(Contact contact) {
 
@@ -43,22 +40,25 @@ public class CollisionHandler implements ContactListener {
 			return;
 		}
 
+		if (fixA.getUserData() == "WormFoot" && fixB.getUserData() == "Worm") {
+			// worm stands on another worm
+			((Worm)o1).beginContact();
+		}
+		else if (fixB.getUserData() == "WormFoot" && fixA.getUserData() == "Worm") {
+			// worm stands on another worm
+			((Worm)o2).beginContact();
+		}
+
 		// Worm -> Ground
-		if ((fixA.getUserData() == "Worm" && o2 instanceof Ground)) {
+		if ((fixA.getUserData() == "WormFoot" && o2 instanceof Ground)) {
+			// worm stands on ground
 			Worm worm = (Worm) o1;
 			worm.beginContact();
-			//worm.setStandsOnGround(true);
-
 			
-			System.out.println("Worm on Ground");
-			
-		} else if ((fixB.getUserData() == "Worm" && o1 instanceof Ground)) {
+		} else if ((fixB.getUserData() == "WormFoot" && o1 instanceof Ground)) {
+			// worm stands on ground
 			Worm worm = (Worm) o2;
 			worm.beginContact();
-			//worm.setStandsOnGround(true);
-			
-			System.out.println("Worm on Ground!");
-			
 		}
 
 		// Projectile -> Worm
@@ -73,7 +73,7 @@ public class CollisionHandler implements ContactListener {
 			
 			System.out.println("Projectile collided with Worm!");
 			System.out.println("Worms life = " + worm.getHealth());
-			
+
 		} else if ((fixB.getUserData() == "Worm" && fixA.getUserData() == "Projectile")) {
 			Worm worm = (Worm) o2;
 			Projectile projectile = (Projectile) o1;
@@ -89,8 +89,6 @@ public class CollisionHandler implements ContactListener {
 		
 		
 		// Projectile -> Ground
-		
-
 		if ((fixB.getUserData() == "Projectile" && o1 instanceof Ground)) {
 			
 			Projectile projectile = (Projectile) o2;
@@ -107,14 +105,11 @@ public class CollisionHandler implements ContactListener {
 			
 			System.out.println("Projectile collided with Ground");
 		}
-		
-		}
+	}
 	
-	  /**
-    *
+	/**
     * treats the contact of fixtures which separate from each other
-    */	
-
+    */
 	@Override
 	public void endContact(Contact contact) {
 
@@ -127,45 +122,33 @@ public class CollisionHandler implements ContactListener {
 		
 		Object o1 = fixA.getBody().getUserData();
 		Object o2 = fixB.getBody().getUserData();
-		
 
 		if (o1 == null || o2 == null) {
 			return;
 		}
 		
-		
 		// Worm -> jump || Worm -> out of world
-		if ((fixA.getUserData() == "Worm" && o2 instanceof Ground)) {
+		if ((fixA.getUserData() == "WormFoot" && o2 instanceof Ground)) {
 			Worm worm = (Worm) o1;
 			worm.endContact();
-			//worm.setStandsOnGround(false);
-			
-			
-			System.out.println("Worm not on the Ground!");
-			
-		} else if ((fixB.getUserData() == "Worm" && o1 instanceof Ground)) {
+		} else if ((fixB.getUserData() == "WormFoot" && o1 instanceof Ground)) {
 			Worm worm = (Worm) o2;
 			worm.endContact();
-			//worm.setStandsOnGround(false);
-			
-			System.out.println("Worm not on the Ground!");
-			
-			
 		}
-		
 
+		if (fixA.getUserData() == "WormFoot" && fixB.getUserData() == "Worm") {
+			Worm worm = (Worm)o1;
+			worm.endContact();
+		}
+		else if (fixB.getUserData() == "WormFoot" && fixA.getUserData() == "Worm") {
+			Worm worm = (Worm)o2;
+			worm.endContact();
+		}
 	}
 
 	@Override
-	public void preSolve(Contact contact, Manifold oldManifold) {
-		// TODO Auto-generated method stub
-
-	}
+	public void preSolve(Contact contact, Manifold oldManifold) { }
 
 	@Override
-	public void postSolve(Contact contact, ContactImpulse impulse) {
-
-	}
-	// TODO Auto-generated method stub
-
+	public void postSolve(Contact contact, ContactImpulse impulse) { }
 }

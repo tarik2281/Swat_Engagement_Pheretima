@@ -1,0 +1,8 @@
+<AnimatedSprite>
+    <Texture>WormFly.png</Texture>
+    <Columns>1</Columns>
+    <Rows>2</Rows>
+    <FrameInterval>0.065</FrameInterval>
+    <SpriteOffset>0</SpriteOffset>
+    <PlayMode>Loop</PlayMode>
+</AnimatedSprite>

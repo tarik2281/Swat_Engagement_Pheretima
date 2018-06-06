@@ -6,9 +6,15 @@ import com.badlogic.gdx.assets.AssetManager;
 import de.paluno.game.*;
 
 public class Player implements Updatable {
+
+	public class SnapshotData {
+		private int playerNumber;
+		private Worm.SnapshotData[] wormData;
+	}
+
 	private int playerNum;
 	
-	private int characterNum;
+	private int numCharacters;
 	public Worm[] characters;
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
@@ -17,8 +23,6 @@ public class Player implements Updatable {
 	private int turn = 1;
 	
 	private World world;
-	private AssetManager assets;
-	private InputHandler input;
 
 	private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
 		if (keyDown) {
@@ -87,13 +91,11 @@ public class Player implements Updatable {
 	 * @param world - Reference to the world we are playing in
 	 * @param assets - Reference to the global Asset Manager
 	 */
-	public Player(int playerNum, World world, AssetManager assets) {
+	public Player(int playerNum, World world) {
 		
-		this.characterNum = Constants.MAX_CHAR_NUM;
+		this.numCharacters = Constants.MAX_CHAR_NUM;
 		this.playerNum = playerNum;
 		this.world = world;
-
-		this.assets = assets;
 
         setupWeapons();
         setupWorms();
@@ -102,21 +104,24 @@ public class Player implements Updatable {
 		this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
 	}
 
+	public Player(SnapshotData data, World world) {
+
+	}
+
 	public ShotDirectionIndicator getShotDirectionIndicator() {
 		return shotDirectionIndicator;
 	}
 	public WindDirectionIndicator getWindDirectionIndicator(){ return windDirectionIndicator; }
 
 	private void setupWorms() {
-        this.characters = new Worm[characterNum];
+        this.characters = new Worm[numCharacters];
 
-        for(int i = 0; i < characterNum; i++) {
-            characters[i] = new Worm(this, i+1);
+        for(int i = 0; i < numCharacters; i++) {
+            characters[i] = new Worm(this, i);
             HealthBar healthBar = new HealthBar(world, characters[i]);
             world.registerAfterUpdate(characters[i]);
             world.registerAfterUpdate(healthBar);
         }
-
     }
 
 	private void setupWeapons() {
@@ -161,8 +166,9 @@ public class Player implements Updatable {
 		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
 		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
 		getCurrentWorm().equipWeapon(weapons[2]);
+		getCurrentWorm().setIsPlaying(true);
 
-		this.input = InputHandler.getInstance();
+		InputHandler input = InputHandler.getInstance();
 		input.registerKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
 		input.registerKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
 		input.registerKeyListener(Constants.KEY_DO_ACTION, keyListener);
@@ -180,11 +186,12 @@ public class Player implements Updatable {
 
 		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 		getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-		getCurrentWorm().unequipGun();
+		getCurrentWorm().unequipWeapon();
+		getCurrentWorm().setIsPlaying(false);
 
         shiftTurn();
 
-		this.input = InputHandler.getInstance();
+		InputHandler input = InputHandler.getInstance();
 		input.unregisterKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
 		input.unregisterKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
 		input.unregisterKeyListener(Constants.KEY_DO_ACTION, keyListener);
@@ -201,21 +208,30 @@ public class Player implements Updatable {
 	 * Shift through all still available characters to find the next one whose turn it is
 	 */
 	protected void shiftTurn() {
-		if(characterNum == 0) return;
-		this.turn++;
-		if(turn > characterNum) turn = 1;
-		if(characters[turn-1] == null) shiftTurn();
+		turn++;
+		if (turn == Constants.MAX_CHAR_NUM)
+			turn = 0;
+		if (characters[turn] == null) shiftTurn();
+
+		//if(numCharacters == 0) return;
+		//this.turn++;
+		//if(turn > numCharacters) turn = 1;
+		//if(characters[turn-1] == null) shiftTurn();
 	}
 	/**
 	 * Getter Method for the reference to the Asset Manager
 	 * @return AssetManager
 	 */
-	public AssetManager getAssets() {return this.assets;}
+	public AssetManager getAssets() {
+		return world.getAssetManager();
+	}
 	/**
 	 * Getter method for the world we are playing in
 	 * @return world
 	 */
-	public World getWorld() {return this.world;}
+	public World getWorld() {
+		return this.world;
+	}
 	
 	/**
 	 * Soft setter method for characterNumber - Set Character as KIA and remove it
@@ -223,12 +239,15 @@ public class Player implements Updatable {
 	 */
 	protected void characterDied(int charNum) {
 		// No characters anymore or this one allready dead? Nothing to do here.
-		if(this.characterNum <= 0 || this.characters[charNum-1] == null)
+		if(this.numCharacters <= 0 || this.characters[charNum] == null)
 			return;
 
-		world.forgetAfterUpdate(characters[charNum - 1]);
-		this.characters[charNum-1] = null;
-		this.characterNum--;
+		world.forgetAfterUpdate(characters[charNum]);
+		this.characters[charNum] = null;
+		this.numCharacters--;
+
+		if (numCharacters <= 0)
+			world.playerDefeated(this);
 	}
 
 	public Weapon[] getWeapons() {
@@ -248,12 +267,20 @@ public class Player implements Updatable {
 				||
 				(this.playerNum == Constants.PLAYER_NUMBER_2 && world.getGameState() == GameState.PLAYERTWOTURN);
 	}
+
+	public void setWormsStatic(boolean isStatic) {
+		for (Worm worm : characters) {
+			if (worm != null) {
+				worm.setIsStatic(isStatic);
+			}
+		}
+	}
 	
 	/**
 	 * Getter method for the character whose turn it currently is
 	 * @return Worm
 	 */
-	public Worm getCurrentWorm() {return this.characters[this.turn-1];}
+	public Worm getCurrentWorm() {return this.characters[this.turn];}
 	
 	/**
 	 * Passthrough method to give move order to the currently movable worm
@@ -267,7 +294,10 @@ public class Player implements Updatable {
 	/**
 	 * Passthrough method to give a shoot order to the currently movable worm
 	 */
-	public void shoot() {if(getCurrentWorm() != null) getCurrentWorm().shoot();}
+	public void shoot() {
+		if(getCurrentWorm() != null)
+			getCurrentWorm().shoot();
+	}
 	
 	/**
 	 * Method to return a clone of this object
@@ -284,37 +314,17 @@ public class Player implements Updatable {
 	 */
 	public void setCloningParameters(Player copy) {
 		this.playerNum = copy.playerNum;
-		
-		this.characterNum = copy.characterNum;
+
+		this.numCharacters = copy.numCharacters;
 		this.characters = copy.characters;
 		this.turn = copy.turn;
 		
 		this.world = copy.world;
-		this.assets = copy.assets;
 	}
 
-	public void moveKeyDown(Integer keyCode) {
-		switch (keyCode) {
-			case Constants.KEY_MOVE_LEFT:
-				getCurrentWorm().setMovement(Constants.MOVEMENT_LEFT);
-				break;
-			case Constants.KEY_MOVE_RIGHT:
-				getCurrentWorm().setMovement(Constants.MOVEMENT_RIGHT);
-				break;
-		}
-	}
-
-	public void moveKeyUp(Integer keyCode) {
-		switch (keyCode) {
-			case Constants.KEY_MOVE_LEFT:
-				if (getCurrentWorm().getMovement() == Constants.MOVEMENT_LEFT)
-					getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-				break;
-			case Constants.KEY_MOVE_RIGHT:
-				if (getCurrentWorm().getMovement() == Constants.MOVEMENT_RIGHT)
-					getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-				break;
-		}
+	public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		return data;
 	}
 
 	/**
