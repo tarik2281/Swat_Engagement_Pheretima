@@ -88,8 +88,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         return false;
     }
 
-    public void setGameState(GameState gameState) {
-        uiLayer.setGameState(gameState);
+    public void setGameState(GameState gameState, int currentPlayer) {
+        uiLayer.setGameState(gameState, currentPlayer);
     }
 
     public void setGameOver(WinningPlayer winningPlayer) {

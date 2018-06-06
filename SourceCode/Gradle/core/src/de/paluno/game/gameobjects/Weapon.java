@@ -27,12 +27,12 @@ public class Weapon {
 	/**
 	 * Method to generate a projectile if allowed to
 	 */
-	public void shoot() {
+	public void shoot(Worm worm, float angle) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
-			Vector2 direction = new Vector2(1, 0).rotate(player.getShotDirectionIndicator().getAngle());
+			Vector2 direction = new Vector2(1, 0).rotate(angle);
 
-			Projectile projectile = new Projectile(player.getWorld(), player.getCurrentWorm(),
-					type, player.getCurrentWorm().getBody().getPosition(), direction);
+			Projectile projectile = new Projectile(player.getWorld(), worm,
+					type, worm.getBody().getPosition(), direction);
 
 			player.getWorld().spawnProjectile(projectile);
 

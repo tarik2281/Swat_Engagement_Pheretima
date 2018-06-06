@@ -20,10 +20,9 @@ public class World {
 
     private PlayScreen screen;
     private WindHandler windHandler;
-    private WindDirectionIndicator windDirectionIndicator;
 
-    private GameState oldGameState = GameState.PLAYERONETURN;
-    private GameState gameState = GameState.PLAYERONETURN;
+    private int currentPlayer;
+    private GameState currentGameState = GameState.NONE;
 
     private LinkedList<Object> objectRegisterQueue;
     private LinkedList<Object> objectForgetQueue;
@@ -98,13 +97,14 @@ public class World {
 
         players = new Player[Constants.NUM_PLAYERS];
 
+        currentPlayer = Constants.PLAYER_NUMBER_1;
         initializePlayer(Constants.PLAYER_NUMBER_1);
         initializePlayer(Constants.PLAYER_NUMBER_2);
 
         registerAfterUpdate(ground);
         registerAfterUpdate(windHandler);
 
-        setGameState(GameState.PLAYERONETURN);
+        setGameState(GameState.PLAYERTURN);
 
         InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
     }
@@ -129,7 +129,7 @@ public class World {
     }
 
     public void updatePhase(float delta) {
-        if (gameState == GameState.WAITING) {
+        if (currentGameState == GameState.WAITING) {
             boolean advance = true;
 
             for (Player player : players) {
@@ -146,7 +146,7 @@ public class World {
         }
 
         for (Updatable updatable : updatableObjects) {
-            updatable.update(delta, gameState);
+            updatable.update(delta, currentGameState);
         }
     }
 
@@ -253,25 +253,34 @@ public class World {
         }
     }
 
-    public void setGameState(GameState gameState) {
-        oldGameState = this.gameState;
-        this.gameState = gameState;
+    private void setWormsStatic(boolean isStatic) {
+        for (Player player : players) {
+            player.setWormsStatic(isStatic);
+        }
+    }
 
-        screen.setGameState(gameState);
+    private void shiftPlayers() {
+        currentPlayer = (currentPlayer + 1) % Constants.NUM_PLAYERS;
+    }
+
+    private void setGameState(GameState gameState) {
+        switch (this.currentGameState) {
+            case PLAYERTURN:
+                getCurrentPlayer().onEndTurn();
+                shiftPlayers();
+                setWormsStatic(false);
+                break;
+        }
+
+        this.currentGameState = gameState;
+
+        screen.setGameState(gameState, currentPlayer);
 
         switch (gameState) {
-            case PLAYERONETURN:
-                for (Player player : players) {
-                    player.setWormsStatic(true);
-                }
+            case PLAYERTURN:
+                setWormsStatic(true);
                 getCurrentPlayer().onBeginTurn();
-                windHandler.setNextWind();
-                break;
-            case PLAYERTWOTURN:
-                for (Player player : players) {
-                    player.setWormsStatic(true);
-                }
-                getCurrentPlayer().onBeginTurn();
+                camera.setCameraFocus(getCurrentPlayer().getCurrentWorm());
                 windHandler.setNextWind();
                 break;
             case GAMEOVERPLAYERONEWON:
@@ -281,44 +290,26 @@ public class World {
                 screen.setGameOver(WinningPlayer.PLAYERTWO);
                 break;
             case SHOOTING:
-                for (Player player : players) {
-                    player.setWormsStatic(false);
-                }
                 break;
         }
-
-        if (gameState != GameState.SHOOTING)
-            camera.setCameraFocus(getCurrentWorm());
     }
 
     public void advanceGameState() {
-        switch (gameState) {
-            case PLAYERONETURN:
-                getCurrentPlayer().onEndTurn();
-                setGameState(GameState.SHOOTING);
-                break;
-            case PLAYERTWOTURN:
-                getCurrentPlayer().onEndTurn();
-                setGameState(GameState.SHOOTING);
+        switch (currentGameState) {
+            case PLAYERTURN:
+                setGameState(GameState.WAITING);
                 break;
             case SHOOTING:
-                gameState = GameState.WAITING;
+                setGameState(GameState.WAITING);
                 break;
             case WAITING:
-                switch (oldGameState) {
-                    case PLAYERONETURN:
-                        setGameState(GameState.PLAYERTWOTURN);
-                        break;
-                    case PLAYERTWOTURN:
-                        setGameState(GameState.PLAYERONETURN);
-                        break;
-                }
+                setGameState(GameState.PLAYERTURN);
                 break;
         }
     }
 
     public GameState getGameState() {
-        return gameState;
+        return currentGameState;
     }
 
     public Vector2 generateSpawnPosition() {
@@ -329,38 +320,11 @@ public class World {
         return worldBounds;
     }
 
-    public Worm getCurrentWorm() {
-        Player player = getCurrentPlayer();
-        if (player != null)
-            return player.getCurrentWorm();
-
-        return null;
-    }
-
-    public ShotDirectionIndicator getCurrentIndicator() {
-        Player player = getCurrentPlayer();
-        if (player != null)
-            return player.getShotDirectionIndicator();
-
-        return null;
-    }
-
     public void spawnProjectile(Projectile projectile) {
         windHandler.setProjectile(projectile);
         registerAfterUpdate(projectile);
-        advanceGameState();
+        setGameState(GameState.SHOOTING);
         camera.setCameraFocus(projectile);
-    }
-
-    public void wormDied(Worm worm) {
-        switch (worm.getPlayerNumber()) {
-            case Constants.PLAYER_NUMBER_1:
-                setGameState(GameState.GAMEOVERPLAYERTWOWON);
-                break;
-            case Constants.PLAYER_NUMBER_2:
-                setGameState(GameState.GAMEOVERPLAYERONEWON);
-                break;
-        }
     }
 
     private void registerObjects() {
@@ -372,9 +336,6 @@ public class World {
             if (gameObject instanceof PhysicsObject) {
                 PhysicsObject physicsObject = (PhysicsObject)gameObject;
                 physicsObject.setupBody();
-                if (physicsObject.getBody() == null) {
-                    System.out.println("We fucked up");
-                }
                 physicsObject.getBody().setUserData(gameObject);
             }
             if (gameObject instanceof Renderable) {
@@ -411,16 +372,7 @@ public class World {
         objectForgetQueue.clear();
     }
 
-    private Player getCurrentPlayer() {
-        switch (gameState) {
-            case PLAYERONETURN:
-            case GAMEOVERPLAYERONEWON:
-                return players[Constants.PLAYER_NUMBER_1];
-            case PLAYERTWOTURN:
-            case GAMEOVERPLAYERTWOWON:
-                return players[Constants.PLAYER_NUMBER_2];
-        }
-
-        return null;
+    public Player getCurrentPlayer() {
+        return players[currentPlayer];
     }
 }
