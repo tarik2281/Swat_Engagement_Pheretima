@@ -4,6 +4,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
+import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.screens.WeaponUI;
 
 public class Player implements Updatable {
 
@@ -107,6 +109,9 @@ public class Player implements Updatable {
 	public void setWindHandler(WindHandler windHandler) {
 		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
 	}
+	public void setWeaponUI(WeaponUI weaponUI){
+	}
+
 
 	public Player(SnapshotData data, World world) {
 

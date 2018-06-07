@@ -10,55 +10,49 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import de.paluno.game.GameState;
+import de.paluno.game.WeaponType;
+import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Renderable;
+import de.paluno.game.gameobjects.Weapon;
+import de.paluno.game.gameobjects.World;
 
 public class WeaponUI implements Renderable {
 
 
-
-
     private PlayScreen playScreen;
     private Stage stage;
-    private Texture gun,grenade,bazooka;
-    private TextureRegion textureRegionGun,textureRegionGrenade, textureRegionBazooka;
-    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade,regionDrawableBazooka;
-    private ImageButton buttonWeaponGun, buttonGrenade,buttonBazooka;
+    private Texture gun, grenade, bazooka;
+    private TextureRegion textureRegionGun, textureRegionGrenade, textureRegionBazooka;
+    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade, regionDrawableBazooka;
+    private ImageButton buttonGun, buttonGrenade, buttonBazooka;
     private Table table;
     private Image image;
-    private Texture textureBackground = new Texture(Gdx.files.internal("weaponUI.png"));
+    private Texture textureBackground;
+    private Player player;
+    private Weapon weapon;
+    private World world;
 
 
 
     WeaponUI(PlayScreen playScreen) {
         this.playScreen = playScreen;
-
+     //   this.player = new Player(1,world);
+        textureBackground = new Texture(Gdx.files.internal("weaponUI.png"));
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
 
         //Gun
         gun = new Texture(Gdx.files.internal("IconGun.png"));
         textureRegionGun = new TextureRegion(gun);
         regionDrawableGun = new TextureRegionDrawable(textureRegionGun);
-        buttonWeaponGun = new ImageButton(regionDrawableGun);
-        buttonWeaponGun.addListener((new ClickListener() {
-
-
-            @Override
-            public boolean mouseMoved(InputEvent event, float x, float y) {
-                System.out.println("Mouse touched");
-                return true;
-            }
-
+        buttonGun = new ImageButton(regionDrawableGun);
+        buttonGun.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("ButtonWeapon1 Clicked");
-                table.setVisible(false);
-
-
+                System.out.println("Gun Button Clicked");
+              //  weapon = new Weapon(player,WeaponType.WEAPON_GUN);
+              //  player.getCurrentWorm().equipWeapon(weapon);
             }
         }));
-
 
 
         // Grenade
@@ -86,9 +80,6 @@ public class WeaponUI implements Renderable {
         }));
 
 
-
-
-
         table = new Table();
 
         //Stage
@@ -97,19 +88,19 @@ public class WeaponUI implements Renderable {
         stage.setDebugAll(false);
 
 
+        table.setBackground(image.getDrawable());
 
-        table.setBackground( image.getDrawable());
+        table.setPosition(1220, 120);
 
-        table.setPosition(1150,120);
 
+        // Positioning of Buttons
         table.top().right();
-        table.add(buttonWeaponGun);
+        table.add(buttonGun);
         table.row();
         table.add(buttonGrenade);
         table.row();
         table.add(buttonBazooka);
-        table.pad(7);
-
+        table.pad(7); //sets space to the edge of table
 
 
         table.setSize(92, 147);
@@ -127,7 +118,7 @@ public class WeaponUI implements Renderable {
 
     }
 
-
+    // Listener for Buttons
     public Stage getInputProcessor() {
         return stage;
     }

@@ -129,7 +129,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.setGravityScale(1.0f);
             Vector2 impulse = new Vector2(direction).scl(body.getMass() * 7.0f);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
-            fix.setUserData("Projectile");
+            fix.setUserData("Bazooka");
 
         } else if (weaponType == WeaponType.WEAPON_GRENADE) {
 
@@ -145,7 +145,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             Vector2 impulse = new Vector2(direction).scl(5.0f * body.getMass());
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             body.applyAngularImpulse(-0.01f * body.getMass(), true);
-            fix.setUserData("Projectile");
+            fix.setUserData("Grenade");
         }
         shape.dispose();
     }
