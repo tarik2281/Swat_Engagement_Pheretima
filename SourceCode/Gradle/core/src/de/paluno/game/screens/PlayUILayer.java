@@ -63,19 +63,21 @@ public class PlayUILayer {
         messageLayout.setText(font, message, color, 0, Align.center, false);
     }
 
-    public void setGameState(GameState gameState) {
+    public void setGameState(GameState gameState, int currentPlayer) {
         String message = null;
         Color color = null;
 
         // set the message and message color according to the current GameState
         switch (gameState) {
-            case PLAYERONETURN:
-                message = "Spieler 1 ist am Zug!";
-                color = Constants.PLAYER_1_COLOR;
-                break;
-            case PLAYERTWOTURN:
-                message = "Spieler 2 ist am Zug!";
-                color = Constants.PLAYER_2_COLOR;
+            case PLAYERTURN:
+                if (currentPlayer == Constants.PLAYER_NUMBER_1) {
+                    message = "Spieler 1 ist am Zug!";
+                    color = Constants.PLAYER_1_COLOR;
+                }
+                else {
+                    message = "Spieler 2 ist am Zug!";
+                    color = Constants.PLAYER_2_COLOR;
+                }
                 break;
             case GAMEOVERPLAYERONEWON:
                 message = "Spieler 1 hat gewonnen!";

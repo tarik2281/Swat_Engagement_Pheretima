@@ -21,7 +21,6 @@ public class Player implements Updatable {
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
 	private WindDirectionIndicator windDirectionIndicator;
-	private WindHandler windHandler;
 	private int turn = 1;
 	
 	private World world;
@@ -101,7 +100,6 @@ public class Player implements Updatable {
 
         setupWeapons();
         setupWorms();
-        windHandler = new WindHandler();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
 		//this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
 	}
@@ -194,10 +192,15 @@ public class Player implements Updatable {
         world.forgetAfterUpdate(getShotDirectionIndicator());
         world.forgetAfterUpdate(getWindDirectionIndicator());
 
+        getShotDirectionIndicator().attachToWorm(null);
+        getWindDirectionIndicator().attachToWorm(null);
+
 		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
-		getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-		getCurrentWorm().unequipWeapon();
-		getCurrentWorm().setIsPlaying(false);
+		if (getCurrentWorm() != null) {
+            getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
+            getCurrentWorm().unequipWeapon();
+            getCurrentWorm().setIsPlaying(false);
+        }
 
         shiftTurn();
 
@@ -218,6 +221,9 @@ public class Player implements Updatable {
 	 * Shift through all still available characters to find the next one whose turn it is
 	 */
 	protected void shiftTurn() {
+	    if (numCharacters == 0)
+	        return;
+
 		turn++;
 		if (turn == Constants.MAX_CHAR_NUM)
 			turn = 0;
@@ -252,9 +258,15 @@ public class Player implements Updatable {
 		if(this.numCharacters <= 0 || this.characters[charNum] == null)
 			return;
 
+		if (getCurrentWorm().isPlaying())
+		    world.advanceGameState();
+
 		world.forgetAfterUpdate(characters[charNum]);
 		this.characters[charNum] = null;
 		this.numCharacters--;
+
+		if (charNum == turn)
+		    shiftTurn();
 
 		if (numCharacters <= 0)
 			world.playerDefeated(this);
@@ -273,9 +285,7 @@ public class Player implements Updatable {
 	 * @return Is it this player's turn?
 	 */
 	public boolean isPlayerTurn() {
-		return (this.playerNum == Constants.PLAYER_NUMBER_1 && world.getGameState() == GameState.PLAYERONETURN)
-				||
-				(this.playerNum == Constants.PLAYER_NUMBER_2 && world.getGameState() == GameState.PLAYERTWOTURN);
+		return world.getCurrentPlayer() == this;
 	}
 
 	public void setWormsStatic(boolean isStatic) {
@@ -306,7 +316,7 @@ public class Player implements Updatable {
 	 */
 	public void shoot() {
 		if(getCurrentWorm() != null)
-			getCurrentWorm().shoot();
+			getCurrentWorm().shoot(getShotDirectionIndicator().getAngle());
 	}
 	
 	/**

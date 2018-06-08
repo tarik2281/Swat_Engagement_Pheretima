@@ -1,8 +1,8 @@
 package de.paluno.game;
 
 public enum GameState {
-	PLAYERONETURN,
-	PLAYERTWOTURN,
+	NONE,
+	PLAYERTURN,
 	SELECTING,
 	SHOOTING,
 	WAITING,

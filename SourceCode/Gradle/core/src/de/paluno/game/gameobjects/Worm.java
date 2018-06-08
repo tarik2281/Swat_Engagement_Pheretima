@@ -423,9 +423,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	/**
 	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
 	 */
-	public void shoot() {
+	public void shoot(float angle) {
 	    if(canShoot() && currentWeapon != null) {
-			currentWeapon.shoot();
+			currentWeapon.shoot(this, angle);
 			unequipWeapon();
 	    }
 	}
