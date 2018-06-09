@@ -63,6 +63,15 @@ public class CollisionHandler implements ContactListener {
 
 		// Projectile -> Worm
 
+		if (fixA.getUserData() == "Worm" && fixB.getUserData() == "Virus") {
+			Worm worm = (Worm)o1;
+			worm.setIsInfected(true);
+		}
+		else if (fixB.getUserData() == "Worm" && fixA.getUserData() == "Virus") {
+			Worm worm = (Worm)o2;
+			worm.setIsInfected(true);
+		}
+
 		if ((fixB.getUserData() == "Projectile" && fixA.getUserData() == "Worm")) {
 			Worm worm = (Worm) o1;
 			Projectile projectile = (Projectile) o2;

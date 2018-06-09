@@ -53,6 +53,9 @@ public class Player implements Updatable {
                 case Input.Keys.F3:
                     getCurrentWorm().equipWeapon(weapons[2]);
                     break;
+				case Input.Keys.F4:
+					getCurrentWorm().equipWeapon(weapons[3]);
+					break;
 			}
 		}
 		else {
@@ -133,6 +136,7 @@ public class Player implements Updatable {
         weapons[0] = new Weapon(this, WeaponType.WEAPON_GUN);
         weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
+        weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
     }
 
 	/**
@@ -181,6 +185,7 @@ public class Player implements Updatable {
 		input.registerKeyListener(Input.Keys.F1, keyListener);
 		input.registerKeyListener(Input.Keys.F2, keyListener);
 		input.registerKeyListener(Input.Keys.F3, keyListener);
+		input.registerKeyListener(Input.Keys.F4, keyListener);
 	}
 
 	public void onEndTurn() {
@@ -209,6 +214,7 @@ public class Player implements Updatable {
         input.unregisterKeyListener(Input.Keys.F1, keyListener);
         input.unregisterKeyListener(Input.Keys.F2, keyListener);
         input.unregisterKeyListener(Input.Keys.F3, keyListener);
+        input.unregisterKeyListener(Input.Keys.F4, keyListener);
 	}
 
 	/**
