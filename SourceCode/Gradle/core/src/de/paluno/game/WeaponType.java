@@ -9,9 +9,10 @@ public enum WeaponType {
 	WEAPON_GUN(Constants.WEAPON_AMMO_INF, Assets.iconGun,
 			Assets.weaponGun, Assets.projectileGun),
 	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade,
-			Assets.weaponGrenade, Assets.projectileGrenade);
+			Assets.weaponGrenade, Assets.projectileGrenade),
+	WEAPON_SPECIAL(Constants.WEAPON_AMMO_INF, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial);
 
-	public static final int NUM_WEAPONS = 3;
+	public static final int NUM_WEAPONS = 4;
 
 	private final int maxAmmo;
 	private final AssetDescriptor<Texture> icon;

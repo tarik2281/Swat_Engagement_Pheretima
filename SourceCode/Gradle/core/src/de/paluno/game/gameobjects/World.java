@@ -183,7 +183,7 @@ public class World {
         objectForgetQueue.add(gameObject);
     }
 
-    public void addExplosion(Vector2 center, float radius) {
+    public ArrayList<Worm> addExplosion(Vector2 center, float radius) {
         ground.addExplosion(center, radius);
 
         final ArrayList<Worm> affectedWorms = new ArrayList<>();
@@ -204,8 +204,10 @@ public class World {
             if (bodyCom.dst2(center) >= radius * radius)
                 continue;
 
-            applyBlastImpulse(worm.getBody(), center, bodyCom, 0.008f);
+            applyBlastImpulse(worm.getBody(), center, bodyCom, 0.0015f);
         }
+
+        return affectedWorms;
     }
 
     private void applyBlastImpulse(Body body, Vector2 blastCenter, Vector2 applyPoint, float blastPower) {

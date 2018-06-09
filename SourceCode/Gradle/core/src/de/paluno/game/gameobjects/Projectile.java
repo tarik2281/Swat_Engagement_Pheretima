@@ -11,6 +11,8 @@ import de.paluno.game.GameState;
 import de.paluno.game.UserData;
 import de.paluno.game.WeaponType;
 
+import java.util.ArrayList;
+
 public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     // in meters
@@ -88,6 +90,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                 sprite.setRotation(angle);
                 break;
             case WEAPON_GRENADE:
+            case WEAPON_SPECIAL:
                 sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
                 break;
         }
@@ -136,7 +139,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
 
-        } else if (weaponType == WeaponType.WEAPON_GRENADE) {
+        } else if (weaponType == WeaponType.WEAPON_GRENADE || weaponType == WeaponType.WEAPON_SPECIAL) {
 
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
@@ -147,7 +150,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             Fixture fix = body.createFixture(fixtureDef);
             body.setGravityScale(1.0f);
             body.setAngularDamping(2.0f);
-            Vector2 impulse = new Vector2(direction).scl(5.0f * body.getMass());
+            Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             body.applyAngularImpulse(-0.01f * body.getMass(), true);
             fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
@@ -172,7 +175,12 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     public void explode() {
         if (!exploded) {
             exploded = true;
-            world.addExplosion(body.getPosition(), 0.3f);
+            ArrayList<Worm> affectedWorms = world.addExplosion(body.getPosition(), 0.35f);
+
+            if (weaponType == WeaponType.WEAPON_SPECIAL) {
+                for (Worm worm : affectedWorms)
+                    worm.setIsInfected(true);
+            }
 
             world.forgetAfterUpdate(this);
             world.advanceGameState();
