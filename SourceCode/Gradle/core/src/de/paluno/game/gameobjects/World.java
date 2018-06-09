@@ -54,12 +54,12 @@ public class World {
     };
 
     private ContactFilter contactFilter = (fixtureA, fixtureB) -> {
-        if (fixtureA.getUserData() == "Worm" && fixtureB.getUserData() == "Projectile") {
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Worm && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
             Projectile projectile = (Projectile)fixtureB.getBody().getUserData();
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureA.getBody().getUserData())
                 return false;
         }
-        else if (fixtureB.getUserData() == "Worm" && fixtureA.getUserData() == "Projectile") {
+        else if (UserData.getType(fixtureB) == UserData.ObjectType.Worm && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
             Projectile projectile = (Projectile)fixtureA.getBody().getUserData();
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureB.getBody().getUserData())
                 return false;

@@ -27,7 +27,6 @@ class CollisionObject {
     void destroyFixture() {
         if (fixture != null) {
             Body body = fixture.getBody();
-            fixture.setUserData(null);
             body.destroyFixture(fixture);
             fixture = null;
         }

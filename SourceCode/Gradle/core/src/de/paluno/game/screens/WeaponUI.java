@@ -42,21 +42,19 @@ public class WeaponUI implements Renderable {
 
     private Player player;
     private Weapon weapon;
-    private World world;
 
 
     // TODO: Assetmanager nutzen
 
     WeaponUI(PlayScreen playScreen) {
         this.playScreen = playScreen;
-        this.world = new World(playScreen);
 
         // Table Background
-        textureBackground = world.getAssetManager().get(Assets.weaponUI);
+        textureBackground = playScreen.getAssetManager().get(Assets.weaponUI);
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
 
         //Gun Button
-        gun = world.getAssetManager().get(Assets.iconGun);
+        gun = playScreen.getAssetManager().get(Assets.iconGun);
         textureRegionGun = new TextureRegion(gun);
         regionDrawableGun = new TextureRegionDrawable(textureRegionGun);
         buttonGun = new ImageButton(regionDrawableGun);
@@ -71,7 +69,7 @@ public class WeaponUI implements Renderable {
 
 
         // Grenade Button
-        grenade = world.getAssetManager().get(Assets.iconGrenade);
+        grenade = playScreen.getAssetManager().get(Assets.iconGrenade);
         textureRegionGrenade = new TextureRegion(grenade);
         regionDrawableGrenade = new TextureRegionDrawable(textureRegionGrenade);
         buttonGrenade = new ImageButton(regionDrawableGrenade);
@@ -83,7 +81,7 @@ public class WeaponUI implements Renderable {
         }));
 
         // Bazooka Button
-        bazooka = world.getAssetManager().get(Assets.iconBazooka);
+        bazooka = playScreen.getAssetManager().get(Assets.iconBazooka);
         textureRegionBazooka = new TextureRegion(bazooka);
         regionDrawableBazooka = new TextureRegionDrawable(textureRegionBazooka);
         buttonBazooka = new ImageButton(regionDrawableBazooka);

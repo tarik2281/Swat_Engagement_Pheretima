@@ -57,13 +57,13 @@ public class CollisionHandler implements ContactListener {
          * Worms Foot -> Ground
          * Worm stands on ground
          */
-        if ((UserData.getType(fixA) == UserData.ObjectType.Worm && UserData.getType(fixB) == UserData.ObjectType.Ground)) {
+        if ((UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Ground)) {
 
             Worm worm = (Worm) o1;
             worm.beginContact();
             System.out.println("Worm -> Ground");
 
-        } else if ((UserData.getType(fixB) == UserData.ObjectType.Worm && UserData.getType(fixA) == UserData.ObjectType.Ground)) {
+        } else if ((UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Ground)) {
             Worm worm = (Worm) o2;
             worm.beginContact();
             System.out.println("Worm -> Ground");
@@ -180,6 +180,16 @@ public class CollisionHandler implements ContactListener {
          * Worms Foot -> Ground
          * Worm isn't in contact with the ground
          */
+        if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Worm) {
+            Worm worm = (Worm) o1;
+            worm.endContact();
+            System.out.println("Worm isn't in contact with the worm");
+        } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Worm) {
+            Worm worm = (Worm) o2;
+            worm.endContact();
+            System.out.println("Worm isn't in contact with the worm");
+        }
+
         if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Ground) {
             Worm worm = (Worm) o1;
             worm.endContact();

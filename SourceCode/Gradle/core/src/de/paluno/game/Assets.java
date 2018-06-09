@@ -60,7 +60,6 @@ public class Assets {
 
     public static final AssetDescriptor[] PlayScreenAssets = new AssetDescriptor[] {
             map, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial
-            weaponGun, weaponGrenade, weaponBazooka, weaponUI
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI
     };
 }
