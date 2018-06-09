@@ -7,18 +7,15 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import de.paluno.game.Assets;
-import de.paluno.game.GameState;
-import de.paluno.game.InputHandler;
-import de.paluno.game.SEPGame;
+import de.paluno.game.*;
 import de.paluno.game.gameobjects.World;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
 
-	private SEPGame game;
-	private SpriteBatch spriteBatch;
+    private SEPGame game;
+    private SpriteBatch spriteBatch;
 
-	private World world;
+    private World world;
 
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
@@ -27,6 +24,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         this.game = game;
 
         spriteBatch = new SpriteBatch();
+
 
     }
 
@@ -90,7 +88,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     public void setGameState(GameState gameState, int currentPlayer) {
         uiLayer.setGameState(gameState, currentPlayer);
-    }
+//        if (gameState == GameState.PLAYERTURN)
+//            weaponUI.setPlayer(world.getCurrentPlayer());
+   }
 
     public void setGameOver(WinningPlayer winningPlayer) {
         game.setGameOver(winningPlayer);

@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
 import de.paluno.game.Constants;
+import de.paluno.game.UserData;
 
 public class Virus implements PhysicsObject{
 	
@@ -42,7 +43,7 @@ public class Virus implements PhysicsObject{
 		fixtureDef.isSensor = true;
 		
 		Fixture fix = this.body.createFixture(fixtureDef);
-		fix.setUserData("Virus");
+		fix.setUserData(new UserData(UserData.ObjectType.Virus,this));
 		
 		DistanceJointDef jointDef = new DistanceJointDef();
 		jointDef.bodyA = worm.getBody();

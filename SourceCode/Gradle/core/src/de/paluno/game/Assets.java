@@ -17,6 +17,9 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WormWalk.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> wormFly =
             new AssetDescriptor<AnimationData>("WormFly.xml", AnimationData.class);
+    // WeaponUI
+    public static final AssetDescriptor<Texture> weaponUI =
+            new AssetDescriptor<Texture>("weaponUI.png", Texture.class);
 
     //WindIndicator
     public static final AssetDescriptor<Texture> windGreen =
@@ -51,6 +54,6 @@ public class Assets {
 
     public static final AssetDescriptor[] PlayScreenAssets = new AssetDescriptor[] {
             map, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka
+            weaponGun, weaponGrenade, weaponBazooka, weaponUI
     };
 }

@@ -6,10 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-import de.paluno.game.AnimatedSprite;
-import de.paluno.game.Assets;
-import de.paluno.game.Constants;
-import de.paluno.game.GameState;
+import de.paluno.game.*;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -192,7 +189,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Create, apply, done
 		Fixture fix = this.body.createFixture(fixtureDef);
 		// CollisionHandler Identifier
-		fix.setUserData("Worm");
+		fix.setUserData(new UserData(UserData.ObjectType.Worm, this));
 
 		fixtureDef.shape = footRect;
 		fixtureDef.isSensor = true;
@@ -200,7 +197,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;
 		fix = body.createFixture(fixtureDef);
-		fix.setUserData("WormFoot");
+		fix.setUserData(new UserData(UserData.ObjectType.WormFoot,this));
 
 		// Get rid of temporary material properly
 		bodyRect.dispose();

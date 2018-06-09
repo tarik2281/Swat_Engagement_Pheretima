@@ -28,40 +28,29 @@ public class WindDirectionIndicator implements Renderable {
         this.windHandler = windHandler;
 
 
-
     }
-        public void attachToWorm(Worm worm) {
-            this.worm = worm;
-        }
 
-
+    // sets the indicator above the worm
+    public void attachToWorm(Worm worm) {
+        this.worm = worm;
+    }
 
 
     @Override
     public void render(SpriteBatch batch, float delta) {
 
+            // loading of different assets based of the wind force
         if (worm != null) {
-            if ((windHandler.getX() > 0 && windHandler.getX() <= 2) || (windHandler.getX() < 0 && windHandler.getX() >= -2)) {
+            if ((windHandler.getX() > 0 && windHandler.getX() <= 2) ||
+                    (windHandler.getX() < 0 && windHandler.getX() >= -2)) {
                 texture = world.getAssetManager().get(Assets.windGreen);
-                System.out.println(windHandler.getX());
             } else if ((windHandler.getX() > 2 && windHandler.getX() <= 4) ||
                     (windHandler.getX() < -2 && windHandler.getX() >= -4)) {
                 texture = world.getAssetManager().get(Assets.windOrange);
-                System.out.println(windHandler.getX());
             } else {
                 texture = world.getAssetManager().get(Assets.windRed);
-                System.out.println(windHandler.getX());
             }
-        // loading of different assets based of the wind force
-        if ((windHandler.getX() > 0 && windHandler.getX() <= 2) ||
-                (windHandler.getX() < 0 && windHandler.getX() >= -2)){
-            texture = world.getAssetManager().get(Assets.windGreen);
-        }else if ((windHandler.getX() > 2 && windHandler.getX() <= 4) ||
-                (windHandler.getX() < -2 && windHandler.getX() >= -4)){
-            texture = world.getAssetManager().get(Assets.windOrange);
-        }else{
-            texture = world.getAssetManager().get(Assets.windRed);
-        }
+
 
             sprite = new Sprite(texture);
 
@@ -76,7 +65,6 @@ public class WindDirectionIndicator implements Renderable {
             // flips the indicator sprite after every turn, based of the random x coordinate
             if (this.windHandler != null) {
                 sprite.setFlip(windHandler.flipped(), false);
-            System.out.println(windHandler.getX());
             }
             sprite.draw(batch);
         }

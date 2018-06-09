@@ -22,7 +22,7 @@ public class Player implements Updatable {
 	private ShotDirectionIndicator shotDirectionIndicator;
 	private WindDirectionIndicator windDirectionIndicator;
 	private int turn = 1;
-	
+
 	private World world;
 
 	private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
@@ -106,8 +106,6 @@ public class Player implements Updatable {
 
 	public void setWindHandler(WindHandler windHandler) {
 		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
-	}
-	public void setWeaponUI(WeaponUI weaponUI){
 	}
 
 
