@@ -1,25 +1,28 @@
-package de.paluno.game.gameobjects.ground;
+package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.Constants;
 
-class Explosion {
+public class Explosion {
 
     private Vector2 center;
     private float radius;
+    private float blastPower;
 
     private int numSegments;
     private float[] polygonVertices;
 
-    public Explosion(Vector2 center, float radius) {
+    public Explosion(Vector2 center, float radius, float blastPower) {
         this.center = new Vector2(center);
         this.radius = radius;
+        this.blastPower = blastPower;
     }
 
-    public Explosion(float x, float y, float radius) {
+    public Explosion(float x, float y, float radius, float blastPower) {
         this.center = new Vector2(x, y);
         this.radius = radius;
+        this.blastPower = blastPower;
     }
 
     public Vector2 getCenter() {
@@ -46,7 +49,25 @@ class Explosion {
         return center.y + radius;
     }
 
-    int getNumSegments() {
+    public boolean applyBlastImpulse(Worm worm) {
+        if (worm.getBody().getWorldCenter().dst2(center) >= radius * radius)
+            return false;
+
+        Vector2 diff = new Vector2(worm.getBody().getWorldCenter()).sub(center);
+        float distance = diff.len();
+
+        if (distance == 0)
+            return true;
+
+        float invDistance = 1.0f / distance;
+        diff.scl(invDistance);
+
+        float impulse = blastPower * invDistance * invDistance;
+        worm.getBody().applyLinearImpulse(diff.scl(impulse), worm.getBody().getWorldCenter(), true);
+        return true;
+    }
+
+    public int getNumSegments() {
         if (numSegments == 0)
             numSegments = Math.max(1, (int) (6 * (float) Math.cbrt(radius * Constants.SCREEN_SCALE)));
 

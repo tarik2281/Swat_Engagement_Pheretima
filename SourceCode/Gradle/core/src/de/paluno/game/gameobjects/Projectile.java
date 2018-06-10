@@ -175,7 +175,18 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     public void explode() {
         if (!exploded) {
             exploded = true;
-            ArrayList<Worm> affectedWorms = world.addExplosion(body.getPosition(), 0.35f);
+            ArrayList<Worm> affectedWorms = world.addExplosion(new Explosion(body.getPosition(),
+                    weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower()));
+
+            for (Worm worm : affectedWorms) {
+                float distance = worm.getBody().getPosition().dst(body.getPosition());
+
+                float factor = 1.0f;
+                if (distance > 0.0f)
+                    factor = distance / weaponType.getExplosionRadius();
+
+                worm.takeDamage(Math.round(factor * weaponType.getDamage()));
+            }
 
             if (weaponType == WeaponType.WEAPON_SPECIAL) {
                 for (Worm worm : affectedWorms)

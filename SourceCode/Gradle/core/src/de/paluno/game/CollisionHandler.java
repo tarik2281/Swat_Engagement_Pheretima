@@ -73,29 +73,29 @@ public class CollisionHandler implements ContactListener {
         // Gun -> Worm
 
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
-            if (((Projectile) o1).getWeaponType().equals(WeaponType.WEAPON_GUN)) {
+            //if (((Projectile) o1).getWeaponType().equals(WeaponType.WEAPON_GUN)) {
 
                 Worm worm = (Worm) o2;
                 Projectile projectile = (Projectile) o1;
                 if (projectile.explodeOnCollision()) {
                     projectile.explode();
-                    worm.takeDamage(Constants.PROJECTILE_DAMAGE);
+                    //worm.takeDamage(Constants.PROJECTILE_DAMAGE);
                 }
                 System.out.println("Gun -> Worm");
                 System.out.println("Worms life = " + worm.getHealth());
-            }
+            //}
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
-            if (((Projectile) o2).getWeaponType().equals(WeaponType.WEAPON_GUN)) {
+            //if (((Projectile) o2).getWeaponType().equals(WeaponType.WEAPON_GUN)) {
 
                 Worm worm = (Worm) o1;
                 Projectile projectile = (Projectile) o2;
                 if (projectile.explodeOnCollision()) {
                     projectile.explode();
-                    worm.takeDamage(Constants.PROJECTILE_DAMAGE);
+                    //worm.takeDamage(Constants.PROJECTILE_DAMAGE);
                 }
                 System.out.println("Gun -> Worm");
                 System.out.println("Worms life = " + worm.getHealth());
-            }
+            //}
         }
 
 

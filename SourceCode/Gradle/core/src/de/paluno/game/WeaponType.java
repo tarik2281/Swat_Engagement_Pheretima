@@ -4,13 +4,14 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.graphics.Texture;
 
 public enum WeaponType {
-	WEAPON_BAZOOKA(Constants.WEAPON_AMMO_INF, Assets.iconBazooka,
-			Assets.weaponBazooka, Assets.projectileBazooka),
-	WEAPON_GUN(Constants.WEAPON_AMMO_INF, Assets.iconGun,
-			Assets.weaponGun, Assets.projectileGun),
-	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade,
-			Assets.weaponGrenade, Assets.projectileGrenade),
-	WEAPON_SPECIAL(Constants.WEAPON_AMMO_INF, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial);
+	WEAPON_BAZOOKA(Constants.WEAPON_AMMO_INF, Assets.iconBazooka, Assets.weaponBazooka, Assets.projectileBazooka,
+			7.0f, 0.35f, 0.003f, 40),
+	WEAPON_GUN(Constants.WEAPON_AMMO_INF, Assets.iconGun, Assets.weaponGun, Assets.projectileGun,
+			7.0f, 0.35f, 0.003f, 40),
+	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade, Assets.weaponGrenade, Assets.projectileGrenade,
+			7.0f, 0.35f, 0.003f, 40),
+	WEAPON_SPECIAL(Constants.WEAPON_AMMO_INF, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
+			7.0f, 0.35f, 0.003f, 40);
 
 	public static final int NUM_WEAPONS = 4;
 
@@ -18,12 +19,21 @@ public enum WeaponType {
 	private final AssetDescriptor<Texture> icon;
 	private final AssetDescriptor<AnimationData> weapon;
 	private final AssetDescriptor<Texture> projectile;
+	private final float shootingImpulse;
+	private final float explosionRadius;
+	private final float explosionBlastPower;
+	private final float damage;
 
-	WeaponType(int maxAmmo, AssetDescriptor<Texture> icon, AssetDescriptor<AnimationData> weapon, AssetDescriptor<Texture> projectile) {
+	WeaponType(int maxAmmo, AssetDescriptor<Texture> icon, AssetDescriptor<AnimationData> weapon, AssetDescriptor<Texture> projectile,
+			   float shootingImpulse, float explosionRadius, float explosionBlastPower, float damage) {
 		this.maxAmmo = maxAmmo;
 		this.icon = icon;
 		this.weapon = weapon;
 		this.projectile = projectile;
+		this.shootingImpulse = shootingImpulse;
+		this.explosionRadius = explosionRadius;
+		this.explosionBlastPower = explosionBlastPower;
+		this.damage = damage;
 	}
 
 	public int getMaxAmmo() {
@@ -40,5 +50,21 @@ public enum WeaponType {
 
 	public AssetDescriptor<Texture> getProjectileAsset() {
 		return projectile;
+	}
+
+	public float getShootingImpulse() {
+		return shootingImpulse;
+	}
+
+	public float getExplosionRadius() {
+		return explosionRadius;
+	}
+
+	public float getExplosionBlastPower() {
+		return explosionBlastPower;
+	}
+
+	public float getDamage() {
+		 return damage;
 	}
 }

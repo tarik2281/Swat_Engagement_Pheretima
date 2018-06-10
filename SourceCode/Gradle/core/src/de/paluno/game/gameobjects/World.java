@@ -55,13 +55,13 @@ public class World {
 
     private ContactFilter contactFilter = (fixtureA, fixtureB) -> {
         if (UserData.getType(fixtureA) == UserData.ObjectType.Worm && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
-            Projectile projectile = (Projectile)fixtureB.getBody().getUserData();
-            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureA.getBody().getUserData())
+            Projectile projectile = UserData.getObject(fixtureB);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA))
                 return false;
         }
         else if (UserData.getType(fixtureB) == UserData.ObjectType.Worm && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
-            Projectile projectile = (Projectile)fixtureA.getBody().getUserData();
-            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureB.getBody().getUserData())
+            Projectile projectile = UserData.getObject(fixtureA);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
                 return false;
         }
 
@@ -183,45 +183,24 @@ public class World {
         objectForgetQueue.add(gameObject);
     }
 
-    public ArrayList<Worm> addExplosion(Vector2 center, float radius) {
-        ground.addExplosion(center, radius);
+    public ArrayList<Worm> addExplosion(Explosion explosion) {
+        ground.addExplosion(explosion);
 
         final ArrayList<Worm> affectedWorms = new ArrayList<>();
 
         world.QueryAABB((fixture -> {
-            if (fixture.getUserData() == "Worm") {
-                Worm worm = (Worm)fixture.getBody().getUserData();
+            if (UserData.getType(fixture) == UserData.ObjectType.Worm) {
+                Worm worm = UserData.getObject(fixture);
 
                 if (!affectedWorms.contains(worm))
                     affectedWorms.add(worm);
             }
             return true;
-        }), center.x - radius, center.y - radius, center.x + radius, center.y + radius);
+        }), explosion.getLowerX(), explosion.getLowerY(), explosion.getUpperX(), explosion.getUpperY());
 
-        for (Worm worm : affectedWorms) {
-            Vector2 bodyCom = worm.getBody().getWorldCenter();
-
-            if (bodyCom.dst2(center) >= radius * radius)
-                continue;
-
-            applyBlastImpulse(worm.getBody(), center, bodyCom, 0.0015f);
-        }
+        affectedWorms.removeIf(worm -> !explosion.applyBlastImpulse(worm));
 
         return affectedWorms;
-    }
-
-    private void applyBlastImpulse(Body body, Vector2 blastCenter, Vector2 applyPoint, float blastPower) {
-        Vector2 diff = new Vector2(applyPoint).sub(blastCenter);
-        float distance = diff.len();
-
-        if (distance == 0)
-            return;
-
-        float invDistance = 1.0f / distance;
-        diff.scl(invDistance);
-
-        float impulse = blastPower * invDistance * invDistance;
-        body.applyLinearImpulse(diff.scl(impulse), applyPoint, true);
     }
 
     public Body createBody(BodyDef bodyDef) {

@@ -28,4 +28,9 @@ public class UserData {
         UserData data = (UserData) fixture.getUserData();
         return data.getType();
     }
+
+    public static <T> T getObject(Fixture fixture) {
+        UserData data = (UserData)fixture.getUserData();
+        return (T)data.getUserData();
+    }
 }
