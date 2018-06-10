@@ -33,6 +33,10 @@ public class Explosion {
         return radius;
     }
 
+    public float getBlastPower() {
+        return blastPower;
+    }
+
     public float getLowerX() {
         return center.x - radius;
     }

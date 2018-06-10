@@ -21,6 +21,8 @@ public class Weapon {
 
 		this.type = type;
 
+		this.currentAmmo = type.getMaxAmmo();
+
 		animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
 

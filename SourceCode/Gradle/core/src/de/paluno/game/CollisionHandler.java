@@ -78,7 +78,7 @@ public class CollisionHandler implements ContactListener {
                 Worm worm = (Worm) o2;
                 Projectile projectile = (Projectile) o1;
                 if (projectile.explodeOnCollision()) {
-                    projectile.explode();
+                    projectile.explode(worm);
                     //worm.takeDamage(Constants.PROJECTILE_DAMAGE);
                 }
                 System.out.println("Gun -> Worm");
@@ -90,7 +90,7 @@ public class CollisionHandler implements ContactListener {
                 Worm worm = (Worm) o1;
                 Projectile projectile = (Projectile) o2;
                 if (projectile.explodeOnCollision()) {
-                    projectile.explode();
+                    projectile.explode(worm);
                     //worm.takeDamage(Constants.PROJECTILE_DAMAGE);
                 }
                 System.out.println("Gun -> Worm");
@@ -142,7 +142,7 @@ public class CollisionHandler implements ContactListener {
 
             Projectile projectile = (Projectile) o1;
             if (projectile.explodeOnCollision()) {
-                projectile.explode();
+                projectile.explode(null);
             }
             System.out.println("Projectile collided with Ground");
 
@@ -150,7 +150,7 @@ public class CollisionHandler implements ContactListener {
 
             Projectile projectile = (Projectile) o2;
             if (projectile.explodeOnCollision()) {
-                projectile.explode();
+                projectile.explode(null);
             }
             System.out.println("Projectile collided with Ground");
         }

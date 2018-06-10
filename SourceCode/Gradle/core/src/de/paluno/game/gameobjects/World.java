@@ -128,15 +128,15 @@ public class World {
         forgetObjects();
     }
 
-    public void updatePhase(float delta) {
+    private void updatePhase(float delta) {
         if (currentGameState == GameState.WAITING) {
             boolean advance = true;
 
-            for (Player player : players) {
+            players: for (Player player : players) {
                 for (Worm worm : player.characters) {
-                    if (worm != null && worm.getBody() != null)
-                    if (worm.getBody().isAwake()) {
+                    if (worm != null && worm.getBody() != null && worm.getBody().isAwake()) {
                         advance = false;
+                        break players;
                     }
                 }
             }
@@ -150,12 +150,12 @@ public class World {
         }
     }
 
-    public void physicsPhase(float delta) {
+    private void physicsPhase(float delta) {
         float timeStep = 1.0f / 60.0f;
         world.step(timeStep, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
     }
 
-    public void renderPhase(SpriteBatch batch, float delta) {
+    private void renderPhase(SpriteBatch batch, float delta) {
         camera.update(delta);
 
         explosionMaskRenderer.renderDepthMask();
@@ -184,7 +184,8 @@ public class World {
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {
-        ground.addExplosion(explosion);
+        if (explosion.getBlastPower() > 0.0f)
+            ground.addExplosion(explosion);
 
         final ArrayList<Worm> affectedWorms = new ArrayList<>();
 

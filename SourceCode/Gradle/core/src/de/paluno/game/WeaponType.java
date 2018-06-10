@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 
 public enum WeaponType {
 	WEAPON_BAZOOKA(Constants.WEAPON_AMMO_INF, Assets.iconBazooka, Assets.weaponBazooka, Assets.projectileBazooka,
-			7.0f, 0.35f, 0.003f, 40),
+			7.0f, 0.35f, 0.003f, 0.0f, 40),
 	WEAPON_GUN(Constants.WEAPON_AMMO_INF, Assets.iconGun, Assets.weaponGun, Assets.projectileGun,
-			7.0f, 0.35f, 0.003f, 40),
+			7.0f, 0.0f, 0.0f, 0.0f, 40),
 	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade, Assets.weaponGrenade, Assets.projectileGrenade,
-			7.0f, 0.35f, 0.003f, 40),
-	WEAPON_SPECIAL(Constants.WEAPON_AMMO_INF, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
-			7.0f, 0.35f, 0.003f, 40);
+			7.0f, 0.35f, 0.003f, 3.0f, 40),
+	WEAPON_SPECIAL(3, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
+			7.0f, 0.35f, 0.003f, 0.0f, 40);
 
 	public static final int NUM_WEAPONS = 4;
 
@@ -22,10 +22,11 @@ public enum WeaponType {
 	private final float shootingImpulse;
 	private final float explosionRadius;
 	private final float explosionBlastPower;
+	private final float explosionTime;
 	private final float damage;
 
 	WeaponType(int maxAmmo, AssetDescriptor<Texture> icon, AssetDescriptor<AnimationData> weapon, AssetDescriptor<Texture> projectile,
-			   float shootingImpulse, float explosionRadius, float explosionBlastPower, float damage) {
+			   float shootingImpulse, float explosionRadius, float explosionBlastPower, float explosionTime, float damage) {
 		this.maxAmmo = maxAmmo;
 		this.icon = icon;
 		this.weapon = weapon;
@@ -33,6 +34,7 @@ public enum WeaponType {
 		this.shootingImpulse = shootingImpulse;
 		this.explosionRadius = explosionRadius;
 		this.explosionBlastPower = explosionBlastPower;
+		this.explosionTime = explosionTime;
 		this.damage = damage;
 	}
 
@@ -62,6 +64,10 @@ public enum WeaponType {
 
 	public float getExplosionBlastPower() {
 		return explosionBlastPower;
+	}
+
+	public float getExplosionTime() {
+		return explosionTime;
 	}
 
 	public float getDamage() {
