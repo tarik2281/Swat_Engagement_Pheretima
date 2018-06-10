@@ -17,11 +17,12 @@ public class Player implements Updatable {
 	private int playerNum;
 	
 	private int numCharacters;
-	public Worm[] characters;
+	private Worm[] characters;
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
 	private WindDirectionIndicator windDirectionIndicator;
-	private int turn = 1;
+	private int turn = 0;
+	private boolean isRoundEnded = false;
 
 	private World world;
 
@@ -107,11 +108,6 @@ public class Player implements Updatable {
 		//this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
 	}
 
-	public void setWindHandler(WindHandler windHandler) {
-		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
-	}
-
-
 	public Player(SnapshotData data, World world) {
 
 	}
@@ -119,7 +115,12 @@ public class Player implements Updatable {
 	public ShotDirectionIndicator getShotDirectionIndicator() {
 		return shotDirectionIndicator;
 	}
+
 	public WindDirectionIndicator getWindDirectionIndicator(){ return windDirectionIndicator; }
+
+	public void setWindHandler(WindHandler windHandler) {
+		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
+	}
 
 	private void setupWorms() {
         this.characters = new Worm[numCharacters];
@@ -149,6 +150,10 @@ public class Player implements Updatable {
 	 * @param state - Current GameState
 	 */
 	public void update(float delta, GameState state) {}
+
+	public Worm[] getCharacters() {
+		return characters;
+	}
 
 	/**
 	 * Getter method for this player's player number
@@ -229,8 +234,10 @@ public class Player implements Updatable {
 	        return;
 
 		turn++;
-		if (turn == Constants.MAX_CHAR_NUM)
+		if (turn == Constants.MAX_CHAR_NUM) {
 			turn = 0;
+			isRoundEnded = true;
+		}
 		if (characters[turn] == null) shiftTurn();
 
 		//if(numCharacters == 0) return;
@@ -238,6 +245,15 @@ public class Player implements Updatable {
 		//if(turn > numCharacters) turn = 1;
 		//if(characters[turn-1] == null) shiftTurn();
 	}
+
+	public boolean isRoundEnded() {
+		return isRoundEnded;
+	}
+
+	public void setIsRoundEnded(boolean isRoundEnded) {
+		this.isRoundEnded = isRoundEnded;
+	}
+
 	/**
 	 * Getter Method for the reference to the Asset Manager
 	 * @return AssetManager
@@ -245,6 +261,7 @@ public class Player implements Updatable {
 	public AssetManager getAssets() {
 		return world.getAssetManager();
 	}
+
 	/**
 	 * Getter method for the world we are playing in
 	 * @return world
@@ -311,10 +328,12 @@ public class Player implements Updatable {
 	 * @param code - Constants.MOVEMENT_... integer for the movement code
 	 */
 	public void setMovement(int code) {if(getCurrentWorm() != null) getCurrentWorm().setMovement(code);}
+
 	/**
 	 * Passthrough method to give a jump order to the currently movable worm
 	 */
 	public void jump() {if(getCurrentWorm() != null) getCurrentWorm().setJump(true);}
+
 	/**
 	 * Passthrough method to give a shoot order to the currently movable worm
 	 */
@@ -332,6 +351,7 @@ public class Player implements Updatable {
 		clone.setCloningParameters(this);
 		return clone;
 	}
+
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from

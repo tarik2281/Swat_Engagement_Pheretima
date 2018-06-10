@@ -133,7 +133,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!world.getWorldBounds().contains(body.getPosition())) die();
+		if (!world.isInWorldBounds(body)) die();
 	}
 	
 	/**

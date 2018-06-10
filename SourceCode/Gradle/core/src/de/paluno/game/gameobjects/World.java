@@ -31,6 +31,7 @@ public class World {
 
     private com.badlogic.gdx.physics.box2d.World world;
     private Rectangle worldBounds;
+    private float targetLimit;
 
     private Player[] players;
 
@@ -133,7 +134,7 @@ public class World {
             boolean advance = true;
 
             players: for (Player player : players) {
-                for (Worm worm : player.characters) {
+                for (Worm worm : player.getCharacters()) {
                     if (worm != null && worm.getBody() != null && worm.getBody().isAwake()) {
                         advance = false;
                         break players;
@@ -142,6 +143,13 @@ public class World {
             }
 
             if (advance)
+                advanceGameState();
+        }
+        else if (currentGameState == GameState.RAISE_LIMIT) {
+            worldBounds.y += Constants.RAISE_LIMIT_SPEED * delta;
+            camera.setBottomLimit(worldBounds.y);
+
+            if (worldBounds.y >= targetLimit)
                 advanceGameState();
         }
 
@@ -273,6 +281,12 @@ public class World {
                 break;
             case SHOOTING:
                 break;
+            case RAISE_LIMIT:
+                targetLimit = worldBounds.y + Constants.RAISE_LIMIT_LENGTH;
+
+                for (Player player : players)
+                    player.setIsRoundEnded(false);
+                break;
         }
     }
 
@@ -285,6 +299,20 @@ public class World {
                 setGameState(GameState.WAITING);
                 break;
             case WAITING:
+                boolean raiseLimit = true;
+
+                for (Player player : players) {
+                    if (!player.isRoundEnded())
+                        raiseLimit = false;
+                }
+
+                if (raiseLimit)
+                    setGameState(GameState.RAISE_LIMIT);
+                else
+                    setGameState(GameState.PLAYERTURN);
+
+                break;
+            case RAISE_LIMIT:
                 setGameState(GameState.PLAYERTURN);
                 break;
         }
@@ -296,6 +324,10 @@ public class World {
 
     public Vector2 generateSpawnPosition() {
         return ground.getRandomSpawnPosition();
+    }
+
+    public boolean isInWorldBounds(Body body) {
+        return body.getPosition().y > worldBounds.y;
     }
 
     public Rectangle getWorldBounds() {

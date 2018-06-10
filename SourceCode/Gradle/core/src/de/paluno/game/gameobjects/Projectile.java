@@ -33,7 +33,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private Worm shootingWorm;
     private boolean wormContactEnded = false;
 
-    private float timer = 0.0f;
+    private float explosionTimer = 0.0f;
 
     public Projectile(World world, Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
         this.world = world;
@@ -52,11 +52,11 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     @Override
     public void update(float delta, GameState gameState) {
-        timer += delta;
+        explosionTimer += delta;
 
         // check if the projectile is inside our world - if not, destroy it
-        if (!world.getWorldBounds().contains(body.getPosition()) ||
-                (weaponType.getExplosionTime() > 0.0f && timer >= weaponType.getExplosionTime()))
+        if (!world.isInWorldBounds(body) ||
+                (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null);
 
         if (!wormContactEnded) {
