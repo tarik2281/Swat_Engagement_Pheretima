@@ -11,42 +11,49 @@ import de.paluno.game.Assets;
 import de.paluno.game.GameState;
 import de.paluno.game.InputHandler;
 import de.paluno.game.SEPGame;
+import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.World;
+import de.paluno.game.gameobjects.Worm;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
-
+ 
+	private boolean isdie  = true;
 	private SEPGame game;
-	private SpriteBatch spriteBatch;
-
+	private SpriteBatch spriteBatch; 
+	
 	private World world;
-
+	private World replayWorld;
+	
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
-
+	private de.paluno.game.gameobjects.World.SnapshotData data;
+	
     public PlayScreen(SEPGame game) {
         this.game = game;
-
+   
         spriteBatch = new SpriteBatch();
 
     }
+    
+  
 
     @Override
+    
     public void show() {
-        //Gdx.input.setInputProcessor(inputAdapter);
-
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
-
+  
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
-
+  
         world = new World(this);
-        //Gdx.input.setInputProcessor(inputAdapter);
         weaponUI = new WeaponUI(this);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
-        Gdx.input.setInputProcessor(inputMultiplexer);
+        Gdx.input.setInputProcessor(inputMultiplexer);  
     }
-
+   
+    
+ 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -55,7 +62,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         // game loop
         Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
 
-        world.doGameLoop(spriteBatch, delta);
+        if (replayWorld != null)
+        	replayWorld.doGameLoop(spriteBatch, delta);
+        else
+        	world.doGameLoop(spriteBatch, delta);
 
         renderPhase(delta);
 
@@ -88,8 +98,18 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         return false;
     }
 
-    public void setGameState(GameState gameState, int currentPlayer) {
+    public void setGameState(World world, GameState gameState, int currentPlayer) {
         uiLayer.setGameState(gameState, currentPlayer);
+        
+        if (this.world == world && gameState == GameState.SHOOTING)
+        	data = world.makeSnapshot();
+        
+        if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED)
+        	replayWorld = null;
+        
+        if (this.world == world && gameState == GameState.PLAYERTURN && world.isWormDied()) {
+        	replayWorld = new World(this, data);
+        }
     }
 
     public void setGameOver(WinningPlayer winningPlayer) {

@@ -5,7 +5,9 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.PhysicsObject;
 
+
 public class GameCamera {
+	
 
     // normal camera used for drawing sprites, etc., metrics given in pixels
     private OrthographicCamera camera;
@@ -113,6 +115,10 @@ public class GameCamera {
         debugCamera.update();
         camera.update();
     }
+    
+    public void setCameraPosition(Vector2 position) {
+    	debugPosition.set(position);
+    }
 
     public Matrix4 getDebugProjection() {
         return debugCamera.combined;
@@ -130,4 +136,5 @@ public class GameCamera {
     public OrthographicCamera getWorldCamera() {
         return debugCamera;
     }
+   
 }

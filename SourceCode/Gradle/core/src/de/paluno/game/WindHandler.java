@@ -8,12 +8,23 @@ import java.util.Random;
 
 
 public class WindHandler implements Updatable {
+	
+	public static class SnapshotData {
+		private int x;
+	}
+	
     private Random rand = new Random();
     private Vector2 wind;
     private Projectile projectile;
     private int x = rand.nextInt(12) - 6;
 
-
+    public WindHandler() {
+    	
+    }
+    
+    public WindHandler(SnapshotData data) {
+    	this.x = data.x;
+    }
 
     @Override
     public void update(float delta, GameState gamestate) {
@@ -52,5 +63,13 @@ public class WindHandler implements Updatable {
 
     public int getX() {
         return x;
+    }
+    
+    public SnapshotData makeSnapshot() {
+    	SnapshotData data = new SnapshotData();
+    	
+    	data.x = x;
+    	
+    	return data;
     }
 }

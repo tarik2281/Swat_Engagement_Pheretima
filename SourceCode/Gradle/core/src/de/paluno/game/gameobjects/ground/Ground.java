@@ -20,12 +20,21 @@ import de.paluno.game.gameobjects.PhysicsObject;
 import de.paluno.game.gameobjects.Renderable;
 import de.paluno.game.gameobjects.Updatable;
 import de.paluno.game.gameobjects.World;
+import de.paluno.game.gameobjects.Worm.SnapshotData;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
 public class Ground implements PhysicsObject, Renderable, Updatable {
+	
+	public class SnapshotData {
+		private TiledMap tiled;
+		
+		private ArrayList<CollisionObject> collisionobjects;
+
+	    private ArrayList<Explosion> explosions;
+	}
 
     private Body body;
     private World world;
@@ -75,6 +84,19 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         spawnPoints = new ArrayList<>();
 
         loadSpawnPositions();
+    }
+    
+    public Ground(World world, ExplosionMaskRenderer renderer, SnapshotData data) {
+    	this.world = world;
+    	this.tiledMap = data.tiled;
+    	this.maskRenderer = renderer;
+    	
+    	clipper = new ClipperWrapper();
+    	
+    	collisionObjects = new ArrayList<CollisionObject>(data.collisionobjects);
+    	queriedObjects = new ArrayList<CollisionObject>();
+    	explosions = new ArrayList<Explosion>(data.explosions);
+    	explosionQueue = new LinkedList<Explosion>();
     }
 
     public void addExplosion(Vector2 center, float radius) {
@@ -197,14 +219,29 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
 
     private void loadCollisions() {
-        MapLayer collisionLayer = tiledMap.getLayers().get(Constants.COLLISION_LAYER);
-        if (collisionLayer != null) {
-            for (MapObject object : collisionLayer.getObjects()) {
-                float[] vertices = ShapeFactory.createVertices(object);
+    	if (collisionObjects.isEmpty()) {
+    		MapLayer collisionLayer = tiledMap.getLayers().get(Constants.COLLISION_LAYER);
+    		if (collisionLayer != null) {
+    			for (MapObject object : collisionLayer.getObjects()) {
+    				float[] vertices = ShapeFactory.createVertices(object);
 
-                if (vertices != null)
-                    addCollisionObject(new CollisionObject(vertices));
-            }
-        }
+    				if (vertices != null)
+    					addCollisionObject(new CollisionObject(vertices));
+    			}
+    		}
+    	}
+    	else {
+    		for (CollisionObject object : collisionObjects)
+    			object.createFixture(body);
+    	}
     }
+    public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		
+		data.collisionobjects= new ArrayList<>(this.collisionObjects);
+		data.explosions = new ArrayList<>(this.explosions);
+		data.tiled = this.tiledMap;
+		
+		return data;
+	}
 }

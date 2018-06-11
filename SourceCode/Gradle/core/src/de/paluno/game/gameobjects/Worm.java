@@ -1,5 +1,7 @@
 package de.paluno.game.gameobjects;
 
+import javax.swing.text.Position;
+
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -10,23 +12,27 @@ import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
+import de.paluno.game.gameobjects.Player.SnapshotData;
+import de.paluno.game.screens.PlayScreen;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
-    public class SnapshotData {
+    public static class SnapshotData {
         private int characterNumber;
         private Vector2 position;
         private int health;
+        private int orientation;
+        private boolean isinfiziert;
     }
 
     private int characterNumber;
-
+    private PlayScreen screen;
 	private World world;
 	private Body body;
 	private Player player;
-
+	private boolean isinfiziert=false;
 	private Vector2 spawnPosition;
-
+    private Projectile projectile;
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
 	private AnimatedSprite walkAnimation;
@@ -75,6 +81,24 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.health = Constants.WORM_MAX_HEALTH;
 
 		// Finally setup Animations
+		updateAnimation();
+	}
+	
+	public Worm(Player player, SnapshotData data) {
+		characterNumber = data.characterNumber;
+		this.player = player;
+		this.world = player.getWorld();
+		
+		this.orientation = data.orientation;
+		
+		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
+		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
+		
+		this.spawnPosition = data.position;
+		
+		this.health = data.health;
+		
 		updateAnimation();
 	}
 
@@ -274,6 +298,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public int getPlayerNumber() {
 		return this.player.getPlayerNumber();
 	}
+	
+	public int getCharacterNumber() {
+		return this.characterNumber;
+	}
 
     /**
      * Damage handler method - calculate remaining life and death
@@ -304,6 +332,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//screen.wormDied(this);
 		this.player.characterDied(this.characterNumber);
 		//this.setBodyToNullReference();
+
 	}
 	
 	/**
@@ -434,38 +463,19 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Method to return a clone of this object
 	 * @return clone
 	 */
-	public Worm clone() {
-		//Worm clone = new Worm();
-		//clone.setCloningParameters(this);
-		//return clone;
-        return null;
-	}
+	
 
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from
 	 */
-	public void setCloningParameters(Worm copy) {
-		this.characterNumber = copy.characterNumber;
-
-		this.world = copy.world;
-		this.body = copy.body;
-		this.player = copy.player;
-
-		this.spawnPosition = copy.spawnPosition;
-
-		this.currentAnimation = copy.currentAnimation;
-		this.idleAnimation = copy.idleAnimation;
-		this.walkAnimation = copy.walkAnimation;
-
-		this.movement = copy.movement;
-		this.orientation = copy.orientation;
-		this.jump = copy.jump;
-
-		this.gunUnequipping = copy.gunUnequipping;
-
-		this.health = copy.health;
-
-		this.currentWeapon = copy.currentWeapon;
+	public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		data.characterNumber= characterNumber;
+		data.health = health;
+		data.position= new Vector2(body.getPosition());
+		data.isinfiziert = isinfiziert;
+		
+		return data;
 	}
 }

@@ -2,8 +2,14 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.*;
+import de.paluno.game.gameobjects.Player.SnapshotData;
 
 public class Weapon {
+
+	public class SnapshotData {
+		private WeaponType type;
+		private int currentAmmo;		
+	}
 
 	private Player player;
 
@@ -21,6 +27,16 @@ public class Weapon {
 
 		this.type = type;
 
+		animationSet = player.getAssets().get(type.getWeaponAsset());
+	}
+	
+	public Weapon(Player player, SnapshotData data) {
+		this.player = player;
+		
+		this.type = data.type;
+		
+		this.currentAmmo = data.currentAmmo;
+		
 		animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
 
@@ -58,5 +74,12 @@ public class Weapon {
 
 	public void setCloningParameters(Weapon clone) {
 
+	}
+	public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		data.currentAmmo = currentAmmo;
+		data.type = type;
+		
+		return data;
 	}
 }

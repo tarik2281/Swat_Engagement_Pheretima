@@ -4,16 +4,18 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
+import de.paluno.game.screens.PlayScreen;
 
 public class Player implements Updatable {
 
 	public class SnapshotData {
 		private int playerNumber;
 		private Worm.SnapshotData[] wormData;
+		private Weapon.SnapshotData[] weapondata;	    
 	}
-
+    private PlayScreen screen;
 	private int playerNum;
-	
+	public boolean isdie = true;
 	private int numCharacters;
 	public Worm[] characters;
 	private Weapon[] weapons;
@@ -107,7 +109,14 @@ public class Player implements Updatable {
 	}
 
 	public Player(SnapshotData data, World world) {
-
+		this.numCharacters = Constants.MAX_CHAR_NUM;
+		this.playerNum = data.playerNumber;
+		this.world = world;
+		
+		setupWorms(data.wormData);
+		setupWeapons(data.weapondata);
+		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
+		
 	}
 
 	public ShotDirectionIndicator getShotDirectionIndicator() {
@@ -126,6 +135,19 @@ public class Player implements Updatable {
             world.registerAfterUpdate(windDirectionIndicator);
         }
     }
+	
+	private void setupWorms(Worm.SnapshotData[] data) {
+		this.characters = new Worm[numCharacters];
+		
+		for (int i = 0; i < numCharacters; i++) {
+			if (data[i] != null) {
+				characters[i] = new Worm(this, data[i]);
+				HealthBar healthBar = new HealthBar(world, characters[i]);
+            	world.registerAfterUpdate(characters[i]);
+            	world.registerAfterUpdate(healthBar);
+			}
+		}
+	}
 
 	private void setupWeapons() {
         weapons = new Weapon[WeaponType.NUM_WEAPONS];
@@ -134,6 +156,14 @@ public class Player implements Updatable {
         weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
     }
+	
+	private void setupWeapons(Weapon.SnapshotData[] data) {
+		weapons = new Weapon[WeaponType.NUM_WEAPONS];
+
+        weapons[0] = new Weapon(this, data[0]);
+        weapons[1] = new Weapon(this, data[1]);
+        weapons[2] = new Weapon(this, data[2]);
+	}
 
 	/**
 	 * Handler for GameLoop's update cycle - needed from Interface updatable
@@ -161,6 +191,7 @@ public class Player implements Updatable {
 		if(turn < 1) this.turn = 1;
 		else if(this.turn > Constants.MAX_CHAR_NUM) this.turn = Constants.MAX_CHAR_NUM;
 		else this.turn = turn;
+		
 	}
 
 	public void onBeginTurn() {
@@ -263,6 +294,8 @@ public class Player implements Updatable {
 		if (charNum == turn)
 		    shiftTurn();
 
+		world.setWormDied(true);
+		
 		if (numCharacters <= 0)
 			world.playerDefeated(this);
 	}
@@ -312,33 +345,36 @@ public class Player implements Updatable {
 	public void shoot() {
 		if(getCurrentWorm() != null)
 			getCurrentWorm().shoot(getShotDirectionIndicator().getAngle());
+		makeSnapshot();
 	}
 	
 	/**
 	 * Method to return a clone of this object
 	 * @return clone
 	 */
-	public Player clone() {
-		Player clone = new Player();
-		clone.setCloningParameters(this);
-		return clone;
-	}
+	
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from
 	 */
-	public void setCloningParameters(Player copy) {
-		this.playerNum = copy.playerNum;
-
-		this.numCharacters = copy.numCharacters;
-		this.characters = copy.characters;
-		this.turn = copy.turn;
-		
-		this.world = copy.world;
-	}
+	
+	
 
 	public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
+		
+		data.playerNumber = playerNum;
+		
+		data.wormData = new Worm.SnapshotData[characters.length];
+		data.weapondata = new Weapon.SnapshotData[weapons.length];
+		
+		for (int i = 0; i < characters.length; i++)
+			if (characters[i] != null)
+				data.wormData[i] = characters[i].makeSnapshot();
+		
+		for (int i = 0; i < weapons.length; i++) 
+			data.weapondata[i] = weapons[i].makeSnapshot();
+		
 		return data;
 	}
 
@@ -349,4 +385,5 @@ public class Player implements Updatable {
 	public void handleAction(int keycode) {
 		this.shoot();
 	}
+	
 }

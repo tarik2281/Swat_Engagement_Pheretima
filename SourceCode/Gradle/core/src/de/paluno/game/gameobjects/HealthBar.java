@@ -8,8 +8,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Align;
 import de.paluno.game.Constants;
+import de.paluno.game.gameobjects.Player.SnapshotData;
 
 public class HealthBar implements Renderable {
+	
+	public class SnapshotData {
+		
+		private Worm worm;
+		private BitmapFont font;
+		private GlyphLayout layout;
+	}
 
     private World world;
     private Worm worm;
@@ -64,8 +72,13 @@ public class HealthBar implements Renderable {
         return color;
     }
 
-	public void setCloningParameters(HealthBar clone) {
-		// TODO Auto-generated method stub
+    public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		data.font= this.font;
+		data.layout = this.layout;
+		data.worm = this.worm;
 		
+		return data;
 	}
+
 }

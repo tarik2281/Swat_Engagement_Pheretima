@@ -9,8 +9,22 @@ import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.WeaponType;
+import de.paluno.game.gameobjects.Player.SnapshotData;
 
 public class Projectile implements Updatable, PhysicsObject, Renderable {
+	public class SnapshotData {
+		
+		private Vector2 position;
+		private Vector2 direction;
+		private WeaponType weapontype;
+		
+		private int playerNumber;
+		private int wormNumber;
+		
+		public Vector2 getPosition() {
+			return position;
+		}
+	}
 
     // in meters
     private static final float PROJECTILE_RADIUS = 0.03f;
@@ -47,7 +61,23 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         this.shootingWorm = shootingWorm;
     }
 
-    public Worm getShootingWorm() {
+    public Projectile(World world, SnapshotData projectile) {
+		// TODO Auto-generated constructor stub
+    	this.world = world;
+    	this.position = projectile.position;
+    	this.direction = projectile.direction;
+    	
+    	this.weaponType = projectile.weapontype;
+    	
+    	texture = world.getAssetManager().get(weaponType.getProjectileAsset());
+    	sprite = new Sprite(texture);
+    	
+    	sprite.setOriginCenter();
+    	
+    	this.shootingWorm = world.getPlayerWorm(projectile.playerNumber, projectile.wormNumber);
+	}
+
+	public Worm getShootingWorm() {
         return shootingWorm;
     }
 
@@ -140,7 +170,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             fixtureDef.restitution = 0.5f;
             body = world.createBody(bodyDef);
             Fixture fix = body.createFixture(fixtureDef);
-            body.setGravityScale(1.0f);
+            body.setGravityScale(1.0f); 
             body.setAngularDamping(2.0f);
             Vector2 impulse = new Vector2(direction).scl(5.0f * body.getMass());
             body.applyLinearImpulse(impulse, body.getPosition(), true);
@@ -174,15 +204,17 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         }
     }
 
-	public void setCloningParameters(Projectile clone) {
-		// TODO Auto-generated method stub
-
-		this.body = clone.body;
-		this.world = clone.world;
-
-		this.texture= clone.texture;
-		this.sprite= clone.sprite;
-		this.position= clone.position;
-		this.direction= clone.direction;
+	
+    public  SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		
+		data.position= position;
+		data.direction= direction;
+		data.weapontype= weaponType;
+		data.playerNumber = shootingWorm.getPlayerNumber();
+		data.wormNumber = shootingWorm.getCharacterNumber();
+		
+		return data;
 	}
+	
 }
