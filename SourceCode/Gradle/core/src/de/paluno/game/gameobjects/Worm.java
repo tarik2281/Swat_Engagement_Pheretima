@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
+import de.paluno.game.UserData.ObjectType;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -222,7 +223,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.isSensor = true;
 
 		virusFixture = this.body.createFixture(fixtureDef);
-		virusFixture.setUserData("Virus");
+		virusFixture.setUserData(new UserData(ObjectType.Virus, this));
 		circle.dispose();
 		createVirusFixture = false;
 	}
