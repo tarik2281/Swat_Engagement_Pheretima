@@ -4,6 +4,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
+import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.screens.WeaponUI;
 
 public class Player implements Updatable {
 
@@ -15,12 +17,13 @@ public class Player implements Updatable {
 	private int playerNum;
 	
 	private int numCharacters;
-	public Worm[] characters;
+	private Worm[] characters;
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
 	private WindDirectionIndicator windDirectionIndicator;
-	private int turn = 1;
-	
+	private int turn = 0;
+	private boolean isRoundEnded = false;
+
 	private World world;
 
 	private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
@@ -44,15 +47,18 @@ public class Player implements Updatable {
 				case Constants.KEY_ROTATE_INDICATOR_UP:
 					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
-                case Input.Keys.F1:
+                case Constants.KEY_SELECT_WEAPON_1:
                     getCurrentWorm().equipWeapon(weapons[0]);
                     break;
-                case Input.Keys.F2:
+                case Constants.KEY_SELECT_WEAPON_2:
                     getCurrentWorm().equipWeapon(weapons[1]);
                     break;
-                case Input.Keys.F3:
+                case Constants.KEY_SELECT_WEAPON_3:
                     getCurrentWorm().equipWeapon(weapons[2]);
                     break;
+				case Constants.KEY_SELECT_WEAPON_4:
+					getCurrentWorm().equipWeapon(weapons[3]);
+					break;
 			}
 		}
 		else {
@@ -99,11 +105,6 @@ public class Player implements Updatable {
         setupWeapons();
         setupWorms();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-		//this.windDirectionIndicator = new WindDirectionIndicator(playerNum,world,windHandler);
-	}
-
-	public void setWindHandler(WindHandler windHandler) {
-		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
 	}
 
 	public Player(SnapshotData data, World world) {
@@ -113,7 +114,14 @@ public class Player implements Updatable {
 	public ShotDirectionIndicator getShotDirectionIndicator() {
 		return shotDirectionIndicator;
 	}
-	public WindDirectionIndicator getWindDirectionIndicator(){ return windDirectionIndicator; }
+
+	public WindDirectionIndicator getWindDirectionIndicator() {
+		return windDirectionIndicator;
+	}
+
+	public void setWindHandler(WindHandler windHandler) {
+		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
+	}
 
 	private void setupWorms() {
         this.characters = new Worm[numCharacters];
@@ -133,6 +141,7 @@ public class Player implements Updatable {
         weapons[0] = new Weapon(this, WeaponType.WEAPON_GUN);
         weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
+        weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
     }
 
 	/**
@@ -142,6 +151,10 @@ public class Player implements Updatable {
 	 * @param state - Current GameState
 	 */
 	public void update(float delta, GameState state) {}
+
+	public Worm[] getCharacters() {
+		return characters;
+	}
 
 	/**
 	 * Getter method for this player's player number
@@ -178,9 +191,10 @@ public class Player implements Updatable {
 		input.registerKeyListener(Constants.KEY_JUMP, keyListener);
 		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
 		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-		input.registerKeyListener(Input.Keys.F1, keyListener);
-		input.registerKeyListener(Input.Keys.F2, keyListener);
-		input.registerKeyListener(Input.Keys.F3, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
 	}
 
 	public void onEndTurn() {
@@ -206,9 +220,10 @@ public class Player implements Updatable {
 		input.unregisterKeyListener(Constants.KEY_JUMP, keyListener);
 		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
 		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-        input.unregisterKeyListener(Input.Keys.F1, keyListener);
-        input.unregisterKeyListener(Input.Keys.F2, keyListener);
-        input.unregisterKeyListener(Input.Keys.F3, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
 	}
 
 	/**
@@ -220,8 +235,10 @@ public class Player implements Updatable {
 	        return;
 
 		turn++;
-		if (turn == Constants.MAX_CHAR_NUM)
+		if (turn == Constants.MAX_CHAR_NUM) {
 			turn = 0;
+			isRoundEnded = true;
+		}
 		if (characters[turn] == null) shiftTurn();
 
 		//if(numCharacters == 0) return;
@@ -229,6 +246,15 @@ public class Player implements Updatable {
 		//if(turn > numCharacters) turn = 1;
 		//if(characters[turn-1] == null) shiftTurn();
 	}
+
+	public boolean isRoundEnded() {
+		return isRoundEnded;
+	}
+
+	public void setIsRoundEnded(boolean isRoundEnded) {
+		this.isRoundEnded = isRoundEnded;
+	}
+
 	/**
 	 * Getter Method for the reference to the Asset Manager
 	 * @return AssetManager
@@ -236,6 +262,7 @@ public class Player implements Updatable {
 	public AssetManager getAssets() {
 		return world.getAssetManager();
 	}
+
 	/**
 	 * Getter method for the world we are playing in
 	 * @return world
@@ -302,10 +329,12 @@ public class Player implements Updatable {
 	 * @param code - Constants.MOVEMENT_... integer for the movement code
 	 */
 	public void setMovement(int code) {if(getCurrentWorm() != null) getCurrentWorm().setMovement(code);}
+
 	/**
 	 * Passthrough method to give a jump order to the currently movable worm
 	 */
 	public void jump() {if(getCurrentWorm() != null) getCurrentWorm().setJump(true);}
+
 	/**
 	 * Passthrough method to give a shoot order to the currently movable worm
 	 */
@@ -323,6 +352,7 @@ public class Player implements Updatable {
 		clone.setCloningParameters(this);
 		return clone;
 	}
+
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from

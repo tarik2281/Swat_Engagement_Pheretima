@@ -3,6 +3,7 @@ package de.paluno.game.gameobjects.ground;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import de.paluno.game.UserData;
 
 class CollisionObject {
     private float[] vertices;
@@ -16,7 +17,7 @@ class CollisionObject {
         ChainShape shape = ShapeFactory.createChainShape(vertices);
         if (shape != null) {
             fixture = body.createFixture(shape, 0.0f);
-            fixture.setUserData(this);
+            fixture.setUserData(new UserData(UserData.ObjectType.Ground,this));
             shape.dispose();
         }
 
@@ -26,7 +27,6 @@ class CollisionObject {
     void destroyFixture() {
         if (fixture != null) {
             Body body = fixture.getBody();
-            fixture.setUserData(null);
             body.destroyFixture(fixture);
             fixture = null;
         }

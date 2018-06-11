@@ -31,6 +31,7 @@ public class World {
 
     private com.badlogic.gdx.physics.box2d.World world;
     private Rectangle worldBounds;
+    private float targetLimit;
 
     private Player[] players;
 
@@ -54,14 +55,14 @@ public class World {
     };
 
     private ContactFilter contactFilter = (fixtureA, fixtureB) -> {
-        if (fixtureA.getUserData() == "Worm" && fixtureB.getUserData() == "Projectile") {
-            Projectile projectile = (Projectile)fixtureB.getBody().getUserData();
-            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureA.getBody().getUserData())
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Worm && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+            Projectile projectile = UserData.getObject(fixtureB);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA))
                 return false;
         }
-        else if (fixtureB.getUserData() == "Worm" && fixtureA.getUserData() == "Projectile") {
-            Projectile projectile = (Projectile)fixtureA.getBody().getUserData();
-            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == fixtureB.getBody().getUserData())
+        else if (UserData.getType(fixtureB) == UserData.ObjectType.Worm && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            Projectile projectile = UserData.getObject(fixtureA);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
                 return false;
         }
 
@@ -128,20 +129,27 @@ public class World {
         forgetObjects();
     }
 
-    public void updatePhase(float delta) {
+    private void updatePhase(float delta) {
         if (currentGameState == GameState.WAITING) {
             boolean advance = true;
 
-            for (Player player : players) {
-                for (Worm worm : player.characters) {
-                    if (worm != null && worm.getBody() != null)
-                    if (worm.getBody().isAwake()) {
+            players: for (Player player : players) {
+                for (Worm worm : player.getCharacters()) {
+                    if (worm != null && worm.getBody() != null && worm.getBody().isAwake()) {
                         advance = false;
+                        break players;
                     }
                 }
             }
 
             if (advance)
+                advanceGameState();
+        }
+        else if (currentGameState == GameState.RAISE_LIMIT) {
+            worldBounds.y += Constants.RAISE_LIMIT_SPEED * delta;
+            camera.setBottomLimit(worldBounds.y);
+
+            if (worldBounds.y >= targetLimit)
                 advanceGameState();
         }
 
@@ -150,12 +158,12 @@ public class World {
         }
     }
 
-    public void physicsPhase(float delta) {
+    private void physicsPhase(float delta) {
         float timeStep = 1.0f / 60.0f;
         world.step(timeStep, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
     }
 
-    public void renderPhase(SpriteBatch batch, float delta) {
+    private void renderPhase(SpriteBatch batch, float delta) {
         camera.update(delta);
 
         explosionMaskRenderer.renderDepthMask();
@@ -183,43 +191,25 @@ public class World {
         objectForgetQueue.add(gameObject);
     }
 
-    public void addExplosion(Vector2 center, float radius) {
-        ground.addExplosion(center, radius);
+    public ArrayList<Worm> addExplosion(Explosion explosion) {
+        if (explosion.getBlastPower() > 0.0f)
+            ground.addExplosion(explosion);
 
         final ArrayList<Worm> affectedWorms = new ArrayList<>();
 
         world.QueryAABB((fixture -> {
-            if (fixture.getUserData() == "Worm") {
-                Worm worm = (Worm)fixture.getBody().getUserData();
+            if (UserData.getType(fixture) == UserData.ObjectType.Worm) {
+                Worm worm = UserData.getObject(fixture);
 
                 if (!affectedWorms.contains(worm))
                     affectedWorms.add(worm);
             }
             return true;
-        }), center.x - radius, center.y - radius, center.x + radius, center.y + radius);
+        }), explosion.getLowerX(), explosion.getLowerY(), explosion.getUpperX(), explosion.getUpperY());
 
-        for (Worm worm : affectedWorms) {
-            Vector2 bodyCom = worm.getBody().getWorldCenter();
+        affectedWorms.removeIf(worm -> !explosion.applyBlastImpulse(worm));
 
-            if (bodyCom.dst2(center) >= radius * radius)
-                continue;
-
-            applyBlastImpulse(worm.getBody(), center, bodyCom, 0.008f);
-        }
-    }
-
-    private void applyBlastImpulse(Body body, Vector2 blastCenter, Vector2 applyPoint, float blastPower) {
-        Vector2 diff = new Vector2(applyPoint).sub(blastCenter);
-        float distance = diff.len();
-
-        if (distance == 0)
-            return;
-
-        float invDistance = 1.0f / distance;
-        diff.scl(invDistance);
-
-        float impulse = blastPower * invDistance * invDistance;
-        body.applyLinearImpulse(diff.scl(impulse), applyPoint, true);
+        return affectedWorms;
     }
 
     public Body createBody(BodyDef bodyDef) {
@@ -291,6 +281,12 @@ public class World {
                 break;
             case SHOOTING:
                 break;
+            case RAISE_LIMIT:
+                targetLimit = worldBounds.y + Constants.RAISE_LIMIT_LENGTH;
+
+                for (Player player : players)
+                    player.setIsRoundEnded(false);
+                break;
         }
     }
 
@@ -303,6 +299,20 @@ public class World {
                 setGameState(GameState.WAITING);
                 break;
             case WAITING:
+                boolean raiseLimit = true;
+
+                for (Player player : players) {
+                    if (!player.isRoundEnded())
+                        raiseLimit = false;
+                }
+
+                if (raiseLimit)
+                    setGameState(GameState.RAISE_LIMIT);
+                else
+                    setGameState(GameState.PLAYERTURN);
+
+                break;
+            case RAISE_LIMIT:
                 setGameState(GameState.PLAYERTURN);
                 break;
         }
@@ -314,6 +324,10 @@ public class World {
 
     public Vector2 generateSpawnPosition() {
         return ground.getRandomSpawnPosition();
+    }
+
+    public boolean isInWorldBounds(Body body) {
+        return body.getPosition().y > worldBounds.y;
     }
 
     public Rectangle getWorldBounds() {

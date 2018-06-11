@@ -70,6 +70,10 @@ public class Constants {
     public static final int KEY_DO_ACTION = Input.Keys.ENTER;
     public static final int KEY_ROTATE_INDICATOR_UP = Input.Keys.UP;
     public static final int KEY_ROTATE_INDICATOR_DOWN = Input.Keys.DOWN;
+    public static final int KEY_SELECT_WEAPON_1 = Input.Keys.F1;
+    public static final int KEY_SELECT_WEAPON_2 = Input.Keys.F2;
+    public static final int KEY_SELECT_WEAPON_3 = Input.Keys.F3;
+    public static final int KEY_SELECT_WEAPON_4 = Input.Keys.F4;
 
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;
@@ -94,6 +98,9 @@ public class Constants {
     public static final int WEAPON_ARSENAL_RIFLE = 1;
     public static final int WEAPON_ARSENAL_PROJECTILE = 1;
     public static final int WEAPON_ARSENAL_THROWABLE = 1;
+
+    public static final float RAISE_LIMIT_SPEED = 0.07f;
+    public static final float RAISE_LIMIT_LENGTH = 0.3f;
 
 	private Constants() {
 		// An instance should not be created of this class

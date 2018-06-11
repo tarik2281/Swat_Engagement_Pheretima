@@ -3,16 +3,9 @@ package de.paluno.game;
 public enum GameState {
 	NONE,
 	PLAYERTURN,
-	SELECTING,
 	SHOOTING,
 	WAITING,
+	RAISE_LIMIT,
 	GAMEOVERPLAYERONEWON,
-	GAMEOVERPLAYERTWOWON;
-	
-	
-	 
-	
-	
-	
-	
+	GAMEOVERPLAYERTWOWON
 }

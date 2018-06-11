@@ -16,10 +16,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.QueryCallback;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
-import de.paluno.game.gameobjects.PhysicsObject;
-import de.paluno.game.gameobjects.Renderable;
-import de.paluno.game.gameobjects.Updatable;
-import de.paluno.game.gameobjects.World;
+import de.paluno.game.UserData;
+import de.paluno.game.gameobjects.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -47,8 +45,8 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     private QueryCallback explosionQueryCallback = new QueryCallback() {
         @Override
         public boolean reportFixture(Fixture fixture) {
-            if (fixture.getUserData() instanceof CollisionObject) {
-                CollisionObject object = (CollisionObject)fixture.getUserData();
+            if (UserData.getType(fixture) == UserData.ObjectType.Ground) {
+                CollisionObject object = UserData.getObject(fixture);
 
                 if (!queriedObjects.contains(object))
                     queriedObjects.add(object);
@@ -77,8 +75,8 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         loadSpawnPositions();
     }
 
-    public void addExplosion(Vector2 center, float radius) {
-        explosionQueue.add(new Explosion(center, radius));
+    public void addExplosion(Explosion explosion) {
+        explosionQueue.add(explosion);
     }
 
     private void executeExplosion(Explosion explosion) {

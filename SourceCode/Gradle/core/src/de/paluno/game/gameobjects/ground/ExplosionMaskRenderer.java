@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import de.paluno.game.Constants;
+import de.paluno.game.gameobjects.Explosion;
 
 public class ExplosionMaskRenderer {
 

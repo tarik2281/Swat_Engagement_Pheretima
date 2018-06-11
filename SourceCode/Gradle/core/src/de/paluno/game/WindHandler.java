@@ -14,7 +14,6 @@ public class WindHandler implements Updatable {
     private int x = rand.nextInt(12) - 6;
 
 
-
     @Override
     public void update(float delta, GameState gamestate) {
         // magnitude and a direction
@@ -26,12 +25,13 @@ public class WindHandler implements Updatable {
         // apply wind (force) to the center of the projectile
         if (projectile != null && projectile.getBody() != null) {
             this.projectile.getBody().applyForceToCenter(wind, true);
-            System.out.println(x);
         }
 
     }
 
-
+    /**
+     * @return x - coordinate positive or negative? -> flip sprite
+     */
     public boolean flipped() {
         if (x < 0) {
             return true;
@@ -49,6 +49,7 @@ public class WindHandler implements Updatable {
     public void setNextWind() {
         this.x = rand.nextInt(12) - 6;
     }
+
 
     public int getX() {
         return x;

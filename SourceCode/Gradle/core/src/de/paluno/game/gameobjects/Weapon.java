@@ -21,6 +21,8 @@ public class Weapon {
 
 		this.type = type;
 
+		this.currentAmmo = type.getMaxAmmo();
+
 		animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
 
@@ -32,7 +34,7 @@ public class Weapon {
 			Vector2 direction = new Vector2(1, 0).rotate(angle);
 
 			Projectile projectile = new Projectile(player.getWorld(), worm,
-					type, worm.getBody().getPosition(), direction);
+					this.type, worm.getBody().getPosition(), direction);
 
 			player.getWorld().spawnProjectile(projectile);
 

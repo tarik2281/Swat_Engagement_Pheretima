@@ -6,10 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
-import de.paluno.game.AnimatedSprite;
-import de.paluno.game.Assets;
-import de.paluno.game.Constants;
-import de.paluno.game.GameState;
+import de.paluno.game.*;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -40,6 +37,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private int numContacts = 0;
 	private boolean isStatic = false;
 	private boolean isPlaying;
+	private boolean isInfected = false;
+	private boolean createVirusFixture = false;
+	private Fixture virusFixture;
 
 	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
@@ -87,6 +87,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// No body anymore? Shouldn't happen, catch
 		if(this.body == null) return;
 
+		if (createVirusFixture)
+			createVirusFixture();
+
         // Now we apply movements - therefor we need our current position
 		Vector2 currentPos = body.getWorldCenter();
 
@@ -130,7 +133,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!world.getWorldBounds().contains(body.getPosition())) die();
+		if (!world.isInWorldBounds(body)) die();
 	}
 	
 	/**
@@ -156,7 +159,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 			// And finally draw it
 			currentAnimation.setPosition(currentPos);
+			if (isInfected)
+				batch.setColor(0.0f, 1.0f, 0.0f, 1.0f);
 			currentAnimation.draw(batch, delta);
+			batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
 
@@ -192,7 +198,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Create, apply, done
 		Fixture fix = this.body.createFixture(fixtureDef);
 		// CollisionHandler Identifier
-		fix.setUserData("Worm");
+		fix.setUserData(new UserData(UserData.ObjectType.Worm, this));
 
 		fixtureDef.shape = footRect;
 		fixtureDef.isSensor = true;
@@ -200,11 +206,25 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;
 		fix = body.createFixture(fixtureDef);
-		fix.setUserData("WormFoot");
+		fix.setUserData(new UserData(UserData.ObjectType.WormFoot,this));
 
 		// Get rid of temporary material properly
 		bodyRect.dispose();
 		footRect.dispose();
+	}
+
+	private void createVirusFixture() {
+		CircleShape circle = new CircleShape();
+		circle.setRadius(30 * Constants.WORLD_SCALE);
+
+		FixtureDef fixtureDef = new FixtureDef();
+		fixtureDef.shape = circle;
+		fixtureDef.isSensor = true;
+
+		virusFixture = this.body.createFixture(fixtureDef);
+		virusFixture.setUserData("Virus");
+		circle.dispose();
+		createVirusFixture = false;
 	}
 
 	/**
@@ -225,8 +245,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void setIsPlaying(boolean isPlaying) {
 		this.isPlaying = isPlaying;
 
-		if (isPlaying)
+		if (isPlaying) {
 			setIsStatic(false);
+			if (isInfected)
+				takeDamage(5);
+		}
 	}
 
 	public boolean isPlaying() {
@@ -247,6 +270,21 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	public boolean isStatic() {
 		return isStatic;
+	}
+
+	public void setIsInfected(boolean isInfected) {
+		if (!this.isInfected && isInfected)
+			createVirusFixture = true;
+		else if (!isInfected && virusFixture != null) {
+			body.destroyFixture(virusFixture);
+			virusFixture = null;
+		}
+
+		this.isInfected = isInfected;
+	}
+
+	public boolean isInfected() {
+		return isInfected;
 	}
 
 	public void equipWeapon(Weapon weapon) {
