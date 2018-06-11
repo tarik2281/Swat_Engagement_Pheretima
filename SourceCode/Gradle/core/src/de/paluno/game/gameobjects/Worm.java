@@ -322,7 +322,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		health -= damage;
 
 		if (health <= 0) {
-			// Is ded, kill it
+			// Is dead, kill it
 			health = 0;
 			die();
 		}

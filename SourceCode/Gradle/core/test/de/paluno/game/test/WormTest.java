@@ -5,21 +5,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
-class WorldTest {
+import de.paluno.game.gameobjects.Worm;
+
+class WormTest {
 	
-	Player player_mock;
+	Worm wormToTest;
 	
 	@Before
 	public void setUp() {
 		
 	}
 	@Test
-	void testAdvanceGameState() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGenerateSpawnPosition() {
+	void testTakeDamage() {
 		fail("Not yet implemented");
 	}
 
