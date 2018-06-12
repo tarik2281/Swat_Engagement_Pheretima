@@ -20,11 +20,13 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 	
 	private World world;
 	private World replayWorld;
-	private boolean disposeReplayWorld;
-	
+	private boolean disposeReplayAfterUpdate;
+    private World.SnapshotData worldSnapshot;
+
+    private WinningPlayer winningPlayer = WinningPlayer.NONE;
+
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
-	private de.paluno.game.gameobjects.World.SnapshotData data;
 	
     public PlayScreen(SEPGame game) {
         this.game = game;
@@ -64,10 +66,14 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         weaponUI.render(spriteBatch, delta);
 
-        if (disposeReplayWorld) {
+        if (disposeReplayAfterUpdate) {
             replayWorld.dispose();
             replayWorld = null;
-            disposeReplayWorld = false;
+            disposeReplayAfterUpdate = false;
+        }
+
+        if (winningPlayer != WinningPlayer.NONE && replayWorld == null) {
+            game.setGameOver(winningPlayer);
         }
     }
 
@@ -104,19 +110,23 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer.setGameState(gameState, currentPlayer);
         
         if (this.world == world && gameState == GameState.SHOOTING)
-        	data = world.makeSnapshot();
+        	worldSnapshot = world.makeSnapshot();
         
         if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED) {
-            disposeReplayWorld = true;
+            disposeReplayAfterUpdate = true;
         }
-        
-        if (this.world == world && gameState == GameState.PLAYERTURN && world.isWormDied()) {
-        	replayWorld = new World(this);
-        	replayWorld.initializeFromSnapshot(data);
+
+        if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
+            if (world.isWormDied() && worldSnapshot != null) {
+                replayWorld = new World(this);
+                replayWorld.initializeFromSnapshot(worldSnapshot);
+            }
+
+            worldSnapshot = null;
         }
     }
 
     public void setGameOver(WinningPlayer winningPlayer) {
-        game.setGameOver(winningPlayer);
+        this.winningPlayer = winningPlayer;
     }
 }

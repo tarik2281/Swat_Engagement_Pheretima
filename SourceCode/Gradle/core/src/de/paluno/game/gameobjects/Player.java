@@ -290,7 +290,7 @@ public class Player implements Updatable {
 		if(this.numCharacters <= 0 || this.characters[charNum] == null)
 			return;
 
-		if (getCurrentWorm().isPlaying())
+		if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
 		    world.advanceGameState();
 
 		world.forgetAfterUpdate(characters[charNum]);
