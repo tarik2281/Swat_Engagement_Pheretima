@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
-import de.paluno.game.gameobjects.Worm.SnapshotData;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
 import de.paluno.game.screens.PlayScreen;
@@ -17,7 +16,7 @@ import de.paluno.game.screens.WinningPlayer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class World {
+public class World implements Disposable {
 
 	public class SnapshotData{
 		private WindHandler.SnapshotData windHandler;
@@ -30,7 +29,6 @@ public class World {
 	
     private PlayScreen screen;
     private WindHandler windHandler;
-    private Worm worm;
     private int currentPlayer;
     private GameState currentGameState = GameState.NONE;
     private boolean wormDied = false;
@@ -82,50 +80,10 @@ public class World {
 
         return true;
     };
-	private SnapshotData data;
-   
-    
-    public World(PlayScreen screen, SnapshotData data) {
-    	
-    	 this.screen = screen;
-    	 isReplayWorld = true;
-
-         objectRegisterQueue = new LinkedList<>();
-         objectForgetQueue = new LinkedList<>();
-         renderableObjects = new ArrayList<>();
-         updatableObjects = new ArrayList<>();
-    	 
-    	 world = new com.badlogic.gdx.physics.box2d.World(Constants.GRAVITY, true);
-         world.setContactListener(new CollisionHandler());
-         world.setContactFilter(contactFilter);
-
-         worldBounds = data.worldBounds;
-
-         camera = new GameCamera  (Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-         camera.setBottomLimit(worldBounds.y);
-         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
-    	
-         windHandler = new WindHandler(data.windHandler);
-         
-         ground = new Ground(this, explosionMaskRenderer, data.ground);
-         explosionMaskRenderer.setGround(ground);
-         
-         initializePlayers(data.player);
-         
-         registerAfterUpdate(ground);
-         registerAfterUpdate(windHandler);
-
-         debugRenderer = new Box2DDebugRenderer();
-         
-         spawnProjectile(projectile = new Projectile(this, data.projectile));
-         camera.setCameraPosition(data.projectile.getPosition());
-    }
 
     public World(PlayScreen screen) {
         this.screen = screen;
         isReplayWorld = false;
-        
-        this.windHandler = new WindHandler();
 
         objectRegisterQueue = new LinkedList<>();
         objectForgetQueue = new LinkedList<>();
@@ -135,48 +93,80 @@ public class World {
         world = new com.badlogic.gdx.physics.box2d.World(Constants.GRAVITY, true);
         world.setContactListener(new CollisionHandler());
         world.setContactFilter(contactFilter);
+        debugRenderer = new Box2DDebugRenderer();
 
         worldBounds = new Rectangle();
 
         camera = new GameCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.setBottomLimit(0.0f);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
+        players = new Player[Constants.NUM_PLAYERS];
+    }
+
+    public void initializeNew() {
         ground = new Ground(this, screen.getAssetManager().get(Assets.map), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
+
+        windHandler = new WindHandler();
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
 
-        debugRenderer = new Box2DDebugRenderer();
-
-        players = new Player[Constants.NUM_PLAYERS];
-
-        currentPlayer = Constants.PLAYER_NUMBER_1;
         initializePlayer(Constants.PLAYER_NUMBER_1);
         initializePlayer(Constants.PLAYER_NUMBER_2);
+
+        worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
+                ground.getWorldWidth(), ground.getWorldHeight());
+        camera.setBottomLimit(worldBounds.y);
 
         registerAfterUpdate(ground);
         registerAfterUpdate(windHandler);
 
+        currentPlayer = Constants.PLAYER_NUMBER_1;
         setGameState(GameState.PLAYERTURN);
 
         InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
+    }
+
+    public void initializeFromSnapshot(SnapshotData data) {
+        isReplayWorld = true;
+
+        ground = new Ground(this, explosionMaskRenderer, data.ground);
+        explosionMaskRenderer.setGround(ground);
+
+        windHandler = new WindHandler(data.windHandler);
+
+        worldBounds.set(data.worldBounds);
+        camera.setBottomLimit(worldBounds.y);
+
+        for (Player.SnapshotData playerData : data.player)
+            initializePlayer(playerData);
+
+        registerAfterUpdate(ground);
+        registerAfterUpdate(windHandler);
+
+        projectile = new Projectile(this, data.projectile);
+        spawnProjectile(projectile);
+        camera.setCameraPosition(data.projectile.getPosition());
     }
 
     private void initializePlayer(int playerNumber) {
         players[playerNumber] = new Player(playerNumber, this);
         players[playerNumber].setWindHandler(windHandler);
     }
-    
-    private void initializePlayers(Player.SnapshotData[] data) {
-    	players = new Player[data.length];
-    	players[0] = new Player(data[0], this);
-    	players[1] = new Player(data[1], this);
-    	players[0].setWindHandler(windHandler);
-    	players[1].setWindHandler(windHandler);
+
+    private void initializePlayer(Player.SnapshotData data) {
+        players[data.getPlayerNumber()] = new Player(data, this);
+        players[data.getPlayerNumber()].setWindHandler(windHandler);
     }
-    
+
+    @Override
+    public void dispose() {
+        world.dispose();
+        debugRenderer.dispose();
+        explosionMaskRenderer.dispose();
+    }
+
     public Worm getPlayerWorm(int playerNumber, int characterNumber) {
     	Player player = players[playerNumber];
     	
@@ -191,7 +181,6 @@ public class World {
         isRenderDebug = !isRenderDebug;
     }
 
-
     public void doGameLoop(SpriteBatch batch, float delta) {
         registerObjects();
 
@@ -203,6 +192,7 @@ public class World {
         else {
         	skipFrame = false;
         }
+
         renderPhase(batch, delta);
 
         forgetObjects();
@@ -249,7 +239,7 @@ public class World {
 
         batch.end();
 
-        //if (isRenderDebug)
+        if (isRenderDebug)
             debugRenderer.render(world, camera.getDebugProjection());
     }
 

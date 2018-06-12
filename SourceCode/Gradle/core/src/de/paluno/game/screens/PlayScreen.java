@@ -11,18 +11,16 @@ import de.paluno.game.Assets;
 import de.paluno.game.GameState;
 import de.paluno.game.InputHandler;
 import de.paluno.game.SEPGame;
-import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.World;
-import de.paluno.game.gameobjects.Worm;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
- 
-	private boolean isdie  = true;
+
 	private SEPGame game;
 	private SpriteBatch spriteBatch; 
 	
 	private World world;
 	private World replayWorld;
+	private boolean disposeReplayWorld;
 	
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
@@ -32,13 +30,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         this.game = game;
    
         spriteBatch = new SpriteBatch();
-
     }
-    
-  
 
     @Override
-    
     public void show() {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
@@ -46,13 +40,12 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
   
         world = new World(this);
+        world.initializeNew();
         weaponUI = new WeaponUI(this);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
         Gdx.input.setInputProcessor(inputMultiplexer);  
     }
-   
-    
  
     @Override
     public void render(float delta) {
@@ -70,6 +63,12 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         renderPhase(delta);
 
         weaponUI.render(spriteBatch, delta);
+
+        if (disposeReplayWorld) {
+            replayWorld.dispose();
+            replayWorld = null;
+            disposeReplayWorld = false;
+        }
     }
 
     public void renderPhase(float delta) {
@@ -78,6 +77,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void hide() {
+        world.dispose();
+        world = null;
+
         Gdx.input.setInputProcessor(null);
     }
 
@@ -104,11 +106,13 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         if (this.world == world && gameState == GameState.SHOOTING)
         	data = world.makeSnapshot();
         
-        if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED)
-        	replayWorld = null;
+        if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED) {
+            disposeReplayWorld = true;
+        }
         
         if (this.world == world && gameState == GameState.PLAYERTURN && world.isWormDied()) {
-        	replayWorld = new World(this, data);
+        	replayWorld = new World(this);
+        	replayWorld.initializeFromSnapshot(data);
         }
     }
 

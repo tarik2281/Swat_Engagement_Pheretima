@@ -8,10 +8,14 @@ import de.paluno.game.screens.PlayScreen;
 
 public class Player implements Updatable {
 
-	public class SnapshotData {
+	public static class SnapshotData {
 		private int playerNumber;
 		private Worm.SnapshotData[] wormData;
-		private Weapon.SnapshotData[] weapondata;	    
+		private Weapon.SnapshotData[] weapondata;
+
+		public int getPlayerNumber() {
+			return playerNumber;
+		}
 	}
     private PlayScreen screen;
 	private int playerNum;
