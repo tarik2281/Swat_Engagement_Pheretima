@@ -65,13 +65,17 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
 
 		// Load animations
-		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
-		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
-
+		if (player.getAssets() != null) {
+			this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
+			this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
+			this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
+		}
+		
 		// Get our spawning position
-		this.spawnPosition = world.generateSpawnPosition();
-
+		if (world != null) {
+			this.spawnPosition = world.generateSpawnPosition();
+		}
+		
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
 
@@ -421,11 +425,13 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		else 													currentAnimation = idleAnimation;
 
 		// flip the animation if needed since the animations are only for the left direction
-		currentAnimation.setOrientation(orientation);
-		currentAnimation.reset();
+		if (currentAnimation != null) {
+			currentAnimation.setOrientation(orientation);
+			currentAnimation.reset();
 
-		if (currentWeapon != null && gunUnequipping)
-			currentAnimation.reverse();
+			if (currentWeapon != null && gunUnequipping)
+				currentAnimation.reverse();
+		}
 	}
 
 	/**
