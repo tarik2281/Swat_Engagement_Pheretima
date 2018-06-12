@@ -2,7 +2,6 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.*;
-import de.paluno.game.gameobjects.Player.SnapshotData;
 
 public class Weapon {
 
@@ -72,11 +71,9 @@ public class Weapon {
 		return new AnimatedSprite(animationSet);
 	}
 
-	public void setCloningParameters(Weapon clone) {
-
-	}
 	public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
+
 		data.currentAmmo = currentAmmo;
 		data.type = type;
 		

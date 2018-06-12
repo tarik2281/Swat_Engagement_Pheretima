@@ -19,8 +19,7 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	private Sprite sprite;
 	private Texture texture;
 	private int movement;
-	
-	
+
 	public ShotDirectionIndicator(int playerNumber, World world) {
 		this.playerNumber = playerNumber;
 		this.world = world;
@@ -68,17 +67,5 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 
 	public float getAngle() {
 		return degrees;
-	}
-
-	public void setCloningParameters(ShotDirectionIndicator clone) {
-		// TODO Auto-generated method stub
-		this.playerNumber = clone.playerNumber;
-		this.world=clone.world;
-		this.degrees= clone.degrees;
-		this.worm= clone.worm;
-		this.sprite=clone.sprite;
-		this.texture= clone.texture;
-		this.movement= clone.movement;
-		
 	}
 }

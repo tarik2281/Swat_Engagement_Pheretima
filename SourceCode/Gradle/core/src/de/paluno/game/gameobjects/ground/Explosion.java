@@ -3,11 +3,8 @@ package de.paluno.game.gameobjects.ground;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.Constants;
-import de.paluno.game.gameobjects.Worm.SnapshotData;
 
 class Explosion {
-	
-	
 
     private Vector2 center;
     private float radius;
@@ -78,5 +75,4 @@ class Explosion {
 
         return polygonVertices;
     }
-   
 }

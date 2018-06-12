@@ -4,22 +4,20 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
-import de.paluno.game.screens.PlayScreen;
 
 public class Player implements Updatable {
 
 	public static class SnapshotData {
 		private int playerNumber;
 		private Worm.SnapshotData[] wormData;
-		private Weapon.SnapshotData[] weapondata;
+		private Weapon.SnapshotData[] weaponData;
 
 		public int getPlayerNumber() {
 			return playerNumber;
 		}
 	}
-    private PlayScreen screen;
+
 	private int playerNum;
-	public boolean isdie = true;
 	private int numCharacters;
 	public Worm[] characters;
 	private Weapon[] weapons;
@@ -118,9 +116,9 @@ public class Player implements Updatable {
 		this.world = world;
 		
 		setupWorms(data.wormData);
-		setupWeapons(data.weapondata);
+		setupWeapons(data.weaponData);
+
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-		
 	}
 
 	public ShotDirectionIndicator getShotDirectionIndicator() {
@@ -167,6 +165,10 @@ public class Player implements Updatable {
         weapons[0] = new Weapon(this, data[0]);
         weapons[1] = new Weapon(this, data[1]);
         weapons[2] = new Weapon(this, data[2]);
+	}
+
+	public Worm getWormByNumber(int characterNumber) {
+		return characters[characterNumber];
 	}
 
 	/**
@@ -353,31 +355,23 @@ public class Player implements Updatable {
 	}
 	
 	/**
-	 * Method to return a clone of this object
-	 * @return clone
-	 */
-	
-	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from
 	 */
-	
-	
-
 	public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 		
 		data.playerNumber = playerNum;
 		
 		data.wormData = new Worm.SnapshotData[characters.length];
-		data.weapondata = new Weapon.SnapshotData[weapons.length];
+		data.weaponData = new Weapon.SnapshotData[weapons.length];
 		
 		for (int i = 0; i < characters.length; i++)
 			if (characters[i] != null)
 				data.wormData[i] = characters[i].makeSnapshot();
 		
 		for (int i = 0; i < weapons.length; i++) 
-			data.weapondata[i] = weapons[i].makeSnapshot();
+			data.weaponData[i] = weapons[i].makeSnapshot();
 		
 		return data;
 	}
@@ -389,5 +383,4 @@ public class Player implements Updatable {
 	public void handleAction(int keycode) {
 		this.shoot();
 	}
-	
 }

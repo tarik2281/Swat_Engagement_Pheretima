@@ -9,14 +9,14 @@ import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.WeaponType;
-import de.paluno.game.gameobjects.Player.SnapshotData;
 
 public class Projectile implements Updatable, PhysicsObject, Renderable {
-	public class SnapshotData {
+
+	public static class SnapshotData {
 		
 		private Vector2 position;
 		private Vector2 direction;
-		private WeaponType weapontype;
+		private WeaponType weaponType;
 		
 		private int playerNumber;
 		private int wormNumber;
@@ -61,20 +61,19 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         this.shootingWorm = shootingWorm;
     }
 
-    public Projectile(World world, SnapshotData projectile) {
-		// TODO Auto-generated constructor stub
+    public Projectile(World world, SnapshotData data) {
     	this.world = world;
-    	this.position = projectile.position;
-    	this.direction = projectile.direction;
+    	this.position = data.position;
+    	this.direction = data.direction;
     	
-    	this.weaponType = projectile.weapontype;
+    	this.weaponType = data.weaponType;
     	
     	texture = world.getAssetManager().get(weaponType.getProjectileAsset());
     	sprite = new Sprite(texture);
     	
     	sprite.setOriginCenter();
     	
-    	this.shootingWorm = world.getPlayerWorm(projectile.playerNumber, projectile.wormNumber);
+    	this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
 	}
 
 	public Worm getShootingWorm() {
@@ -204,17 +203,15 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         }
     }
 
-	
-    public  SnapshotData makeSnapshot() {
+    public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 		
 		data.position= new Vector2(position);
 		data.direction= new Vector2(direction);
-		data.weapontype= weaponType;
+		data.weaponType = weaponType;
 		data.playerNumber = shootingWorm.getPlayerNumber();
 		data.wormNumber = shootingWorm.getCharacterNumber();
 		
 		return data;
 	}
-	
 }

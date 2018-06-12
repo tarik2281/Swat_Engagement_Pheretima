@@ -9,12 +9,9 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
 import de.paluno.game.Constants;
-import de.paluno.game.gameobjects.Player.SnapshotData;
 
 public class Virus implements PhysicsObject{
-	
-	
-	private boolean isinfiziert;
+
 	private Body body;
 	private Worm worm;
 	private World world;
@@ -62,6 +59,4 @@ public class Virus implements PhysicsObject{
 	public Body getBody() {
 		return body;
 	}
-
-	
 }

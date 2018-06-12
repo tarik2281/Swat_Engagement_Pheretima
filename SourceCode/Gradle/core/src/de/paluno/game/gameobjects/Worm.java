@@ -1,7 +1,5 @@
 package de.paluno.game.gameobjects;
 
-import javax.swing.text.Position;
-
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -12,8 +10,6 @@ import de.paluno.game.AnimatedSprite;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
-import de.paluno.game.gameobjects.Player.SnapshotData;
-import de.paluno.game.screens.PlayScreen;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -22,17 +18,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         private Vector2 position;
         private int health;
         private int orientation;
-        private boolean isinfiziert;
     }
 
     private int characterNumber;
-    private PlayScreen screen;
 	private World world;
 	private Body body;
 	private Player player;
-	private boolean isinfiziert=false;
 	private Vector2 spawnPosition;
-    private Projectile projectile;
+
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
 	private AnimatedSprite walkAnimation;
@@ -117,7 +110,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if(this.jump) {
 			if (canJump()) {
 				// We shall jump - AND are allowed to - so let's apply some vertical impulse
-				// TODO: maybe jump and landing animations
 				this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
 						currentPos.x, currentPos.y, true);
 			}
@@ -458,12 +450,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			unequipWeapon();
 	    }
 	}
-	
-	/**
-	 * Method to return a clone of this object
-	 * @return clone
-	 */
-	
 
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
@@ -471,11 +457,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
-		data.characterNumber= characterNumber;
+
+		data.characterNumber = characterNumber;
 		data.health = health;
-		data.position= new Vector2(body.getPosition());
-		data.isinfiziert = isinfiziert;
-		data.orientation = this.orientation;
+		data.position = new Vector2(body.getPosition());
+		data.orientation = orientation;
 		
 		return data;
 	}

@@ -4,8 +4,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
-import de.paluno.game.gameobjects.Worm.SnapshotData;
-
 class CollisionObject {
 	
 	class SnapshotData {
@@ -50,10 +48,12 @@ class CollisionObject {
     Fixture getFixture() {
         return fixture;
     }
-    public SnapshotData makeSnapshot() {
+
+    SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
-		data.vertices= this.vertices;
+		data.vertices = this.vertices;
+
 		return data;
 	}
 }

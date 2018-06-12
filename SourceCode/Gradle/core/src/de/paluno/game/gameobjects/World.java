@@ -167,14 +167,13 @@ public class World implements Disposable {
         explosionMaskRenderer.dispose();
     }
 
-    public Worm getPlayerWorm(int playerNumber, int characterNumber) {
-    	Player player = players[playerNumber];
-    	
-    	for (Worm worm : player.characters)
-    		if (worm != null && worm.getCharacterNumber() == characterNumber)
-    			return worm;
-    	
-    	return null;
+    public Worm getWormForPlayer(int playerNumber, int characterNumber) {
+        Player player = players[playerNumber];
+
+        if (player != null)
+            return player.getWormByNumber(characterNumber);
+
+        return null;
     }
 
     public void toggleDebugRender() {

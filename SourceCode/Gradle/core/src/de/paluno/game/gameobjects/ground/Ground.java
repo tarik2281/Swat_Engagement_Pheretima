@@ -20,7 +20,6 @@ import de.paluno.game.gameobjects.PhysicsObject;
 import de.paluno.game.gameobjects.Renderable;
 import de.paluno.game.gameobjects.Updatable;
 import de.paluno.game.gameobjects.World;
-import de.paluno.game.gameobjects.Worm.SnapshotData;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -29,10 +28,8 @@ import java.util.Random;
 public class Ground implements PhysicsObject, Renderable, Updatable {
 	
 	public class SnapshotData {
-		private TiledMap tiled;
-		
-		private ArrayList<CollisionObject.SnapshotData> collisionobjects;
-
+		private TiledMap tiledMap;
+		private ArrayList<CollisionObject.SnapshotData> collisionObjects;
 	    private ArrayList<Explosion> explosions;
 	}
 
@@ -88,13 +85,13 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     
     public Ground(World world, ExplosionMaskRenderer renderer, SnapshotData data) {
     	this.world = world;
-    	this.tiledMap = data.tiled;
+    	this.tiledMap = data.tiledMap;
     	this.maskRenderer = renderer;
     	
     	clipper = new ClipperWrapper();
     	
-    	collisionObjects = new ArrayList<CollisionObject>(data.collisionobjects.size());
-    	for (CollisionObject.SnapshotData objectData : data.collisionobjects)
+    	collisionObjects = new ArrayList<CollisionObject>(data.collisionObjects.size());
+    	for (CollisionObject.SnapshotData objectData : data.collisionObjects)
     	    collisionObjects.add(new CollisionObject(objectData));
 
     	queriedObjects = new ArrayList<CollisionObject>();
@@ -241,12 +238,12 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
-		data.collisionobjects = new ArrayList<>(this.collisionObjects.size());
+		data.collisionObjects = new ArrayList<>(this.collisionObjects.size());
 		for (CollisionObject object : collisionObjects)
-		    data.collisionobjects.add(object.makeSnapshot());
+		    data.collisionObjects.add(object.makeSnapshot());
 
 		data.explosions = new ArrayList<>(this.explosions);
-		data.tiled = this.tiledMap;
+		data.tiledMap = this.tiledMap;
 		
 		return data;
 	}
