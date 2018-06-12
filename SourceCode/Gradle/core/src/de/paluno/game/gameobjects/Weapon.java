@@ -23,9 +23,10 @@ public class Weapon {
 
 		this.currentAmmo = type.getMaxAmmo();
 
+		if (player.getAssets() != null)
 		animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
-
+	
 	/**
 	 * Method to generate a projectile if allowed to
 	 */
@@ -33,14 +34,21 @@ public class Weapon {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
 			Vector2 direction = new Vector2(1, 0).rotate(angle);
 
-			Projectile projectile = new Projectile(player.getWorld(), worm,
-					this.type, worm.getBody().getPosition(), direction);
+			if (worm.getBody() != null) {
+				Projectile projectile = new Projectile(player.getWorld(), worm,
+						this.type, worm.getBody().getPosition(), direction);
 
-			player.getWorld().spawnProjectile(projectile);
-
+				player.getWorld().spawnProjectile(projectile);
+			}
+			
 			currentAmmo--;
 		}
 	}
+
+	public int getCurrentAmmo() {
+		return currentAmmo;
+	}
+	
 
 	public WeaponType getWeaponType() {
 		return type;

@@ -68,7 +68,11 @@ public class World {
 
         return true;
     };
-
+    
+    public World() {
+    	//für den Test
+    }
+    
     public World(PlayScreen screen) {
         this.screen = screen;
         this.windHandler = new WindHandler();

@@ -52,6 +52,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param player - reference to the player we belong to
 	 * @param charNum - Our character number
 	 */
+	
+	public Worm() {
+		//für den Test
+	}
 	public Worm(Player player, int charNum) {
 	    characterNumber = charNum;
 
