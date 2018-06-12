@@ -11,13 +11,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
+import de.paluno.game.GameState;
 import de.paluno.game.WeaponType;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Renderable;
 import de.paluno.game.gameobjects.Weapon;
-import de.paluno.game.gameobjects.World;
 
 public class WeaponUI implements Renderable {
+
+    // TODO:  density of projectiles ok?
 
 
     private PlayScreen playScreen;
@@ -25,29 +27,25 @@ public class WeaponUI implements Renderable {
     //takes the whole screen
     private Stage stage;
     // hold the image of our button
-    private Texture gun, grenade, bazooka, specialWeapon;
+    private Texture gun, grenade, bazooka, weaponSpecial;
     // defines rectangular area of a texture
-    private TextureRegion textureRegionGun, textureRegionGrenade, textureRegionBazooka, textureRegionSpecialWeapon;
+    private TextureRegion textureRegionGun, textureRegionGrenade, textureRegionBazooka, textureRegionWeaponSpecial;
     // draws the texture in the given size
-    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade, regionDrawableBazooka,regionDrawableSpecialWeapon;
+    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade, regionDrawableBazooka, regionDrawableWeaponSpecial;
     // Icons
-    private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonSpecialWeapon;
+    private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonWeaponSpecial;
     // Is implemented into the stage
     private Table table;
 
     // Background of the table
     private Image image;
     private Texture textureBackground;
-
-
     private Player player;
-    private Weapon weapon;
 
 
-    // TODO: Assetmanager nutzen
-
-    WeaponUI(PlayScreen playScreen) {
+    public WeaponUI(PlayScreen playScreen) {
         this.playScreen = playScreen;
+
 
         // Table Background
         textureBackground = playScreen.getAssetManager().get(Assets.weaponUI);
@@ -62,8 +60,8 @@ public class WeaponUI implements Renderable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Gun Button Clicked");
-                //  weapon = new Weapon(player,WeaponType.WEAPON_GUN);
-                //  player.getCurrentWorm().equipWeapon(weapon);
+                player.equipWeapon(WeaponType.WEAPON_GUN);
+
             }
         }));
 
@@ -77,6 +75,7 @@ public class WeaponUI implements Renderable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Grenade Button Clicked");
+                player.equipWeapon(WeaponType.WEAPON_GRENADE);
             }
         }));
 
@@ -89,51 +88,55 @@ public class WeaponUI implements Renderable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Bazooka Button Clicked");
+                player.equipWeapon(WeaponType.WEAPON_BAZOOKA);
             }
         }));
 
         // SpecialWeapon Button
-//        specialWeapon = world.getAssetManager().get(Assets.specialWeapon);
-//        textureRegionSpecialWeapon = new TextureRegion(specialWeapon);
-//        regionDrawableSpecialWeapon = new TextureRegionDrawable(textureRegionSpecialWeapon);
-//        buttonSpecialWeapon = new ImageButton(regionDrawableSpecialWeapon);
-//        buttonSpecialWeapon.addListener((new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                System.out.println("SpecialWeapon Button Clicked");
-//            }
-//        }));
+        weaponSpecial = playScreen.getAssetManager().get(Assets.iconSpecial);
+        textureRegionWeaponSpecial = new TextureRegion(weaponSpecial);
+        regionDrawableWeaponSpecial = new TextureRegionDrawable(textureRegionWeaponSpecial);
+        buttonWeaponSpecial = new ImageButton(regionDrawableWeaponSpecial);
+        buttonWeaponSpecial.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("SpecialWeapon Button Clicked");
+                player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+            }
+        }));
 
 
         stage = new Stage();
         table = new Table();
 
         table.setBackground(image.getDrawable());
-        table.setPosition(1220, 120);
+        table.setPosition(1255, 120);
 
         // Positioning of Buttons
         table.top().right();
+        table.row();
         table.add(buttonGun);
         table.row();
         table.add(buttonGrenade);
         table.row();
         table.add(buttonBazooka);
+        table.row();
+        table.add(buttonWeaponSpecial);
+        stage.setDebugAll(false);
+
         //sets space to the edge of table
-        table.pad(7);
+        table.padRight(7);
+        table.padTop(12);
         table.setSize(92, 147);
         stage.addActor(table);
 
 
     }
 
-    public void setPlayer(Player player) {
-    }
-
 
     @Override
     public void render(SpriteBatch batch, float delta) {
         stage.act(Gdx.graphics.getDeltaTime());
-
         stage.draw();
 
     }
@@ -141,5 +144,9 @@ public class WeaponUI implements Renderable {
     // Listener for Buttons
     public Stage getInputProcessor() {
         return stage;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }

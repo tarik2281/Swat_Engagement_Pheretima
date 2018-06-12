@@ -39,13 +39,15 @@ public class WindDirectionIndicator implements Renderable {
     @Override
     public void render(SpriteBatch batch, float delta) {
 
-            // loading of different assets based of the wind force
+        // loading of different assets based of the wind force
         if (worm != null) {
-            if ((windHandler.getX() > 0 && windHandler.getX() <= 2) ||
-                    (windHandler.getX() < 0 && windHandler.getX() >= -2)) {
+            if (windHandler.getX() == 0) {
+                return;
+            } else if ((windHandler.getX() > 0 && windHandler.getX() <= 1) ||
+                    (windHandler.getX() < 0 && windHandler.getX() >= -1)) {
                 texture = world.getAssetManager().get(Assets.windGreen);
-            } else if ((windHandler.getX() > 2 && windHandler.getX() <= 4) ||
-                    (windHandler.getX() < -2 && windHandler.getX() >= -4)) {
+            } else if ((windHandler.getX() > 1 && windHandler.getX() <= 3) ||
+                    (windHandler.getX() < -1 && windHandler.getX() >= -3)) {
                 texture = world.getAssetManager().get(Assets.windOrange);
             } else {
                 texture = world.getAssetManager().get(Assets.windRed);
@@ -65,6 +67,7 @@ public class WindDirectionIndicator implements Renderable {
             // flips the indicator sprite after every turn, based of the random x coordinate
             if (this.windHandler != null) {
                 sprite.setFlip(windHandler.flipped(), false);
+                System.out.println(windHandler.getX());
             }
             sprite.draw(batch);
         }

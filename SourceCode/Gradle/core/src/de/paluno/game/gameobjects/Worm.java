@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
+import de.paluno.game.screens.WeaponUI;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -15,6 +16,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         private Vector2 position;
         private int health;
     }
+
+    private WeaponUI weaponUI;
 
     private int characterNumber;
 
@@ -294,6 +297,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		gunUnequipping = false;
 		updateAnimation();
 	}
+
 
 	/**
 	 * Soft setter method for animation state - reverse gun animation

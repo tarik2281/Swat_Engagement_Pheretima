@@ -1,8 +1,10 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -11,6 +13,7 @@ import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
 import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.screens.WeaponUI;
 import de.paluno.game.screens.WinningPlayer;
 
 import java.util.ArrayList;
@@ -69,7 +72,7 @@ public class World {
         return true;
     };
 
-    public World(PlayScreen screen) {
+    public World(PlayScreen screen, int mapNumber) {
         this.screen = screen;
         this.windHandler = new WindHandler();
 
@@ -88,7 +91,7 @@ public class World {
         camera.setBottomLimit(0.0f);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
-        ground = new Ground(this, screen.getAssetManager().get(Assets.map), explosionMaskRenderer);
+        ground = new Ground(this, screen.getAssetManager().get((AssetDescriptor<TiledMap>)Assets.maps[mapNumber]), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
@@ -265,6 +268,7 @@ public class World {
         this.currentGameState = gameState;
 
         screen.setGameState(gameState, currentPlayer);
+
 
         switch (gameState) {
             case PLAYERTURN:

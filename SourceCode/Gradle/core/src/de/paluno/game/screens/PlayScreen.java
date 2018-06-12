@@ -17,12 +17,14 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     private World world;
 
+    private int mapNumber;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
 
-    public PlayScreen(SEPGame game) {
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
         this.game = game;
 
+        this.mapNumber = mapNumber;
         spriteBatch = new SpriteBatch();
 
 
@@ -37,9 +39,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
-        world = new World(this);
+        world = new World(this, mapNumber);
         //Gdx.input.setInputProcessor(inputAdapter);
         weaponUI = new WeaponUI(this);
+        weaponUI.setPlayer(world.getCurrentPlayer());
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
         Gdx.input.setInputProcessor(inputMultiplexer);
@@ -88,8 +91,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     public void setGameState(GameState gameState, int currentPlayer) {
         uiLayer.setGameState(gameState, currentPlayer);
-//        if (gameState == GameState.PLAYERTURN)
-//            weaponUI.setPlayer(world.getCurrentPlayer());
+
    }
 
     public void setGameOver(WinningPlayer winningPlayer) {

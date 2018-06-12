@@ -9,6 +9,12 @@ import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
 
+    // TODO: 11.06.2018 explodeOnCollision Bazooka ? , preSolve, postSolve?
+    // Weapon Special on hit
+    // Weapon Special close by
+
+
+
     public CollisionHandler() {
 
     }
@@ -59,13 +65,11 @@ public class CollisionHandler implements ContactListener {
          */
         if ((UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Ground)) {
 
-            Worm worm = (Worm) o1;
-            worm.beginContact();
+            ((Worm) o1).beginContact();
             System.out.println("Worm -> Ground");
 
         } else if ((UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Ground)) {
-            Worm worm = (Worm) o2;
-            worm.beginContact();
+            ((Worm) o2).beginContact();
             System.out.println("Worm -> Ground");
         }
 
@@ -75,26 +79,22 @@ public class CollisionHandler implements ContactListener {
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
             //if (((Projectile) o1).getWeaponType().equals(WeaponType.WEAPON_GUN)) {
 
-                Worm worm = (Worm) o2;
-                Projectile projectile = (Projectile) o1;
-                if (projectile.explodeOnCollision()) {
-                    projectile.explode(worm);
+                if (((Projectile) o1).explodeOnCollision()) {
+                    ((Projectile) o1).explode((Worm) o2);
                     //worm.takeDamage(Constants.PROJECTILE_DAMAGE);
                 }
                 System.out.println("Gun -> Worm");
-                System.out.println("Worms life = " + worm.getHealth());
+                System.out.println("Worms life = " + ((Worm) o2).getHealth());
             //}
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
             //if (((Projectile) o2).getWeaponType().equals(WeaponType.WEAPON_GUN)) {
 
-                Worm worm = (Worm) o1;
-                Projectile projectile = (Projectile) o2;
-                if (projectile.explodeOnCollision()) {
-                    projectile.explode(worm);
+                if (((Projectile) o2).explodeOnCollision()) {
+                    ((Projectile) o2).explode((Worm) o1);
                     //worm.takeDamage(Constants.PROJECTILE_DAMAGE);
                 }
                 System.out.println("Gun -> Worm");
-                System.out.println("Worms life = " + worm.getHealth());
+                System.out.println("Worms life = " + ((Worm)o1).getHealth());
             //}
         }
 
@@ -128,10 +128,12 @@ public class CollisionHandler implements ContactListener {
 
 //        if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
 //            if (((Projectile) o1).getWeaponType().equals(WeaponType.WEAPON_SPECIAL)) {
+//                ((Worm)o2).setIsInfected(true);
 //                System.out.println("Special Weapon");
 //            }
 //        } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
 //            if (((Projectile) o2).getWeaponType().equals(WeaponType.WEAPON_SPECIAL)) {
+//                ((Worm)o1).setIsInfected(true);
 //                System.out.println("Special Weapon");
 //            }
 //        }
@@ -139,18 +141,14 @@ public class CollisionHandler implements ContactListener {
 
         // Projectile -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Ground) {
-
-            Projectile projectile = (Projectile) o1;
-            if (projectile.explodeOnCollision()) {
-                projectile.explode(null);
+            if (((Projectile) o1).explodeOnCollision()) {
+                ((Projectile) o1).explode(null);
             }
             System.out.println("Projectile collided with Ground");
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Ground) {
-
-            Projectile projectile = (Projectile) o2;
-            if (projectile.explodeOnCollision()) {
-                projectile.explode(null);
+            if (((Projectile) o2).explodeOnCollision()) {
+                ((Projectile) o2).explode(null);
             }
             System.out.println("Projectile collided with Ground");
         }
@@ -180,26 +178,26 @@ public class CollisionHandler implements ContactListener {
          * Worms Foot -> Ground
          * Worm isn't in contact with the ground
          */
-        if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Worm) {
-            Worm worm = (Worm) o1;
-            worm.endContact();
-            System.out.println("Worm isn't in contact with the worm");
-        } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Worm) {
-            Worm worm = (Worm) o2;
-            worm.endContact();
-            System.out.println("Worm isn't in contact with the worm");
-        }
 
         if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Ground) {
-            Worm worm = (Worm) o1;
-            worm.endContact();
+            ((Worm) o1).endContact();
             System.out.println("Worm isn't in contact with the ground");
         } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Ground) {
-            Worm worm = (Worm) o2;
-            worm.endContact();
+            ((Worm) o2).endContact();
             System.out.println("Worm isn't in contact with the ground");
         }
 
+        /**
+         * Worms Foot -> Worm
+         * Worm isn't in contact with worm
+         */
+        if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Worm) {
+            ((Worm) o1).endContact();
+            System.out.println("Worm isn't in contact with the worm");
+        } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Worm) {
+            ((Worm) o2).endContact();
+            System.out.println("Worm isn't in contact with the worm");
+        }
     }
 
     @Override
