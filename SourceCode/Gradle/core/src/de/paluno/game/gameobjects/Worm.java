@@ -475,6 +475,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		data.health = health;
 		data.position= new Vector2(body.getPosition());
 		data.isinfiziert = isinfiziert;
+		data.orientation = this.orientation;
 		
 		return data;
 	}

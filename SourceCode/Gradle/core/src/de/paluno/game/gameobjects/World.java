@@ -200,7 +200,7 @@ public class World {
         	physicsPhase(delta);
         	skipFrame = true;
         }
-        else if (skipFrame) {
+        else {
         	skipFrame = false;
         }
         renderPhase(batch, delta);
@@ -438,9 +438,9 @@ public class World {
 
     public void spawnProjectile(Projectile projectile) {
     	this.projectile = projectile;
+        setGameState(GameState.SHOOTING);
         windHandler.setProjectile(projectile);
         registerAfterUpdate(projectile);
-        setGameState(GameState.SHOOTING);
         camera.setCameraFocus(projectile);
     }
 

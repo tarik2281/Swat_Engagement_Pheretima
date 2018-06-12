@@ -43,14 +43,14 @@ public class WindDirectionIndicator implements Renderable {
         if (worm != null) {
             if ((windHandler.getX() > 0 && windHandler.getX() <= 2) || (windHandler.getX() < 0 && windHandler.getX() >= -2)) {
                 texture = world.getAssetManager().get(Assets.windGreen);
-                System.out.println(windHandler.getX());
+                //System.out.println(windHandler.getX());
             } else if ((windHandler.getX() > 2 && windHandler.getX() <= 4) ||
                     (windHandler.getX() < -2 && windHandler.getX() >= -4)) {
                 texture = world.getAssetManager().get(Assets.windOrange);
-                System.out.println(windHandler.getX());
+                //System.out.println(windHandler.getX());
             } else {
                 texture = world.getAssetManager().get(Assets.windRed);
-                System.out.println(windHandler.getX());
+                //System.out.println(windHandler.getX());
             }
 
             sprite = new Sprite(texture);

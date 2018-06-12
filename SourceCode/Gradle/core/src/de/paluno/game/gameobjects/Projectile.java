@@ -208,8 +208,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     public  SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 		
-		data.position= position;
-		data.direction= direction;
+		data.position= new Vector2(position);
+		data.direction= new Vector2(direction);
 		data.weapontype= weaponType;
 		data.playerNumber = shootingWorm.getPlayerNumber();
 		data.wormNumber = shootingWorm.getCharacterNumber();

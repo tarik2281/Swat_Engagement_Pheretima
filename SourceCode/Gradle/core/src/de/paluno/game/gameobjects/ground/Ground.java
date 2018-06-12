@@ -31,7 +31,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 	public class SnapshotData {
 		private TiledMap tiled;
 		
-		private ArrayList<CollisionObject> collisionobjects;
+		private ArrayList<CollisionObject.SnapshotData> collisionobjects;
 
 	    private ArrayList<Explosion> explosions;
 	}
@@ -93,7 +93,10 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     	
     	clipper = new ClipperWrapper();
     	
-    	collisionObjects = new ArrayList<CollisionObject>(data.collisionobjects);
+    	collisionObjects = new ArrayList<CollisionObject>(data.collisionobjects.size());
+    	for (CollisionObject.SnapshotData objectData : data.collisionobjects)
+    	    collisionObjects.add(new CollisionObject(objectData));
+
     	queriedObjects = new ArrayList<CollisionObject>();
     	explosions = new ArrayList<Explosion>(data.explosions);
     	explosionQueue = new LinkedList<Explosion>();
@@ -237,8 +240,11 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
-		
-		data.collisionobjects= new ArrayList<>(this.collisionObjects);
+
+		data.collisionobjects = new ArrayList<>(this.collisionObjects.size());
+		for (CollisionObject object : collisionObjects)
+		    data.collisionobjects.add(object.makeSnapshot());
+
 		data.explosions = new ArrayList<>(this.explosions);
 		data.tiled = this.tiledMap;
 		

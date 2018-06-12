@@ -10,14 +10,17 @@ class CollisionObject {
 	
 	class SnapshotData {
 		private float[] vertices;
-		private Fixture fixture;
-		
 	}
+
     private float[] vertices;
     private Fixture fixture;
 
     CollisionObject(float[] vertices) {
         this.vertices = vertices;
+    }
+
+    CollisionObject(SnapshotData data) {
+        this.vertices = data.vertices;
     }
 
     boolean createFixture(Body body) {
@@ -49,8 +52,7 @@ class CollisionObject {
     }
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
-		
-		data.fixture = this.fixture;
+
 		data.vertices= this.vertices;
 		return data;
 	}
