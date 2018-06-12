@@ -111,7 +111,6 @@ public class Player implements Updatable {
 	}
 
 	public Player(SnapshotData data, World world) {
-		this.numCharacters = Constants.MAX_CHAR_NUM;
 		this.playerNum = data.playerNumber;
 		this.world = world;
 		
@@ -139,14 +138,15 @@ public class Player implements Updatable {
     }
 	
 	private void setupWorms(Worm.SnapshotData[] data) {
-		this.characters = new Worm[numCharacters];
+		this.characters = new Worm[data.length];
 		
-		for (int i = 0; i < numCharacters; i++) {
+		for (int i = 0; i < data.length; i++) {
 			if (data[i] != null) {
 				characters[i] = new Worm(this, data[i]);
 				HealthBar healthBar = new HealthBar(world, characters[i]);
             	world.registerAfterUpdate(characters[i]);
             	world.registerAfterUpdate(healthBar);
+            	numCharacters++;
 			}
 		}
 	}
@@ -253,7 +253,7 @@ public class Player implements Updatable {
 	 * Shift through all still available characters to find the next one whose turn it is
 	 */
 	protected void shiftTurn() {
-	    if (numCharacters == 0)
+	    if (numCharacters <= 0)
 	        return;
 
 		turn++;
@@ -301,9 +301,10 @@ public class Player implements Updatable {
 		    shiftTurn();
 
 		world.setWormDied(true);
-		
-		if (numCharacters <= 0)
-			world.playerDefeated(this);
+	}
+
+	public boolean isDefeated() {
+		return numCharacters <= 0;
 	}
 
 	public Weapon[] getWeapons() {

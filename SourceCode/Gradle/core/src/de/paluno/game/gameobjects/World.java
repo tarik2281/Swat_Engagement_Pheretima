@@ -340,17 +340,6 @@ public class World implements Disposable {
         return screen.getAssetManager();
     }
 
-    public void playerDefeated(Player player) {
-        switch (player.getPlayerNumber()) {
-            case Constants.PLAYER_NUMBER_1:
-                screen.setGameOver(WinningPlayer.PLAYERTWO);
-                break;
-            case Constants.PLAYER_NUMBER_2:
-                screen.setGameOver(WinningPlayer.PLAYERONE);
-                break;
-        }
-    }
-
     private void setWormsStatic(boolean isStatic) {
         for (Player player : players) {
             player.setWormsStatic(isStatic);
@@ -407,8 +396,14 @@ public class World implements Disposable {
             case WAITING:
             	if (isReplayWorld())
             		setGameState(GameState.REPLAY_ENDED);
-            	else
-            		setGameState(GameState.PLAYERTURN);
+            	else {
+            	    if (players[Constants.PLAYER_NUMBER_1].isDefeated())
+            	        setGameState(GameState.GAMEOVERPLAYERTWOWON);
+            	    else if (players[Constants.PLAYER_NUMBER_2].isDefeated())
+            	        setGameState(GameState.GAMEOVERPLAYERONEWON);
+            	    else
+                        setGameState(GameState.PLAYERTURN);
+                }
                 break;
         }
     }
