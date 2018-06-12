@@ -69,16 +69,4 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	public float getAngle() {
 		return degrees;
 	}
-
-	public void setCloningParameters(ShotDirectionIndicator clone) {
-		// TODO Auto-generated method stub
-		this.playerNumber = clone.playerNumber;
-		this.world=clone.world;
-		this.degrees= clone.degrees;
-		this.worm= clone.worm;
-		this.sprite=clone.sprite;
-		this.texture= clone.texture;
-		this.movement= clone.movement;
-		
-	}
 }

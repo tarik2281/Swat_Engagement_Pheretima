@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
 
 public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
@@ -13,10 +14,11 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 	protected Sprite sprite;
 	private SpriteBatch batch;
 	private WinningPlayer winningPlayer;
+	private SEPGame game;
 	
 	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
-		super();
 		this.winningPlayer = winningPlayer;
+		this.game = game;
 	}
 	
 	public void show() {
@@ -26,10 +28,10 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 		
 		switch (winningPlayer) {
 		case PLAYERONE:
-			texture = new Texture(Gdx.files.internal("GameOverPlay1.png"));
+			texture = game.getAssetManager().get(Assets.gameOverScreen1);
 			break;
 		case PLAYERTWO:
-			texture = new Texture(Gdx.files.internal("GameOverPlay2.png"));
+			texture = game.getAssetManager().get(Assets.gameOverScreen2);
 			break;
 		}
 		

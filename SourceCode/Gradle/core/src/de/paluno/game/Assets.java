@@ -10,6 +10,11 @@ public class Assets {
 
     public static final AssetDescriptor<Texture> arrow =
             new AssetDescriptor<Texture>("Arrow.png", Texture.class);
+    
+    public static final AssetDescriptor<Texture> gameOverScreen1 =
+            new AssetDescriptor<Texture>("GameOverPlay1.png", Texture.class);
+    public static final AssetDescriptor<Texture> gameOverScreen2 =
+            new AssetDescriptor<Texture>("GameOverPlay2.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> wormBreath =
             new AssetDescriptor<AnimationData>("WormBreath.xml", AnimationData.class);
