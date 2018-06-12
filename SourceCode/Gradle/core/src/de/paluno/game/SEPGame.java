@@ -7,10 +7,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import de.paluno.game.screens.GameOverScreen;
-import de.paluno.game.screens.Loadable;
-import de.paluno.game.screens.PlayScreen;
-import de.paluno.game.screens.WinningPlayer;
+import de.paluno.game.screens.*;
 
 public class SEPGame extends Game {
 
@@ -24,13 +21,17 @@ public class SEPGame extends Game {
 
 	@Override
 	public void create() {
-		setNextScreen(new PlayScreen(this));
+		setNextScreen(new MenuScreen(this));
 	}
 
     @Override
     public void render() {
         super.render();
     }
+
+    public void setPlayScreen(int mapNumber, int numWorms) {
+		setNextScreen(new PlayScreen(this, mapNumber, numWorms));
+	}
 
     public void setGameOver(WinningPlayer winningPlayer) {
 	    setNextScreen(new GameOverScreen(this, winningPlayer));

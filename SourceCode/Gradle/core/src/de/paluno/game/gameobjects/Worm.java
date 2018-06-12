@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
 import de.paluno.game.UserData.ObjectType;
+import de.paluno.game.screens.WeaponUI;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -16,6 +17,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         private Vector2 position;
         private int health;
     }
+
+    private WeaponUI weaponUI;
 
     private int characterNumber;
 
@@ -52,9 +55,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param player - reference to the player we belong to
 	 * @param charNum - Our character number
 	 */
-	
+
 	public Worm() {
-		//für den Test
+		//fï¿½r den Test
 	}
 	public Worm(Player player, int charNum) {
 	    characterNumber = charNum;
@@ -74,12 +77,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
 			this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
 		}
-		
+
 		// Get our spawning position
 		if (world != null) {
 			this.spawnPosition = world.generateSpawnPosition();
 		}
-		
+
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
 
@@ -303,6 +306,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		gunUnequipping = false;
 		updateAnimation();
 	}
+
 
 	/**
 	 * Soft setter method for animation state - reverse gun animation

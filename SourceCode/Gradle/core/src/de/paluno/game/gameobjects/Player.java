@@ -15,7 +15,8 @@ public class Player implements Updatable {
 	}
 
 	private int playerNum;
-	
+	private WeaponUI weaponUI;
+
 	private int numCharacters;
 	private Worm[] characters;
 	private Weapon[] weapons;
@@ -48,16 +49,16 @@ public class Player implements Updatable {
 					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
                 case Constants.KEY_SELECT_WEAPON_1:
-                    getCurrentWorm().equipWeapon(weapons[0]);
+                	equipWeapon(WeaponType.WEAPON_GUN);
                     break;
                 case Constants.KEY_SELECT_WEAPON_2:
-                    getCurrentWorm().equipWeapon(weapons[1]);
+					equipWeapon(WeaponType.WEAPON_GRENADE);
                     break;
                 case Constants.KEY_SELECT_WEAPON_3:
-                    getCurrentWorm().equipWeapon(weapons[2]);
+					equipWeapon(WeaponType.WEAPON_BAZOOKA);
                     break;
 				case Constants.KEY_SELECT_WEAPON_4:
-					getCurrentWorm().equipWeapon(weapons[3]);
+					equipWeapon(WeaponType.WEAPON_SPECIAL);
 					break;
 			}
 		}
@@ -105,6 +106,7 @@ public class Player implements Updatable {
         setupWeapons();
         setupWorms();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
+
 	}
 
 	public Player(SnapshotData data, World world) {
@@ -122,6 +124,8 @@ public class Player implements Updatable {
 	public void setWindHandler(WindHandler windHandler) {
 		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
 	}
+
+
 
 	private void setupWorms() {
         this.characters = new Worm[numCharacters];
@@ -181,7 +185,7 @@ public class Player implements Updatable {
 		world.registerAfterUpdate(getWindDirectionIndicator());
 		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
 		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
-		getCurrentWorm().equipWeapon(weapons[2]);
+		equipWeapon(WeaponType.WEAPON_BAZOOKA);
 		getCurrentWorm().setIsPlaying(true);
 
 		InputHandler input = InputHandler.getInstance();
@@ -294,13 +298,17 @@ public class Player implements Updatable {
 			world.playerDefeated(this);
 	}
 
-	public Weapon[] getWeapons() {
-	    return weapons;
-    }
+    public Weapon getWeapon(WeaponType type) {
+		for (Weapon weapon : weapons)
+			if (weapon.getWeaponType() == type)
+				return weapon;
 
-    public void equipWeapon(Weapon weapon) {
-	    getCurrentWorm().equipWeapon(weapon);
-    }
+		return null;
+	}
+
+	public void equipWeapon(WeaponType weaponType) {
+		getCurrentWorm().equipWeapon(getWeapon(weaponType));
+	}
 
 	/**
 	 * Getter method for player's turn status

@@ -11,7 +11,7 @@ public class WindHandler implements Updatable {
     private Random rand = new Random();
     private Vector2 wind;
     private Projectile projectile;
-    private int x = rand.nextInt(12) - 6;
+    private int x = rand.nextInt(10) - 5;
 
 
     @Override
@@ -47,7 +47,7 @@ public class WindHandler implements Updatable {
 
     // generates the random wind (x - coordinate)
     public void setNextWind() {
-        this.x = rand.nextInt(12) - 6;
+        this.x = rand.nextInt(10) - 5;
     }
 
 

@@ -18,6 +18,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     // in meters
     private static final float PROJECTILE_RADIUS = 0.03f;
     private static final float PROJECTILE_DENSITY = 0.1f;
+    private static final float BAZOOKA_DENSITY = 0.07f;
+    private static final float GRENADE_DENSITY = 0.05f;
+
 
     private World world;
     private Vector2 position;
@@ -121,7 +124,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         else if (weaponType == WeaponType.WEAPON_BAZOOKA) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
-            fixtureDef.density = 2;
+            fixtureDef.density = BAZOOKA_DENSITY;
             body = world.createBody(bodyDef);
             Fixture fix = body.createFixture(fixtureDef);
             body.setGravityScale(1.0f);
@@ -132,7 +135,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         else if (weaponType == WeaponType.WEAPON_GRENADE || weaponType == WeaponType.WEAPON_SPECIAL) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
-            fixtureDef.density = 9;
+            fixtureDef.density = GRENADE_DENSITY;
             fixtureDef.friction = 0.0f;
             fixtureDef.restitution = 0.5f;
             body = world.createBody(bodyDef);
