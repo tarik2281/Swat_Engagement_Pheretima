@@ -89,7 +89,7 @@ public class World implements Disposable {
     	//f�r den Test
     }
 
-    public World(PlayScreen screen, int mapNumber) {
+    public World(PlayScreen screen) {
         this.screen = screen;
         isReplayWorld = false;
 
@@ -111,7 +111,7 @@ public class World implements Disposable {
         players = new Player[Constants.NUM_PLAYERS];
     }
 
-    public void initializeNew() {
+    public void initializeNew(int mapNumber) {
         ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
@@ -131,7 +131,7 @@ public class World implements Disposable {
         registerAfterUpdate(windHandler);
 
         currentPlayer = Constants.PLAYER_NUMBER_1;
-        setGameState(GameState.PLAYERTURN);
+        setGameState(GameState.WAITING);
 
         InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
     }
@@ -398,6 +398,29 @@ public class World implements Disposable {
                 setGameState(GameState.WAITING);
                 break;
             case WAITING:
+            	if (isReplayWorld())
+            		setGameState(GameState.REPLAY_ENDED);
+            	else {
+            	    if (players[Constants.PLAYER_NUMBER_1].isDefeated())
+            	        setGameState(GameState.GAMEOVERPLAYERTWOWON);
+            	    else if (players[Constants.PLAYER_NUMBER_2].isDefeated())
+            	        setGameState(GameState.GAMEOVERPLAYERONEWON);
+            	    else {
+                        boolean raiseLimit = true;
+
+                        for (Player player : players) {
+                            if (!player.isRoundEnded())
+                                raiseLimit = false;
+                        }
+
+                        if (raiseLimit)
+                            setGameState(GameState.RAISE_LIMIT);
+                        else
+                            setGameState(GameState.PLAYERTURN);
+            	    }
+                }
+                break;
+            case RAISE_LIMIT:
                 setGameState(GameState.PLAYERTURN);
                 break;
         }

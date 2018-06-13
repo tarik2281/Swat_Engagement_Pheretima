@@ -67,7 +67,7 @@ public class WindDirectionIndicator implements Renderable {
             // flips the indicator sprite after every turn, based of the random x coordinate
             if (this.windHandler != null) {
                 sprite.setFlip(windHandler.flipped(), false);
-                System.out.println(windHandler.getX());
+                //System.out.println(windHandler.getX());
             }
             sprite.draw(batch);
         }

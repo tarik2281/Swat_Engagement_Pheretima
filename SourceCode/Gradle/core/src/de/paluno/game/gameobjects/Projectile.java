@@ -82,14 +82,6 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     	this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
 	}
 
-	public Worm getShootingWorm() {
-        return shootingWorm;
-    }
-
-    public boolean isWormContactEnded() {
-        return wormContactEnded;
-    }
-
     @Override
     public void update(float delta, GameState gameState) {
         explosionTimer += delta;

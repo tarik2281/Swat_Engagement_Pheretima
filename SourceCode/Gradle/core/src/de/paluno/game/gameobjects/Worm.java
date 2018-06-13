@@ -49,15 +49,15 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	private int health;
 
+	public Worm() {
+		//f�r den Test
+	}
+
 	/**
 	 * Constructor
 	 * @param player - reference to the player we belong to
 	 * @param charNum - Our character number
 	 */
-
-	public Worm() {
-		//f�r den Test
-	}
 	public Worm(Player player, int charNum) {
 	    characterNumber = charNum;
 

@@ -40,8 +40,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
-        world = new World(this, mapNumber);
-        world.initializeNew();
+        world = new World(this);
+        world.initializeNew(mapNumber);
         weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 
@@ -118,6 +118,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
                 replayWorld.initializeFromSnapshot(worldSnapshot);
             }
 
+            weaponUI.setPlayer(this.world.getCurrentPlayer());
             worldSnapshot = null;
         }
     }
