@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.physics.box2d.Body;
 
-import de.paluno.game.WeaponType;
+import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Weapon;
 import de.paluno.game.gameobjects.World;

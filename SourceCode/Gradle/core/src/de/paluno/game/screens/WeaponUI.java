@@ -11,11 +11,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
-import de.paluno.game.GameState;
-import de.paluno.game.WeaponType;
+import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Renderable;
-import de.paluno.game.gameobjects.Weapon;
 
 public class WeaponUI implements Renderable {
 

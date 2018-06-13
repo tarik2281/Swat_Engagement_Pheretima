@@ -3,8 +3,8 @@ package de.paluno.game;
 import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Projectile;
+import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Worm;
-import de.paluno.game.gameobjects.ground.Ground;
 import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {

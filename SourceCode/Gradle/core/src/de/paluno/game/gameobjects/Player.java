@@ -1,10 +1,8 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
-import de.paluno.game.screens.PlayScreen;
 import de.paluno.game.screens.WeaponUI;
 
 public class Player implements Updatable {
