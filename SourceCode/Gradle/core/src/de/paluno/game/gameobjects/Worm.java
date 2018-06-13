@@ -12,20 +12,19 @@ import de.paluno.game.screens.WeaponUI;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
-    public class SnapshotData {
+    public static class SnapshotData {
         private int characterNumber;
         private Vector2 position;
         private int health;
+        private int orientation;
     }
 
     private WeaponUI weaponUI;
 
     private int characterNumber;
-
 	private World world;
 	private Body body;
 	private Player player;
-
 	private Vector2 spawnPosition;
 
 	private AnimatedSprite currentAnimation;
@@ -90,6 +89,24 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		updateAnimation();
 	}
 
+	public Worm(Player player, SnapshotData data) {
+		characterNumber = data.characterNumber;
+		this.player = player;
+		this.world = player.getWorld();
+
+		this.orientation = data.orientation;
+
+		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
+		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
+
+		this.spawnPosition = data.position;
+
+		this.health = data.health;
+
+		updateAnimation();
+	}
+
 	/**
 	 * Handler method for Game Loop's Update phase
 	 * @param delta - Time since last update in seconds
@@ -108,7 +125,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if(this.jump) {
 			if (canJump()) {
 				// We shall jump - AND are allowed to - so let's apply some vertical impulse
-				// TODO: maybe jump and landing animations
 				this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
 						currentPos.x, currentPos.y, true);
 			}
@@ -326,6 +342,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		return this.player.getPlayerNumber();
 	}
 
+	public int getCharacterNumber() {
+		return this.characterNumber;
+	}
+
     /**
      * Damage handler method - calculate remaining life and death
      * @param damage - The damage taken as integer
@@ -355,6 +375,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//screen.wormDied(this);
 		this.player.characterDied(this.characterNumber);
 		//this.setBodyToNullReference();
+
 	}
 	
 	/**
@@ -482,43 +503,19 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 			unequipWeapon();
 	    }
 	}
-	
-	/**
-	 * Method to return a clone of this object
-	 * @return clone
-	 */
-	public Worm clone() {
-		//Worm clone = new Worm();
-		//clone.setCloningParameters(this);
-		//return clone;
-        return null;
-	}
 
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from
 	 */
-	public void setCloningParameters(Worm copy) {
-		this.characterNumber = copy.characterNumber;
+	public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
 
-		this.world = copy.world;
-		this.body = copy.body;
-		this.player = copy.player;
+		data.characterNumber = characterNumber;
+		data.health = health;
+		data.position = new Vector2(body.getPosition());
+		data.orientation = orientation;
 
-		this.spawnPosition = copy.spawnPosition;
-
-		this.currentAnimation = copy.currentAnimation;
-		this.idleAnimation = copy.idleAnimation;
-		this.walkAnimation = copy.walkAnimation;
-
-		this.movement = copy.movement;
-		this.orientation = copy.orientation;
-		this.jump = copy.jump;
-
-		this.gunUnequipping = copy.gunUnequipping;
-
-		this.health = copy.health;
-
-		this.currentWeapon = copy.currentWeapon;
+		return data;
 	}
 }

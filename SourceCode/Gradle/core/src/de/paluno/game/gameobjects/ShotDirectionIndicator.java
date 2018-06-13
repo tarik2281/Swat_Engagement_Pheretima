@@ -19,8 +19,7 @@ public class ShotDirectionIndicator implements Renderable, Updatable{
 	private Sprite sprite;
 	private Texture texture;
 	private int movement;
-	
-	
+
 	public ShotDirectionIndicator(int playerNumber, World world) {
 		this.playerNumber = playerNumber;
 		this.world = world;

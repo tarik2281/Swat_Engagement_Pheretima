@@ -16,6 +16,11 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private SpriteBatch spriteBatch;
 
     private World world;
+	private World replayWorld;
+	private boolean disposeReplayAfterUpdate;
+    private World.SnapshotData worldSnapshot;
+
+    private WinningPlayer winningPlayer = WinningPlayer.NONE;
 
     private int mapNumber;
     private PlayUILayer uiLayer;
@@ -26,21 +31,17 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         this.mapNumber = mapNumber;
         spriteBatch = new SpriteBatch();
-
-
     }
 
     @Override
     public void show() {
-        //Gdx.input.setInputProcessor(inputAdapter);
-
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
 
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         world = new World(this, mapNumber);
-        //Gdx.input.setInputProcessor(inputAdapter);
+        world.initializeNew();
         weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 
@@ -56,11 +57,24 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         // game loop
         Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
 
-        world.doGameLoop(spriteBatch, delta);
+        if (replayWorld != null)
+        	replayWorld.doGameLoop(spriteBatch, delta);
+        else
+        	world.doGameLoop(spriteBatch, delta);
 
         renderPhase(delta);
 
         weaponUI.render(spriteBatch, delta);
+
+        if (disposeReplayAfterUpdate) {
+            replayWorld.dispose();
+            replayWorld = null;
+            disposeReplayAfterUpdate = false;
+        }
+
+        if (winningPlayer != WinningPlayer.NONE && replayWorld == null) {
+            game.setGameOver(winningPlayer);
+        }
     }
 
     public void renderPhase(float delta) {
@@ -69,6 +83,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void hide() {
+        world.dispose();
+        world = null;
+
         Gdx.input.setInputProcessor(null);
     }
 
@@ -85,12 +102,27 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         return false;
     }
 
-    public void setGameState(GameState gameState, int currentPlayer) {
+    public void setGameState(World world, GameState gameState, int currentPlayer) {
         uiLayer.setGameState(gameState, currentPlayer);
 
-   }
+        if (this.world == world && gameState == GameState.SHOOTING)
+        	worldSnapshot = world.makeSnapshot();
+
+        if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED) {
+            disposeReplayAfterUpdate = true;
+        }
+
+        if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
+            if (world.isWormDied() && worldSnapshot != null) {
+                replayWorld = new World(this);
+                replayWorld.initializeFromSnapshot(worldSnapshot);
+            }
+
+            worldSnapshot = null;
+        }
+    }
 
     public void setGameOver(WinningPlayer winningPlayer) {
-        game.setGameOver(winningPlayer);
+        this.winningPlayer = winningPlayer;
     }
 }

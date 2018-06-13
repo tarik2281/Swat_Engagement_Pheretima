@@ -4,10 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.Constants;
 import de.paluno.game.gameobjects.Explosion;
 
-public class ExplosionMaskRenderer {
+public class ExplosionMaskRenderer implements Disposable {
 
     private ShapeRenderer shapeRenderer;
     private OrthographicCamera camera;
@@ -19,6 +20,11 @@ public class ExplosionMaskRenderer {
 
         this.ground = null;
         this.camera = camera;
+    }
+
+    @Override
+    public void dispose() {
+        shapeRenderer.dispose();
     }
 
     public void setGround(Ground ground) {

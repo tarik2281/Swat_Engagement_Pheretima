@@ -9,9 +9,14 @@ import de.paluno.game.screens.WeaponUI;
 
 public class Player implements Updatable {
 
-	public class SnapshotData {
+	public static class SnapshotData {
 		private int playerNumber;
 		private Worm.SnapshotData[] wormData;
+		private Weapon.SnapshotData[] weaponData;
+
+		public int getPlayerNumber() {
+			return playerNumber;
+		}
 	}
 
 	private int playerNum;
@@ -110,7 +115,13 @@ public class Player implements Updatable {
 	}
 
 	public Player(SnapshotData data, World world) {
+		this.playerNum = data.playerNumber;
+		this.world = world;
 
+		setupWorms(data.wormData);
+		setupWeapons(data.weaponData);
+
+		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
 	}
 
 	public ShotDirectionIndicator getShotDirectionIndicator() {
@@ -139,6 +150,20 @@ public class Player implements Updatable {
         }
     }
 
+	private void setupWorms(Worm.SnapshotData[] data) {
+		this.characters = new Worm[data.length];
+
+		for (int i = 0; i < data.length; i++) {
+			if (data[i] != null) {
+				characters[i] = new Worm(this, data[i]);
+				HealthBar healthBar = new HealthBar(world, characters[i]);
+            	world.registerAfterUpdate(characters[i]);
+            	world.registerAfterUpdate(healthBar);
+            	numCharacters++;
+			}
+		}
+	}
+
 	private void setupWeapons() {
         weapons = new Weapon[WeaponType.NUM_WEAPONS];
 
@@ -147,6 +172,18 @@ public class Player implements Updatable {
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
         weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
     }
+
+	private void setupWeapons(Weapon.SnapshotData[] data) {
+		weapons = new Weapon[WeaponType.NUM_WEAPONS];
+
+        weapons[0] = new Weapon(this, data[0]);
+        weapons[1] = new Weapon(this, data[1]);
+        weapons[2] = new Weapon(this, data[2]);
+	}
+
+	public Worm getWormByNumber(int characterNumber) {
+		return characters[characterNumber];
+	}
 
 	/**
 	 * Handler for GameLoop's update cycle - needed from Interface updatable
@@ -178,6 +215,7 @@ public class Player implements Updatable {
 		if(turn < 1) this.turn = 1;
 		else if(this.turn > Constants.MAX_CHAR_NUM) this.turn = Constants.MAX_CHAR_NUM;
 		else this.turn = turn;
+
 	}
 
 	public void onBeginTurn() {
@@ -235,7 +273,7 @@ public class Player implements Updatable {
 	 * Shift through all still available characters to find the next one whose turn it is
 	 */
 	protected void shiftTurn() {
-	    if (numCharacters == 0)
+	    if (numCharacters <= 0)
 	        return;
 
 		turn++;
@@ -284,7 +322,7 @@ public class Player implements Updatable {
 		if(this.numCharacters <= 0 || this.characters[charNum] == null)
 			return;
 
-		if (getCurrentWorm().isPlaying())
+		if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
 		    world.advanceGameState();
 
 		world.forgetAfterUpdate(characters[charNum]);
@@ -294,8 +332,11 @@ public class Player implements Updatable {
 		if (charNum == turn)
 		    shiftTurn();
 
-		if (numCharacters <= 0)
-			world.playerDefeated(this);
+		world.setWormDied(true);
+	}
+
+	public boolean isDefeated() {
+		return numCharacters <= 0;
 	}
 
     public Weapon getWeapon(WeaponType type) {
@@ -349,34 +390,28 @@ public class Player implements Updatable {
 	public void shoot() {
 		if(getCurrentWorm() != null)
 			getCurrentWorm().shoot(getShotDirectionIndicator().getAngle());
-	}
-	
-	/**
-	 * Method to return a clone of this object
-	 * @return clone
-	 */
-	public Player clone() {
-		Player clone = new Player();
-		clone.setCloningParameters(this);
-		return clone;
+		makeSnapshot();
 	}
 
 	/**
 	 * Method to copy over all variables from a second Worm - used for cloning
 	 * @param copy - The reference to the Worm to copy from
 	 */
-	public void setCloningParameters(Player copy) {
-		this.playerNum = copy.playerNum;
-
-		this.numCharacters = copy.numCharacters;
-		this.characters = copy.characters;
-		this.turn = copy.turn;
-		
-		this.world = copy.world;
-	}
-
 	public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
+
+		data.playerNumber = playerNum;
+
+		data.wormData = new Worm.SnapshotData[characters.length];
+		data.weaponData = new Weapon.SnapshotData[weapons.length];
+
+		for (int i = 0; i < characters.length; i++)
+			if (characters[i] != null)
+				data.wormData[i] = characters[i].makeSnapshot();
+
+		for (int i = 0; i < weapons.length; i++)
+			data.weaponData[i] = weapons[i].makeSnapshot();
+
 		return data;
 	}
 

@@ -19,13 +19,22 @@ import de.paluno.game.screens.WinningPlayer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class World {
+public class World implements Disposable {
+
+	public class SnapshotData{
+		private WindHandler.SnapshotData windHandler;
+        private int currentPlayer;
+		private Projectile.SnapshotData projectile;
+		private Player.SnapshotData[] player;
+	    private Rectangle worldBounds;
+		private Ground.SnapshotData ground;
+	}
 
     private PlayScreen screen;
     private WindHandler windHandler;
-
     private int currentPlayer;
     private GameState currentGameState = GameState.NONE;
+    private boolean wormDied = false;
 
     private LinkedList<Object> objectRegisterQueue;
     private LinkedList<Object> objectForgetQueue;
@@ -41,9 +50,13 @@ public class World {
     private Ground ground;
     private ExplosionMaskRenderer explosionMaskRenderer;
 
+    private Projectile projectile;
+
     private GameCamera camera;
     private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
+    private boolean isReplayWorld;
+    private boolean skipFrame = false;
 
     private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
         if (keyDown) {
@@ -78,7 +91,7 @@ public class World {
 
     public World(PlayScreen screen, int mapNumber) {
         this.screen = screen;
-        this.windHandler = new WindHandler();
+        isReplayWorld = false;
 
         objectRegisterQueue = new LinkedList<>();
         objectForgetQueue = new LinkedList<>();
@@ -88,38 +101,87 @@ public class World {
         world = new com.badlogic.gdx.physics.box2d.World(Constants.GRAVITY, true);
         world.setContactListener(new CollisionHandler());
         world.setContactFilter(contactFilter);
+        debugRenderer = new Box2DDebugRenderer();
 
         worldBounds = new Rectangle();
 
         camera = new GameCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.setBottomLimit(0.0f);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
+        players = new Player[Constants.NUM_PLAYERS];
+    }
+
+    public void initializeNew() {
         ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
+
+        windHandler = new WindHandler();
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
 
-        debugRenderer = new Box2DDebugRenderer();
-
-        players = new Player[Constants.NUM_PLAYERS];
-
-        currentPlayer = Constants.PLAYER_NUMBER_1;
         initializePlayer(Constants.PLAYER_NUMBER_1);
         initializePlayer(Constants.PLAYER_NUMBER_2);
+
+        worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
+                ground.getWorldWidth(), ground.getWorldHeight());
+        camera.setBottomLimit(worldBounds.y);
 
         registerAfterUpdate(ground);
         registerAfterUpdate(windHandler);
 
+        currentPlayer = Constants.PLAYER_NUMBER_1;
         setGameState(GameState.PLAYERTURN);
 
         InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
     }
 
+    public void initializeFromSnapshot(SnapshotData data) {
+        isReplayWorld = true;
+
+        ground = new Ground(this, explosionMaskRenderer, data.ground);
+        explosionMaskRenderer.setGround(ground);
+
+        windHandler = new WindHandler(data.windHandler);
+
+        worldBounds.set(data.worldBounds);
+        camera.setBottomLimit(worldBounds.y);
+
+        for (Player.SnapshotData playerData : data.player)
+            initializePlayer(playerData);
+
+        registerAfterUpdate(ground);
+        registerAfterUpdate(windHandler);
+
+        projectile = new Projectile(this, data.projectile);
+        spawnProjectile(projectile);
+        camera.setCameraPosition(data.projectile.getPosition());
+    }
+
     private void initializePlayer(int playerNumber) {
         players[playerNumber] = new Player(playerNumber, this);
         players[playerNumber].setWindHandler(windHandler);
+    }
+
+    private void initializePlayer(Player.SnapshotData data) {
+        players[data.getPlayerNumber()] = new Player(data, this);
+        players[data.getPlayerNumber()].setWindHandler(windHandler);
+    }
+
+    @Override
+    public void dispose() {
+        world.dispose();
+        debugRenderer.dispose();
+        explosionMaskRenderer.dispose();
+    }
+
+    public Worm getWormForPlayer(int playerNumber, int characterNumber) {
+        Player player = players[playerNumber];
+
+        if (player != null)
+            return player.getWormByNumber(characterNumber);
+
+        return null;
     }
 
     public void toggleDebugRender() {
@@ -129,8 +191,15 @@ public class World {
     public void doGameLoop(SpriteBatch batch, float delta) {
         registerObjects();
 
-        updatePhase(delta);
-        physicsPhase(delta);
+        if (!isReplayWorld() || !skipFrame) {
+        	updatePhase(delta);
+        	physicsPhase(delta);
+        	skipFrame = true;
+        }
+        else {
+        	skipFrame = false;
+        }
+
         renderPhase(batch, delta);
 
         forgetObjects();
@@ -198,6 +267,35 @@ public class World {
         objectForgetQueue.add(gameObject);
     }
 
+    public void setWormDied(boolean wormDied) {
+    	this.wormDied = wormDied;
+    }
+
+    public boolean isWormDied() {
+    	return wormDied;
+    }
+
+    public boolean isReplayWorld() {
+    	return isReplayWorld;
+    }
+
+    public SnapshotData makeSnapshot() {
+    	SnapshotData data = new SnapshotData();
+
+    	data.currentPlayer = currentPlayer;
+    	data.worldBounds = new Rectangle(worldBounds);
+    	data.windHandler = windHandler.makeSnapshot();
+    	data.player = new Player.SnapshotData[players.length];
+
+    	for (int i = 0; i < players.length; i++)
+    		data.player[i] = players[i].makeSnapshot();
+
+    	data.ground = ground.makeSnapshot();
+    	data.projectile = projectile.makeSnapshot();
+
+    	return data;
+    }
+
     public ArrayList<Worm> addExplosion(Explosion explosion) {
         if (explosion.getBlastPower() > 0.0f)
             ground.addExplosion(explosion);
@@ -239,17 +337,6 @@ public class World {
         return screen.getAssetManager();
     }
 
-    public void playerDefeated(Player player) {
-        switch (player.getPlayerNumber()) {
-            case Constants.PLAYER_NUMBER_1:
-                screen.setGameOver(WinningPlayer.PLAYERTWO);
-                break;
-            case Constants.PLAYER_NUMBER_2:
-                screen.setGameOver(WinningPlayer.PLAYERONE);
-                break;
-        }
-    }
-
     private void setWormsStatic(boolean isStatic) {
         for (Player player : players) {
             player.setWormsStatic(isStatic);
@@ -267,11 +354,14 @@ public class World {
                 shiftPlayers();
                 setWormsStatic(false);
                 break;
+            case SHOOTING:
+            	projectile = null;
+            	break;
         }
 
         this.currentGameState = gameState;
 
-        screen.setGameState(gameState, currentPlayer);
+        screen.setGameState(this, gameState, currentPlayer);
 
 
         switch (gameState) {
@@ -280,6 +370,7 @@ public class World {
                 getCurrentPlayer().onBeginTurn();
                 camera.setCameraFocus(getCurrentPlayer().getCurrentWorm());
                 windHandler.setNextWind();
+                setWormDied(false);
                 break;
             case GAMEOVERPLAYERONEWON:
                 screen.setGameOver(WinningPlayer.PLAYERONE);
@@ -307,20 +398,6 @@ public class World {
                 setGameState(GameState.WAITING);
                 break;
             case WAITING:
-                boolean raiseLimit = true;
-
-                for (Player player : players) {
-                    if (!player.isRoundEnded())
-                        raiseLimit = false;
-                }
-
-                if (raiseLimit)
-                    setGameState(GameState.RAISE_LIMIT);
-                else
-                    setGameState(GameState.PLAYERTURN);
-
-                break;
-            case RAISE_LIMIT:
                 setGameState(GameState.PLAYERTURN);
                 break;
         }
@@ -343,9 +420,10 @@ public class World {
     }
 
     public void spawnProjectile(Projectile projectile) {
+    	this.projectile = projectile;
+        setGameState(GameState.SHOOTING);
         windHandler.setProjectile(projectile);
         registerAfterUpdate(projectile);
-        setGameState(GameState.SHOOTING);
         camera.setCameraFocus(projectile);
     }
 
@@ -397,4 +475,5 @@ public class World {
     public Player getCurrentPlayer() {
         return players[currentPlayer];
     }
+
 }

@@ -6,11 +6,20 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import de.paluno.game.UserData;
 
 class CollisionObject {
+	
+	class SnapshotData {
+		private float[] vertices;
+	}
+
     private float[] vertices;
     private Fixture fixture;
 
     CollisionObject(float[] vertices) {
         this.vertices = vertices;
+    }
+
+    CollisionObject(SnapshotData data) {
+        this.vertices = data.vertices;
     }
 
     boolean createFixture(Body body) {
@@ -39,4 +48,12 @@ class CollisionObject {
     Fixture getFixture() {
         return fixture;
     }
+
+    SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+
+		data.vertices = this.vertices;
+
+		return data;
+	}
 }

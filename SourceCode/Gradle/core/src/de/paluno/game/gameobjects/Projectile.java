@@ -15,6 +15,20 @@ import java.util.ArrayList;
 
 public class Projectile implements Updatable, PhysicsObject, Renderable {
 
+	public static class SnapshotData {
+
+		private Vector2 position;
+		private Vector2 direction;
+		private WeaponType weaponType;
+
+		private int playerNumber;
+		private int wormNumber;
+
+		public Vector2 getPosition() {
+			return position;
+		}
+	}
+
     // in meters
     private static final float PROJECTILE_RADIUS = 0.03f;
     private static final float PROJECTILE_DENSITY = 0.1f;
@@ -51,6 +65,29 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         sprite.setOriginCenter();
 
         this.shootingWorm = shootingWorm;
+    }
+
+    public Projectile(World world, SnapshotData data) {
+    	this.world = world;
+    	this.position = data.position;
+    	this.direction = data.direction;
+
+    	this.weaponType = data.weaponType;
+
+    	texture = world.getAssetManager().get(weaponType.getProjectileAsset());
+    	sprite = new Sprite(texture);
+
+    	sprite.setOriginCenter();
+
+    	this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
+	}
+
+	public Worm getShootingWorm() {
+        return shootingWorm;
+    }
+
+    public boolean isWormContactEnded() {
+        return wormContactEnded;
     }
 
     @Override
@@ -210,15 +247,15 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         }
     }
 
-	public void setCloningParameters(Projectile clone) {
-		// TODO Auto-generated method stub
+    public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
 
-		this.body = clone.body;
-		this.world = clone.world;
+		data.position= new Vector2(position);
+		data.direction= new Vector2(direction);
+		data.weaponType = weaponType;
+		data.playerNumber = shootingWorm.getPlayerNumber();
+		data.wormNumber = shootingWorm.getCharacterNumber();
 
-		this.texture= clone.texture;
-		this.sprite= clone.sprite;
-		this.position= clone.position;
-		this.direction= clone.direction;
+		return data;
 	}
 }

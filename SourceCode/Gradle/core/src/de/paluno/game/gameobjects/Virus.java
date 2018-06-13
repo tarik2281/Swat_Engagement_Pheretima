@@ -12,7 +12,7 @@ import de.paluno.game.Constants;
 import de.paluno.game.UserData;
 
 public class Virus implements PhysicsObject{
-	
+
 	private Body body;
 	private Worm worm;
 	private World world;
@@ -59,10 +59,5 @@ public class Virus implements PhysicsObject{
 	@Override
 	public Body getBody() {
 		return body;
-	}
-
-	public void setCloningParameters(Virus clone) {
-		// TODO Auto-generated method stub
-		
 	}
 }

@@ -5,6 +5,11 @@ import de.paluno.game.*;
 
 public class Weapon {
 
+	public class SnapshotData {
+		private WeaponType type;
+		private int currentAmmo;
+	}
+
 	private Player player;
 
 	private WeaponType type;
@@ -26,7 +31,17 @@ public class Weapon {
 		if (player.getAssets() != null)
 		animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
-	
+
+	public Weapon(Player player, SnapshotData data) {
+		this.player = player;
+
+		this.type = data.type;
+
+		this.currentAmmo = data.currentAmmo;
+
+		animationSet = player.getAssets().get(type.getWeaponAsset());
+	}
+
 	/**
 	 * Method to generate a projectile if allowed to
 	 */
@@ -40,7 +55,7 @@ public class Weapon {
 
 				player.getWorld().spawnProjectile(projectile);
 			}
-			
+
 			currentAmmo--;
 		}
 	}
@@ -48,7 +63,7 @@ public class Weapon {
 	public int getCurrentAmmo() {
 		return currentAmmo;
 	}
-	
+
 
 	public WeaponType getWeaponType() {
 		return type;
@@ -66,7 +81,12 @@ public class Weapon {
 		return new AnimatedSprite(animationSet);
 	}
 
-	public void setCloningParameters(Weapon clone) {
+	public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
 
+		data.currentAmmo = currentAmmo;
+		data.type = type;
+
+		return data;
 	}
 }

@@ -24,6 +24,12 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class Ground implements PhysicsObject, Renderable, Updatable {
+	
+	public class SnapshotData {
+		private TiledMap tiledMap;
+		private ArrayList<CollisionObject.SnapshotData> collisionObjects;
+	    private ArrayList<Explosion> explosions;
+	}
 
     private Body body;
     private World world;
@@ -73,6 +79,22 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         spawnPoints = new ArrayList<>();
 
         loadSpawnPositions();
+    }
+    
+    public Ground(World world, ExplosionMaskRenderer renderer, SnapshotData data) {
+    	this.world = world;
+    	this.tiledMap = data.tiledMap;
+    	this.maskRenderer = renderer;
+    	
+    	clipper = new ClipperWrapper();
+    	
+    	collisionObjects = new ArrayList<CollisionObject>(data.collisionObjects.size());
+    	for (CollisionObject.SnapshotData objectData : data.collisionObjects)
+    	    collisionObjects.add(new CollisionObject(objectData));
+
+    	queriedObjects = new ArrayList<CollisionObject>();
+    	explosions = new ArrayList<Explosion>(data.explosions);
+    	explosionQueue = new LinkedList<Explosion>();
     }
 
     public void addExplosion(Explosion explosion) {
@@ -195,14 +217,32 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
 
     private void loadCollisions() {
-        MapLayer collisionLayer = tiledMap.getLayers().get(Constants.COLLISION_LAYER);
-        if (collisionLayer != null) {
-            for (MapObject object : collisionLayer.getObjects()) {
-                float[] vertices = ShapeFactory.createVertices(object);
+    	if (collisionObjects.isEmpty()) {
+    		MapLayer collisionLayer = tiledMap.getLayers().get(Constants.COLLISION_LAYER);
+    		if (collisionLayer != null) {
+    			for (MapObject object : collisionLayer.getObjects()) {
+    				float[] vertices = ShapeFactory.createVertices(object);
 
-                if (vertices != null)
-                    addCollisionObject(new CollisionObject(vertices));
-            }
-        }
+    				if (vertices != null)
+    					addCollisionObject(new CollisionObject(vertices));
+    			}
+    		}
+    	}
+    	else {
+    		for (CollisionObject object : collisionObjects)
+    			object.createFixture(body);
+    	}
     }
+    public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+
+		data.collisionObjects = new ArrayList<>(this.collisionObjects.size());
+		for (CollisionObject object : collisionObjects)
+		    data.collisionObjects.add(object.makeSnapshot());
+
+		data.explosions = new ArrayList<>(this.explosions);
+		data.tiledMap = this.tiledMap;
+		
+		return data;
+	}
 }
