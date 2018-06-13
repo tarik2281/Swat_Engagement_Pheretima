@@ -91,9 +91,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null);
 
-        if (!wormContactEnded) {
-            float distanceSQ = shootingWorm.getBody().getPosition().dst2(body.getPosition());
-            if (distanceSQ > Constants.WORM_RADIUS_SQUARE + PROJECTILE_RADIUS * PROJECTILE_RADIUS)
+        if (!wormContactEnded) {//  
+            float distance = shootingWorm.getBody().getPosition().dst(body.getPosition());
+            if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
                 wormContactEnded = true;
         }
     }

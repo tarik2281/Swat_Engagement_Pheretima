@@ -214,7 +214,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		//PolygonShape bodyRect = new PolygonShape();
 		//bodyRect.setAsBox(Constants.WORM_WIDTH / 2.0f, Constants.WORM_HEIGHT / 2.0f);
 		CircleShape bodyRect = new CircleShape();
-		bodyRect.setRadius(Constants.WORM_HEIGHT / 2.0f);
+		bodyRect.setRadius(Constants.WORM_RADIUS);
 		PolygonShape footRect = new PolygonShape();
 		footRect.setAsBox(Constants.WORM_WIDTH / 4.0f, Constants.WORM_WIDTH / 4.0f, new Vector2(0.0f, -Constants.WORM_HEIGHT / 2.0f), 0.0f);
 

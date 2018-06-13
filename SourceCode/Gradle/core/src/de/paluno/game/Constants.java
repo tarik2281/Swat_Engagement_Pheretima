@@ -58,7 +58,7 @@ public class Constants {
 	public static final float CAMERA_FOCUS_TIME = 0.5f;
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
-	public static final float WORM_RADIUS_SQUARE = WORM_WIDTH * WORM_WIDTH / 4 + WORM_HEIGHT * WORM_HEIGHT / 4;
+	public static final float WORM_RADIUS = WORM_HEIGHT / 2.0f;
 
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
