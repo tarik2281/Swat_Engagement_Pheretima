@@ -23,6 +23,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private WinningPlayer winningPlayer = WinningPlayer.NONE;
 
     private int mapNumber;
+    private int numWorms;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
 
@@ -30,6 +31,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         this.game = game;
 
         this.mapNumber = mapNumber;
+        this.numWorms = numWorms;
+
         spriteBatch = new SpriteBatch();
     }
 
@@ -41,7 +44,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         world = new World(this);
-        world.initializeNew(mapNumber);
+        world.initializeNew(mapNumber, numWorms);
         weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 

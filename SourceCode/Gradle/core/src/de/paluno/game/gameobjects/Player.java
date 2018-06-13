@@ -102,9 +102,9 @@ public class Player implements Updatable {
 	 * @param world - Reference to the world we are playing in
 	 * @param assets - Reference to the global Asset Manager
 	 */
-	public Player(int playerNum, World world) {
+	public Player(int playerNum, int numWorms, World world) {
 		
-		this.numCharacters = Constants.MAX_CHAR_NUM;
+		this.numCharacters = numWorms;
 		this.playerNum = playerNum;
 		this.world = world;
 
@@ -277,7 +277,7 @@ public class Player implements Updatable {
 	        return;
 
 		turn++;
-		if (turn == Constants.MAX_CHAR_NUM) {
+		if (turn == characters.length) {
 			turn = 0;
 			isRoundEnded = true;
 		}

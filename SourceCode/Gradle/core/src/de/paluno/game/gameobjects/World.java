@@ -111,7 +111,7 @@ public class World implements Disposable {
         players = new Player[Constants.NUM_PLAYERS];
     }
 
-    public void initializeNew(int mapNumber) {
+    public void initializeNew(int mapNumber, int numWorms) {
         ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
@@ -120,8 +120,8 @@ public class World implements Disposable {
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
 
-        initializePlayer(Constants.PLAYER_NUMBER_1);
-        initializePlayer(Constants.PLAYER_NUMBER_2);
+        initializePlayer(Constants.PLAYER_NUMBER_1, numWorms);
+        initializePlayer(Constants.PLAYER_NUMBER_2, numWorms);
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
@@ -158,8 +158,8 @@ public class World implements Disposable {
         camera.setCameraPosition(data.projectile.getPosition());
     }
 
-    private void initializePlayer(int playerNumber) {
-        players[playerNumber] = new Player(playerNumber, this);
+    private void initializePlayer(int playerNumber, int numWorms) {
+        players[playerNumber] = new Player(playerNumber, numWorms, this);
         players[playerNumber].setWindHandler(windHandler);
     }
 
