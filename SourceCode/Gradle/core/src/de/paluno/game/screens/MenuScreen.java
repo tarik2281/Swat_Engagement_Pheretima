@@ -24,7 +24,6 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
 
     private SEPGame game;
-    protected Sprite sprite;
     private Stage menuStage;
     private Table menuTable, menuTable2,menuTable3;
     private Image image;
@@ -61,10 +60,13 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
     }
 
     public void show() {
-        textureBackground = game.getAssetManager().get(Assets.menuBackground);
 
+        // Menu Background
+        textureBackground = game.getAssetManager().get(Assets.menuBackground);
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
 
+
+        // Map Buttons
         map1 = game.getAssetManager().get(Assets.map1Thumbnail);
         textureRegionMap1 = new TextureRegion(map1);
         regionDrawableMap1 = new TextureRegionDrawable(textureRegionMap1);
@@ -128,6 +130,8 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
+
+        // Play Button
         play = game.getAssetManager().get(Assets.playButton);
         textureRegionPlay = new TextureRegion(play);
         regionDrawablePlay = new TextureRegionDrawable(textureRegionPlay);
@@ -143,8 +147,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         });
 
 
-        // Buttons Multiplayer
-
+        // Worm Number Buttons
         worm1 = game.getAssetManager().get(Assets.worms1Button);
         textureRegionWorm1 = new TextureRegion(worm1);
         regionDrawableWorm1 = new TextureRegionDrawable(textureRegionWorm1);
@@ -174,7 +177,6 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
                 System.out.println("Worm 2 Clicked");
             }
         });
-        ImageButton.ImageButtonStyle style;
 
         worm3 = game.getAssetManager().get(Assets.worms3Button);
         textureRegionWorm3 = new TextureRegion(worm3);
@@ -228,7 +230,8 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
         menuStage.setDebugAll(false);
         menuStage.addActor(menuTable);
-        menuTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        //menuTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        menuTable.setFillParent(true);
 
         menuTable.setBackground(image.getDrawable());
         menuTable.add(buttonMap1);
@@ -274,11 +277,12 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
     }
 
     private void setSelectedMapButton(ImageButton button) {
+        //GREY Transparent 1,1,1,0.4
         if (selectedMapButton != null)
             selectedMapButton.setColor(1.0f, 1.0f, 1.0f, 0.4f);
 
         selectedMapButton = button;
-
+        // WHITE Transparent 1,1,1,1
         if (selectedMapButton != null)
             selectedMapButton.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
@@ -294,7 +298,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
     }
 
     public void render(float delta) {
-
+        // clears screen
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 

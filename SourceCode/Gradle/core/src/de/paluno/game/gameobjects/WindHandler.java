@@ -1,6 +1,7 @@
-package de.paluno.game;
+package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.math.Vector2;
+import de.paluno.game.GameState;
 import de.paluno.game.gameobjects.Projectile;
 import de.paluno.game.gameobjects.Updatable;
 
