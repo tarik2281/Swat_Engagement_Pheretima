@@ -87,7 +87,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         explosionTimer += delta;
 
         // check if the projectile is inside our world - if not, destroy it
-        if (!world.isInWorldBounds(body) ||
+        if (!world.isInWorldBounds(body) || (weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(body.getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null);
 
