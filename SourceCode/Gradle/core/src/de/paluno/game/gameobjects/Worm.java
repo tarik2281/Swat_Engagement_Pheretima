@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
 import de.paluno.game.UserData.ObjectType;
-import de.paluno.game.screens.WeaponUI;
 
 public class Worm implements Updatable, PhysicsObject, Renderable {
 
@@ -17,9 +16,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         private Vector2 position;
         private int health;
         private int orientation;
+        private boolean isInfected;
     }
-
-    private WeaponUI weaponUI;
 
     private int characterNumber;
 	private World world;
@@ -85,6 +83,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
 
+		this.isInfected = false;
+
 		// Finally setup Animations
 		updateAnimation();
 	}
@@ -103,6 +103,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.spawnPosition = data.position;
 
 		this.health = data.health;
+
+		this.isInfected = data.isInfected;
 
 		updateAnimation();
 	}
@@ -236,6 +238,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fix = body.createFixture(fixtureDef);
 		fix.setUserData(new UserData(UserData.ObjectType.WormFoot,this));
 
+		if (isInfected)
+			createVirusFixture();
+
 		// Get rid of temporary material properly
 		bodyRect.dispose();
 		footRect.dispose();
@@ -243,7 +248,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 	private void createVirusFixture() {
 		CircleShape circle = new CircleShape();
-		circle.setRadius(30 * Constants.WORLD_SCALE);
+		circle.setRadius(Constants.VIRUS_RADIUS);
 
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = circle;
@@ -276,7 +281,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (isPlaying) {
 			setIsStatic(false);
 			if (isInfected)
-				takeDamage(5);
+				takeDamage(Constants.VIRUS_DAMAGE);
 		}
 	}
 
@@ -515,6 +520,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		data.health = health;
 		data.position = new Vector2(body.getPosition());
 		data.orientation = orientation;
+		data.isInfected = isInfected;
 
 		return data;
 	}

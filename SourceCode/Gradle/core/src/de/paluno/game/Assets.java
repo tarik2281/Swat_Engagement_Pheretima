@@ -4,7 +4,6 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.utils.Array;
 
 public class Assets {
     public static final AssetDescriptor<Texture> menuBackground =

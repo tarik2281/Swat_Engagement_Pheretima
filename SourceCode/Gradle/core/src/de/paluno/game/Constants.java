@@ -13,7 +13,6 @@ public class Constants {
 	public static final int NUM_PLAYERS = 2;
 	public static final int MAX_CHAR_NUM = 5;
 	public static final int WORM_MAX_HEALTH = 100;
-	public static final int PROJECTILE_DAMAGE = 40;
 
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
@@ -61,7 +60,9 @@ public class Constants {
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
 	public static final float WORM_RADIUS_SQUARE = WORM_WIDTH * WORM_WIDTH / 4 + WORM_HEIGHT * WORM_HEIGHT / 4;
 
-	public static final float PROJECTILE_SPAWN_OFFSET = 25.0f * WORLD_SCALE;
+	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
+	public static final int VIRUS_DAMAGE = 5;
+
 
 	// key bindings
     public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;

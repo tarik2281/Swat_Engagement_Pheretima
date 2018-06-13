@@ -73,6 +73,15 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Worm -> Ground");
         }
 
+        if ((UserData.getType(fixA) == UserData.ObjectType.Virus && UserData.getType(fixB) == UserData.ObjectType.Worm)) {
+            Worm worm = UserData.getObject(fixB);
+            worm.setIsInfected(true);
+        }
+        else if ((UserData.getType(fixB) == UserData.ObjectType.Virus && UserData.getType(fixA) == UserData.ObjectType.Worm)) {
+            Worm worm = UserData.getObject(fixA);
+            worm.setIsInfected(true);
+        }
+
 
         // Gun -> Worm
 

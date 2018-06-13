@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.Texture;
 
 public enum WeaponType {
 	WEAPON_BAZOOKA(Constants.WEAPON_AMMO_INF, Assets.iconBazooka, Assets.weaponBazooka, Assets.projectileBazooka,
-			7.0f, 0.35f, 0.003f, 0.0f, 40),
+			7.0f, 0.35f, 0.003f, 0.0f, 30),
 	WEAPON_GUN(Constants.WEAPON_AMMO_INF, Assets.iconGun, Assets.weaponGun, Assets.projectileGun,
 			7.0f, 0.0f, 0.0f, 0.0f, 40),
 	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade, Assets.weaponGrenade, Assets.projectileGrenade,
-			7.0f, 0.35f, 0.003f, 3.0f, 40),
+			7.0f, 0.5f, 0.003f, 3.0f, 50),
 	WEAPON_SPECIAL(3, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
-			7.0f, 0.35f, 0.003f, 0.0f, 40);
+			7.0f, 0.35f, 0.0f, 0.0f, 0);
 
 	public static final int NUM_WEAPONS = 4;
 
