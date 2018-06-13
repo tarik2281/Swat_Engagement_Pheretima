@@ -1,15 +1,11 @@
-package de.paluno.game;
+package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import de.paluno.game.gameobjects.Renderable;
-import de.paluno.game.gameobjects.Updatable;
-import de.paluno.game.gameobjects.World;
-import de.paluno.game.gameobjects.Worm;
-import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.Assets;
+import de.paluno.game.Constants;
 
 public class WindDirectionIndicator implements Renderable {
 

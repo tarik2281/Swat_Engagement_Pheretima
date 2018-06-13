@@ -9,7 +9,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.UserData;
-import de.paluno.game.WeaponType;
 
 import java.util.ArrayList;
 

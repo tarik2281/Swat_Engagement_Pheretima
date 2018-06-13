@@ -1,10 +1,8 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -13,7 +11,6 @@ import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
 import de.paluno.game.screens.PlayScreen;
-import de.paluno.game.screens.WeaponUI;
 import de.paluno.game.screens.WinningPlayer;
 
 import java.util.ArrayList;
