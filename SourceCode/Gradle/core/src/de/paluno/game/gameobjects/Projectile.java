@@ -218,15 +218,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                         weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower()));
 
                 for (Worm worm : affectedWorms) {
-                    float distance = worm.getBody().getPosition().dst(body.getPosition());
-
-                    distance = Math.max(0.0f, distance - PROJECTILE_RADIUS - Constants.WORM_HEIGHT / 2.0f);
-
-                    float factor = 1.0f;
-                    if (distance > 0.0f)
-                        factor = distance / weaponType.getExplosionRadius();
-
-                    worm.takeDamage(Math.round(factor * weaponType.getDamage()));
+                    worm.takeDamage((int)weaponType.getDamage());
 
                     if (weaponType == WeaponType.WEAPON_SPECIAL)
                         worm.setIsInfected(true);

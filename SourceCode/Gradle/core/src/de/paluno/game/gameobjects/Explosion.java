@@ -70,7 +70,8 @@ public class Explosion {
         worm.getBody().applyLinearImpulse(diff.scl(impulse), worm.getBody().getWorldCenter(), true);
         return true;
     }
-
+//----------------------------------------------------------------------------------------------------------------------
+    //Tarik
     public int getNumSegments() {
         if (numSegments == 0)
             numSegments = Math.max(1, (int) (6 * (float) Math.cbrt(radius * Constants.SCREEN_SCALE)));
