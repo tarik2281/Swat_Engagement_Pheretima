@@ -32,7 +32,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private static final float PROJECTILE_RADIUS = 0.03f;
     private static final float PROJECTILE_DENSITY = 0.1f;
     private static final float BAZOOKA_DENSITY = 0.07f;
-    private static final float GRENADE_DENSITY = 0.05f;
+    private static final float GRENADE_DENSITY = 0.2f;
 
 
     private World world;
@@ -164,8 +164,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
             fixtureDef.density = GRENADE_DENSITY;
-            fixtureDef.friction = 0.0f;
-            fixtureDef.restitution = 0.5f;
+            fixtureDef.friction = 0.2f;
+            fixtureDef.restitution = 0.1f;
             body = world.createBody(bodyDef);
             Fixture fix = body.createFixture(fixtureDef);
             body.setGravityScale(1.0f);
