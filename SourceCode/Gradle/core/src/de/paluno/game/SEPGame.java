@@ -43,6 +43,8 @@ public class SEPGame extends Game {
 
 	public void setNextScreen(Screen screen) {
 		// TODO: maybe loading screen
+		assetManager.clear();
+
 		if (screen instanceof Loadable) {
 			((Loadable) screen).load(assetManager);
 			assetManager.finishLoading();

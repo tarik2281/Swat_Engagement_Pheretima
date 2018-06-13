@@ -78,13 +78,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-        for (AssetDescriptor asset : Assets.PlayScreenAssets) {
-            manager.load(asset);
-        }
+        Assets.loadAssets(manager, Assets.PlayScreenAssets);
 
-        manager.load(Assets.windGreen);
-        manager.load(Assets.windOrange);
-        manager.load(Assets.windRed);
+        manager.load(Assets.getMapByIndex(mapNumber));
 
         return false;
     }

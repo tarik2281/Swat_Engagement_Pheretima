@@ -1,13 +1,35 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.utils.Array;
 
 public class Assets {
-    public static final AssetDescriptor<TiledMap> map =
-            new AssetDescriptor<TiledMap>("map.tmx", TiledMap.class);
+    public static final AssetDescriptor<Texture> menuBackground =
+            new AssetDescriptor<Texture>("MENU.png", Texture.class);
+    public static final AssetDescriptor<Texture> map1Thumbnail =
+            new AssetDescriptor<Texture>("Map1SEPThumb.png", Texture.class);
+    public static final AssetDescriptor<Texture> map2Thumbnail =
+            new AssetDescriptor<Texture>("Map2SEPThumb.png", Texture.class);
+    public static final AssetDescriptor<Texture> map3Thumbnail =
+            new AssetDescriptor<Texture>("Map3SEPThumb.png", Texture.class);
+    public static final AssetDescriptor<Texture> map4Thumbnail =
+            new AssetDescriptor<Texture>("Map4SEPThumb.png", Texture.class);
+    public static final AssetDescriptor<Texture> playButton =
+            new AssetDescriptor<Texture>("PlayButton.png", Texture.class);
+    public static final AssetDescriptor<Texture> worms1Button =
+            new AssetDescriptor<Texture>("Worms1.png", Texture.class);
+    public static final AssetDescriptor<Texture> worms2Button =
+            new AssetDescriptor<Texture>("Worms2.png", Texture.class);
+    public static final AssetDescriptor<Texture> worms3Button =
+            new AssetDescriptor<Texture>("Worms3.png", Texture.class);
+    public static final AssetDescriptor<Texture> worms4Button =
+            new AssetDescriptor<Texture>("Worms4.png", Texture.class);
+    public static final AssetDescriptor<Texture> worms5Button =
+            new AssetDescriptor<Texture>("Worms5.png", Texture.class);
+
     public static final AssetDescriptor<TiledMap> map1 =
             new AssetDescriptor<TiledMap>("Map1SEP.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> map2 =
@@ -17,9 +39,20 @@ public class Assets {
     public static final AssetDescriptor<TiledMap> map4 =
             new AssetDescriptor<TiledMap>("Map4SEP.tmx", TiledMap.class);
 
-    public static final AssetDescriptor[] maps = {
-            map1, map2, map3, map4
-    };
+    public static AssetDescriptor<TiledMap> getMapByIndex(int index) {
+        switch (index) {
+            case 0:
+                return map1;
+            case 1:
+                return map2;
+            case 2:
+                return map3;
+            case 3:
+                return map4;
+        }
+
+        return null;
+    }
 
     public static final AssetDescriptor<Texture> arrow =
             new AssetDescriptor<Texture>("Arrow.png", Texture.class);
@@ -76,8 +109,20 @@ public class Assets {
     public static final AssetDescriptor<AnimationData> weaponSpecial =
             new AssetDescriptor<AnimationData>("WeaponSpecial.xml", AnimationData.class);
 
-    public static final AssetDescriptor[] PlayScreenAssets = new AssetDescriptor[] {
-            map, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, map1, map2, map3, map4
+    public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
+        for (AssetDescriptor asset : assets)
+            assetManager.load(asset);
+    }
+
+    public static final AssetDescriptor[] MenuScreenAssets = {
+            menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
+            worms2Button, worms3Button, worms4Button, worms5Button
     };
+
+    public static final AssetDescriptor[] PlayScreenAssets = {
+            arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, windGreen, windOrange, windRed
+    };
+
+
 }

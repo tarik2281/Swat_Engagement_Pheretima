@@ -3,6 +3,7 @@ package de.paluno.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -19,7 +20,7 @@ import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
 
 
-public class MenuScreen extends ScreenAdapter {
+public class MenuScreen extends ScreenAdapter implements Loadable {
 
 
     private SEPGame game;
@@ -37,6 +38,9 @@ public class MenuScreen extends ScreenAdapter {
     // Icons
     private ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4, buttonPlay, buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
 
+    private ImageButton selectedWormButton;
+    private ImageButton selectedMapButton;
+
     private int mapNumber;
     private int numWorms;
 
@@ -49,65 +53,82 @@ public class MenuScreen extends ScreenAdapter {
 
     }
 
+    @Override
+    public boolean load(AssetManager manager) {
+        Assets.loadAssets(manager, Assets.MenuScreenAssets);
+
+        return false;
+    }
+
     public void show() {
-        textureBackground = new Texture("MENU.png");
+        textureBackground = game.getAssetManager().get(Assets.menuBackground);
 
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
 
-        map1 = new Texture(Gdx.files.internal("Map1SEP.png"));
+        map1 = game.getAssetManager().get(Assets.map1Thumbnail);
         textureRegionMap1 = new TextureRegion(map1);
         regionDrawableMap1 = new TextureRegionDrawable(textureRegionMap1);
         buttonMap1 = new ImageButton(regionDrawableMap1);
+        buttonMap1.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap1.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedMapButton(buttonMap1);
                 mapNumber = 0;
                 System.out.println("Map1 Clicked");
             }
         });
 
-        map2 = new Texture(Gdx.files.internal("Map2SEP.png"));
+
+
+        map2 = game.getAssetManager().get(Assets.map2Thumbnail);
         textureRegionMap2 = new TextureRegion(map2);
         regionDrawableMap2 = new TextureRegionDrawable(textureRegionMap2);
         buttonMap2 = new ImageButton(regionDrawableMap2);
+        buttonMap2.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap2.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedMapButton(buttonMap2);
                 mapNumber = 1;
                 System.out.println("Map2 Clicked");
             }
         });
 
-        map3 = new Texture(Gdx.files.internal("Map3SEP.png"));
+        map3 = game.getAssetManager().get(Assets.map3Thumbnail);
         textureRegionMap3 = new TextureRegion(map3);
         regionDrawableMap3 = new TextureRegionDrawable(textureRegionMap3);
         buttonMap3 = new ImageButton(regionDrawableMap3);
+        buttonMap3.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap3.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedMapButton(buttonMap3);
                 mapNumber = 2;
                 System.out.println("Map3 Clicked");
             }
         });
 
-        map4 = new Texture(Gdx.files.internal("Map4SEP.png"));
+        map4 = game.getAssetManager().get(Assets.map4Thumbnail);
         textureRegionMap4 = new TextureRegion(map4);
         regionDrawableMap4 = new TextureRegionDrawable(textureRegionMap4);
         buttonMap4 = new ImageButton(regionDrawableMap4);
+        buttonMap4.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap4.addListener(new ClickListener() {
 
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedMapButton(buttonMap4);
                 mapNumber = 3;
                 System.out.println("Map4 Clicked");
             }
         });
 
-        play = new Texture(Gdx.files.internal("PlayButton.png"));
+        play = game.getAssetManager().get(Assets.playButton);
         textureRegionPlay = new TextureRegion(play);
         regionDrawablePlay = new TextureRegionDrawable(textureRegionPlay);
         buttonPlay = new ImageButton(regionDrawablePlay);
@@ -124,65 +145,77 @@ public class MenuScreen extends ScreenAdapter {
 
         // Buttons Multiplayer
 
-
-        worm1 = new Texture(Gdx.files.internal("1.png"));
+        worm1 = game.getAssetManager().get(Assets.worms1Button);
         textureRegionWorm1 = new TextureRegion(worm1);
         regionDrawableWorm1 = new TextureRegionDrawable(textureRegionWorm1);
         buttonWorm1 = new ImageButton(regionDrawableWorm1);
+        buttonWorm1.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm1.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedWormButton(buttonWorm1);
                 numWorms = 1;
                 System.out.println("Worm 1 Clicked");
             }
         });
 
-        worm2 = new Texture(Gdx.files.internal("2.png"));
+        worm2 = game.getAssetManager().get(Assets.worms2Button);
         textureRegionWorm2 = new TextureRegion(worm2);
         regionDrawableWorm2 = new TextureRegionDrawable(textureRegionWorm2);
         buttonWorm2 = new ImageButton(regionDrawableWorm2);
+        buttonWorm2.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm2.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedWormButton(buttonWorm2);
                 numWorms = 2;
                 System.out.println("Worm 2 Clicked");
             }
         });
-        worm3 = new Texture(Gdx.files.internal("3.png"));
+        ImageButton.ImageButtonStyle style;
+
+        worm3 = game.getAssetManager().get(Assets.worms3Button);
         textureRegionWorm3 = new TextureRegion(worm3);
         regionDrawableWorm3 = new TextureRegionDrawable(textureRegionWorm3);
         buttonWorm3 = new ImageButton(regionDrawableWorm3);
+        buttonWorm3.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm3.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedWormButton(buttonWorm3);
                 numWorms = 3;
                 System.out.println("Worm 3 Clicked");
             }
         });
-        worm4 = new Texture(Gdx.files.internal("4.png"));
+
+        worm4 = game.getAssetManager().get(Assets.worms4Button);
         textureRegionWorm4 = new TextureRegion(worm4);
         regionDrawableWorm4 = new TextureRegionDrawable(textureRegionWorm4);
         buttonWorm4 = new ImageButton(regionDrawableWorm4);
+        buttonWorm4.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm4.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedWormButton(buttonWorm4);
                 numWorms = 4;
                 System.out.println("Worm 4 Clicked");
             }
         });
 
-        worm5 = new Texture(Gdx.files.internal("5.png"));
+        worm5 = game.getAssetManager().get(Assets.worms5Button);
         textureRegionWorm5 = new TextureRegion(worm5);
         regionDrawableWorm5 = new TextureRegionDrawable(textureRegionWorm5);
         buttonWorm5 = new ImageButton(regionDrawableWorm5);
+        buttonWorm5.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm5.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                setSelectedWormButton(buttonWorm5);
                 numWorms = 5;
                 System.out.println("Worm 5 Clicked");
             }
@@ -234,7 +267,30 @@ public class MenuScreen extends ScreenAdapter {
         buttonPlay.padBottom(70);
 
 
+        setSelectedMapButton(buttonMap1);
+        mapNumber = 0;
+        setSelectedWormButton(buttonWorm1);
+        numWorms = 1;
+    }
 
+    private void setSelectedMapButton(ImageButton button) {
+        if (selectedMapButton != null)
+            selectedMapButton.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+
+        selectedMapButton = button;
+
+        if (selectedMapButton != null)
+            selectedMapButton.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    private void setSelectedWormButton(ImageButton button) {
+        if (selectedWormButton != null)
+            selectedWormButton.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+
+        selectedWormButton = button;
+
+        if (selectedWormButton != null)
+            selectedWormButton.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     public void render(float delta) {

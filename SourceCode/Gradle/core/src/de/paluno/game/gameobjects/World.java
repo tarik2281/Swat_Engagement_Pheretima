@@ -95,7 +95,7 @@ public class World {
         camera.setBottomLimit(0.0f);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
-        ground = new Ground(this, screen.getAssetManager().get((AssetDescriptor<TiledMap>)Assets.maps[mapNumber]), explosionMaskRenderer);
+        ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
