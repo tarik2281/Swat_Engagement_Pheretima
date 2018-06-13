@@ -18,6 +18,8 @@ public class Assets {
             new AssetDescriptor<Texture>("Map4SEPThumb.png", Texture.class);
     public static final AssetDescriptor<Texture> playButton =
             new AssetDescriptor<Texture>("PlayButton.png", Texture.class);
+    public static final AssetDescriptor<Texture> menuButton =
+            new AssetDescriptor<Texture>("MenuButton.png", Texture.class);
     public static final AssetDescriptor<Texture> worms1Button =
             new AssetDescriptor<Texture>("Worms1.png", Texture.class);
     public static final AssetDescriptor<Texture> worms2Button =
@@ -124,6 +126,6 @@ public class Assets {
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {
-            gameOverScreen1, gameOverScreen2
+            gameOverScreen1, gameOverScreen2, menuButton
     };
 }

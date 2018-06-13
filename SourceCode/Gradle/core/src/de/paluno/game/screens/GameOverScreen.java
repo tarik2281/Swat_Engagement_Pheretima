@@ -7,6 +7,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
@@ -17,6 +24,13 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private SpriteBatch batch;
 	private WinningPlayer winningPlayer;
 	private SEPGame game;
+	private Stage restartStage;
+	private Table table;
+	private ImageButton restartButton;
+	private Texture restartButtonTexture;
+	private TextureRegion restartButtonTextureRegion;
+	private TextureRegionDrawable restartButtonTextureDrawable;
+	
 	
 	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
 		this.winningPlayer = winningPlayer;
@@ -31,7 +45,9 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	}
 
 	public void show() {
+		//GameOverScreen
 		batch = new SpriteBatch();
+		table = new Table();
 		
 		Texture texture = null;
 		
@@ -45,6 +61,28 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		}
 		
 		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
+		
+		//Restart button
+		restartStage = new Stage();
+		Gdx.input.setInputProcessor(restartStage);
+		
+		restartButtonTexture = game.getAssetManager().get(Assets.menuButton);
+        restartButtonTextureRegion = new TextureRegion(restartButtonTexture);
+        restartButtonTextureDrawable = new TextureRegionDrawable(restartButtonTextureRegion);
+        restartButton = new ImageButton(restartButtonTextureDrawable);
+        restartButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setMenuScreen();
+            }
+        });
+        
+        restartStage.addActor(table);
+        table.add(restartButton);
+        table.setFillParent(true);
+        table.bottom();
+        table.padBottom(100);
+        table.padRight(30);
 	}
 	
 	public void render(float delta) {
@@ -52,13 +90,13 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		batch.begin();
 		sprite.draw(batch);
 		batch.end();
-
-		if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-			game.setMenuScreen();
-		}
+		
+		restartStage.act(delta);
+		restartStage.draw();
 	}
 	
 	public void hide(){
 		batch.dispose();
+		restartStage.dispose();
 	}
 }
