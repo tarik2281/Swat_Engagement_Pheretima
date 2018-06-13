@@ -21,13 +21,17 @@ public class SEPGame extends Game {
 
 	@Override
 	public void create() {
-		setNextScreen(new MenuScreen(this));
+		setMenuScreen();
 	}
 
     @Override
     public void render() {
         super.render();
     }
+
+    public void setMenuScreen() {
+		setNextScreen(new MenuScreen(this));
+	}
 
     public void setPlayScreen(int mapNumber, int numWorms) {
 		setNextScreen(new PlayScreen(this, mapNumber, numWorms));

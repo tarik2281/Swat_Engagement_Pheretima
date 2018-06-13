@@ -1,6 +1,8 @@
 package de.paluno.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -9,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
 
-public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
+public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Loadable {
 	
 	protected Sprite sprite;
 	private SpriteBatch batch;
@@ -20,7 +22,14 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 		this.winningPlayer = winningPlayer;
 		this.game = game;
 	}
-	
+
+	@Override
+	public boolean load(AssetManager manager) {
+		Assets.loadAssets(manager, Assets.GameOverScreenAssets);
+
+		return false;
+	}
+
 	public void show() {
 		batch = new SpriteBatch();
 		
@@ -43,10 +52,13 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter {
 		batch.begin();
 		sprite.draw(batch);
 		batch.end();
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+			game.setMenuScreen();
+		}
 	}
 	
 	public void hide(){
 		batch.dispose();
-		sprite.getTexture().dispose();
 	}
 }

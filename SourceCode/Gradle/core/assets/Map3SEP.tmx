@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextobjectid="88">
+<map version="1.0" tiledversion="2018.05.24" orientation="orthogonal" renderorder="right-up" width="100" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="88">
  <tileset firstgid="1" source="OverWorldTiles.tsx"/>
- <layer name="TileLayer" width="100" height="100">
+ <layer id="1" name="TileLayer" width="100" height="100">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -105,7 +105,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="CollisionLayer">
+ <objectgroup id="2" name="CollisionLayer">
   <object id="70" x="80" y="1360">
    <polygon points="0,0 144,0 144,48 0,48"/>
   </object>
@@ -161,11 +161,11 @@
    <polygon points="0,0 128,0 128,16 144,16 144,48 128,48 128,64 96,64 96,80 32,80 32,64 0,64 0,48 -16,48 -16,16 0,16"/>
   </object>
  </objectgroup>
- <objectgroup name="SpawnPositions">
+ <objectgroup id="3" name="SpawnPositions">
   <object id="59" x="432" y="1293.33">
    <point/>
   </object>
-  <object id="60" x="600" y="1486.67">
+  <object id="60" x="576" y="1472">
    <point/>
   </object>
   <object id="61" x="144" y="1357.33">

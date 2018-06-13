@@ -124,5 +124,7 @@ public class Assets {
             weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, windGreen, windOrange, windRed
     };
 
-
+    public static final AssetDescriptor[] GameOverScreenAssets = {
+            gameOverScreen1, gameOverScreen2
+    };
 }
