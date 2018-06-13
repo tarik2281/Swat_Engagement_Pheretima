@@ -41,35 +41,34 @@ public class WindDirectionIndicator implements Renderable {
 
         // loading of different assets based of the wind force
         if (worm != null) {
-            if (windHandler.getX() == 0) {
-                return;
-            } else if ((windHandler.getX() > 0 && windHandler.getX() <= 1) ||
-                    (windHandler.getX() < 0 && windHandler.getX() >= -1)) {
-                texture = world.getAssetManager().get(Assets.windGreen);
-            } else if ((windHandler.getX() > 1 && windHandler.getX() <= 3) ||
-                    (windHandler.getX() < -1 && windHandler.getX() >= -3)) {
-                texture = world.getAssetManager().get(Assets.windOrange);
-            } else {
-                texture = world.getAssetManager().get(Assets.windRed);
-            }
+                if (windHandler.getX() == 0) {
+                    return;
+                } else if ((windHandler.getX() > 0 && windHandler.getX() <= 1) ||
+                        (windHandler.getX() < 0 && windHandler.getX() >= -1)) {
+                    texture = world.getAssetManager().get(Assets.windGreen);
+                } else if ((windHandler.getX() > 1 && windHandler.getX() <= 3) ||
+                        (windHandler.getX() < -1 && windHandler.getX() >= -3)) {
+                    texture = world.getAssetManager().get(Assets.windOrange);
+                } else {
+                    texture = world.getAssetManager().get(Assets.windRed);
+                }
 
 
-            sprite = new Sprite(texture);
+                sprite = new Sprite(texture);
 
 
-            // sets the indicator at the position of the current worm
-            Vector2 windIndicator = Constants.getScreenSpaceVector(this.worm.getBody().getPosition());
+                // sets the indicator at the position of the current worm
+                Vector2 windIndicator = Constants.getScreenSpaceVector(this.worm.getBody().getPosition());
 
+                // Sets the position where the sprite will be drawn, relative to its current origin = center
+                sprite.setOriginBasedPosition(windIndicator.x, windIndicator.y + 100);
 
-            //sprite.setOriginCenter();
-            sprite.setOriginBasedPosition(windIndicator.x, windIndicator.y + 100);
-
-            // flips the indicator sprite after every turn, based of the random x coordinate
-            if (this.windHandler != null) {
-                sprite.setFlip(windHandler.flipped(), false);
-                //System.out.println(windHandler.getX());
-            }
-            sprite.draw(batch);
+                // flips the indicator sprite after every turn, based of the random x coordinate
+                if (this.windHandler != null) {
+                    sprite.setFlip(windHandler.flipped(), false);
+                    //System.out.println(windHandler.getX());
+                }
+                sprite.draw(batch);
         }
 
     }
