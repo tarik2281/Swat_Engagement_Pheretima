@@ -5,6 +5,9 @@ import de.paluno.game.*;
 
 public class Weapon {
 
+	/**
+     * Inner class to create a copy of the data necessary for the replay
+     */
 	public class SnapshotData {
 		private WeaponType type;
 		private int currentAmmo;
@@ -18,7 +21,8 @@ public class Weapon {
 	private AnimationData animationSet;
 
 	/**
-	 * Overloaded constructor - Only WeaponType
+	 * Constructor
+	 * @param player - Reference to the player we belong to
 	 * @param type - WeaponType of the weapon, to determine it's behavior
 	 */
 	public Weapon(Player player, WeaponType type) {
@@ -31,7 +35,11 @@ public class Weapon {
 		if (player.getAssets() != null)
 		animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
-
+	/**
+	 * Constructor to create a new Weapon from given data
+	 * @param player - Reference to the (copied) Player we belong to
+	 * @param data - SnapshotData object to copy from
+	 */
 	public Weapon(Player player, SnapshotData data) {
 		this.player = player;
 
@@ -59,12 +67,19 @@ public class Weapon {
 			currentAmmo--;
 		}
 	}
-
+	
+	/**
+	 * Getter method to get our current ammo
+	 * @return currentAmmo
+	 */
 	public int getCurrentAmmo() {
 		return currentAmmo;
 	}
 
-
+	/**
+	 * Getter method to get the WeaponType reference this weapon is based on
+	 * @return WeaponType
+	 */
 	public WeaponType getWeaponType() {
 		return type;
 	}
@@ -76,11 +91,19 @@ public class Weapon {
 	public boolean getSelectable() {
 		return type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0;
 	}
-
+	
+	/**
+	 * Soft getter method for this weapon's animation set
+	 * @return Animation set as AnimatedSprite, generated from the Asset reference
+	 */
 	public AnimatedSprite createAnimatedSprite() {
 		return new AnimatedSprite(animationSet);
 	}
-
+	
+	/**
+	 * Method to create and fill our SnapshotData copy
+	 * @return SnapshotData
+	 */
 	public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
