@@ -342,10 +342,6 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void setIsInfected(boolean isInfected) {
 		if (!this.isInfected && isInfected)
 			createVirusFixture = true;
-		else if (!isInfected && virusFixture != null) {
-			body.destroyFixture(virusFixture);
-			virusFixture = null;
-		}
 
 		this.isInfected = isInfected;
 	}
