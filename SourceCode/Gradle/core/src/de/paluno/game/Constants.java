@@ -75,6 +75,7 @@ public class Constants {
     public static final int KEY_SELECT_WEAPON_2 = Input.Keys.F2;
     public static final int KEY_SELECT_WEAPON_3 = Input.Keys.F3;
     public static final int KEY_SELECT_WEAPON_4 = Input.Keys.F4;
+    public static final int KEY_SELECT_WEAPON_5 = Input.Keys.F5;
 
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;

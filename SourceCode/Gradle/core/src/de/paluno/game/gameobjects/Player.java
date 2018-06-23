@@ -69,6 +69,9 @@ public class Player implements Updatable {
 				case Constants.KEY_SELECT_WEAPON_4:
 					equipWeapon(WeaponType.WEAPON_SPECIAL);
 					break;
+				case Constants.KEY_SELECT_WEAPON_5:
+					equipWeapon(WeaponType.WEAPON_AIRSTRIKE);
+					break;
 			}
 		}
 		else {
@@ -270,6 +273,7 @@ public class Player implements Updatable {
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_5, keyListener);
 	}
 	/**
 	 * Method to deregister all objects and handlers when this player's turn is over
@@ -305,6 +309,7 @@ public class Player implements Updatable {
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_5, keyListener);
 	}
 
 	/**
