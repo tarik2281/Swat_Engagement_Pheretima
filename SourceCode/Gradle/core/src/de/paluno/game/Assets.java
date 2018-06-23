@@ -91,6 +91,8 @@ public class Assets {
             new AssetDescriptor<Texture>("IconBazooka.png", Texture.class);
     public static final AssetDescriptor<Texture> iconSpecial =
             new AssetDescriptor<Texture>("IconSpecial.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconAirstrike =
+            new AssetDescriptor<Texture>("IconAirstrike.png", Texture.class);
 
     public static final AssetDescriptor<Texture> projectileGun =
             new AssetDescriptor<Texture>("ProjectileGun.png", Texture.class);
@@ -100,6 +102,8 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileBazooka.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileSpecial =
             new AssetDescriptor<Texture>("ProjectileSpecial.png", Texture.class);
+    public static final AssetDescriptor<Texture> projectileAirstrike =
+            new AssetDescriptor<Texture>("ProjectileAirstrike.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> weaponGun =
             new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
@@ -109,6 +113,8 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WeaponBazooka.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> weaponSpecial =
             new AssetDescriptor<AnimationData>("WeaponSpecial.xml", AnimationData.class);
+    public static final AssetDescriptor<AnimationData> weaponAirstrike =
+            new AssetDescriptor<AnimationData>("WeaponAirstrike.xml", AnimationData.class);
 
     public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
         for (AssetDescriptor asset : assets)
@@ -122,7 +128,7 @@ public class Assets {
 
     public static final AssetDescriptor[] PlayScreenAssets = {
             arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, windGreen, windOrange, windRed
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, windGreen, windOrange, windRed
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {

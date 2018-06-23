@@ -196,6 +196,7 @@ public class Player implements Updatable {
         weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
         weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
+        weapons[4] = new Weapon(this, WeaponType.WEAPON_AIRSTRIKE);
     }
 	/**
 	 * Method to generate all our weapons from existing SnapshotData

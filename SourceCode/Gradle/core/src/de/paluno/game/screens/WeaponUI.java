@@ -25,13 +25,13 @@ public class WeaponUI implements Renderable {
     //takes the whole screen
     private Stage stage;
     // hold the image of our button
-    private Texture gun, grenade, bazooka, weaponSpecial;
+    private Texture gun, grenade, bazooka, weaponSpecial, airstrike;
     // defines rectangular area of a texture
-    private TextureRegion textureRegionGun, textureRegionGrenade, textureRegionBazooka, textureRegionWeaponSpecial;
+    private TextureRegion textureRegionGun, textureRegionGrenade, textureRegionBazooka, textureRegionWeaponSpecial, textureRegionAirstrike;
     // draws the texture in the given size
-    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade, regionDrawableBazooka, regionDrawableWeaponSpecial;
+    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade, regionDrawableBazooka, regionDrawableWeaponSpecial, regionDrawableAirstrike;
     // Icons
-    private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonWeaponSpecial;
+    private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonWeaponSpecial, buttonAirstrike;
     // Is implemented into the stage
     private Table table;
 
@@ -102,6 +102,19 @@ public class WeaponUI implements Renderable {
                 player.equipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
+        
+        // Airstrike Button
+        airstrike = playScreen.getAssetManager().get(Assets.iconAirstrike);
+        textureRegionAirstrike = new TextureRegion(airstrike);
+        regionDrawableAirstrike = new TextureRegionDrawable(textureRegionAirstrike);
+        buttonAirstrike = new ImageButton(regionDrawableAirstrike);
+        buttonAirstrike.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("SpecialWeapon Button Clicked");
+                player.equipWeapon(WeaponType.WEAPON_AIRSTRIKE);
+            }
+        }));
 
 
         stage = new Stage();
@@ -120,7 +133,11 @@ public class WeaponUI implements Renderable {
         table.add(buttonBazooka);
         table.row();
         table.add(buttonWeaponSpecial);
+        table.row();
+        table.add(buttonAirstrike);
         stage.setDebugAll(false);
+        
+        buttonAirstrike.padTop(5);
 
         //sets space to the edge of table
         table.padRight(7);
