@@ -16,7 +16,7 @@ public class SEPGame extends Game {
 	public SEPGame() {
 		assetManager = new AssetManager();
         assetManager.setLoader(AnimationData.class, new AnimationData.Loader(new InternalFileHandleResolver()));
-        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
+        assetManager.setLoader(Map.class, new Map.Loader(new InternalFileHandleResolver()));
 	}
 
 	@Override

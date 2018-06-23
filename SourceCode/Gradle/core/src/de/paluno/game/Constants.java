@@ -107,6 +107,10 @@ public class Constants {
 		// An instance should not be created of this class
 	}
 
+	public static float toUnits(float pixels) {
+		return pixels * WORLD_SCALE;
+	}
+
 	public static Vector2 getScreenSpaceVector(Vector2 v) {
 		return new Vector2(v).scl(SCREEN_SCALE);
 	}

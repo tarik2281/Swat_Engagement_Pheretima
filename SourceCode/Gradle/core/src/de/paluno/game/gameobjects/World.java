@@ -10,6 +10,9 @@ import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
+import de.paluno.game.interfaces.GameSetupData;
+import de.paluno.game.interfaces.GameSetupRequest;
+import de.paluno.game.interfaces.PlayerData;
 import de.paluno.game.screens.PlayScreen;
 import de.paluno.game.screens.WinningPlayer;
 
@@ -55,6 +58,13 @@ public class World implements Disposable {
     private boolean isReplayWorld;
     private boolean skipFrame = false;
 
+    private int clientId;
+
+    private WorldHandler worldHandler;
+
+    private ShotDirectionIndicator shotDirectionIndicator;
+    private WindDirectionIndicator windDirectionIndicator;
+
     private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
         if (keyDown) {
             switch (keyCode) {
@@ -83,11 +93,13 @@ public class World implements Disposable {
     };
 
     public World() {
-    	//f�r den Test
+    	//für den Test
     }
 
-    public World(PlayScreen screen) {
+    public World(PlayScreen screen, WorldHandler worldHandler, int clientId) {
         this.screen = screen;
+        this.worldHandler = worldHandler;
+        this.clientId = clientId;
         isReplayWorld = false;
 
         objectRegisterQueue = new LinkedList<>();
@@ -119,6 +131,69 @@ public class World implements Disposable {
 
         initializePlayer(Constants.PLAYER_NUMBER_1, numWorms);
         initializePlayer(Constants.PLAYER_NUMBER_2, numWorms);
+
+        worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
+                ground.getWorldWidth(), ground.getWorldHeight());
+        camera.setBottomLimit(worldBounds.y);
+
+        registerAfterUpdate(ground);
+        registerAfterUpdate(windHandler);
+
+        currentPlayer = Constants.PLAYER_NUMBER_1;
+        setGameState(GameState.WAITING);
+
+        InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
+    }
+
+    public Player[] getPlayers() {
+        return players;
+    }
+
+    public void initializeRequest(int mapNumber, int numWorms, GameSetupRequest request) {
+        ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
+        explosionMaskRenderer.setGround(ground);
+
+        windHandler = new WindHandler();
+
+        worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
+                ground.getWorldWidth(), ground.getWorldHeight());
+
+        for (int i = 0; i < request.getClientIds().length; i++) {
+            players[request.getPlayerNumbers()[i]] = new Player(request.getPlayerNumbers()[i], numWorms, this);
+            players[request.getPlayerNumbers()[i]].setClientId(request.getClientIds()[i]);
+            players[request.getPlayerNumbers()[i]].setIsRemotePlayer(clientId == request.getClientIds()[i]);
+            players[request.getPlayerNumbers()[i]].setWindHandler(windHandler);
+        }
+
+        worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
+                ground.getWorldWidth(), ground.getWorldHeight());
+        camera.setBottomLimit(worldBounds.y);
+
+        registerAfterUpdate(ground);
+        registerAfterUpdate(windHandler);
+
+        currentPlayer = Constants.PLAYER_NUMBER_1;
+        setGameState(GameState.WAITING);
+
+        InputHandler.getInstance().registerKeyListener(Constants.KEY_TOGGLE_DEBUG_RENDER, keyListener);
+    }
+
+    public void initializeData(int mapNumber, GameSetupData data) {
+        ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
+        explosionMaskRenderer.setGround(ground);
+
+        windHandler = new WindHandler();
+
+        worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
+                ground.getWorldWidth(), ground.getWorldHeight());
+
+        for (int i = 0; i < data.getPlayerData().length; i++) {
+            PlayerData playerData = data.getPlayerData()[i];
+            players[playerData.getPlayerNumber()] = new Player(playerData, this);
+            players[playerData.getPlayerNumber()].setClientId(data.getClientIds()[i]);
+            players[playerData.getPlayerNumber()].setIsRemotePlayer(clientId == data.getClientIds()[i]);
+            players[playerData.getPlayerNumber()].setWindHandler(windHandler);
+        }
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());

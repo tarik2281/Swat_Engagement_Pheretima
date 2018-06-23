@@ -13,6 +13,7 @@ public class CollisionHandler implements ContactListener {
     // Weapon Special on hit
     // Weapon Special close by
 
+    private boolean listenForCollisions; // TODO: CollisionHandler listenForCollisions
 
     public CollisionHandler() {
 

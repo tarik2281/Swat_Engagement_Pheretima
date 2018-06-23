@@ -3,22 +3,25 @@ package de.paluno.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.*;
+import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.World;
+import de.paluno.game.gameobjects.Worm;
+import de.paluno.game.interfaces.*;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
 
     private SEPGame game;
     private SpriteBatch spriteBatch;
 
-    private World world;
 	private World replayWorld;
 	private boolean disposeReplayAfterUpdate;
     private World.SnapshotData worldSnapshot;
+    private WorldHandler worldHandler;
+    private UserWorldController worldController;
 
     private WinningPlayer winningPlayer = WinningPlayer.NONE;
 
@@ -26,6 +29,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private int numWorms;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
+
+    private GameSetupData gameSetupData;
+    private GameSetupRequest gameSetupRequest;
+    private NetworkClient client;
 
     public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
         this.game = game;
@@ -36,6 +43,22 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         spriteBatch = new SpriteBatch();
     }
 
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms, NetworkClient client, GameSetupRequest request) {
+        this(game, mapNumber, numWorms);
+
+        this.client = client;
+
+        this.gameSetupRequest = request;
+    }
+
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms, NetworkClient client, GameSetupData data) {
+        this(game, mapNumber, numWorms);
+
+        this.client = client;
+
+        this.gameSetupData = data;
+    }
+
     @Override
     public void show() {
         float screenWidth = Gdx.graphics.getWidth();
@@ -43,8 +66,54 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
-        world = new World(this);
-        world.initializeNew(mapNumber, numWorms);
+        if (gameSetupRequest != null) {
+            worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest, mapNumber, numWorms);
+        }
+        else if (gameSetupData != null) {
+            worldHandler = new NetworkWorldHandler(this, client, gameSetupData);
+        }
+        else {
+            worldHandler = new LocalWorldHandler(this, mapNumber, numWorms);
+        }
+
+        worldHandler.initialize();
+
+        if (gameSetupRequest != null) {
+            world.initializeRequest(mapNumber, numWorms, gameSetupRequest);
+
+            int[] clientIds = new int[world.getPlayers().length];
+            PlayerData[] players = new PlayerData[world.getPlayers().length];
+            for (int i = 0; i < world.getPlayers().length; i++) {
+                Player player = world.getPlayers()[i];
+                WormData[] worms = new WormData[player.getCharacters().length];
+
+                for (int j = 0; j < player.getCharacters().length; j++) {
+                    Worm worm = player.getCharacters()[j];
+                    WormData wormData = new WormData();
+                    wormData.playerNumber = player.getPlayerNumber();
+                    wormData.wormNumber = worm.getCharacterNumber();
+                    wormData
+                            .setOrientation(worm.getOrientation())
+                            .setMovement(0)
+                            .setPhysicsData(new PhysicsData().setPositionX(worm.spawnPosition.x).setPositionY(worm.spawnPosition.y));
+                    worms[j] = wormData;
+                }
+
+                clientIds[i] = player.getClientId();
+                players[i] = new PlayerData(player.getPlayerNumber(), worms);
+            }
+
+            GameSetupData data = new GameSetupData(clientIds, players);
+
+            client.sendObject(data);
+        }
+        else if (gameSetupData != null) {
+            world.initializeData(mapNumber, gameSetupData);
+        }
+        else {
+            world.initializeNew(mapNumber, numWorms);
+        }
+
         weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 
@@ -59,6 +128,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         // game loop
         Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
+
+        worldHandler.updateAndRender(spriteBatch, delta);
 
         if (replayWorld != null)
         	replayWorld.doGameLoop(spriteBatch, delta);
@@ -86,6 +157,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void hide() {
+        worldHandler.dispose();
+
+        client.disconnect();
+
         world.dispose();
         world = null;
 
@@ -117,8 +192,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
             if (world.isWormDied() && worldSnapshot != null) {
-                replayWorld = new World(this);
-                replayWorld.initializeFromSnapshot(worldSnapshot);
+                //replayWorld = new World(this);
+                //replayWorld.initializeFromSnapshot(worldSnapshot);
             }
 
             weaponUI.setPlayer(this.world.getCurrentPlayer());

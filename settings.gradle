@@ -1,1 +1,4 @@
 include 'SourceCode/Gradle/desktop', 'SourceCode/Gradle/core'
+include 'interfaces'
+include 'server'
+

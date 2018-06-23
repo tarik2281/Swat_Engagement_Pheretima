@@ -31,16 +31,16 @@ public class Assets {
     public static final AssetDescriptor<Texture> worms5Button =
             new AssetDescriptor<Texture>("Worms5.png", Texture.class);
 
-    public static final AssetDescriptor<TiledMap> map1 =
-            new AssetDescriptor<TiledMap>("Map1SEP.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> map2 =
-            new AssetDescriptor<TiledMap>("Map2SEP.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> map3 =
-            new AssetDescriptor<TiledMap>("Map3SEP.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> map4 =
-            new AssetDescriptor<TiledMap>("Map4SEP.tmx", TiledMap.class);
+    public static final AssetDescriptor<Map> map1 =
+            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
+    public static final AssetDescriptor<Map> map2 =
+            new AssetDescriptor<Map>("Map2SEP.tmx", Map.class);
+    public static final AssetDescriptor<Map> map3 =
+            new AssetDescriptor<Map>("Map3SEP.tmx", Map.class);
+    public static final AssetDescriptor<Map> map4 =
+            new AssetDescriptor<Map>("Map4SEP.tmx", Map.class);
 
-    public static AssetDescriptor<TiledMap> getMapByIndex(int index) {
+    public static AssetDescriptor<Map> getMapByIndex(int index) {
         switch (index) {
             case 0:
                 return map1;

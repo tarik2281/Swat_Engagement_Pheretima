@@ -8,8 +8,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
 import de.paluno.game.UserData.ObjectType;
+import de.paluno.game.interfaces.WormData;
+import de.paluno.game.screens.Loadable;
 
-public class Worm implements Updatable, PhysicsObject, Renderable {
+public class Worm implements Updatable, PhysicsObject, Renderable, Loadable {
 
     /**
      * Inner class to create a copy of the data necessary for the replay
@@ -26,7 +28,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private World world;
 	private Body body;
 	private Player player;
-	private Vector2 spawnPosition;
+	public Vector2 spawnPosition;
 
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
@@ -54,6 +56,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Empty constructor for testing purposes
 	 */
 	public Worm() {}
+
+	public Worm(int characterNumber) {
+		this.characterNumber = characterNumber;
+	}
 
 	/**
 	 * Constructor
@@ -117,6 +123,35 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.isInfected = data.isInfected;
 
 		updateAnimation();
+	}
+
+	public Worm(Player player, WormData data) {
+		characterNumber = data.wormNumber;
+		this.player = player;
+		this.world = player.getWorld();
+
+		this.orientation = data.getOrientation();
+
+		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
+		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
+
+		this.spawnPosition = new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY());
+
+		this.health = Constants.WORM_MAX_HEALTH;
+
+		this.isInfected = false;
+
+		updateAnimation();
+	}
+
+	@Override
+	public boolean load(AssetManager manager) {
+		this.walkAnimation = new AnimatedSprite(manager.get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(manager.get(Assets.wormBreath));
+		this.flyAnimation = new AnimatedSprite(manager.get(Assets.wormFly));
+
+		return false;
 	}
 
 	/**
@@ -286,6 +321,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public void setBodyToNullReference() {
 		this.body = null;
+	}
+
+	public Vector2 getPosition() {
+		return body.getWorldCenter();
+	}
+
+	public void setPosition(float x, float y) {
+		// TODO: setPosition: set body transform
 	}
 	
 	/**

@@ -3,7 +3,13 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
+import de.paluno.game.interfaces.GameSetupData;
+import de.paluno.game.interfaces.PlayerData;
+import de.paluno.game.interfaces.WormData;
 import de.paluno.game.screens.WeaponUI;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player implements Updatable {
 
@@ -21,9 +27,9 @@ public class Player implements Updatable {
 	}
 
 	private int playerNum;
-	private WeaponUI weaponUI;
 
 	private int numCharacters;
+	private ArrayList<Worm> worms;
 	private Worm[] characters;
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
@@ -32,6 +38,9 @@ public class Player implements Updatable {
 	private boolean isRoundEnded = false;
 
 	private World world;
+
+	private boolean isRemotePlayer;
+	private int clientId;
 
 	/**
 	 * Inner KeyListener object to dynamically register reactions to certain input keys pressed
@@ -100,6 +109,11 @@ public class Player implements Updatable {
 	 * Empty constructor for cloning purposes
 	 */
 	public Player() {}
+
+	public Player(int playerNumber) {
+		this.playerNum = playerNumber;
+	}
+
 	/**
 	 * Constructor
 	 * @param playerNum - Player Number of this player
@@ -117,6 +131,17 @@ public class Player implements Updatable {
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
 
 	}
+
+	public Player(PlayerData data, World world) {
+		this.playerNum = data.getPlayerNumber();
+		this.world = world;
+
+		setupWorms(data.getWorms());
+		setupWeapons();
+
+		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
+	}
+
 	/**
 	 * Constructor to create a new Player from existing data - for replay purposes
 	 * @param data - The SnpashotData to copy from
@@ -130,6 +155,33 @@ public class Player implements Updatable {
 		setupWeapons(data.weaponData);
 
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
+	}
+
+	public Worm addWorm() {
+		Worm worm = new Worm();
+		worms.add(worm);
+		return worm;
+		// TODO: addWorm
+	}
+
+	public List<Worm> getWorms() {
+		return worms;
+	}
+
+	public void setIsRemotePlayer(boolean isRemotePlayer) {
+		this.isRemotePlayer = isRemotePlayer;
+	}
+
+	public void setClientId(int clientId) {
+		this.clientId = clientId;
+	}
+
+	public int getClientId() {
+		return clientId;
+	}
+
+	public boolean isRemotePlayer() {
+		return isRemotePlayer;
 	}
 	
 	/**
@@ -169,6 +221,19 @@ public class Player implements Updatable {
             world.registerAfterUpdate(windDirectionIndicator);
         }
     }
+
+    private void setupWorms(WormData[] data) {
+		this.characters = new Worm[data.length];
+
+		for (int i = 0; i < data.length; i++) {
+			characters[i] = new Worm(this, data[i]);
+			HealthBar healthBar = new HealthBar(world, characters[i]);
+			world.registerAfterUpdate(characters[i]);
+			world.registerAfterUpdate(healthBar);
+			numCharacters++;
+		}
+	}
+
 	/**
 	 * Method to generate all our characters from existing SnapshotData
 	 * @param data - Array of Worm-SnapshotData to use for generation
@@ -258,17 +323,19 @@ public class Player implements Updatable {
 		getCurrentWorm().setIsPlaying(true);
 		
 		// All Keys to listen to
-		InputHandler input = InputHandler.getInstance();
-		input.registerKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
-		input.registerKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
-		input.registerKeyListener(Constants.KEY_DO_ACTION, keyListener);
-		input.registerKeyListener(Constants.KEY_JUMP, keyListener);
-		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
-		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		if (!isRemotePlayer()) {
+			InputHandler input = InputHandler.getInstance();
+			input.registerKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
+			input.registerKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
+			input.registerKeyListener(Constants.KEY_DO_ACTION, keyListener);
+			input.registerKeyListener(Constants.KEY_JUMP, keyListener);
+			input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
+			input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
+			input.registerKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
+			input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
+			input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
+			input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		}
 	}
 	/**
 	 * Method to deregister all objects and handlers when this player's turn is over
@@ -293,17 +360,19 @@ public class Player implements Updatable {
         shiftTurn();
         
         // No need to listen to these Keys anymore
-		InputHandler input = InputHandler.getInstance();
-		input.unregisterKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
-		input.unregisterKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
-		input.unregisterKeyListener(Constants.KEY_DO_ACTION, keyListener);
-		input.unregisterKeyListener(Constants.KEY_JUMP, keyListener);
-		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
-		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		if (!isRemotePlayer()) {
+			InputHandler input = InputHandler.getInstance();
+			input.unregisterKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
+			input.unregisterKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
+			input.unregisterKeyListener(Constants.KEY_DO_ACTION, keyListener);
+			input.unregisterKeyListener(Constants.KEY_JUMP, keyListener);
+			input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
+			input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
+			input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
+			input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
+			input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
+			input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		}
 	}
 
 	/**
