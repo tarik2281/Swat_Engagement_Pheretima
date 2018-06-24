@@ -2,12 +2,10 @@ package de.paluno.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import de.paluno.game.gameobjects.Player;
-import de.paluno.game.gameobjects.Projectile;
-import de.paluno.game.gameobjects.WeaponType;
-import de.paluno.game.gameobjects.Worm;
+import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
+import org.objenesis.instantiator.SerializationInstantiatorHelper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +17,7 @@ public class NetworkWorldHandler extends WorldHandler {
 
     private NetworkClient client;
 
+    private ArrayList<GameEvent> receivedGameEvents = new ArrayList<>();
     private ArrayList<WorldData> receivedGameData = new ArrayList<>();
 
     private float currentTime;
@@ -53,6 +52,15 @@ public class NetworkWorldHandler extends WorldHandler {
         }
     };
 
+    private DataHandler<ExplosionEvent> eventHandler = new DataHandler<ExplosionEvent>() {
+        @Override
+        public void handleData(NetworkClient client, ExplosionEvent data) {
+            data.setReceivingTimeStamp(currentTime);
+
+            Gdx.app.postRunnable(() -> receivedGameEvents.add(data));
+        }
+    };
+
     public NetworkWorldHandler(PlayScreen screen, NetworkClient client, GameSetupData data) {
         super(screen, data.mapNumber);
 
@@ -78,10 +86,25 @@ public class NetworkWorldHandler extends WorldHandler {
         return false;
     }
 
+    private GameEvent pollEvents() {
+        float shiftedTime = currentTime - TIME_SHIFT;
+
+        for (Iterator<GameEvent> it = receivedGameEvents.iterator(); it.hasNext(); ) {
+            GameEvent event = it.next();
+            if (shiftedTime >= event.getReceivingTimeStamp()) {
+                it.remove();
+                return event;
+            }
+        }
+
+        return null;
+    }
+
     @Override
     public void onInitializePlayers() {
         client.registerDataHandler(StartTurnEvent.class, startTurnHandler);
         client.registerDataHandler(WorldData.class, worldDataHandler);
+        client.registerDataHandler(ExplosionEvent.class, eventHandler);
 
         if (gameSetupRequest != null) {
             PlayerData[] playerData = new PlayerData[gameSetupRequest.getPlayerNumbers().length];
@@ -160,7 +183,6 @@ public class NetworkWorldHandler extends WorldHandler {
                         .setVelocityX(projectile.getBody().getLinearVelocity().x)
                         .setVelocityY(projectile.getBody().getLinearVelocity().y));
                     data.projectile = projectileData;
-                    System.out.println("Adding projectile data");
                 }
 
                 int i = 0;
@@ -194,6 +216,16 @@ public class NetworkWorldHandler extends WorldHandler {
             float shiftedTime = updateCurrentSnapshots();
             float ratio = 0.0f;
 
+            GameEvent currentEvent;
+            while ((currentEvent = pollEvents()) != null) {
+                if (currentEvent instanceof ExplosionEvent) {
+                    System.out.println("adding explosion");
+                    ExplosionEvent ex = (ExplosionEvent)currentEvent;
+                    getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
+                            ex.getRadius(), 1.0f));
+                }
+            }
+
             if (currentSnapshot != null && nextSnapshot != null)
                 ratio = getSnapshotsRatio(shiftedTime);
 
@@ -204,7 +236,6 @@ public class NetworkWorldHandler extends WorldHandler {
                 shotDirectionIndicator.setAngle(angle);
 
                 if (currentSnapshot.projectile != null) {
-                    System.out.println("Received projectile data");
                     float x = currentSnapshot.projectile.getPhysicsData().getPositionX();
                     float y = currentSnapshot.projectile.getPhysicsData().getPositionY();
                     float velX = currentSnapshot.projectile.getPhysicsData().getVelocityX();
@@ -218,14 +249,12 @@ public class NetworkWorldHandler extends WorldHandler {
                     }
 
                     if (projectile == null) {
-                        System.out.println("Registering new projectile");
                         Projectile projectile = new Projectile(null, WeaponType.values()[currentSnapshot.projectile.getType()],
                                 new Vector2(x, y), new Vector2());
                         this.projectile = projectile;
                         getWorld().registerAfterUpdate(projectile);
                     }
                     else {
-                        System.out.println("Applying new projectile data");
                         this.projectile.getBody().setTransform(x, y, 0.0f);
                         this.projectile.getBody().setLinearVelocity(velX, velY);
                     }
@@ -292,6 +321,12 @@ public class NetworkWorldHandler extends WorldHandler {
         }
 
         return shiftedTime;
+    }
+
+    @Override
+    public void onAddExplosion(Explosion explosion) {
+        ExplosionEvent e = new ExplosionEvent(0, explosion.getCenter().x, explosion.getCenter().y, explosion.getRadius());
+        client.sendObject(e);
     }
 
     @Override

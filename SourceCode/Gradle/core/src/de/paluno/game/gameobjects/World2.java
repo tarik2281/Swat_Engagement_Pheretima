@@ -27,8 +27,6 @@ public class World2 implements Disposable {
     private Ground ground;
     private ExplosionMaskRenderer explosionMaskRenderer;
 
-    private Projectile projectile;
-
     private GameCamera camera;
     private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
@@ -138,6 +136,8 @@ public class World2 implements Disposable {
         }, explosion.getLowerX(), explosion.getLowerY(), explosion.getUpperX(), explosion.getUpperY());
 
         affectedWorms.removeIf(worm -> !explosion.applyBlastImpulse(worm));
+
+        worldHandler.onAddExplosion(explosion);
 
         return affectedWorms;
     }

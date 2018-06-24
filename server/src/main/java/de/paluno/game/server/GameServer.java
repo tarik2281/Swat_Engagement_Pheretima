@@ -89,6 +89,25 @@ public class GameServer {
         }
     };
 
+    private DataHandler broadcaster = new DataHandler<>() {
+        @Override
+        public void handle(Connection connection, Object data) {
+            for (Connection c : connections)
+                if (c.getID() != connection.getID())
+                    c.sendTCP(data);
+        }
+    };
+
+    private DataHandler<ExplosionEvent> explosionEventHandler = new DataHandler<ExplosionEvent>() {
+        @Override
+        public void handle(Connection connection, ExplosionEvent data) {
+            for (Connection c : connections) {
+                if (c.getID() != connection.getID())
+                    c.sendTCP(data);
+            }
+        }
+    };
+
     private DataHandler<WorldData> worldDataHandler = new DataHandler<>() {
         @Override
         public void handle(Connection connection, WorldData data) {
@@ -163,6 +182,7 @@ public class GameServer {
         objectHandlers.put(WorldData.class, new WorldDataHandler().initialize(this));
         objectHandlers.put(GameSetupData.class, gameSetupDataDataHandler);
         objectHandlers.put(MessageData.class, messageDataDataHandler);
+        objectHandlers.put(ExplosionEvent.class, broadcaster);
 
         server.addListener(serverListener);
 

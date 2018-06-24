@@ -116,12 +116,13 @@ public class Ground extends WorldObject {
 
     @Override
     public void update(float delta) {
-        while (!explosionQueue.isEmpty())
-            executeExplosion(explosionQueue.poll());
     }
 
     @Override
     public void render(SpriteBatch batch, float delta) {
+        while (!explosionQueue.isEmpty())
+            executeExplosion(explosionQueue.poll());
+
         if (mapRenderer == null)
             mapRenderer = new OrthogonalTiledMapRenderer(map.getTiledMap(), batch);
 

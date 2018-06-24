@@ -18,5 +18,7 @@ public class KryoInterface {
         kryo.register(WormData[].class);
         kryo.register(StartTurnEvent.class);
         kryo.register(ProjectileData.class);
+        kryo.register(GameEvent.Type.class);
+        kryo.register(ExplosionEvent.class);
     }
 }

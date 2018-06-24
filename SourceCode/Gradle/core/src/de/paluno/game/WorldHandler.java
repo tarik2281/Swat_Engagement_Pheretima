@@ -169,6 +169,10 @@ public abstract class WorldHandler implements Disposable {
         }
     }
 
+    public void onAddExplosion(Explosion explosion) {
+
+    }
+
     public void setCurrentPlayerTurn(int playerNumber, int wormNumber) {
         currentGameState = GameState.PLAYERTURN;
 
