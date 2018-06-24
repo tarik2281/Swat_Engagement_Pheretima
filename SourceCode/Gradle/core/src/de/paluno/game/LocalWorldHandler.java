@@ -5,6 +5,8 @@ import de.paluno.game.screens.PlayScreen;
 
 public class LocalWorldHandler extends WorldHandler {
 
+    private int currentPlayer;
+
     private int mapNumber;
     private int numWorms;
 
@@ -16,7 +18,24 @@ public class LocalWorldHandler extends WorldHandler {
     }
 
     @Override
+    public boolean requestNextTurn() {
+        setCurrentPlayerTurn(0, 0);
+
+        return true;
+    }
+
+    @Override
+    public void onInitializePlayers() {
+        initializePlayersDefault(numWorms);
+    }
+
+    @Override
     protected void onEmitWorldData(WorldData data) {
+
+    }
+
+    @Override
+    protected void onUpdate(float delta) {
 
     }
 }

@@ -4,10 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.QueryCallback;
+import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.GameState;
 import de.paluno.game.Map;
 import de.paluno.game.UserData;
@@ -16,16 +13,13 @@ import de.paluno.game.gameobjects.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class Ground implements PhysicsObject, Renderable, Updatable {
+public class Ground extends WorldObject {
 	
 	public class SnapshotData {
 		private Map map;
 		private ArrayList<CollisionObject.SnapshotData> collisionObjects;
 	    private ArrayList<Explosion> explosions;
 	}
-
-    private Body body;
-    private World world;
 
     private ClipperWrapper clipper;
 
@@ -53,9 +47,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         }
     };
 
-    public Ground(World world, Map map, ExplosionMaskRenderer renderer) {
-        this.world = world;
-
+    public Ground(Map map, ExplosionMaskRenderer renderer) {
         this.map = map;
 
         this.maskRenderer = renderer;
@@ -68,9 +60,8 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         explosionQueue = new LinkedList<Explosion>();
     }
     
-    public Ground(World world, ExplosionMaskRenderer renderer, SnapshotData data) {
-    	this.world = world;
-    	this.map = data.map;
+    public Ground(World2 world, ExplosionMaskRenderer renderer, SnapshotData data) {
+        this.map = data.map;
     	this.maskRenderer = renderer;
     	
     	clipper = new ClipperWrapper();
@@ -90,7 +81,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
     private void executeExplosion(Explosion explosion) {
         queriedObjects.clear();
-        world.getWorld().QueryAABB(explosionQueryCallback, explosion.getLowerX(),
+        getWorld().getWorld().QueryAABB(explosionQueryCallback, explosion.getLowerX(),
                 explosion.getLowerY(), explosion.getUpperX(), explosion.getUpperY());
 
         for (CollisionObject object : queriedObjects) {
@@ -103,13 +94,13 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         float[][] resultPolygons = clipper.clip();
         for (float[] polygon : resultPolygons) {
             CollisionObject object = new CollisionObject(polygon);
-            addCollisionObject(object);
+            addCollisionObject(getBody(), object);
         }
 
         explosions.add(explosion);
     }
 
-    private void addCollisionObject(CollisionObject object) {
+    private void addCollisionObject(Body body, CollisionObject object) {
         if (object.createFixture(body))
             collisionObjects.add(object);
     }
@@ -124,7 +115,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
 
     @Override
-    public void update(float delta, GameState gamestate) {
+    public void update(float delta) {
         while (!explosionQueue.isEmpty())
             executeExplosion(explosionQueue.poll());
     }
@@ -138,7 +129,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
         maskRenderer.enableMask();
 
-        mapRenderer.setView(world.getCamera().getOrthoCamera());
+        mapRenderer.setView(getWorld().getCamera().getOrthoCamera());
         mapRenderer.render();
 
         maskRenderer.disableMask();
@@ -147,32 +138,24 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
 
     @Override
-    public void setBodyToNullReference() {
-        this.body = null;
-    }
-
-    @Override
-    public void setupBody() {
+    public Body onSetupBody(World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
-        body = world.createBody(bodyDef);
+        Body body = world.createBody(bodyDef);
 
-        loadCollisions();
+        loadCollisions(body);
+
+        return body;
     }
 
-    @Override
-    public Body getBody() {
-        return this.body;
-    }
-
-    private void loadCollisions() {
+    private void loadCollisions(Body body) {
     	if (collisionObjects.isEmpty()) {
     	    for (MapObject object : map.getCollisionObjects()) {
     	        float[] vertices = ShapeFactory.createVertices(object);
 
     	        if (vertices != null)
-    	            addCollisionObject(new CollisionObject(vertices));
+    	            addCollisionObject(body, new CollisionObject(vertices));
             }
     	}
     	else {

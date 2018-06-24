@@ -15,6 +15,7 @@ public class GameServer {
     private Server server;
     public ArrayList<Connection> connections;
     private HashMap<Class, DataHandler> objectHandlers;
+    private HashMap<Integer, Boolean> clientsReady;
     //private ArrayList<Lobby> lobbies;
 
     private Listener serverListener = new Listener() {
@@ -76,9 +77,23 @@ public class GameServer {
         @Override
         public void handle(Connection connection, GameSetupData data) {
             System.out.println("Broadcasting gameSetup");
+
+            numWorms = 1;
+
             for (Connection c : connections) {
                 if (c.getID() != connection.getID())
                     c.sendTCP(data);
+            }
+        }
+    };
+
+    private DataHandler<WorldData> worldDataHandler = new DataHandler<>() {
+        @Override
+        public void handle(Connection connection, WorldData data) {
+            for (Connection c : connections) {
+                if (connection.getID() == c.getID()) {
+                    c.sendTCP(data);
+                }
             }
         }
     };
@@ -87,17 +102,51 @@ public class GameServer {
         @Override
         public void handle(Connection connection, MessageData data) {
             switch (data.getType()) {
-                case RequestGameSetupResult:
+                case ClientReady:
+                    clientsReady.put(connection.getID(), true);
+
+                    boolean allClientsReady = true;
+
+                    for (Boolean ready : clientsReady.values()) {
+                        if (!ready) {
+                            allClientsReady = false;
+                            break;
+                        }
+                    }
+
+                    if (allClientsReady) {
+                        StartTurnEvent event = new StartTurnEvent();
+
+                        event.playerNumber = currentPlayer;
+                        event.wormNumber = playerTurns[currentPlayer];
+
+                        for (Connection c : connections)
+                            c.sendTCP(event);
+
+                        shiftTurn();
+                    }
 
                     break;
             }
         }
     };
 
+    private int currentPlayer;
+    private int[] playerTurns;
+    private int numWorms;
+
+    private void shiftTurn() {
+        playerTurns[currentPlayer] = (playerTurns[currentPlayer] + 1) % numWorms;
+        currentPlayer = (currentPlayer + 1) % 2;
+    }
+
     public GameServer() {
         //lobbies = new ArrayList<>();
         connections = new ArrayList<>();
         objectHandlers = new HashMap<>();
+        clientsReady = new HashMap<>();
+
+        playerTurns = new int[2];
     }
 
     public void initialize() {
@@ -108,6 +157,7 @@ public class GameServer {
 
         objectHandlers.put(WorldData.class, new WorldDataHandler().initialize(this));
         objectHandlers.put(GameSetupData.class, gameSetupDataDataHandler);
+        objectHandlers.put(MessageData.class, messageDataDataHandler);
 
         server.addListener(serverListener);
 

@@ -30,14 +30,12 @@ public class Player implements Updatable {
 
 	private int numCharacters;
 	private ArrayList<Worm> worms;
-	private Worm[] characters;
-	private Weapon[] weapons;
+	private ArrayList<Weapon> weapons;
+	//private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
-	private WindDirectionIndicator windDirectionIndicator;
+	//private WindDirectionIndicator windDirectionIndicator;
 	private int turn = 0;
 	private boolean isRoundEnded = false;
-
-	private World world;
 
 	private boolean isRemotePlayer;
 	private int clientId;
@@ -112,6 +110,13 @@ public class Player implements Updatable {
 
 	public Player(int playerNumber) {
 		this.playerNum = playerNumber;
+
+		worms = new ArrayList<>();
+		weapons = new ArrayList<>();
+	}
+
+	public void addWeapon(Weapon weapon) {
+		weapons.add(weapon);
 	}
 
 	/**
@@ -120,7 +125,7 @@ public class Player implements Updatable {
 	 * @param numWorms - Number of characters this player begins with
 	 * @param world - Reference to the world we are playing in
 	 */
-	public Player(int playerNum, int numWorms, World world) {
+	/*public Player(int playerNum, int numWorms, World world) {
 		
 		this.numCharacters = numWorms;
 		this.playerNum = playerNum;
@@ -140,14 +145,14 @@ public class Player implements Updatable {
 		setupWeapons();
 
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-	}
+	}*/
 
 	/**
 	 * Constructor to create a new Player from existing data - for replay purposes
 	 * @param data - The SnpashotData to copy from
 	 * @param world - The reference to the (copied) world
 	 */
-	public Player(SnapshotData data, World world) {
+	/*public Player(SnapshotData data, World world) {
 		this.playerNum = data.playerNumber;
 		this.world = world;
 
@@ -155,11 +160,11 @@ public class Player implements Updatable {
 		setupWeapons(data.weaponData);
 
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-	}
+	}*/
 
-	public Worm addWorm() {
-		Worm worm = new Worm();
-		worms.add(worm);
+	public Worm addWorm(int wormNumber) {
+		Worm worm = new Worm(this, wormNumber);
+		worms.add(wormNumber, worm);
 		return worm;
 		// TODO: addWorm
 	}
@@ -195,22 +200,25 @@ public class Player implements Updatable {
 	 * Getter method to get this player's WindDirectionIndicator
 	 * @return windDirectionIndicator
 	 */
-	public WindDirectionIndicator getWindDirectionIndicator() {
-		return windDirectionIndicator;
-	}
+	//public WindDirectionIndicator getWindDirectionIndicator() {
+	//	return windDirectionIndicator;
+	//}
 	/**
 	 * Soft setter method to set this player's WindHandler
 	 * @param windHandler - The WindHandler to use for the creation of our windDirectionIndicator
 	 */
 	public void setWindHandler(WindHandler windHandler) {
-		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
+		//windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
 	}
 
+	public void setTurn(int turn) {
+		this.turn = turn;
+	}
 
 	/**
 	 * Method to generate and setup all of our characters
 	 */
-	private void setupWorms() {
+	/*private void setupWorms() {
         this.characters = new Worm[numCharacters];
 
         for(int i = 0; i < numCharacters; i++) {
@@ -232,13 +240,13 @@ public class Player implements Updatable {
 			world.registerAfterUpdate(healthBar);
 			numCharacters++;
 		}
-	}
+	}*/
 
 	/**
 	 * Method to generate all our characters from existing SnapshotData
 	 * @param data - Array of Worm-SnapshotData to use for generation
 	 */
-	private void setupWorms(Worm.SnapshotData[] data) {
+	/*private void setupWorms(Worm.SnapshotData[] data) {
 		this.characters = new Worm[data.length];
 
 		for (int i = 0; i < data.length; i++) {
@@ -250,36 +258,36 @@ public class Player implements Updatable {
             	numCharacters++;
 			}
 		}
-	}
+	}*/
 	/**
 	 * Method to generate and setup all our deadly weapons
 	 */
-	private void setupWeapons() {
+	/*private void setupWeapons() {
         weapons = new Weapon[WeaponType.NUM_WEAPONS];
 
         weapons[0] = new Weapon(this, WeaponType.WEAPON_GUN);
         weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
         weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
-    }
+    }*/
 	/**
 	 * Method to generate all our weapons from existing SnapshotData
 	 * @param data - Array of Weapon-SnapshotData to use for generation
 	 */
-	private void setupWeapons(Weapon.SnapshotData[] data) {
+	/*private void setupWeapons(Weapon.SnapshotData[] data) {
 		weapons = new Weapon[WeaponType.NUM_WEAPONS];
 
         weapons[0] = new Weapon(this, data[0]);
         weapons[1] = new Weapon(this, data[1]);
         weapons[2] = new Weapon(this, data[2]);
-	}
+	}*/
 	/**
 	 * Soft getter method to get a certain character
 	 * @param characterNumber - Number of the character to fetch
 	 * @return Worm behind given number
 	 */
 	public Worm getWormByNumber(int characterNumber) {
-		return characters[characterNumber];
+		return worms.get(characterNumber);
 	}
 
 	/**
@@ -289,12 +297,6 @@ public class Player implements Updatable {
 	 * @param state - Current GameState
 	 */
 	public void update(float delta, GameState state) {}
-	
-	/**
-	 * Getter method for all our worms
-	 * @return Array of Worms
-	 */
-	public Worm[] getCharacters() {return characters;}
 
 	/**
 	 * Getter method for this player's player number
@@ -312,11 +314,11 @@ public class Player implements Updatable {
 	 */
 	public void onBeginTurn() {
 		// Register indicators for drawing
-		world.registerAfterUpdate(getShotDirectionIndicator());
-		world.registerAfterUpdate(getWindDirectionIndicator());
+		//world.registerAfterUpdate(getShotDirectionIndicator());
+		//world.registerAfterUpdate(getWindDirectionIndicator());
 		// Attach indicators to the characters whose turn it is
 		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
-		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
+		//getWindDirectionIndicator().attachToWorm(getCurrentWorm());
 		// Default weapon
 		equipWeapon(WeaponType.WEAPON_BAZOOKA);
 		// Worm's turn it is
@@ -342,11 +344,11 @@ public class Player implements Updatable {
 	 */
 	public void onEndTurn() {
         // No need to draw our indicators anymore
-		world.forgetAfterUpdate(getShotDirectionIndicator());
-        world.forgetAfterUpdate(getWindDirectionIndicator());
+		//world.forgetAfterUpdate(getShotDirectionIndicator());
+        //world.forgetAfterUpdate(getWindDirectionIndicator());
         // No attachment anymore - Worm might not even exist anymore
         getShotDirectionIndicator().attachToWorm(null);
-        getWindDirectionIndicator().attachToWorm(null);
+        //getWindDirectionIndicator().attachToWorm(null);
         // Reset angle of indicator to default
 		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 		// If Worm still alive, force stop and reset
@@ -385,13 +387,13 @@ public class Player implements Updatable {
 	        return;
 
 		turn++;
-		if (turn == characters.length) {
+		if (turn == worms.size()) {
 			// Handle int-overflow (i.e. higher number than possible characters)
 			turn = 0;
 			isRoundEnded = true;
 		}
 		// This character isn't alive anymore? Choose another one
-		if (characters[turn] == null) shiftTurn();
+		if (worms.get(turn) == null) shiftTurn();
 	}
 	
 	/**
@@ -413,17 +415,17 @@ public class Player implements Updatable {
 	 * Getter Method for the reference to the Asset Manager
 	 * @return world.AssetManager
 	 */
-	public AssetManager getAssets() {
+	/*public AssetManager getAssets() {
 		return world.getAssetManager();
-	}
+	}*/
 
 	/**
 	 * Getter method for the world we are playing in
 	 * @return world
 	 */
-	public World getWorld() {
+	/*public World getWorld() {
 		return this.world;
-	}
+	}*/
 	
 	/**
 	 * Soft setter method for characterNumber - Set Character as KIA and remove it
@@ -431,16 +433,16 @@ public class Player implements Updatable {
 	 */
 	protected void characterDied(int charNum) {
 		// No characters anymore or this one allready dead? Nothing to do here.
-		if(this.numCharacters <= 0 || this.characters[charNum] == null)
+		if(this.numCharacters <= 0 || this.worms.get(charNum) == null)
 			return;
 
 		// It was this Worm's turn? The game must go on!
-		if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
-		    world.advanceGameState();
+		//if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
+		    //world.advanceGameState();
 
 		// Farewell, rendering reference...!
-		world.forgetAfterUpdate(characters[charNum]);
-		this.characters[charNum] = null;
+		//world.forgetAfterUpdate(characters[charNum]);
+		//this.characters[charNum] = null;
 		this.numCharacters--;
 
 		// It was this Worm's turn? So, someone else must play next time
@@ -448,7 +450,7 @@ public class Player implements Updatable {
 		    shiftTurn();
 		
 		// And finally - is ded
-		world.setWormDied(true);
+		//world.setWormDied(true);
 	}
 	
 	/**
@@ -483,15 +485,15 @@ public class Player implements Updatable {
 	 * Getter method for player's turn status
 	 * @return Is it this player's turn?
 	 */
-	public boolean isPlayerTurn() {
-		return world.getCurrentPlayer() == this;
+	public boolean isPlayerTurn() {return true;
+		//return world.getCurrentPlayer() == this;
 	}
 	/**
 	 * Passthrough setter method to set all Worms static or not
 	 * @param isStatic - Shall they be rocks or no?
 	 */
 	public void setWormsStatic(boolean isStatic) {
-		for (Worm worm : characters) {
+		for (Worm worm : worms) {
 			if (worm != null) {
 				worm.setIsStatic(isStatic);
 			}
@@ -502,7 +504,7 @@ public class Player implements Updatable {
 	 * Getter method for the character whose turn it currently is
 	 * @return Worm
 	 */
-	public Worm getCurrentWorm() {return this.characters[this.turn];}
+	public Worm getCurrentWorm() {return this.worms.get(this.turn);}
 	
 	/**
 	 * Passthrough method to give move order to the currently movable worm
@@ -535,15 +537,15 @@ public class Player implements Updatable {
 
 		data.playerNumber = playerNum;
 
-		data.wormData = new Worm.SnapshotData[characters.length];
-		data.weaponData = new Weapon.SnapshotData[weapons.length];
+		//data.wormData = new Worm.SnapshotData[characters.length];
+		//data.weaponData = new Weapon.SnapshotData[weapons.length];
 
-		for (int i = 0; i < characters.length; i++)
+		/*for (int i = 0; i < characters.length; i++)
 			if (characters[i] != null)
-				data.wormData[i] = characters[i].makeSnapshot();
+				data.wormData[i] = characters[i].makeSnapshot();*/
 
-		for (int i = 0; i < weapons.length; i++)
-			data.weaponData[i] = weapons[i].makeSnapshot();
+		//for (int i = 0; i < weapons.length; i++)
+		//	data.weaponData[i] = weapons[i].makeSnapshot();
 
 		return data;
 	}

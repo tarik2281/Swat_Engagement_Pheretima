@@ -30,7 +30,7 @@ public class NetworkClient {
 
         @Override
         public void received(Connection connection, Object object) {
-            System.out.println("Data received: " + object.toString());
+            //System.out.println("Data received: " + object.toString());
 
             DataHandler handler = dataHandlers.get(object.getClass());
             if (handler != null) {

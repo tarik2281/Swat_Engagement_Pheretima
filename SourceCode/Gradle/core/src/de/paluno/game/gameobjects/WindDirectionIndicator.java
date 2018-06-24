@@ -1,4 +1,4 @@
-package de.paluno.game.gameobjects;
+/*package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -75,3 +75,4 @@ public class WindDirectionIndicator implements Renderable {
 
     }
 }
+*/

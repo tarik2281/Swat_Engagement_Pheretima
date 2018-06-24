@@ -1,5 +1,6 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.*;
 
@@ -13,8 +14,6 @@ public class Weapon {
 		private int currentAmmo;
 	}
 
-	private Player player;
-
 	private WeaponType type;
 	private int currentAmmo;
 	
@@ -25,15 +24,18 @@ public class Weapon {
 	 * @param player - Reference to the player we belong to
 	 * @param type - WeaponType of the weapon, to determine it's behavior
 	 */
-	public Weapon(Player player, WeaponType type) {
-		this.player = player;
+	public Weapon(WeaponType type) {
 
 		this.type = type;
 
 		this.currentAmmo = type.getMaxAmmo();
 
-		if (player.getAssets() != null)
-		animationSet = player.getAssets().get(type.getWeaponAsset());
+		//if (player.getAssets() != null)
+		//animationSet = player.getAssets().get(type.getWeaponAsset());
+	}
+
+	public void setupAssets(AssetManager manager) {
+		animationSet = manager.get(type.getWeaponAsset());
 	}
 	/**
 	 * Constructor to create a new Weapon from given data
@@ -41,13 +43,12 @@ public class Weapon {
 	 * @param data - SnapshotData object to copy from
 	 */
 	public Weapon(Player player, SnapshotData data) {
-		this.player = player;
 
 		this.type = data.type;
 
 		this.currentAmmo = data.currentAmmo;
 
-		animationSet = player.getAssets().get(type.getWeaponAsset());
+		//animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
 
 	/**
@@ -58,10 +59,10 @@ public class Weapon {
 			Vector2 direction = new Vector2(1, 0).rotate(angle);
 
 			if (worm.getBody() != null) {
-				Projectile projectile = new Projectile(player.getWorld(), worm,
+				/*Projectile projectile = new Projectile(player.getWorld(), worm,
 						this.type, worm.getBody().getPosition(), direction);
 
-				player.getWorld().spawnProjectile(projectile);
+				player.getWorld().spawnProjectile(projectile);*/
 			}
 
 			currentAmmo--;

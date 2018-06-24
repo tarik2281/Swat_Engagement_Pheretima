@@ -1,4 +1,4 @@
-package de.paluno.game.gameobjects;
+/*package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
@@ -572,3 +572,4 @@ public class World implements Disposable {
     }
 
 }
+*/

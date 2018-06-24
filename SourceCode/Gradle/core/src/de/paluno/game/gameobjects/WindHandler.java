@@ -8,7 +8,7 @@ import de.paluno.game.gameobjects.Updatable;
 import java.util.Random;
 
 
-public class WindHandler implements Updatable {
+public class WindHandler extends WorldObject {
 
 	public static class SnapshotData {
 		private int x;
@@ -27,7 +27,7 @@ public class WindHandler implements Updatable {
     }
 
     @Override
-    public void update(float delta, GameState gamestate) {
+    public void update(float delta) {
         // magnitude and a direction
         wind = new Vector2(this.x, 0);
 

@@ -276,7 +276,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setNextScreen(new MultiplayerScreen(game));
+                game.setNextScreen(new MultiplayerScreen(game, mapNumber, numWorms));
             }
         });
         menuTable3.row();

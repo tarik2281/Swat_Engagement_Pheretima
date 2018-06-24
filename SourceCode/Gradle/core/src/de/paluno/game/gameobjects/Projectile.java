@@ -1,5 +1,6 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -9,10 +10,11 @@ import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.UserData;
+import de.paluno.game.screens.Loadable;
 
 import java.util.ArrayList;
 
-public class Projectile implements Updatable, PhysicsObject, Renderable {
+public class Projectile extends WorldObject {
 
 	public static class SnapshotData {
 
@@ -35,11 +37,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private static final float GRENADE_DENSITY = 0.2f;
 
 
-    private World world;
     private Vector2 position;
     private Vector2 direction;
     private WeaponType weaponType;
-    private Body body;
 
     private Texture texture;
     private Sprite sprite;
@@ -51,47 +51,43 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     private float explosionTimer = 0.0f;
 
-    public Projectile(World world, Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
-        this.world = world;
+    public Projectile(Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
         this.position = position;
         this.direction = direction;
 
         this.weaponType = weaponType;
 
-        texture = world.getAssetManager().get(weaponType.getProjectileAsset());
-        sprite = new Sprite(texture);
 
-        sprite.setOriginCenter();
 
         this.shootingWorm = shootingWorm;
     }
 
-    public Projectile(World world, SnapshotData data) {
-    	this.world = world;
+    public Projectile(SnapshotData data) {
     	this.position = data.position;
     	this.direction = data.direction;
 
     	this.weaponType = data.weaponType;
 
-    	texture = world.getAssetManager().get(weaponType.getProjectileAsset());
-    	sprite = new Sprite(texture);
-
-    	sprite.setOriginCenter();
-
-    	this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
 	}
 
     @Override
-    public void update(float delta, GameState gameState) {
+    public void setupAssets(AssetManager manager) {
+        texture = manager.get(weaponType.getProjectileAsset());
+        sprite = new Sprite(texture);
+        sprite.setOriginCenter();
+    }
+
+    @Override
+    public void update(float delta) {
         explosionTimer += delta;
 
         // check if the projectile is inside our world - if not, destroy it
-        if (!world.isInWorldBounds(body) || (weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(body.getPosition())) ||
+        if (!getWorld().isInWorldBounds(getBody()) || (weaponType == WeaponType.WEAPON_GUN ) ||//&& !world.getWorldBounds().contains(getBody().getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null);
 
         if (!wormContactEnded) {//  
-            float distance = shootingWorm.getBody().getPosition().dst(body.getPosition());
+            float distance = shootingWorm.getBody().getPosition().dst(getBody().getPosition());
             if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
                 wormContactEnded = true;
         }
@@ -99,19 +95,19 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     @Override
     public void render(SpriteBatch batch, float delta) {
-        Vector2 position = Constants.getScreenSpaceVector(body.getPosition());
+        Vector2 position = Constants.getScreenSpaceVector(getBody().getPosition());
 
         sprite.setOriginBasedPosition(position.x, position.y);
 
         switch (weaponType) {
             case WEAPON_BAZOOKA:
-                Vector2 direction = new Vector2(-body.getLinearVelocity().x, body.getLinearVelocity().y);
+                Vector2 direction = new Vector2(-getBody().getLinearVelocity().x, getBody().getLinearVelocity().y);
                 float angle = direction.angle(new Vector2(0, 1));
                 sprite.setRotation(angle);
                 break;
             case WEAPON_GRENADE:
             case WEAPON_SPECIAL:
-                sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
+                sprite.setRotation(getBody().getAngle() * MathUtils.radiansToDegrees);
                 break;
         }
 
@@ -119,7 +115,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     @Override
-    public void setupBody() {
+    public Body onSetupBody(World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(position.x, position.y);
@@ -130,6 +126,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
         //Vector2 impulse = new Vector2(direction).scl(body.getMass() * weaponType.getShootingImpulse());
 
+        Body body = null;
         if (weaponType == WeaponType.WEAPON_GUN) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
@@ -147,9 +144,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.applyLinearImpulse(impulse, body.getPosition(), true);
 
             // CollisionHandler Identifier
-            fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
-        }
-        else if (weaponType == WeaponType.WEAPON_BAZOOKA) {
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        } else if (weaponType == WeaponType.WEAPON_BAZOOKA) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
             fixtureDef.density = BAZOOKA_DENSITY;
@@ -158,9 +154,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.setGravityScale(1.0f);
             Vector2 impulse = new Vector2(direction).scl(body.getMass() * 7.0f);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
-            fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
-        }
-        else if (weaponType == WeaponType.WEAPON_GRENADE || weaponType == WeaponType.WEAPON_SPECIAL) {
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        } else if (weaponType == WeaponType.WEAPON_GRENADE || weaponType == WeaponType.WEAPON_SPECIAL) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
             fixtureDef.density = GRENADE_DENSITY;
@@ -173,20 +168,12 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             body.applyAngularImpulse(-0.01f * body.getMass(), true);
-            fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
         }
 
         shape.dispose();
-    }
 
-    @Override
-    public Body getBody() {
         return body;
-    }
-
-    @Override
-    public void setBodyToNullReference() {
-        body = null;
     }
 
     public Worm getShootingWorm() {
@@ -214,7 +201,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                     directHitWorm.takeDamage(Math.round(weaponType.getDamage()));
             }
             else {
-                ArrayList<Worm> affectedWorms = world.addExplosion(new Explosion(body.getPosition(),
+                ArrayList<Worm> affectedWorms = getWorld().addExplosion(new Explosion(getBody().getPosition(),
                         weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower()));
 
                 for (Worm worm : affectedWorms) {
@@ -225,8 +212,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                 }
             }
 
-            world.forgetAfterUpdate(this);
-            world.advanceGameState();
+            getWorld().forgetAfterUpdate(this);
+            //world.advanceGameState();
         }
     }
 

@@ -5,6 +5,6 @@ import com.badlogic.gdx.physics.box2d.World;
 
 public interface PhysicsObject {
     void setBodyToNullReference();
-    void setupBody();
+    void setupBody(World world);
     Body getBody();
 }

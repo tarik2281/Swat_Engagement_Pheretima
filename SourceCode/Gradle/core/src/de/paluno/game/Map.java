@@ -31,12 +31,12 @@ public class Map {
 
         @Override
         public void loadAsync(AssetManager manager, String fileName, FileHandle file, Parameter parameter) {
-            tmxLoader.loadAsync(manager, fileName, file, parameter.parameters);
+            tmxLoader.loadAsync(manager, fileName, file, null);
         }
 
         @Override
         public Map loadSync(AssetManager manager, String fileName, FileHandle file, Parameter parameter) {
-            TiledMap tiledMap = tmxLoader.loadSync(manager, fileName, file, parameter.parameters);
+            TiledMap tiledMap = tmxLoader.loadSync(manager, fileName, file, null);
 
             this.map = new Map();
             this.map.tiledMap = tiledMap;
@@ -84,12 +84,11 @@ public class Map {
 
         @Override
         public Array<AssetDescriptor> getDependencies(String fileName, FileHandle file, Parameter parameter) {
-            return tmxLoader.getDependencies(fileName, file, parameter.parameters);
+            return tmxLoader.getDependencies(fileName, file, null);
         }
 
         public static class Parameter extends AssetLoaderParameters<Map> {
 
-            public TmxMapLoader.Parameters parameters = new TmxMapLoader.Parameters();
         }
     }
 

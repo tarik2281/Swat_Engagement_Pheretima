@@ -2,13 +2,14 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ContactFilter;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
-import de.paluno.game.screens.Loadable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -17,13 +18,9 @@ public class World2 implements Disposable {
 
     private WorldHandler worldHandler;
 
-    private GameState lastGameState = GameState.NONE;
-    private GameState currentGameState = GameState.NONE;
-
-    private LinkedList<Object> objectRegisterQueue;
-    private LinkedList<Object> objectForgetQueue;
-    private ArrayList<Renderable> renderableObjects;
-    private ArrayList<Updatable> updatableObjects;
+    private LinkedList<WorldObject> objectRegisterQueue;
+    private LinkedList<WorldObject> objectForgetQueue;
+    private ArrayList<WorldObject> objects;
 
     private com.badlogic.gdx.physics.box2d.World world;
 
@@ -56,8 +53,7 @@ public class World2 implements Disposable {
 
         objectRegisterQueue = new LinkedList<>();
         objectForgetQueue = new LinkedList<>();
-        renderableObjects = new ArrayList<>();
-        updatableObjects = new ArrayList<>();
+        objects = new ArrayList<>();
     }
 
     public void initialize(Map map) {
@@ -69,10 +65,12 @@ public class World2 implements Disposable {
         camera = new GameCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
-        ground = new Ground(this, map, explosionMaskRenderer);
+        ground = new Ground(map, explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
-        windHandler = new WindHandler();
-        camera.setBottomLimit(worldBounds.y);
+
+        registerAfterUpdate(ground);
+        //windHandler = new WindHandler();
+        //camera.setBottomLimit(worldBounds.y);
     }
 
     @Override
@@ -82,17 +80,13 @@ public class World2 implements Disposable {
         explosionMaskRenderer.dispose();
     }
 
-    public void update(float delta) {
-        switch (currentGameState) {
-            case WAITING:
-                if (worldHandler.shouldIdle()) // TODO: idle game state
-                    currentGameState = GameState.IDLE;
-                break;
-        }
+    public World getWorld() {
+        return world;
+    }
 
-        for (Updatable updatable : updatableObjects) {
-            updatable.update(delta, currentGameState);
-        }
+    public void update(float delta) {
+        for (WorldObject object : objects)
+            object.update(delta);
     }
 
     public void step() {
@@ -100,6 +94,9 @@ public class World2 implements Disposable {
     }
 
     public void render(SpriteBatch batch, float delta) {
+        forgetObjects();
+        registerObjects();
+
         camera.update(delta);
 
         explosionMaskRenderer.renderDepthMask();
@@ -107,17 +104,21 @@ public class World2 implements Disposable {
         batch.setProjectionMatrix(camera.getScreenProjection());
         batch.begin();
 
-        for (Renderable renderable : renderableObjects) {
-            renderable.render(batch, delta);
-        }
+        for (WorldObject object : objects)
+            object.render(batch, delta);
 
         batch.end();
 
-        if (isRenderDebug)
+        //if (isRenderDebug)
             debugRenderer.render(world, camera.getDebugProjection());
+    }
 
-        forgetObjects();
-        registerObjects();
+    public GameCamera getCamera() {
+        return camera;
+    }
+
+    public boolean isInWorldBounds(Body body) {
+        return true;
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {
@@ -145,33 +146,48 @@ public class World2 implements Disposable {
         isRenderDebug = !isRenderDebug;
     }
 
-    public void registerAfterUpdate(Object gameObject) {
+    public void registerAfterUpdate(WorldObject gameObject) {
         // add object to queue
         objectRegisterQueue.add(gameObject);
     }
 
-    public void forgetAfterUpdate(Object gameObject) {
+    public void forgetAfterUpdate(WorldObject gameObject) {
         // add object to queue
         objectForgetQueue.add(gameObject);
     }
 
+    private void addObject(WorldObject object) {
+        object.setWorld(this);
+        object.setupAssets(worldHandler.getAssetManager());
+        object.setupBody(world);
+
+
+        objects.add(object);
+
+        for (WorldObject child : object.getChildren())
+            addObject(child);
+    }
+
+    private void removeObject(WorldObject object) {
+        if (object.getBody() != null)
+            world.destroyBody(object.getBody());
+        object.setBodyToNullReference();
+
+        objects.remove(object);
+
+        for (WorldObject child : object.getChildren())
+            removeObject(child);
+
+        object.setWorld(null);
+
+        if (camera.getCameraFocus() == object)
+            camera.setCameraFocus(null);
+    }
+
     private void registerObjects() {
         // add all objects from queue
-        for (Object gameObject : objectRegisterQueue) {
-            if (gameObject instanceof Updatable) {
-                updatableObjects.add((Updatable)gameObject);
-            }
-            if (gameObject instanceof PhysicsObject) {
-                PhysicsObject physicsObject = (PhysicsObject)gameObject;
-                physicsObject.setupBody();
-                physicsObject.getBody().setUserData(gameObject);
-            }
-            if (gameObject instanceof Renderable) {
-                renderableObjects.add((Renderable)gameObject);
-            }
-            if (gameObject instanceof Loadable) {
-                ((Loadable)gameObject).load(worldHandler.getAssetManager());
-            }
+        for (WorldObject object : objectRegisterQueue) {
+            addObject(object);
         }
 
         objectRegisterQueue.clear();
@@ -179,25 +195,8 @@ public class World2 implements Disposable {
 
     private void forgetObjects() {
         // remove all objects from queue
-        for (Object gameObject : objectForgetQueue) {
-            if (gameObject instanceof Updatable) {
-                updatableObjects.remove((Updatable)gameObject);
-            }
-            if (gameObject instanceof PhysicsObject) {
-                PhysicsObject physicsObject = (PhysicsObject)gameObject;
-                if (physicsObject.getBody() != null)
-                    world.destroyBody(physicsObject.getBody());
-                physicsObject.setBodyToNullReference();
-            }
-            if (gameObject instanceof Renderable) {
-                renderableObjects.remove((Renderable)gameObject);
-            }
-            if (gameObject instanceof Disposable) {
-                ((Disposable)gameObject).dispose();
-            }
-
-            if (gameObject == camera.getCameraFocus())
-                camera.setCameraFocus(null);
+        for (WorldObject object : objectForgetQueue) {
+            removeObject(object);
         }
 
         objectForgetQueue.clear();

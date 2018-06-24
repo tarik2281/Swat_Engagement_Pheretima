@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.Player;
-import de.paluno.game.gameobjects.World;
+import de.paluno.game.gameobjects.World2;
 import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.interfaces.*;
 
@@ -17,9 +17,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private SEPGame game;
     private SpriteBatch spriteBatch;
 
-	private World replayWorld;
+	//private World replayWorld;
 	private boolean disposeReplayAfterUpdate;
-    private World.SnapshotData worldSnapshot;
+    //private World.SnapshotData worldSnapshot;
     private WorldHandler worldHandler;
     private UserWorldController worldController;
 
@@ -78,7 +78,11 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         worldHandler.initialize();
 
-        if (gameSetupRequest != null) {
+        worldController = new UserWorldController();
+        worldController.initialize(worldHandler);
+
+
+        /*if (gameSetupRequest != null) {
             world.initializeRequest(mapNumber, numWorms, gameSetupRequest);
 
             int[] clientIds = new int[world.getPlayers().length];
@@ -113,11 +117,11 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         else {
             world.initializeNew(mapNumber, numWorms);
         }
-
+*/
         weaponUI = new WeaponUI(this);
-        weaponUI.setPlayer(world.getCurrentPlayer());
+        //weaponUI.setPlayer(world.getCurrentPlayer());
 
-        InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
+        InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), worldController.getInputProcessor());
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
@@ -131,16 +135,16 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         worldHandler.updateAndRender(spriteBatch, delta);
 
-        if (replayWorld != null)
+        /*if (replayWorld != null)
         	replayWorld.doGameLoop(spriteBatch, delta);
         else
-        	world.doGameLoop(spriteBatch, delta);
+        	world.doGameLoop(spriteBatch, delta);*/
 
         renderPhase(delta);
 
         weaponUI.render(spriteBatch, delta);
 
-        if (disposeReplayAfterUpdate) {
+        /*if (disposeReplayAfterUpdate) {
             replayWorld.dispose();
             replayWorld = null;
             disposeReplayAfterUpdate = false;
@@ -148,7 +152,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         if (winningPlayer != WinningPlayer.NONE && replayWorld == null) {
             game.setGameOver(winningPlayer);
-        }
+        }*/
     }
 
     public void renderPhase(float delta) {
@@ -159,10 +163,11 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     public void hide() {
         worldHandler.dispose();
 
-        client.disconnect();
+        if (client != null)
+            client.disconnect();
 
-        world.dispose();
-        world = null;
+        //world.dispose();
+        //world = null;
 
         Gdx.input.setInputProcessor(null);
     }
@@ -180,17 +185,17 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         return false;
     }
 
-    public void setGameState(World world, GameState gameState, int currentPlayer) {
+    public void setGameState(World2 world, GameState gameState, int currentPlayer) {
         uiLayer.setGameState(gameState, currentPlayer);
 
-        if (this.world == world && gameState == GameState.SHOOTING)
-        	worldSnapshot = world.makeSnapshot();
+        //if (this.world == world && gameState == GameState.SHOOTING)
+        //	worldSnapshot = world.makeSnapshot();
 
-        if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED) {
+        //if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED) {
             disposeReplayAfterUpdate = true;
-        }
+        //}
 
-        if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
+        /*if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
             if (world.isWormDied() && worldSnapshot != null) {
                 //replayWorld = new World(this);
                 //replayWorld.initializeFromSnapshot(worldSnapshot);
@@ -198,7 +203,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
             weaponUI.setPlayer(this.world.getCurrentPlayer());
             worldSnapshot = null;
-        }
+        }*/
     }
 
     public void setGameOver(WinningPlayer winningPlayer) {

@@ -19,14 +19,13 @@ public abstract class WorldHandler implements Disposable {
 
     private World2 world;
 
+    public int currentPlayer;
     private ArrayList<Player> players;
     private GameState currentGameState = GameState.NONE;
 
-    private ArrayList<Worm> worms;
-
     private ShotDirectionIndicator shotDirectionIndicator;
 
-    private List<Vector2> spawnPositions;
+    private ArrayList<Vector2> spawnPositions;
 
     public WorldHandler(PlayScreen screen, int mapNumber) {
         this.screen = screen;
@@ -37,12 +36,46 @@ public abstract class WorldHandler implements Disposable {
 
     public void initialize() {
         map = screen.getAssetManager().get(Assets.getMapByIndex(mapNumber));
-        spawnPositions = Arrays.asList(map.getSpawnPoints());
+        spawnPositions = new ArrayList<>(Arrays.asList(map.getSpawnPoints()));
+        shotDirectionIndicator = new ShotDirectionIndicator();
 
         world = new World2(this);
         world.initialize(map);
 
         onInitializePlayers();
+
+        currentGameState = GameState.WAITING;
+    }
+
+    public void initializePlayersDefault(int numWorms) {
+        for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
+            Player player = addPlayer(i);
+
+            addWeapon(player, WeaponType.WEAPON_BAZOOKA);
+            addWeapon(player, WeaponType.WEAPON_GRENADE);
+            addWeapon(player, WeaponType.WEAPON_GUN);
+            addWeapon(player, WeaponType.WEAPON_SPECIAL);
+
+            for (int j = 0; j < numWorms; j++) {
+                Worm worm = addWorm(player, j);
+                worm.spawnPosition = getRandomSpawnPosition();
+            }
+        }
+    }
+
+    public void addWeapon(Player player, WeaponType type) {
+        Weapon weapon = new Weapon(type);
+        weapon.setupAssets(getAssetManager());
+        player.addWeapon(weapon);
+    }
+
+    public void setGameState(GameState state) {
+        currentGameState = state;
+    }
+
+    @Override
+    public void dispose() {
+        world.dispose();
     }
 
     public AssetManager getAssetManager() {
@@ -60,8 +93,8 @@ public abstract class WorldHandler implements Disposable {
         return player;
     }
 
-    public Worm addWorm(Player player) {
-        Worm worm = player.addWorm();
+    public Worm addWorm(Player player, int wormNumber) {
+        Worm worm = player.addWorm(wormNumber);
         world.registerAfterUpdate(worm);
         return worm;
     }
@@ -87,11 +120,7 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public List<Player> getPlayers() {
-
-    }
-
-    public Collection<Worm> getWorms() {
-        return worms;
+        return players;
     }
 
     public boolean shouldIdle() {
@@ -99,22 +128,51 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void applyWormMovement(int movement) {
+        if (currentGameState == GameState.PLAYERTURN) {
+            setWormMovement(movement);
+        }
+    }
 
+    protected void setWormMovement(int movement) {
+        players.get(currentPlayer).getCurrentWorm().setMovement(movement);
     }
 
     public void applyWormJump() {
-
+        if (currentGameState == GameState.PLAYERTURN) {
+            players.get(currentPlayer).getCurrentWorm().setJump(true);
+        }
     }
 
     public void applyShotDirectionMovement(int movement) {
+        if (currentGameState == GameState.PLAYERTURN) {
+            shotDirectionIndicator.setRotationMovement(movement);
+        }
+    }
 
+    public void setCurrentPlayerTurn(int playerNumber, int wormNumber) {
+        currentGameState = GameState.PLAYERTURN;
+
+        currentPlayer = playerNumber;
+
+        for (Player player : players) {
+            player.setWormsStatic(true);
+
+            if (player.getPlayerNumber() == playerNumber) {
+                player.setTurn(wormNumber);
+                Worm worm = player.getWormByNumber(wormNumber);
+                worm.setIsPlaying(true);
+                worm.addChild(shotDirectionIndicator);
+                world.getCamera().setCameraFocus(worm);
+                player.equipWeapon(WeaponType.WEAPON_BAZOOKA);
+            }
+        }
     }
 
     public boolean allWormsIdle() {
         boolean allIdle = true;
 
         players: for (Player player : players) {
-            for (Worm worm : player.getCharacters()) {
+            for (Worm worm : player.getWorms()) {
                 if (worm != null && worm.getBody() != null && worm.getBody().isAwake()) {
                     allIdle = false;
                     break players;
@@ -125,12 +183,26 @@ public abstract class WorldHandler implements Disposable {
         return allIdle;
     }
 
-    public void update(float delta) {
+    public void updateAndRender(SpriteBatch batch, float delta) {
+        if (shouldWorldStep()) {
+            world.update(delta);
+            world.step();
+        }
 
+        onUpdate(delta);
+
+        world.render(batch, delta);
+
+        if (currentGameState == GameState.WAITING) {
+            if (allWormsIdle()) {
+                setIdle();
+            }
+        }
     }
 
-    public void updateAndRender(SpriteBatch batch, float delta) {
-
+    public void setIdle() {
+        currentGameState = GameState.IDLE;
+        requestNextTurn();
     }
 
     public World2 getWorld() {
@@ -138,4 +210,6 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected abstract void onEmitWorldData(WorldData data);
+
+    protected abstract void onUpdate(float delta);
 }
