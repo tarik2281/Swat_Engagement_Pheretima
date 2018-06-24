@@ -21,11 +21,13 @@ public abstract class WorldHandler implements Disposable {
 
     public int currentPlayer;
     private ArrayList<Player> players;
-    private GameState currentGameState = GameState.NONE;
+    public GameState currentGameState = GameState.NONE;
 
-    private ShotDirectionIndicator shotDirectionIndicator;
+    public ShotDirectionIndicator shotDirectionIndicator;
 
     private ArrayList<Vector2> spawnPositions;
+
+    public Projectile projectile;
 
     public WorldHandler(PlayScreen screen, int mapNumber) {
         this.screen = screen;
@@ -146,6 +148,24 @@ public abstract class WorldHandler implements Disposable {
     public void applyShotDirectionMovement(int movement) {
         if (currentGameState == GameState.PLAYERTURN) {
             shotDirectionIndicator.setRotationMovement(movement);
+        }
+    }
+
+    public void shoot() {
+        if (currentGameState == GameState.PLAYERTURN) {
+            Worm worm = players.get(currentPlayer).getCurrentWorm();
+            Projectile projectile = new Projectile(worm, WeaponType.WEAPON_BAZOOKA,
+                    worm.getBody().getWorldCenter(), new Vector2(1, 0).rotate(shotDirectionIndicator.getAngle()));
+            world.registerAfterUpdate(projectile);
+            currentGameState = GameState.SHOOTING;
+            world.forgetAfterUpdate(shotDirectionIndicator);
+            world.getCamera().setCameraFocus(projectile);
+
+            this.projectile = projectile;
+
+            for (Player player : players) {
+                player.setWormsStatic(false);
+            }
         }
     }
 

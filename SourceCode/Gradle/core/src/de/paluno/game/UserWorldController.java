@@ -26,6 +26,17 @@ public class UserWorldController extends WorldController {
                 case Constants.KEY_JUMP:
                     worldHandler.applyWormJump();
                     break;
+                case Constants.KEY_ROTATE_INDICATOR_UP:
+                    angleRotationMovement = Constants.MOVEMENT_UP;
+                    worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                    break;
+                case Constants.KEY_ROTATE_INDICATOR_DOWN:
+                    angleRotationMovement = Constants.MOVEMENT_DOWN;
+                    worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                    break;
+                case Constants.KEY_DO_ACTION:
+                    worldHandler.shoot();
+                    break;
             }
 
             return super.keyDown(keycode);
@@ -44,6 +55,18 @@ public class UserWorldController extends WorldController {
                     if (wormMovement == Constants.MOVEMENT_RIGHT) {
                         wormMovement = Constants.MOVEMENT_NO_MOVEMENT;
                         worldHandler.applyWormMovement(wormMovement);
+                    }
+                    break;
+                case Constants.KEY_ROTATE_INDICATOR_UP:
+                    if (angleRotationMovement == Constants.MOVEMENT_UP) {
+                        angleRotationMovement = Constants.MOVEMENT_NO_MOVEMENT;
+                        worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                    }
+                    break;
+                case Constants.KEY_ROTATE_INDICATOR_DOWN:
+                    if (angleRotationMovement == Constants.MOVEMENT_DOWN) {
+                        angleRotationMovement = Constants.MOVEMENT_NO_MOVEMENT;
+                        worldHandler.applyShotDirectionMovement(angleRotationMovement);
                     }
                     break;
             }

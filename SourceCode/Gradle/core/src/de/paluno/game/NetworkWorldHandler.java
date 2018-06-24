@@ -3,6 +3,7 @@ package de.paluno.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.Player;
+import de.paluno.game.gameobjects.Projectile;
 import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.interfaces.*;
@@ -14,7 +15,7 @@ import java.util.Iterator;
 public class NetworkWorldHandler extends WorldHandler {
 
     private static final float UPDATE_FREQUENCY = 1.0f / 30.0f; // 30Hz
-    private static final float TIME_SHIFT = 0.1f; // 100 ms delay
+    private static final float TIME_SHIFT = 0.3f; // 100 ms delay
 
     private NetworkClient client;
 
@@ -148,6 +149,19 @@ public class NetworkWorldHandler extends WorldHandler {
                 updateTimer -= UPDATE_FREQUENCY;
 
                 WorldData data = new WorldData();
+                data.shootingAngle = shotDirectionIndicator.getAngle();
+
+                if (projectile != null && projectile.getBody() != null) {
+                    ProjectileData projectileData = new ProjectileData();
+                    projectileData.setType(projectile.getWeaponType().ordinal());
+                    projectileData.setPhysicsData(new PhysicsData()
+                        .setPositionX(projectile.getBody().getWorldCenter().x)
+                        .setPositionY(projectile.getBody().getWorldCenter().y)
+                        .setVelocityX(projectile.getBody().getLinearVelocity().x)
+                        .setVelocityY(projectile.getBody().getLinearVelocity().y));
+                    data.projectile = projectileData;
+                    System.out.println("Adding projectile data");
+                }
 
                 int i = 0;
                 PlayerData[] playerDataArray = new PlayerData[getPlayers().size()];
@@ -158,6 +172,7 @@ public class NetworkWorldHandler extends WorldHandler {
                     int index = 0;
                     for (Worm worm : player.getWorms()) {
                         WormData wormData = new WormData();
+                        wormData.numGroundContacts = worm.getNumContacts();
                         wormData.playerNumber = player.getPlayerNumber();
                         wormData.wormNumber = worm.getCharacterNumber();
                         if (worm.getBody() != null)
@@ -182,9 +197,40 @@ public class NetworkWorldHandler extends WorldHandler {
             if (currentSnapshot != null && nextSnapshot != null)
                 ratio = getSnapshotsRatio(shiftedTime);
 
-            System.out.println("Ratio: " + ratio);
-
             if (currentSnapshot != null) {
+                float angle = currentSnapshot.shootingAngle;
+                if (nextSnapshot != null)
+                    angle = angle * (1.0f - ratio) + nextSnapshot.shootingAngle * ratio;
+                shotDirectionIndicator.setAngle(angle);
+
+                if (currentSnapshot.projectile != null) {
+                    System.out.println("Received projectile data");
+                    float x = currentSnapshot.projectile.getPhysicsData().getPositionX();
+                    float y = currentSnapshot.projectile.getPhysicsData().getPositionY();
+                    float velX = currentSnapshot.projectile.getPhysicsData().getVelocityX();
+                    float velY = currentSnapshot.projectile.getPhysicsData().getVelocityY();
+
+                    if (nextSnapshot != null && nextSnapshot.projectile != null) {
+                        x = x * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getPositionX() * ratio;
+                        y = y * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getPositionY() * ratio;
+                        velX = velX * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getVelocityX() * ratio;
+                        velY = velY * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getVelocityY() * ratio;
+                    }
+
+                    if (projectile == null) {
+                        System.out.println("Registering new projectile");
+                        Projectile projectile = new Projectile(null, WeaponType.values()[currentSnapshot.projectile.getType()],
+                                new Vector2(x, y), new Vector2());
+                        this.projectile = projectile;
+                        getWorld().registerAfterUpdate(projectile);
+                    }
+                    else {
+                        System.out.println("Applying new projectile data");
+                        this.projectile.getBody().setTransform(x, y, 0.0f);
+                        this.projectile.getBody().setLinearVelocity(velX, velY);
+                    }
+                }
+
                 for (int i = 0; i < currentSnapshot.players.length; i++) {
                     PlayerData playerData = currentSnapshot.players[i];
                     Player player = getPlayers().get(playerData.getPlayerNumber());
@@ -201,6 +247,8 @@ public class NetworkWorldHandler extends WorldHandler {
                             x = x * (1.0f - ratio) + nextSnapshot.players[i].getWorms()[j].getPhysicsData().getPositionX() * ratio;
                             y = y * (1.0f - ratio) + nextSnapshot.players[i].getWorms()[j].getPhysicsData().getPositionY() * ratio;
                         }
+
+                        worm.setNumContacts(wormData.numGroundContacts);
 
                         worm.setPosition(x, y);
                         worm.setMovement(wormData.getMovement());
@@ -248,8 +296,8 @@ public class NetworkWorldHandler extends WorldHandler {
 
     @Override
     public boolean shouldWorldStep() {
-        return true;
-        //return getPlayers().get(currentPlayer).getClientId() == getClientId();
+        //return true;
+        return currentGameState == GameState.WAITING || getPlayers().get(currentPlayer).getClientId() == getClientId();
     }
 
     public int getClientId() {

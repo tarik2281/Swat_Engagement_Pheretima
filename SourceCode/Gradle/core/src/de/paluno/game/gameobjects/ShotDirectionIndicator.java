@@ -72,4 +72,8 @@ public class ShotDirectionIndicator extends WorldObject {
 	public float getAngle() {
 		return degrees;
 	}
+
+	public void setAngle(float angle) {
+		this.degrees = angle;
+	}
 }

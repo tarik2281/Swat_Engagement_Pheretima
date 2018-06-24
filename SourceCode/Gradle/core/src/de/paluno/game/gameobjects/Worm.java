@@ -8,8 +8,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
 import de.paluno.game.UserData.ObjectType;
-import de.paluno.game.interfaces.WormData;
-import de.paluno.game.screens.Loadable;
 
 public class Worm extends WorldObject {
 
@@ -50,6 +48,8 @@ public class Worm extends WorldObject {
 
 	private int health;
 
+	private boolean animationInvalidated;
+
 	/**
 	 * Empty constructor for testing purposes
 	 */
@@ -61,6 +61,7 @@ public class Worm extends WorldObject {
 		this.player = player;
 
 		this.health = Constants.WORM_MAX_HEALTH;
+		this.animationInvalidated = true;
 
 		addChild(new HealthBar(this));
 	}
@@ -221,6 +222,13 @@ public class Worm extends WorldObject {
 	public void render(SpriteBatch batch, float delta) {
 		// No body? Shouldn't happen, catch
 		if(this.getBody() == null) return;
+
+		if (animationInvalidated) {
+			updateAnimation();
+
+			if (currentAnimation != null)
+				animationInvalidated = false;
+		}
 		
 		// Again we need the current position, so we know where to draw our animations
 		// (Based on screen size <-> world size calculations)
@@ -296,6 +304,10 @@ public class Worm extends WorldObject {
 
 		return body;
 	}
+
+	public void invalidateAnimation() {
+		animationInvalidated = true;
+	}
 	
 	/**
 	 * Method to setup the Fixture of our Virus hitbox sensor for further infection spreading
@@ -360,7 +372,8 @@ public class Worm extends WorldObject {
 		if (getBody() != null)
 			getBody().setType(isStatic ? BodyType.StaticBody : BodyType.DynamicBody);
 
-		updateAnimation();
+		invalidateAnimation();
+		//updateAnimation();
 	}
 	/**
 	 * Getter method for current static-state
@@ -486,14 +499,25 @@ public class Worm extends WorldObject {
 	 */
 	public void beginContact() {
 		if (numContacts++ == 0)
-			updateAnimation();
+			invalidateAnimation();
 	}
 	/**
 	 * Method to end one ground contact, if any
 	 */
 	public void endContact() {
 		if (--numContacts == 0)
-			updateAnimation();
+			invalidateAnimation();
+	}
+
+	public void setNumContacts(int numContacts) {
+		if ((this.numContacts == 0 && numContacts > 0) || (this.numContacts > 0 && numContacts == 0))
+			invalidateAnimation();
+
+		this.numContacts = numContacts;
+	}
+
+	public int getNumContacts() {
+		return numContacts;
 	}
 
 	/**
@@ -508,6 +532,7 @@ public class Worm extends WorldObject {
 		if (movement == newMovementCode) return;
 
 		this.movement = newMovementCode;
+		invalidateAnimation();
 
 		if (isStandsOnGround() && movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			// The new movementCode is a move-order? Update orientation
@@ -522,7 +547,7 @@ public class Worm extends WorldObject {
 		}
 
 		// If we got this far - something WILL change, so reset the animations just in case
-		updateAnimation();
+		//updateAnimation();
 	}
 
 	/**

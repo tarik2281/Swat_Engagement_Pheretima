@@ -9,6 +9,7 @@ public class WormData {
 
     private int movement;
     private int orientation;
+    public int numGroundContacts;
 
 
     public PhysicsData getPhysicsData() {

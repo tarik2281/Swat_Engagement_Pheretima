@@ -15,7 +15,7 @@ public class GameServer {
     private Server server;
     public ArrayList<Connection> connections;
     private HashMap<Class, DataHandler> objectHandlers;
-    private HashMap<Integer, Boolean> clientsReady;
+    public ArrayList<ClientState> clientStates;
     //private ArrayList<Lobby> lobbies;
 
     private Listener serverListener = new Listener() {
@@ -29,6 +29,7 @@ public class GameServer {
                 }
 
                 connections.add(connection);
+                clientStates.add(new ClientState(connection.getID()));
 
                 if (connections.size() == 2) {
                     // start game but request setup data from client
@@ -58,13 +59,14 @@ public class GameServer {
         @Override
         public void disconnected(Connection connection) {
             connections.remove(connection);
+            clientStates.removeIf(clientState -> clientState.clientId == connection.getID());
         }
 
         @Override
         public void received(Connection connection, Object object) {
             super.received(connection, object);
 
-            System.out.println("Data received: " + object.toString());
+            //System.out.println("Data received: " + object.toString());
 
             DataHandler handler = objectHandlers.get(object.getClass());
             if (handler != null) {
@@ -103,12 +105,13 @@ public class GameServer {
         public void handle(Connection connection, MessageData data) {
             switch (data.getType()) {
                 case ClientReady:
-                    clientsReady.put(connection.getID(), true);
+                    clientStates.forEach(clientState -> { if (clientState.clientId == connection.getID()) clientState.ready = true; });
+                    //clientsReady.put(connection.getID(), true);
 
                     boolean allClientsReady = true;
 
-                    for (Boolean ready : clientsReady.values()) {
-                        if (!ready) {
+                    for (ClientState state : clientStates) {
+                        if (!state.ready) {
                             allClientsReady = false;
                             break;
                         }
@@ -124,6 +127,8 @@ public class GameServer {
                             c.sendTCP(event);
 
                         shiftTurn();
+
+                        clientStates.forEach(clientState -> clientState.ready = false );
                     }
 
                     break;
@@ -144,7 +149,7 @@ public class GameServer {
         //lobbies = new ArrayList<>();
         connections = new ArrayList<>();
         objectHandlers = new HashMap<>();
-        clientsReady = new HashMap<>();
+        clientStates = new ArrayList<>();
 
         playerTurns = new int[2];
     }
