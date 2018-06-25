@@ -147,4 +147,8 @@ public class Assets {
     public static final AssetDescriptor[] GameOverScreenAssets = {
             gameOverScreen1, gameOverScreen2, menuButton
     };
+
+    public static final AssetDescriptor[] TeamMenuScreenAssets = {
+            playButton
+    };
 }
