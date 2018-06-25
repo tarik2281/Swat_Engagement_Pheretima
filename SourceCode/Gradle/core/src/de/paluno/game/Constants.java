@@ -1,6 +1,7 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
@@ -75,6 +76,7 @@ public class Constants {
     public static final int KEY_SELECT_WEAPON_2 = Input.Keys.F2;
     public static final int KEY_SELECT_WEAPON_3 = Input.Keys.F3;
     public static final int KEY_SELECT_WEAPON_4 = Input.Keys.F4;
+    public static final int KEY_NUM = Input.Keys.NUM_1;
 
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;

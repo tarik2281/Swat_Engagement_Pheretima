@@ -72,6 +72,8 @@ public class Assets {
     // WeaponUI
     public static final AssetDescriptor<Texture> weaponUI =
             new AssetDescriptor<Texture>("weaponUI.png", Texture.class);
+    public static final AssetDescriptor<Texture> weaponUI2 =
+            new AssetDescriptor<Texture>("weapon2.PNG", Texture.class);
 
     //WindIndicator
     public static final AssetDescriptor<Texture> windGreen =
@@ -92,6 +94,15 @@ public class Assets {
     public static final AssetDescriptor<Texture> iconSpecial =
             new AssetDescriptor<Texture>("IconSpecial.png", Texture.class);
 
+    public static final AssetDescriptor<Texture> iconAirStrike =
+            new AssetDescriptor<Texture>("airstrike.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconTeleport =
+            new AssetDescriptor<Texture>("teleport.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconMine =
+            new AssetDescriptor<Texture>("mine.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconArtillery =
+            new AssetDescriptor<Texture>("arti.png", Texture.class);
+
     public static final AssetDescriptor<Texture> projectileGun =
             new AssetDescriptor<Texture>("ProjectileGun.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileGrenade =
@@ -100,6 +111,11 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileBazooka.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileSpecial =
             new AssetDescriptor<Texture>("ProjectileSpecial.png", Texture.class);
+
+    public static final AssetDescriptor<Texture> multi =
+            new AssetDescriptor<Texture>("Multiplayer.png", Texture.class);
+    public static final AssetDescriptor<Texture> local =
+            new AssetDescriptor<Texture>("Local.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> weaponGun =
             new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
@@ -110,6 +126,8 @@ public class Assets {
     public static final AssetDescriptor<AnimationData> weaponSpecial =
             new AssetDescriptor<AnimationData>("WeaponSpecial.xml", AnimationData.class);
 
+
+
     public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
         for (AssetDescriptor asset : assets)
             assetManager.load(asset);
@@ -117,12 +135,13 @@ public class Assets {
 
     public static final AssetDescriptor[] MenuScreenAssets = {
             menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
-            worms2Button, worms3Button, worms4Button, worms5Button
+            worms2Button, worms3Button, worms4Button, worms5Button, multi, local,
     };
 
     public static final AssetDescriptor[] PlayScreenAssets = {
             arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, windGreen, windOrange, windRed
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI,weaponUI2, windGreen, windOrange, windRed,
+            iconAirStrike, iconMine,iconTeleport,iconArtillery
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {

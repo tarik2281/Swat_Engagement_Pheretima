@@ -30,7 +30,7 @@ public class SEPGame extends Game {
     }
 
     public void setMenuScreen() {
-		setNextScreen(new MenuScreen(this));
+		setNextScreen(new TeamMenuScreen(this));
 	}
 
     public void setPlayScreen(int mapNumber, int numWorms) {
