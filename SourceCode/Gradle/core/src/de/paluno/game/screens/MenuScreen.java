@@ -1,13 +1,10 @@
 package de.paluno.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -25,23 +22,27 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
     private SEPGame game;
     private Stage menuStage;
-    private Table menuTable, menuTable2,menuTable3;
+    private Table menuTable, menuTable2,menuTable3, menuTableModi;
     private Image image;
-    private Texture map1, map2, map3, map4, textureBackground, play, worm1, worm2, worm3, worm4, worm5;
+    private Texture map1, map2, map3, map4, textureBackground, play, worm1, worm2, worm3, worm4, worm5,local, multi;
     // defines rectangular area of a texture
     private TextureRegion textureRegionMap1, textureRegionMap2, textureRegionMap3, textureRegionMap4,
-            textureRegionPlay, textureRegionWorm1, textureRegionWorm2, textureRegionWorm3, textureRegionWorm4, textureRegionWorm5;
+            textureRegionPlay, textureRegionWorm1, textureRegionWorm2, textureRegionWorm3,
+            textureRegionWorm4, textureRegionWorm5, textureRegionLocal,textureRegionMulti;
     // draws the texture in the given size
     private TextureRegionDrawable regionDrawableMap1, regionDrawableMap2, regionDrawableMap3, regionDrawableMap4, regionDrawablePlay,
-            regionDrawableWorm1, regionDrawableWorm2, regionDrawableWorm3, regionDrawableWorm4, regionDrawableWorm5;
+            regionDrawableWorm1, regionDrawableWorm2, regionDrawableWorm3, regionDrawableWorm4, regionDrawableWorm5,regionDrawableLocal, regionDrawableMulti;
     // Icons
-    private ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4, buttonPlay, buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
+    private ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4, buttonPlay, buttonWorm1, buttonWorm2,
+            buttonWorm3, buttonWorm4, buttonWorm5, buttonLocal, buttonMulti;
 
     private ImageButton selectedWormButton;
     private ImageButton selectedMapButton;
+    private ImageButton selectedModiButton;
 
     private int mapNumber;
     private int numWorms;
+    private int modi;
 
     public MenuScreen(SEPGame game) {
         super();
@@ -224,6 +225,39 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         });
 
 
+        //Local Button
+        local = game.getAssetManager().get(Assets.local);
+        textureRegionLocal = new TextureRegion(local);
+        regionDrawableLocal = new TextureRegionDrawable(textureRegionLocal);
+        buttonLocal = new ImageButton(regionDrawableLocal);
+        buttonLocal.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+        buttonLocal.addListener(new ClickListener() {
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                setSelectedModiButton(buttonLocal);
+                modi = 0;
+                System.out.println("Local Clicked");
+            }
+        });
+
+        //Multiplayer Button
+        multi = game.getAssetManager().get(Assets.multi);
+        textureRegionMulti = new TextureRegion(multi);
+        regionDrawableMulti = new TextureRegionDrawable(textureRegionMulti);
+        buttonMulti = new ImageButton(regionDrawableMulti);
+        buttonMulti.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+        buttonMulti.addListener(new ClickListener() {
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                setSelectedModiButton(buttonMulti);
+                modi = 1;
+                System.out.println("Multi Clicked");
+            }
+        });
+
+
         menuTable = new Table();
         menuTable2 = new Table();
 
@@ -262,6 +296,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         menuTable2.padLeft(50);
 
         menuTable3 = new Table();
+        menuTableModi = new Table();
 
         menuStage.addActor(menuTable3);
         menuTable3.left().bottom();
@@ -269,9 +304,22 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         buttonPlay.padLeft(250);
         buttonPlay.padBottom(70);
 
+        menuTableModi.add(buttonLocal);
+        menuTableModi.add(buttonMulti);
+        buttonMulti.pad(5);
+        buttonLocal.pad(5);
+        menuTableModi.setFillParent(true);
+        menuStage.addActor(menuTableModi);
+        menuTableModi.top().left();
+        menuTableModi.padLeft(160);
+        menuTableModi.padTop(200);
+
+
 
         setSelectedMapButton(buttonMap1);
         mapNumber = 0;
+        setSelectedModiButton(buttonLocal);
+        modi = 0;
         setSelectedWormButton(buttonWorm1);
         numWorms = 1;
     }
@@ -295,6 +343,16 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
         if (selectedWormButton != null)
             selectedWormButton.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    private void setSelectedModiButton(ImageButton button) {
+        if (selectedModiButton != null)
+            selectedModiButton.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+
+        selectedModiButton = button;
+
+        if (selectedModiButton != null)
+            selectedModiButton.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     public void render(float delta) {
