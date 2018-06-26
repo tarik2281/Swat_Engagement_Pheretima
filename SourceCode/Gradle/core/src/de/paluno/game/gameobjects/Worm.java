@@ -463,7 +463,8 @@ public class Worm extends WorldObject {
 	 * Method to handle characters death - cleanup and stuff
 	 */
 	public void die() {
-		this.player.characterDied(this.characterNumber);
+		EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
+		//this.player.characterDied(this.characterNumber);
 		//this.setBodyToNullReference();
 
 	}

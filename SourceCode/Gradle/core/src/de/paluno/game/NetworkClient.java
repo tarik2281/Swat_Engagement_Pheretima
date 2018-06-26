@@ -7,6 +7,7 @@ import de.paluno.game.gameobjects.Player;
 import de.paluno.game.interfaces.*;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -48,6 +49,7 @@ public class NetworkClient {
     public void connect() {
         if (client == null) {
             client = new Client();
+
             client.start();
 
             KryoInterface.registerClasses(client.getKryo());
@@ -56,12 +58,20 @@ public class NetworkClient {
 
             try {
                 // TODO: hardcoded TCP port
-                client.connect(5000, remoteAddress, 5000);
+                client.connect(5000, remoteAddress, 5000, 5001);
             } catch (IOException e) {
                 // TODO: client connection error handling
                 e.printStackTrace();
             }
         }
+    }
+
+    public void updateRTT() {
+        client.updateReturnTripTime();
+    }
+
+    public int getRTT() {
+        return client.getReturnTripTime();
     }
 
     public void disconnect() {
@@ -74,6 +84,10 @@ public class NetworkClient {
 
     public void sendObject(Object object) {
         client.sendTCP(object);
+    }
+
+    public void sendObjectUDP(Object object) {
+        client.sendUDP(object);
     }
 
     public <T> void registerDataHandler(Class<T> tClass, DataHandler<T> handler) {

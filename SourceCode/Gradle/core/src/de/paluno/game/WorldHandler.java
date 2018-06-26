@@ -27,7 +27,51 @@ public abstract class WorldHandler implements Disposable {
 
     private ArrayList<Vector2> spawnPositions;
 
+    private ArrayList<Projectile> projectiles;
+
     public Projectile projectile;
+
+    private EventManager.Listener listener = (eventType, data) -> {
+        switch (eventType) {
+            case WormDied: {
+                Worm worm = (Worm)data;
+                world.forgetAfterUpdate(worm);
+                players.get(worm.getPlayerNumber()).removeWorm(worm);
+                onWormDied(worm);
+                break;
+            }
+            case ProjectileExploded: {
+                Projectile projectile = (Projectile)data;
+                onProjectileExploded(projectile);
+                break;
+            }
+        }
+    };
+
+    public void onWormDied(Worm worm) {
+
+    }
+
+    public void onProjectileExploded(Projectile projectile) {
+
+    }
+
+    public void addProjectile(Projectile projectile) {
+        projectiles.add(projectile);
+        projectile.setId(projectiles.size());
+        world.registerAfterUpdate(projectile);
+        world.getCamera().setCameraFocus(projectile);
+
+        if (currentGameState == GameState.PLAYERTURN) {
+            world.forgetAfterUpdate(shotDirectionIndicator);
+
+            players.forEach(player -> player.setWormsStatic(false));
+        }
+    }
+
+    public void removeProjectile(Projectile projectile) {
+
+    }
 
     public WorldHandler(PlayScreen screen, int mapNumber) {
         this.screen = screen;
@@ -47,6 +91,8 @@ public abstract class WorldHandler implements Disposable {
         onInitializePlayers();
 
         currentGameState = GameState.WAITING;
+
+        EventManager.getInstance().addListener(EventManager.Type.WormDied, listener);
     }
 
     public void initializePlayersDefault(int numWorms) {

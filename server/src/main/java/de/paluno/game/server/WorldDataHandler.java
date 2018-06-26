@@ -18,7 +18,7 @@ public class WorldDataHandler extends DataHandler<WorldData> {
         // broadcast to other clients
         for (Connection c : gameServer.connections) {
             if (c.getID() != connection.getID())
-                c.sendTCP(data);
+                c.sendUDP(data);
         }
     }
 }

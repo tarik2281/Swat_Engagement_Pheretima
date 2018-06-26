@@ -169,6 +169,10 @@ public class Player implements Updatable {
 		// TODO: addWorm
 	}
 
+	public void removeWorm(Worm worm) {
+		worms.remove(worm);
+	}
+
 	public List<Worm> getWorms() {
 		return worms;
 	}

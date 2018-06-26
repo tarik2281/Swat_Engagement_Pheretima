@@ -5,15 +5,14 @@ import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
-import org.objenesis.instantiator.SerializationInstantiatorHelper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class NetworkWorldHandler extends WorldHandler {
 
-    private static final float UPDATE_FREQUENCY = 1.0f / 30.0f; // 30Hz
-    private static final float TIME_SHIFT = 0.3f; // 100 ms delay
+    private static final float UPDATE_FREQUENCY = 1.0f / 20.0f; // 20Hz
+    private static final float TIME_SHIFT = 0.3f; // 300 ms delay
 
     private NetworkClient client;
 
@@ -209,7 +208,7 @@ public class NetworkWorldHandler extends WorldHandler {
 
                 data.players = playerDataArray;
 
-                client.sendObject(data);
+                client.sendObjectUDP(data);
             }
         }
         else {

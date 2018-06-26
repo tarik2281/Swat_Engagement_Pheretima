@@ -6,6 +6,8 @@ import com.esotericsoftware.kryonet.Server;
 import de.paluno.game.interfaces.*;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -113,7 +115,7 @@ public class GameServer {
         public void handle(Connection connection, WorldData data) {
             for (Connection c : connections) {
                 if (connection.getID() == c.getID()) {
-                    c.sendTCP(data);
+                    c.sendUDP(data);
                 }
             }
         }
@@ -187,7 +189,7 @@ public class GameServer {
         server.addListener(serverListener);
 
         try {
-            server.bind(Constants.TCP_PORT);
+            server.bind(5000, 5001);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -198,5 +200,13 @@ public class GameServer {
         GameServer server = new GameServer();
 
         server.initialize();
+
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            //System.out.println(addr);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

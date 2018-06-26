@@ -26,6 +26,8 @@ public class SEPGame extends Game {
 
     @Override
     public void render() {
+		EventManager.getInstance().processEvents();
+
         super.render();
     }
 

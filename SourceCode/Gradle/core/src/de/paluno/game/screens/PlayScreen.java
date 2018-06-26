@@ -131,7 +131,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // game loop
-        Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
+        //Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
 
         worldHandler.updateAndRender(spriteBatch, delta);
 

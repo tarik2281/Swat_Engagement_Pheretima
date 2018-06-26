@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.GameState;
 import de.paluno.game.UserData;
 import de.paluno.game.screens.Loadable;
@@ -37,6 +38,7 @@ public class Projectile extends WorldObject {
     private static final float GRENADE_DENSITY = 0.2f;
 
 
+    private int id;
     private Vector2 position;
     private Vector2 direction;
     private WeaponType weaponType;
@@ -69,6 +71,14 @@ public class Projectile extends WorldObject {
     	this.weaponType = data.weaponType;
 
 	}
+
+	public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 
     @Override
     public void setupAssets(AssetManager manager) {
@@ -195,6 +205,7 @@ public class Projectile extends WorldObject {
     public void explode(Worm directHitWorm) {
         if (!exploded) {
             exploded = true;
+            EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, this);
 
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null)
@@ -212,7 +223,8 @@ public class Projectile extends WorldObject {
                 }
             }
 
-            getWorld().forgetAfterUpdate(this);
+            removeFromWorld();
+            //getWorld().forgetAfterUpdate(this);
             //world.advanceGameState();
         }
     }
