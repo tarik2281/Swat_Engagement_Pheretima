@@ -20,7 +20,7 @@ public enum WeaponType {
 	WEAPON_SPECIAL(3, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
 			7.0f, 0.35f, 0.0f, 0.0f, 0),
 	WEAPON_AIRSTRIKE(1, Assets.iconAirstrike, Assets.weaponAirstrike, Assets.projectileAirstrike,
-			7.5f, 0.75f, 0.0f, 0.0f, 20);
+			1f, 0.75f, 0.009f, 0.0f, 20);
 
 	public static final int NUM_WEAPONS = 5;
 

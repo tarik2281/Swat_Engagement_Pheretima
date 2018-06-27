@@ -1,5 +1,7 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 
 import de.paluno.game.*;
@@ -27,9 +29,12 @@ public class Player implements Updatable {
 	private Worm[] characters;
 	private Weapon[] weapons;
 	private ShotDirectionIndicator shotDirectionIndicator;
+	private AirstrikeIndicator airstrikeIndicator;
 	private WindDirectionIndicator windDirectionIndicator;
 	private int turn = 0;
 	private boolean isRoundEnded = false;
+	boolean indicatorAvailable = false;
+	WeaponType currentWeapon;
 
 	private World world;
 
@@ -49,7 +54,7 @@ public class Player implements Updatable {
 					getCurrentWorm().setJump(true);
 					break;
                 case Constants.KEY_DO_ACTION:
-                    shoot();
+                	shoot();
                     break;
 				case Constants.KEY_ROTATE_INDICATOR_DOWN:
 					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
@@ -118,7 +123,7 @@ public class Player implements Updatable {
         setupWeapons();
         setupWorms();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-
+		this.airstrikeIndicator = new AirstrikeIndicator(playerNum, world);
 	}
 	/**
 	 * Constructor to create a new Player from existing data - for replay purposes
@@ -133,6 +138,7 @@ public class Player implements Updatable {
 		setupWeapons(data.weaponData);
 
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
+		this.airstrikeIndicator = new AirstrikeIndicator(playerNum, world);
 	}
 	
 	/**
@@ -141,6 +147,13 @@ public class Player implements Updatable {
 	 */
 	public ShotDirectionIndicator getShotDirectionIndicator() {
 		return shotDirectionIndicator;
+	}
+	/**
+	 * Getter method to get this player's AirstrikeIndicator
+	 * @return airstrikeIndicator
+	 */
+	public AirstrikeIndicator getAirstrikeIndicator() {
+		return airstrikeIndicator;
 	}
 	/**
 	 * Getter method to get this player's WindDirectionIndicator
@@ -250,14 +263,17 @@ public class Player implements Updatable {
 	 * Method to register all objects and handlers when it becomes this player's turn
 	 */
 	public void onBeginTurn() {
-		// Register indicators for drawing
+		/*// Register indicators for drawing
 		world.registerAfterUpdate(getShotDirectionIndicator());
 		world.registerAfterUpdate(getWindDirectionIndicator());
-		// Attach indicators to the characters whose turn it is
+		// Attach indicators to the characters whose turn it is*/
 		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
 		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
+		indicatorAvailable = false;
+		
+		
 		// Default weapon
-		equipWeapon(WeaponType.WEAPON_BAZOOKA);
+		equipWeapon(WeaponType.WEAPON_GUN);
 		// Worm's turn it is
 		getCurrentWorm().setIsPlaying(true);
 		
@@ -282,8 +298,10 @@ public class Player implements Updatable {
         // No need to draw our indicators anymore
 		world.forgetAfterUpdate(getShotDirectionIndicator());
         world.forgetAfterUpdate(getWindDirectionIndicator());
+        world.forgetAfterUpdate(getAirstrikeIndicator());
         // No attachment anymore - Worm might not even exist anymore
         getShotDirectionIndicator().attachToWorm(null);
+        getAirstrikeIndicator().attachToWorm(null);
         getWindDirectionIndicator().attachToWorm(null);
         // Reset angle of indicator to default
 		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
@@ -408,12 +426,47 @@ public class Player implements Updatable {
 
 		return null;
 	}
+    
+    public WeaponType getCurrentWeaponType() {
+    	currentWeapon = getCurrentWorm().getCurrentWeapon().getWeaponType();
+    	return currentWeapon;
+    }
     /**
      * Passthrough method to make our current Worm equip a given Weapon
      * @param weaponType - The WeaponType of the Weapon to select
      */
 	public void equipWeapon(WeaponType weaponType) {
 		getCurrentWorm().equipWeapon(getWeapon(weaponType));
+
+		if(weaponType == WeaponType.WEAPON_AIRSTRIKE && indicatorAvailable == true) {
+			world.registerAfterUpdate(getAirstrikeIndicator());
+			world.forgetAfterUpdate(getShotDirectionIndicator());
+			indicatorAvailable = false;
+		}
+		
+		if(weaponType == WeaponType.WEAPON_BAZOOKA && indicatorAvailable == false) {
+			world.registerAfterUpdate(getShotDirectionIndicator());
+			world.forgetAfterUpdate(getAirstrikeIndicator());
+			indicatorAvailable = true;
+		}
+		
+		if(weaponType == WeaponType.WEAPON_GRENADE && indicatorAvailable == false) {
+			world.registerAfterUpdate(getShotDirectionIndicator());
+			world.forgetAfterUpdate(getAirstrikeIndicator());
+			indicatorAvailable = true;
+		}
+		
+		if(weaponType == WeaponType.WEAPON_GUN && indicatorAvailable == false) {
+			world.registerAfterUpdate(getShotDirectionIndicator());
+			world.forgetAfterUpdate(getAirstrikeIndicator());
+			indicatorAvailable = true;
+		}
+		
+		if(weaponType == WeaponType.WEAPON_SPECIAL && indicatorAvailable == false) {
+			world.registerAfterUpdate(getShotDirectionIndicator());
+			world.forgetAfterUpdate(getAirstrikeIndicator());
+			indicatorAvailable = true;
+		}
 	}
 
 	/**
