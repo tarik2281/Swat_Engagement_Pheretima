@@ -4,6 +4,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.*;
 
+import java.util.List;
+
 public class Weapon {
 
 	/**
@@ -66,6 +68,12 @@ public class Weapon {
 			}
 
 			currentAmmo--;
+		}
+	}
+
+	public void shoot(Worm worm, ShotDirectionIndicator indicator, List<Projectile> output) {
+		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
+
 		}
 	}
 	

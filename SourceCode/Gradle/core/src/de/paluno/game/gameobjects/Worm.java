@@ -24,7 +24,6 @@ public class Worm extends WorldObject {
 
     private int characterNumber;
 	private Player player;
-	public Vector2 spawnPosition;
 
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
@@ -65,90 +64,6 @@ public class Worm extends WorldObject {
 
 		addChild(new HealthBar(this));
 	}
-
-	/**
-	 * Constructor
-	 * @param player - reference to the player we belong to
-	 * @param charNum - Our character number
-	 */
-	/*public Worm(Player player, int charNum) {
-	    characterNumber = charNum;
-
-		// Link references
-		this.player = player;
-		this.world = player.getWorld();
-
-		// Set a random spawning direction, so not every Worm looks the same
-		int o = Math.round((float)Math.random());
-		if(o == 0) this.orientation = Constants.WORM_DIRECTION_LEFT;
-		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
-
-		// Load animations
-		if (player.getAssets() != null) {
-			this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
-			this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-			this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
-		}
-
-		// Get our spawning position
-		if (world != null) {
-			this.spawnPosition = world.generateSpawnPosition();
-		}
-
-		// Health is limited
-		this.health = Constants.WORM_MAX_HEALTH;
-
-		//And of course, we initially are NOT infected
-		this.isInfected = false;
-
-		// Finally setup Animations
-		updateAnimation();
-	}*/
-
-	/**
-	 * Constructor with snapshot data to create a new Worm from existing data - for the replay
-	 * @param player - Reference to the player (copy) we belong to
-	 * @param data - The SnpashotData element to gain our settings from
-	 */
-	/*public Worm(Player player, SnapshotData data) {
-		characterNumber = data.characterNumber;
-		this.player = player;
-		this.world = player.getWorld();
-
-		this.orientation = data.orientation;
-
-		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
-		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
-
-		this.spawnPosition = data.position;
-
-		this.health = data.health;
-
-		this.isInfected = data.isInfected;
-
-		updateAnimation();
-	}
-
-	public Worm(Player player, WormData data) {
-		characterNumber = data.wormNumber;
-		this.player = player;
-		this.world = player.getWorld();
-
-		this.orientation = data.getOrientation();
-
-		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
-		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
-
-		this.spawnPosition = new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY());
-
-		this.health = Constants.WORM_MAX_HEALTH;
-
-		this.isInfected = false;
-
-		updateAnimation();
-	}*/
 
 	@Override
 	public void setupAssets(AssetManager manager) {
@@ -260,7 +175,7 @@ public class Worm extends WorldObject {
 	public Body onSetupBody(World world) {
 		// Blueprint with spawning position and BodyType
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
+		bodyDef.position.set(getPosition());
 		bodyDef.type = isStatic ? BodyType.StaticBody : BodyType.DynamicBody;
 		
 		// Create the actual physics body in our current game world
@@ -326,15 +241,6 @@ public class Worm extends WorldObject {
 		createVirusFixture = false;
 	}
 
-	public Vector2 getPosition() {
-		return getBody().getWorldCenter();
-	}
-
-	public void setPosition(float x, float y) {
-		getBody().setTransform(x, y, 0.0f);
-		// TODO: setPosition: set body transform
-	}
-	
 	/**
 	 * Setter method for our current playstate - if this worm is playing right now or not
 	 * @param isPlaying - Is this worm playing right now?
@@ -388,8 +294,10 @@ public class Worm extends WorldObject {
 	 * @param isInfected - Is this worm infected now?
 	 */
 	public void setIsInfected(boolean isInfected) {
-		if (!this.isInfected && isInfected)
-			createVirusFixture = true;
+		if (!this.isInfected && isInfected) {
+            EventManager.getInstance().queueEvent(EventManager.Type.WormInfected, this);
+            createVirusFixture = true;
+		}
 
 		this.isInfected = isInfected;
 	}

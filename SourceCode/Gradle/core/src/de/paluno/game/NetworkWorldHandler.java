@@ -119,14 +119,14 @@ public class NetworkWorldHandler extends WorldHandler {
                 WormData[] wormData = new WormData[numWorms];
                 for (int j = 0; j < numWorms; j++) {
                     Worm worm = addWorm(player, j);
-                    worm.spawnPosition = getRandomSpawnPosition();
+                    worm.setPosition(getRandomSpawnPosition());
 
                     WormData wormD = new WormData();
                     wormD.playerNumber = player.getPlayerNumber();
                     wormD.wormNumber = j;
                     wormD.setPhysicsData(new PhysicsData()
-                            .setPositionX(worm.spawnPosition.x)
-                            .setPositionY(worm.spawnPosition.y));
+                            .setPositionX(worm.getPosition().x)
+                            .setPositionY(worm.getPosition().y));
 
                     wormData[j] = wormD;
                 }
@@ -151,7 +151,8 @@ public class NetworkWorldHandler extends WorldHandler {
 
                 for (WormData wormData : playerData.getWorms()) {
                     Worm worm = addWorm(player, wormData.wormNumber);
-                    worm.spawnPosition = new Vector2(wormData.getPhysicsData().getPositionX(), wormData.getPhysicsData().getPositionY());
+                    worm.setPosition(wormData.getPhysicsData().getPositionX(),
+                            wormData.getPhysicsData().getPositionY());
                     // TODO: setup worms
                 }
             }
@@ -173,15 +174,25 @@ public class NetworkWorldHandler extends WorldHandler {
                 WorldData data = new WorldData();
                 data.shootingAngle = shotDirectionIndicator.getAngle();
 
-                if (projectile != null && projectile.getBody() != null) {
-                    ProjectileData projectileData = new ProjectileData();
-                    projectileData.setType(projectile.getWeaponType().ordinal());
-                    projectileData.setPhysicsData(new PhysicsData()
-                        .setPositionX(projectile.getBody().getWorldCenter().x)
-                        .setPositionY(projectile.getBody().getWorldCenter().y)
-                        .setVelocityX(projectile.getBody().getLinearVelocity().x)
-                        .setVelocityY(projectile.getBody().getLinearVelocity().y));
-                    data.projectile = projectileData;
+                if (!getProjectiles().isEmpty()) {
+                    ProjectileData[] projectiles = new ProjectileData[getProjectiles().size()];
+
+                    int index = 0;
+                    for (Projectile projectile : getProjectiles()) {
+                        ProjectileData projectileData = new ProjectileData();
+                        projectileData.id = projectile.getId();
+                        projectileData.setType(projectile.getWeaponType().ordinal());
+                        if (projectile.getBody() != null) {
+                            projectileData.setPhysicsData(new PhysicsData()
+                                    .setPositionX(projectile.getBody().getWorldCenter().x)
+                                    .setPositionY(projectile.getBody().getWorldCenter().y)
+                                    .setVelocityX(projectile.getBody().getLinearVelocity().x)
+                                    .setVelocityY(projectile.getBody().getLinearVelocity().y));
+                        }
+                        projectiles[index++] = projectileData;
+                    }
+
+                    data.projectiles = projectiles;
                 }
 
                 int i = 0;
@@ -234,28 +245,35 @@ public class NetworkWorldHandler extends WorldHandler {
                     angle = angle * (1.0f - ratio) + nextSnapshot.shootingAngle * ratio;
                 shotDirectionIndicator.setAngle(angle);
 
-                if (currentSnapshot.projectile != null) {
-                    float x = currentSnapshot.projectile.getPhysicsData().getPositionX();
-                    float y = currentSnapshot.projectile.getPhysicsData().getPositionY();
-                    float velX = currentSnapshot.projectile.getPhysicsData().getVelocityX();
-                    float velY = currentSnapshot.projectile.getPhysicsData().getVelocityY();
+                if (currentSnapshot.projectiles != null) {
+                    for (ProjectileData projectileData : currentSnapshot.projectiles) {
+                        float x = projectileData.getPhysicsData().getPositionX();
+                        float y = projectileData.getPhysicsData().getPositionY();
+                        float velX = projectileData.getPhysicsData().getVelocityX();
+                        float velY = projectileData.getPhysicsData().getVelocityY();
 
-                    if (nextSnapshot != null && nextSnapshot.projectile != null) {
-                        x = x * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getPositionX() * ratio;
-                        y = y * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getPositionY() * ratio;
-                        velX = velX * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getVelocityX() * ratio;
-                        velY = velY * (1.0f - ratio) + nextSnapshot.projectile.getPhysicsData().getVelocityY() * ratio;
-                    }
+                        if (nextSnapshot != null && nextSnapshot.projectiles != null) {
+                            for (ProjectileData nextProjectileData : nextSnapshot.projectiles) {
+                                if (nextProjectileData.id == projectileData.id) {
+                                    x = x * (1.0f - ratio) + nextProjectileData.getPhysicsData().getPositionX() * ratio;
+                                    y = y * (1.0f - ratio) + nextProjectileData.getPhysicsData().getPositionY() * ratio;
+                                    velX = velX * (1.0f - ratio) + nextProjectileData.getPhysicsData().getVelocityX() * ratio;
+                                    velY = velY * (1.0f - ratio) + nextProjectileData.getPhysicsData().getVelocityY() * ratio;
+                                    break;
+                                }
+                            }
+                        }
 
-                    if (projectile == null) {
-                        Projectile projectile = new Projectile(null, WeaponType.values()[currentSnapshot.projectile.getType()],
-                                new Vector2(x, y), new Vector2());
-                        this.projectile = projectile;
-                        getWorld().registerAfterUpdate(projectile);
-                    }
-                    else {
-                        this.projectile.getBody().setTransform(x, y, 0.0f);
-                        this.projectile.getBody().setLinearVelocity(velX, velY);
+                        Projectile projectile = getProjectileById(projectileData.id);
+                        if (projectile == null) {
+                            projectile = new Projectile(null, WeaponType.values()[projectileData.getType()], new Vector2(x, y), new Vector2());
+                            addProjectile(projectile);
+                            projectile.setId(projectileData.id);
+                        }
+                        else {
+                            projectile.getBody().setTransform(x, y, 0.0f);
+                            projectile.getBody().setLinearVelocity(velX, velY);
+                        }
                     }
                 }
 
@@ -320,6 +338,14 @@ public class NetworkWorldHandler extends WorldHandler {
         }
 
         return shiftedTime;
+    }
+
+    @Override
+    public void onProjectileExploded(Projectile projectile) {
+        Vector2 pos = projectile.getBody().getWorldCenter();
+        ExplosionEvent e = new ExplosionEvent(0, pos.x, pos.y, projectile.getWeaponType().getExplosionRadius());
+        client.sendObject(e);
+        //super.onProjectileExploded(projectile);
     }
 
     @Override

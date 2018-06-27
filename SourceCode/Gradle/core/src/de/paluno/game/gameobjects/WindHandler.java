@@ -18,6 +18,7 @@ public class WindHandler extends WorldObject {
     private Vector2 wind;
     private Projectile projectile;
     private int x = rand.nextInt(10) - 5;
+
     public WindHandler() {
 
     }

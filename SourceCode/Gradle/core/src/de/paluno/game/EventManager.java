@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class EventManager {
     public enum Type {
-        WormDied, ProjectileExploded
+        WormInfected, WormDied, ProjectileExploded
     }
 
     public interface Listener {

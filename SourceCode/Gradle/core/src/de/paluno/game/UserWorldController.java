@@ -2,6 +2,7 @@ package de.paluno.game;
 
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
+import de.paluno.game.gameobjects.WeaponType;
 
 public class UserWorldController extends WorldController {
 
@@ -36,6 +37,18 @@ public class UserWorldController extends WorldController {
                     break;
                 case Constants.KEY_DO_ACTION:
                     worldHandler.shoot();
+                    break;
+                case Constants.KEY_SELECT_WEAPON_1:
+                    worldHandler.applyEquipWeapon(WeaponType.WEAPON_GUN);
+                    break;
+                case Constants.KEY_SELECT_WEAPON_2:
+                    worldHandler.applyEquipWeapon(WeaponType.WEAPON_GRENADE);
+                    break;
+                case Constants.KEY_SELECT_WEAPON_3:
+                    worldHandler.applyEquipWeapon(WeaponType.WEAPON_BAZOOKA);
+                    break;
+                case Constants.KEY_SELECT_WEAPON_4:
+                    worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
                     break;
             }
 

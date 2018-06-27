@@ -1,6 +1,7 @@
 package de.paluno.game.interfaces;
 
 public class ProjectileData {
+    public int id;
     private int type; // according to WeaponType enum
     private PhysicsData physicsData;
 

@@ -116,7 +116,7 @@ public class World2 implements Disposable {
     }
 
     public boolean isInWorldBounds(Body body) {
-        return true;
+        return body.getWorldCenter().y > 0;
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {
@@ -160,7 +160,6 @@ public class World2 implements Disposable {
         object.setWorld(this);
         object.setupAssets(worldHandler.getAssetManager());
         object.setupBody(world);
-
 
         objects.add(object);
 

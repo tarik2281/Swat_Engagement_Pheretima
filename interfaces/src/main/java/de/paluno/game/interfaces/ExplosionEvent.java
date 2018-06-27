@@ -4,6 +4,7 @@ public class ExplosionEvent extends GameEvent {
 
     private float centerX, centerY;
     private float radius;
+    public int projectileId;
 
     public ExplosionEvent() {
         super();

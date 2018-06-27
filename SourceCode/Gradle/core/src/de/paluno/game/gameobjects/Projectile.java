@@ -64,6 +64,8 @@ public class Projectile extends WorldObject {
         this.shootingWorm = shootingWorm;
     }
 
+
+
     public Projectile(SnapshotData data) {
     	this.position = data.position;
     	this.direction = data.direction;
@@ -223,7 +225,7 @@ public class Projectile extends WorldObject {
                 }
             }
 
-            removeFromWorld();
+            //removeFromWorld();
             //getWorld().forgetAfterUpdate(this);
             //world.advanceGameState();
         }

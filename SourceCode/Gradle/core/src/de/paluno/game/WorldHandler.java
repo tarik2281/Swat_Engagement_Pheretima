@@ -23,13 +23,15 @@ public abstract class WorldHandler implements Disposable {
     private ArrayList<Player> players;
     public GameState currentGameState = GameState.NONE;
 
+    private WindHandler windHandler;
+
     public ShotDirectionIndicator shotDirectionIndicator;
+    private WindDirectionIndicator windDirectionIndicator;
 
     private ArrayList<Vector2> spawnPositions;
 
+    private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
-
-    public Projectile projectile;
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
@@ -42,6 +44,7 @@ public abstract class WorldHandler implements Disposable {
             }
             case ProjectileExploded: {
                 Projectile projectile = (Projectile)data;
+                removeProjectile(projectile);
                 onProjectileExploded(projectile);
                 break;
             }
@@ -50,6 +53,10 @@ public abstract class WorldHandler implements Disposable {
 
     public void onWormDied(Worm worm) {
 
+    }
+
+    public ArrayList<Projectile> getProjectiles() {
+        return projectiles;
     }
 
     public void onProjectileExploded(Projectile projectile) {
@@ -62,15 +69,41 @@ public abstract class WorldHandler implements Disposable {
         world.registerAfterUpdate(projectile);
         world.getCamera().setCameraFocus(projectile);
 
-        if (currentGameState == GameState.PLAYERTURN) {
-            world.forgetAfterUpdate(shotDirectionIndicator);
-
-            players.forEach(player -> player.setWormsStatic(false));
-        }
+        endPlayerTurn();
     }
 
     public void removeProjectile(Projectile projectile) {
+        projectiles.remove(projectile);
+        world.forgetAfterUpdate(projectile);
 
+        if (world.getCamera().getCameraFocus() == projectile) {
+            if (!projectiles.isEmpty())
+                world.getCamera().setCameraFocus(projectiles.get(0));
+        }
+
+        if (projectiles.isEmpty()) {
+            setWaiting();
+        }
+    }
+
+    public Projectile getProjectileById(int id) {
+        for (Projectile projectile : projectiles) {
+            if (projectile.getId() == id)
+                return projectile;
+        }
+
+        return null;
+    }
+
+    public void endPlayerTurn() {
+        if (currentGameState == GameState.PLAYERTURN) {
+            players.get(currentPlayer).getCurrentWorm().unequipWeapon();
+
+            world.forgetAfterUpdate(shotDirectionIndicator);
+            world.forgetAfterUpdate(windDirectionIndicator);
+
+            players.forEach(player -> player.setWormsStatic(false));
+        }
     }
 
     public WorldHandler(PlayScreen screen, int mapNumber) {
@@ -78,6 +111,9 @@ public abstract class WorldHandler implements Disposable {
         this.mapNumber = mapNumber;
 
         this.players = new ArrayList<>();
+
+        this.projectiles = new ArrayList<>();
+        this.weaponProjectileCache = new ArrayList<>();
     }
 
     public void initialize() {
@@ -93,6 +129,7 @@ public abstract class WorldHandler implements Disposable {
         currentGameState = GameState.WAITING;
 
         EventManager.getInstance().addListener(EventManager.Type.WormDied, listener);
+        EventManager.getInstance().addListener(EventManager.Type.ProjectileExploded, listener);
     }
 
     public void initializePlayersDefault(int numWorms) {
@@ -106,7 +143,7 @@ public abstract class WorldHandler implements Disposable {
 
             for (int j = 0; j < numWorms; j++) {
                 Worm worm = addWorm(player, j);
-                worm.spawnPosition = getRandomSpawnPosition();
+                worm.setPosition(getRandomSpawnPosition());
             }
         }
     }
@@ -181,6 +218,42 @@ public abstract class WorldHandler implements Disposable {
         }
     }
 
+    public void applyEquipWeapon(WeaponType weaponType) {
+        Player player = getCurrentPlayer();
+        player.equipWeapon(weaponType);
+    }
+
+    public boolean queryWeaponAvailable(WeaponType weaponType) {
+        Player player = players.get(currentPlayer);
+        return player.getWeapon(weaponType).getSelectable();
+    }
+
+    public Player getCurrentPlayer() {
+        return players.get(currentPlayer);
+    }
+
+    public Worm getNextActiveWorm() {
+        Vector2 velocity = null;
+        Worm nextWorm = null;
+
+        for (Player player : players) {
+            for (Worm worm : player.getWorms()) {
+                if (worm.getBody().isAwake()) {
+                    if (velocity == null) {
+                        velocity = worm.getBody().getLinearVelocity();
+                        nextWorm = worm;
+                    }
+                    else if (worm.getBody().getLinearVelocity().len2() > velocity.len2()) {
+                        velocity = worm.getBody().getLinearVelocity();
+                        nextWorm = worm;
+                    }
+                }
+            }
+        }
+
+        return nextWorm;
+    }
+
     protected void setWormMovement(int movement) {
         players.get(currentPlayer).getCurrentWorm().setMovement(movement);
     }
@@ -199,19 +272,24 @@ public abstract class WorldHandler implements Disposable {
 
     public void shoot() {
         if (currentGameState == GameState.PLAYERTURN) {
-            Worm worm = players.get(currentPlayer).getCurrentWorm();
-            Projectile projectile = new Projectile(worm, WeaponType.WEAPON_BAZOOKA,
-                    worm.getBody().getWorldCenter(), new Vector2(1, 0).rotate(shotDirectionIndicator.getAngle()));
-            world.registerAfterUpdate(projectile);
-            currentGameState = GameState.SHOOTING;
-            world.forgetAfterUpdate(shotDirectionIndicator);
-            world.getCamera().setCameraFocus(projectile);
+            Player player = getCurrentPlayer();
+            Worm worm = player.getCurrentWorm();
+            weaponProjectileCache.clear();
+            player.getCurrentWeapon().shoot(worm, shotDirectionIndicator, weaponProjectileCache);
+            weaponProjectileCache.forEach(this::addProjectile);
+            //Projectile projectile = new Projectile(worm, WeaponType.WEAPON_BAZOOKA,
+            //        worm.getBody().getWorldCenter(), new Vector2(1, 0).rotate(shotDirectionIndicator.getAngle()));
+            //addProjectile(projectile);
+            //world.registerAfterUpdate(projectile);
+            //currentGameState = GameState.SHOOTING;
+            //world.forgetAfterUpdate(shotDirectionIndicator);
+            //world.getCamera().setCameraFocus(projectile);
 
-            this.projectile = projectile;
+            //this.projectile = projectile;
 
-            for (Player player : players) {
-                player.setWormsStatic(false);
-            }
+            //for (Player player : players) {
+              //  player.setWormsStatic(false);
+            //}
         }
     }
 
@@ -232,6 +310,7 @@ public abstract class WorldHandler implements Disposable {
                 Worm worm = player.getWormByNumber(wormNumber);
                 worm.setIsPlaying(true);
                 worm.addChild(shotDirectionIndicator);
+                worm.addChild(windDirectionIndicator);
                 world.getCamera().setCameraFocus(worm);
                 player.equipWeapon(WeaponType.WEAPON_BAZOOKA);
             }
@@ -253,17 +332,30 @@ public abstract class WorldHandler implements Disposable {
         return allIdle;
     }
 
+    public void setWaiting() {
+        Worm nextActiveWorm = getNextActiveWorm();
+        currentGameState = GameState.WAITING;
+
+        if (nextActiveWorm != null) {
+            world.getCamera().setCameraFocus(nextActiveWorm);
+        }
+        else {
+
+        }
+    }
+
     public void updateAndRender(SpriteBatch batch, float delta) {
         if (shouldWorldStep()) {
             world.update(delta);
             world.step();
+
         }
 
         onUpdate(delta);
 
         world.render(batch, delta);
 
-        if (currentGameState == GameState.WAITING) {
+        if (shouldWorldStep() && currentGameState == GameState.WAITING) {
             if (allWormsIdle()) {
                 setIdle();
             }
