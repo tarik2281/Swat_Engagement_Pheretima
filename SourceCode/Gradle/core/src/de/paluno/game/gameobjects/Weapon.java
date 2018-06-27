@@ -1,9 +1,6 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-
 import de.paluno.game.*;
 
 public class Weapon {
@@ -20,7 +17,6 @@ public class Weapon {
 
 	private WeaponType type;
 	private int currentAmmo;
-	//private Vector2 curserPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 	
 	private AnimationData animationSet;
 
@@ -62,34 +58,10 @@ public class Weapon {
 			Vector2 direction = new Vector2(1, 0).rotate(angle);
 
 			if (worm.getBody() != null) {
-				if(getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
-					Vector3 position = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-					Projectile projectile = new Projectile(player.getWorld(), worm, 
-							this.type, Constants.AIRSTRIKE_SPAWNPOS, 
-							 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
-									 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-					
-					Vector3 position2 = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-					Projectile projectile2 = new Projectile(player.getWorld(), worm, 
-							this.type, Constants.AIRSTRIKE_SPAWNPOS2 , 
-							 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
-									 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-					
-					Vector3 position3 = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-					Projectile projectile3 = new Projectile(player.getWorld(), worm, 
-							this.type, Constants.AIRSTRIKE_SPAWNPOS3, 
-							 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
-									 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-					
-					player.getWorld().spawnProjectile(projectile);
-					player.getWorld().spawnProjectile(projectile2);
-					player.getWorld().spawnProjectile(projectile3);
-				}else {
-					Projectile projectile = new Projectile(player.getWorld(), worm,
-							this.type, worm.getBody().getPosition(), direction);
-	
-					player.getWorld().spawnProjectile(projectile);
-				}
+				Projectile projectile = new Projectile(player.getWorld(), worm,
+						this.type, worm.getBody().getPosition(), direction);
+
+				player.getWorld().spawnProjectile(projectile);
 			}
 
 			currentAmmo--;

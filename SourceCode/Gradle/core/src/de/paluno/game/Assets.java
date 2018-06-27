@@ -57,8 +57,6 @@ public class Assets {
 
     public static final AssetDescriptor<Texture> arrow =
             new AssetDescriptor<Texture>("Arrow.png", Texture.class);
-    public static final AssetDescriptor<Texture> airstrikeCrosshair =
-            new AssetDescriptor<Texture>("AirstrikeCrosshair.png", Texture.class);
     
     public static final AssetDescriptor<Texture> gameOverScreen1 =
             new AssetDescriptor<Texture>("GameOverPlay1.png", Texture.class);
@@ -129,7 +127,7 @@ public class Assets {
     };
 
     public static final AssetDescriptor[] PlayScreenAssets = {
-            airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
+            arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
             weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, windGreen, windOrange, windRed
     };
 

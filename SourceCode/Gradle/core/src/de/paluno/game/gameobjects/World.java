@@ -47,15 +47,13 @@ public class World implements Disposable {
     private Ground ground;
     private ExplosionMaskRenderer explosionMaskRenderer;
 
-    //private Projectile projectile;
+    private Projectile projectile;
 
     private GameCamera camera;
     private boolean isRenderDebug = false;
     private Box2DDebugRenderer debugRenderer;
     private boolean isReplayWorld;
     private boolean skipFrame = false;
-    private ArrayList<Projectile> projectiles;
-    private int numProjectiles = 0;
 
     private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
         if (keyDown) {
@@ -85,7 +83,7 @@ public class World implements Disposable {
     };
 
     public World() {
-    	//f�r dnen Test
+    	//f�r den Test
     }
 
     public World(PlayScreen screen) {
@@ -96,7 +94,6 @@ public class World implements Disposable {
         objectForgetQueue = new LinkedList<>();
         renderableObjects = new ArrayList<>();
         updatableObjects = new ArrayList<>();
-        projectiles = new ArrayList<>();
 
         world = new com.badlogic.gdx.physics.box2d.World(Constants.GRAVITY, true);
         world.setContactListener(new CollisionHandler());
@@ -153,8 +150,8 @@ public class World implements Disposable {
         registerAfterUpdate(ground);
         registerAfterUpdate(windHandler);
 
-        //projectile = new Projectile(this, data.projectile);
-        //spawnProjectile(projectile);
+        projectile = new Projectile(this, data.projectile);
+        spawnProjectile(projectile);
         camera.setCameraPosition(data.projectile.getPosition());
     }
 
@@ -291,7 +288,7 @@ public class World implements Disposable {
     		data.player[i] = players[i].makeSnapshot();
 
     	data.ground = ground.makeSnapshot();
-    	//data.projectile = projectile.makeSnapshot();
+    	data.projectile = projectile.makeSnapshot();
 
     	return data;
     }
@@ -355,8 +352,7 @@ public class World implements Disposable {
                 setWormsStatic(false);
                 break;
             case SHOOTING:
-            	//if (gameState != GameState.SHOOTING)
-            		//projectile = null;
+            	projectile = null;
             	break;
         }
 
@@ -396,8 +392,6 @@ public class World implements Disposable {
                 setGameState(GameState.WAITING);
                 break;
             case SHOOTING:
-            	if (--numProjectiles == 0)
-            		
                 setGameState(GameState.WAITING);
                 break;
             case WAITING:
@@ -446,11 +440,8 @@ public class World implements Disposable {
     }
 
     public void spawnProjectile(Projectile projectile) {
-    	numProjectiles++;
-    	//projectiles.add(projectile);
-    	//this.projectile = projectile;
-    	if (currentGameState != GameState.SHOOTING)
-    		setGameState(GameState.SHOOTING);
+    	this.projectile = projectile;
+        setGameState(GameState.SHOOTING);
         windHandler.setProjectile(projectile);
         registerAfterUpdate(projectile);
         camera.setCameraFocus(projectile);

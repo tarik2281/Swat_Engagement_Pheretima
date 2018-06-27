@@ -33,8 +33,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     private static final float PROJECTILE_DENSITY = 0.1f;
     private static final float BAZOOKA_DENSITY = 0.07f;
     private static final float GRENADE_DENSITY = 0.2f;
-    private static final float AIRSTRIKE_DENSITY = 1f;
-    
+
 
     private World world;
     private Vector2 position;
@@ -101,11 +100,11 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     @Override
     public void render(SpriteBatch batch, float delta) {
         Vector2 position = Constants.getScreenSpaceVector(body.getPosition());
+
         sprite.setOriginBasedPosition(position.x, position.y);
 
         switch (weaponType) {
             case WEAPON_BAZOOKA:
-            case WEAPON_AIRSTRIKE:
                 Vector2 direction = new Vector2(-body.getLinearVelocity().x, body.getLinearVelocity().y);
                 float angle = direction.angle(new Vector2(0, 1));
                 sprite.setRotation(angle);
@@ -115,6 +114,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                 sprite.setRotation(body.getAngle() * MathUtils.radiansToDegrees);
                 break;
         }
+
         sprite.draw(batch);
     }
 
@@ -175,20 +175,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.applyAngularImpulse(-0.01f * body.getMass(), true);
             fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
         }
-        else if (weaponType == WeaponType.WEAPON_AIRSTRIKE) {
-        	FixtureDef fixtureDef = new FixtureDef();
-        	fixtureDef.shape = shape;
-        	fixtureDef.density = AIRSTRIKE_DENSITY;
-        	body = world.createBody(bodyDef);
-        	Fixture fix = body.createFixture(fixtureDef);
-        	body.setGravityScale(0.0f);
-        	body.setAngularDamping(2.0f);
-        	Vector2 impulse = new Vector2(direction).scl(8.0f * body.getMass());
-        	body.applyLinearImpulse(impulse, body.getPosition(), true);
-        	body.applyAngularImpulse(-0.01f * body.getMass(),  true);
-        	fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
-        }
-        
+
         shape.dispose();
     }
 
