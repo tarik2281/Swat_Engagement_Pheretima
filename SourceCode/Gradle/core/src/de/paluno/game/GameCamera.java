@@ -94,7 +94,7 @@ public class GameCamera {
             debugPosition.add(focusDirectionVector);
 
             // if we have a camera focus then we center the camera on the given object
-            //debugPosition.set(cameraFocus.getBody().getPosition());
+            debugPosition.set(cameraFocus.getBody().getPosition());
         }
 
         // move the camera according to user input
