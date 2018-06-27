@@ -2,6 +2,7 @@ package de.paluno.game;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 
@@ -117,6 +118,13 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WeaponSpecial.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> weaponAirstrike =
             new AssetDescriptor<AnimationData>("WeaponAirstrike.xml", AnimationData.class);
+    
+    public static final AssetDescriptor<Music> menuSound = 
+    		new AssetDescriptor<Music>("MenuScreen_ThemeSong.mp3", Music.class);
+    public static final AssetDescriptor<Music> tickSound = 
+    		new AssetDescriptor<Music>("MenuScreen_ClickSound.mp3", Music.class);
+    public static final AssetDescriptor<Music> gameOverSound = 
+    		new AssetDescriptor<Music>("GameOverScreen_CrowdCheer.mp3", Music.class);
 
     public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
         for (AssetDescriptor asset : assets)
@@ -135,5 +143,9 @@ public class Assets {
 
     public static final AssetDescriptor[] GameOverScreenAssets = {
             gameOverScreen1, gameOverScreen2, menuButton
+    };
+    
+    public static final AssetDescriptor[] Music = {
+    		menuSound, tickSound, gameOverSound
     };
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -21,7 +22,6 @@ import de.paluno.game.SEPGame;
 
 
 public class MenuScreen extends ScreenAdapter implements Loadable {
-
 
     private SEPGame game;
     private Stage menuStage;
@@ -42,29 +42,32 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
     private int mapNumber;
     private int numWorms;
+    
+    private Music music;
+    private Music tickSound;
 
     public MenuScreen(SEPGame game) {
         super();
         this.game = game;
         menuStage = new Stage();
         Gdx.input.setInputProcessor(menuStage);
-
-
     }
 
     @Override
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
-
+        Assets.loadAssets(manager, Assets.Music);
         return false;
     }
 
     public void show() {
-
         // Menu Background
         textureBackground = game.getAssetManager().get(Assets.menuBackground);
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
-
+        
+        tickSound = game.getAssetManager().get(Assets.tickSound);
+        tickSound.setLooping(false);
+        tickSound.setVolume(0.6f);
 
         // Map Buttons
         map1 = game.getAssetManager().get(Assets.map1Thumbnail);
@@ -76,6 +79,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedMapButton(buttonMap1);
                 mapNumber = 0;
                 System.out.println("Map1 Clicked");
@@ -93,6 +97,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedMapButton(buttonMap2);
                 mapNumber = 1;
                 System.out.println("Map2 Clicked");
@@ -108,6 +113,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedMapButton(buttonMap3);
                 mapNumber = 2;
                 System.out.println("Map3 Clicked");
@@ -124,6 +130,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedMapButton(buttonMap4);
                 mapNumber = 3;
                 System.out.println("Map4 Clicked");
@@ -141,6 +148,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 game.setPlayScreen(mapNumber, numWorms);
                 System.out.println("Play Clicked");
             }
@@ -157,6 +165,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedWormButton(buttonWorm1);
                 numWorms = 1;
                 System.out.println("Worm 1 Clicked");
@@ -172,6 +181,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedWormButton(buttonWorm2);
                 numWorms = 2;
                 System.out.println("Worm 2 Clicked");
@@ -187,6 +197,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedWormButton(buttonWorm3);
                 numWorms = 3;
                 System.out.println("Worm 3 Clicked");
@@ -202,6 +213,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedWormButton(buttonWorm4);
                 numWorms = 4;
                 System.out.println("Worm 4 Clicked");
@@ -217,6 +229,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	tickSound.play();
                 setSelectedWormButton(buttonWorm5);
                 numWorms = 5;
                 System.out.println("Worm 5 Clicked");
@@ -301,6 +314,11 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         // clears screen
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        //Menu sound
+        music = game.getAssetManager().get(Assets.menuSound);
+        music.setLooping(true);
+        music.setVolume(0.1f);
+        music.play();
 
         menuStage.act(Gdx.graphics.getDeltaTime());
         menuStage.draw();
@@ -309,6 +327,8 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
     public void hide() {
         menuStage.dispose();
+        music.dispose();
+        tickSound.dispose();
     }
 }
 
