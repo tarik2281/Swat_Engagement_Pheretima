@@ -3,6 +3,7 @@ package de.paluno.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -30,6 +31,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private Texture restartButtonTexture;
 	private TextureRegion restartButtonTextureRegion;
 	private TextureRegionDrawable restartButtonTextureDrawable;
+	private Music overSound;
 	
 	
 	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
@@ -40,7 +42,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	@Override
 	public boolean load(AssetManager manager) {
 		Assets.loadAssets(manager, Assets.GameOverScreenAssets);
-
+		Assets.loadAssets(manager, Assets.Music);
 		return false;
 	}
 
@@ -51,11 +53,17 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		
 		Texture texture = null;
 		
+		overSound = game.getAssetManager().get(Assets.gameOverSound);
+		overSound.setLooping(false);
+		overSound.setVolume(0.1f);
+		
 		switch (winningPlayer) {
 		case PLAYERONE:
+			overSound.play();
 			texture = game.getAssetManager().get(Assets.gameOverScreen1);
 			break;
 		case PLAYERTWO:
+			overSound.play();
 			texture = game.getAssetManager().get(Assets.gameOverScreen2);
 			break;
 		}
@@ -98,5 +106,6 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	public void hide(){
 		batch.dispose();
 		restartStage.dispose();
+		overSound.dispose();
 	}
 }
