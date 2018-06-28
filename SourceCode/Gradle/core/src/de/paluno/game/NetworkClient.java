@@ -90,11 +90,11 @@ public class NetworkClient {
         client.sendUDP(object);
     }
 
-    public <T> void registerDataHandler(Class<T> tClass, DataHandler<T> handler) {
+    public <T> void registerDataHandler(Class<T> tClass, DataHandler handler) {
         dataHandlers.put(tClass, handler);
     }
 
-    public <T> void unregisterDataHandler(Class<T> tClass, DataHandler<T> handler) {
+    public <T> void unregisterDataHandler(Class<T> tClass, DataHandler handler) {
         dataHandlers.remove(tClass);
     }
 }

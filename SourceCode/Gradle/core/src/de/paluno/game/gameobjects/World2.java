@@ -137,8 +137,6 @@ public class World2 implements Disposable {
 
         affectedWorms.removeIf(worm -> !explosion.applyBlastImpulse(worm));
 
-        worldHandler.onAddExplosion(explosion);
-
         return affectedWorms;
     }
 

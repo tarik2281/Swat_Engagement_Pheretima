@@ -52,6 +52,7 @@ public class Projectile extends WorldObject {
     private boolean wormContactEnded = false;
 
     private float explosionTimer = 0.0f;
+    private Explosion explosion;
 
     public Projectile(Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
         this.position = position;
@@ -94,11 +95,14 @@ public class Projectile extends WorldObject {
         explosionTimer += delta;
 
         // check if the projectile is inside our world - if not, destroy it
-        if (!getWorld().isInWorldBounds(getBody()) || (weaponType == WeaponType.WEAPON_GUN ) ||//&& !world.getWorldBounds().contains(getBody().getPosition())) ||
+        if (!getWorld().isInWorldBounds(getBody()) || //(weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(getBody().getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null);
 
-        if (!wormContactEnded) {//  
+        if (!wormContactEnded) {//
+            if (shootingWorm == null) {
+                System.out.println("Null pointer");
+            }
             float distance = shootingWorm.getBody().getPosition().dst(getBody().getPosition());
             if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
                 wormContactEnded = true;
@@ -204,9 +208,14 @@ public class Projectile extends WorldObject {
         return weaponType.getExplosionTime() == 0.0f;
     }
 
+    public Explosion getExplosion() {
+        return explosion;
+    }
+
     public void explode(Worm directHitWorm) {
         if (!exploded) {
             exploded = true;
+            explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());
             EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, this);
 
             if (weaponType.getExplosionRadius() == 0.0f) {
@@ -214,8 +223,7 @@ public class Projectile extends WorldObject {
                     directHitWorm.takeDamage(Math.round(weaponType.getDamage()));
             }
             else {
-                ArrayList<Worm> affectedWorms = getWorld().addExplosion(new Explosion(getBody().getPosition(),
-                        weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower()));
+                ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
 
                 for (Worm worm : affectedWorms) {
                     worm.takeDamage((int)weaponType.getDamage());

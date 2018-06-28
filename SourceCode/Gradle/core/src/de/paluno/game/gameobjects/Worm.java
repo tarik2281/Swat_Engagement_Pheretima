@@ -125,7 +125,7 @@ public class Worm extends WorldObject {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		//if (!world.isInWorldBounds(getBody())) die();
+		if (!getWorld().isInWorldBounds(getBody())) die();
 	}
 	
 	/**

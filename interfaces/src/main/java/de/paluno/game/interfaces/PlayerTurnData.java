@@ -3,6 +3,7 @@ package de.paluno.game.interfaces;
 public class PlayerTurnData extends GameData {
     private WormData playingWormData;
     private float shootingAngle;
+    private int wind;
 
     public PlayerTurnData() {
         super();

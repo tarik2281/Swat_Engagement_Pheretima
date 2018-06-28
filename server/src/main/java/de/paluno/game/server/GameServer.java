@@ -6,62 +6,49 @@ import com.esotericsoftware.kryonet.Server;
 import de.paluno.game.interfaces.*;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 public class GameServer {
 
     private Server server;
-    public ArrayList<Connection> connections;
     private HashMap<Class, DataHandler> objectHandlers;
-    public ArrayList<ClientState> clientStates;
-    //private ArrayList<Lobby> lobbies;
+    private ArrayList<Lobby> lobbies;
+
+    private Lobby getLobbyForConnection(Connection connection) {
+        for (Lobby lobby : lobbies) {
+            if (lobby.isInLobby(connection))
+                return lobby;
+        }
+
+        return null;
+    }
 
     private Listener serverListener = new Listener() {
         @Override
         public void connected(Connection connection) {
-            if (connections.size() < 2) {
+            Lobby lobby = null;
 
-                MessageData message = new MessageData(MessageData.Type.PlayerJoined);
-                for (Connection c : connections) {
-                    c.sendTCP(message);
-                }
-
-                connections.add(connection);
-                clientStates.add(new ClientState(connection.getID()));
-
-                if (connections.size() == 2) {
-                    // start game but request setup data from client
-
-                    int[] clientIds = new int[connections.size()];
-                    int[] playerIds = new int[connections.size()];
-
-                    for (int i = 0; i < connections.size(); i++) {
-                        Connection c = connections.get(i);
-                        clientIds[i] = c.getID();
-                        playerIds[i] = i;
-                    }
-
-                    GameSetupRequest request = new GameSetupRequest(clientIds, playerIds);
-                    //MessageData request = new MessageData(MessageData.Type.RequestGameSetup);
-                    System.out.println("Sending game setup request");
-                    connections.get(0).sendTCP(request);
-
-                    /*MessageData messageData = new MessageData(MessageData.Type.GameStarted);
-                    for (Connection c : connections) {
-                        c.sendTCP(messageData);
-                    }*/
+            if (!lobbies.isEmpty()) {
+                lobby = lobbies.get(lobbies.size() - 1);
+                if (lobby.isClosed()) {
+                    lobby = new Lobby();
+                    lobbies.add(lobby);
                 }
             }
+            else {
+                lobby = new Lobby();
+                lobbies.add(lobby);
+            }
+
+            lobby.addPlayerConnection(connection);
         }
 
         @Override
         public void disconnected(Connection connection) {
-            connections.remove(connection);
-            clientStates.removeIf(clientState -> clientState.clientId == connection.getID());
+            //Lobby lobby = getLobbyForConnection(connection);
+            //connections.remove(connection);
+            //clientStates.removeIf(clientState -> clientState.clientId == connection.getID());
         }
 
         @Override
@@ -77,102 +64,26 @@ public class GameServer {
         }
     };
 
-    private DataHandler<GameSetupData> gameSetupDataDataHandler = new DataHandler<GameSetupData>() {
-        @Override
-        public void handle(Connection connection, GameSetupData data) {
-            System.out.println("Broadcasting gameSetup");
+    private DataHandler<GameSetupData> gameSetupDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameSetupData(connection, data);
 
-            numWorms = 1;
+    private DataHandler<WorldData> worldDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveWorldData(connection, data);
 
-            for (Connection c : connections) {
-                if (c.getID() != connection.getID())
-                    c.sendTCP(data);
-            }
-        }
-    };
+    private DataHandler<GameEvent> eventHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameEvent(connection, data);
 
-    private DataHandler broadcaster = new DataHandler<>() {
-        @Override
-        public void handle(Connection connection, Object data) {
-            for (Connection c : connections)
-                if (c.getID() != connection.getID())
-                    c.sendTCP(data);
-        }
-    };
-
-    private DataHandler<ExplosionEvent> explosionEventHandler = new DataHandler<ExplosionEvent>() {
-        @Override
-        public void handle(Connection connection, ExplosionEvent data) {
-            for (Connection c : connections) {
-                if (c.getID() != connection.getID())
-                    c.sendTCP(data);
-            }
-        }
-    };
-
-    private DataHandler<WorldData> worldDataHandler = new DataHandler<>() {
-        @Override
-        public void handle(Connection connection, WorldData data) {
-            for (Connection c : connections) {
-                if (connection.getID() == c.getID()) {
-                    c.sendUDP(data);
+    private DataHandler<MessageData> messageDataDataHandler = (connection, data) -> {
+        switch (data.getType()) {
+            case ClientReady:
+                Lobby lobby = getLobbyForConnection(connection);
+                if (lobby != null) {
+                    lobby.setClientReady(connection);
                 }
-            }
+                break;
         }
     };
-
-    private DataHandler<MessageData> messageDataDataHandler = new DataHandler<MessageData>() {
-        @Override
-        public void handle(Connection connection, MessageData data) {
-            switch (data.getType()) {
-                case ClientReady:
-                    clientStates.forEach(clientState -> { if (clientState.clientId == connection.getID()) clientState.ready = true; });
-                    //clientsReady.put(connection.getID(), true);
-
-                    boolean allClientsReady = true;
-
-                    for (ClientState state : clientStates) {
-                        if (!state.ready) {
-                            allClientsReady = false;
-                            break;
-                        }
-                    }
-
-                    if (allClientsReady) {
-                        StartTurnEvent event = new StartTurnEvent();
-
-                        event.playerNumber = currentPlayer;
-                        event.wormNumber = playerTurns[currentPlayer];
-
-                        for (Connection c : connections)
-                            c.sendTCP(event);
-
-                        shiftTurn();
-
-                        clientStates.forEach(clientState -> clientState.ready = false );
-                    }
-
-                    break;
-            }
-        }
-    };
-
-    private int currentPlayer;
-    private int[] playerTurns;
-    private int numWorms;
-
-    private void shiftTurn() {
-        playerTurns[currentPlayer] = (playerTurns[currentPlayer] + 1) % numWorms;
-        currentPlayer = (currentPlayer + 1) % 2;
-    }
 
     public GameServer() {
-        //lobbies = new ArrayList<>();
-        connections = new ArrayList<>();
+        lobbies = new ArrayList<>();
         objectHandlers = new HashMap<>();
-        clientStates = new ArrayList<>();
-
-        playerTurns = new int[2];
     }
 
     public void initialize() {
@@ -181,10 +92,11 @@ public class GameServer {
 
         KryoInterface.registerClasses(server.getKryo());
 
-        objectHandlers.put(WorldData.class, new WorldDataHandler().initialize(this));
-        objectHandlers.put(GameSetupData.class, gameSetupDataDataHandler);
+        objectHandlers.put(WorldData.class, worldDataHandler);
+        objectHandlers.put(GameSetupData.class, gameSetupDataHandler);
         objectHandlers.put(MessageData.class, messageDataDataHandler);
-        objectHandlers.put(ExplosionEvent.class, broadcaster);
+        objectHandlers.put(ExplosionEvent.class, eventHandler);
+        objectHandlers.put(ShootEvent.class, eventHandler);
 
         server.addListener(serverListener);
 
@@ -200,13 +112,5 @@ public class GameServer {
         GameServer server = new GameServer();
 
         server.initialize();
-
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            //System.out.println(addr);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

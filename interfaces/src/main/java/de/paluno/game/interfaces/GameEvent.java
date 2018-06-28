@@ -5,6 +5,7 @@ public abstract class GameEvent extends GameData {
         WORM_DIED,
         WORM_INFECTED,
         EXPLOSION,
+        SHOOT,
         GAME_STATE_CHANGED
     }
 

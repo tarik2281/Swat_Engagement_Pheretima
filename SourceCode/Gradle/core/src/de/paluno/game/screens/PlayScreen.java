@@ -51,8 +51,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         this.gameSetupRequest = request;
     }
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms, NetworkClient client, GameSetupData data) {
-        this(game, mapNumber, numWorms);
+    public PlayScreen(SEPGame game, NetworkClient client, GameSetupData data) {
+        this(game, data.mapNumber, 1);
 
         this.client = client;
 
@@ -131,7 +131,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // game loop
-        //Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
+        Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
 
         worldHandler.updateAndRender(spriteBatch, delta);
 

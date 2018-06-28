@@ -73,7 +73,11 @@ public class Weapon {
 
 	public void shoot(Worm worm, ShotDirectionIndicator indicator, List<Projectile> output) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
+			Vector2 direction = new Vector2(1, 0).rotate(indicator.getAngle());
+			Projectile projectile = new Projectile(worm, type, worm.getPosition(), direction);
+			output.add(projectile);
 
+			currentAmmo--;
 		}
 	}
 	

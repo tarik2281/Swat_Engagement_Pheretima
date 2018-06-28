@@ -30,7 +30,7 @@ public class MultiplayerScreen extends ScreenAdapter {
         @Override
         public void handleData(NetworkClient client, GameSetupData data) {
             Gdx.app.postRunnable(() -> {
-                game.setNextScreen(new PlayScreen(game, 0, 1, client, data));
+                game.setNextScreen(new PlayScreen(game, client, data));
             });
         }
     };

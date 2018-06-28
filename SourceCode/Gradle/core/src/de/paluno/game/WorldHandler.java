@@ -97,7 +97,9 @@ public abstract class WorldHandler implements Disposable {
 
     public void endPlayerTurn() {
         if (currentGameState == GameState.PLAYERTURN) {
-            players.get(currentPlayer).getCurrentWorm().unequipWeapon();
+            Worm worm = getCurrentPlayer().getCurrentWorm();
+            worm.unequipWeapon();
+            worm.setIsPlaying(false);
 
             world.forgetAfterUpdate(shotDirectionIndicator);
             world.forgetAfterUpdate(windDirectionIndicator);
@@ -116,17 +118,23 @@ public abstract class WorldHandler implements Disposable {
         this.weaponProjectileCache = new ArrayList<>();
     }
 
+    public int getMapNumber() {
+        return mapNumber;
+    }
+
     public void initialize() {
         map = screen.getAssetManager().get(Assets.getMapByIndex(mapNumber));
         spawnPositions = new ArrayList<>(Arrays.asList(map.getSpawnPoints()));
+        windHandler = new WindHandler();
         shotDirectionIndicator = new ShotDirectionIndicator();
+        windDirectionIndicator = new WindDirectionIndicator(windHandler);
 
         world = new World2(this);
         world.initialize(map);
 
         onInitializePlayers();
 
-        currentGameState = GameState.WAITING;
+        currentGameState = GameState.NONE;
 
         EventManager.getInstance().addListener(EventManager.Type.WormDied, listener);
         EventManager.getInstance().addListener(EventManager.Type.ProjectileExploded, listener);
@@ -277,6 +285,7 @@ public abstract class WorldHandler implements Disposable {
             weaponProjectileCache.clear();
             player.getCurrentWeapon().shoot(worm, shotDirectionIndicator, weaponProjectileCache);
             weaponProjectileCache.forEach(this::addProjectile);
+            onShoot(weaponProjectileCache);
             //Projectile projectile = new Projectile(worm, WeaponType.WEAPON_BAZOOKA,
             //        worm.getBody().getWorldCenter(), new Vector2(1, 0).rotate(shotDirectionIndicator.getAngle()));
             //addProjectile(projectile);
@@ -293,7 +302,7 @@ public abstract class WorldHandler implements Disposable {
         }
     }
 
-    public void onAddExplosion(Explosion explosion) {
+    public void onShoot(List<Projectile> projectiles) {
 
     }
 
@@ -354,6 +363,12 @@ public abstract class WorldHandler implements Disposable {
         onUpdate(delta);
 
         world.render(batch, delta);
+
+        if (currentGameState == GameState.NONE) {
+            if (allWormsIdle()) {
+                setIdle();
+            }
+        }
 
         if (shouldWorldStep() && currentGameState == GameState.WAITING) {
             if (allWormsIdle()) {

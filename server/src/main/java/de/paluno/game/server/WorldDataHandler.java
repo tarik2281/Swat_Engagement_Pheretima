@@ -1,4 +1,4 @@
-package de.paluno.game.server;
+/*package de.paluno.game.server;
 
 import com.esotericsoftware.kryonet.Connection;
 import de.paluno.game.interfaces.WorldData;
@@ -22,3 +22,4 @@ public class WorldDataHandler extends DataHandler<WorldData> {
         }
     }
 }
+*/

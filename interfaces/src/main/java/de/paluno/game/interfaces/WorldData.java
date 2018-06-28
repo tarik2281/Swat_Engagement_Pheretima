@@ -6,6 +6,7 @@ public class WorldData extends GameData {
     public PlayerData[] players;
     public float shootingAngle;
     public ProjectileData[] projectiles;
+    public int currentWeapon = -1;
 
     public WorldData() {
         super();
