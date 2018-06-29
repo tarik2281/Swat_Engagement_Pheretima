@@ -4,6 +4,7 @@ public class GameEvent extends GameData {
     public enum Type {
         WORM_DIED,
         WORM_INFECTED,
+        WORM_TOOK_DAMAGE,
         EXPLOSION,
         SHOOT,
         END_TURN,

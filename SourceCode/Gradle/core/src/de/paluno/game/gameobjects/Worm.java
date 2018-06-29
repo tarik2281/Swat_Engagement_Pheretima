@@ -22,6 +22,24 @@ public class Worm extends WorldObject {
         private boolean isInfected;
     }
 
+    public static class DamageEvent {
+		private Worm worm;
+		private int damage;
+
+		private DamageEvent(Worm worm, int damage) {
+			this.worm = worm;
+			this.damage = damage;
+		}
+
+		public Worm getWorm() {
+			return worm;
+		}
+
+		public int getDamage() {
+			return damage;
+		}
+	}
+
     private int characterNumber;
 	private Player player;
 
@@ -92,6 +110,7 @@ public class Worm extends WorldObject {
 
 		if(this.jump) {
 			if (canJump()) {
+				EventManager.getInstance().queueEvent(EventManager.Type.WormJumped, this);
 				// We shall jump - AND are allowed to - so let's apply some vertical impulse
 				this.getBody().applyLinearImpulse(0.0f, getBody().getMass() * Constants.JUMP_VELOCITY,
 						currentPos.x, currentPos.y, true);
@@ -355,6 +374,8 @@ public class Worm extends WorldObject {
 	public void takeDamage(int damage) {
 		health -= damage;
 
+		EventManager.getInstance().queueEvent(EventManager.Type.WormTookDamage, new DamageEvent(this, damage));
+
 		if (health <= 0) {
 			// Is dead, kill it
 			health = 0;
@@ -444,6 +465,8 @@ public class Worm extends WorldObject {
 
 		this.movement = newMovementCode;
 		invalidateAnimation();
+
+		EventManager.getInstance().queueEvent(EventManager.Type.WormMovement, this);
 
 		if (isStandsOnGround() && movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			// The new movementCode is a move-order? Update orientation

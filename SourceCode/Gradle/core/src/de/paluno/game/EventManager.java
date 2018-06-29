@@ -6,7 +6,8 @@ import java.util.HashMap;
 
 public class EventManager {
     public enum Type {
-        WormInfected, WormDied, ProjectileExploded
+        WormTookDamage, WormEquipWeapon, WormInfected, WormJumped,
+        WormMovement, WormDied, WeaponShoot, ProjectileExploded, GameOver
     }
 
     public interface Listener {
@@ -33,15 +34,25 @@ public class EventManager {
         activeQueue = 0;
     }
 
-    public void addListener(Type eventType, Listener l) {
-        listenerMap.computeIfAbsent(eventType, (e) -> new ArrayList<>(1)).add(l);
+    public void addListener(Listener l, Type... eventTypes) {
+        if (eventTypes.length <= 0)
+            throw new IllegalArgumentException("At least one event type must be given");
+
+        for (Type eventType : eventTypes) {
+            listenerMap.computeIfAbsent(eventType, (e) -> new ArrayList<>(1)).add(l);
+        }
     }
 
-    public void removeListener(Type eventType, Listener l) {
-        ArrayList<Listener> listeners = listenerMap.get(eventType);
+    public void removeListener(Listener l, Type... eventTypes) {
+        if (eventTypes.length <= 0)
+            throw new IllegalArgumentException("At least one event type must be given");
 
-        if (listeners != null)
-            listeners.remove(l);
+        for (Type eventType : eventTypes) {
+            ArrayList<Listener> listeners = listenerMap.get(eventType);
+
+            if (listeners != null)
+                listeners.remove(l);
+        }
     }
 
     public void processEvents() {

@@ -40,6 +40,10 @@ public class NetworkWorldHandler extends WorldHandler {
         });
     };
 
+    private DataHandler<GameOverEvent> gameOverHandler = (client, data) -> {
+        Gdx.app.postRunnable(() -> EventManager.getInstance().queueEvent(EventManager.Type.GameOver, data.winningPlayer));
+    };
+
     private DataHandler<WorldData> worldDataHandler = (client, data) -> {
         data.setReceivingTimeStamp(currentTime);
 
@@ -103,6 +107,7 @@ public class NetworkWorldHandler extends WorldHandler {
         client.registerDataHandler(GameEvent.class, eventHandler);
         client.registerDataHandler(ShootEvent.class, eventHandler);
         client.registerDataHandler(WormEvent.class, eventHandler);
+        client.registerDataHandler(WormDamageEvent.class, eventHandler);
 
         if (gameSetupRequest != null) {
             PlayerData[] playerData = new PlayerData[gameSetupRequest.getPlayerNumbers().length];
@@ -336,7 +341,7 @@ public class NetworkWorldHandler extends WorldHandler {
                         ExplosionEvent ex = (ExplosionEvent)currentEvent;
                         Projectile projectile = getProjectileById(ex.projectileId);
                         getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
-                                ex.getRadius(), 1.0f));
+                                ex.getRadius(), ex.getBlastPower()));
                         removeProjectile(projectile);
                         break;
                     }
@@ -357,9 +362,7 @@ public class NetworkWorldHandler extends WorldHandler {
                         WormEvent event = (WormEvent)currentEvent;
                         Player player = getPlayers().get(event.getPlayerNumber());
                         Worm worm = player.getWormByNumber(event.getWormNumber());
-                        getWorld().forgetAfterUpdate(worm);
-                        player.removeWorm(worm);
-                        EventManager.getInstance().queueEvent(EventManager.Type.WormDied, worm);
+                        worm.die();
                         break;
                     }
                     case WORM_INFECTED: {
@@ -367,6 +370,13 @@ public class NetworkWorldHandler extends WorldHandler {
                         Player player = getPlayers().get(event.getPlayerNumber());
                         Worm worm = player.getWormByNumber(event.getWormNumber());
                         worm.setIsInfected(true);
+                        break;
+                    }
+                    case WORM_TOOK_DAMAGE: {
+                        WormDamageEvent event = (WormDamageEvent)currentEvent;
+                        Player player = getPlayers().get(event.getPlayerNumber());
+                        Worm worm = player.getWormByNumber(event.getWormNumber());
+                        worm.takeDamage(event.getDamage());
                         break;
                     }
                 }
@@ -432,7 +442,7 @@ public class NetworkWorldHandler extends WorldHandler {
     @Override
     public void onProjectileExploded(Projectile projectile) {
         Vector2 pos = projectile.getExplosion().getCenter();
-        ExplosionEvent e = new ExplosionEvent(0, pos.x, pos.y, projectile.getExplosion().getRadius());
+        ExplosionEvent e = new ExplosionEvent(0, pos.x, pos.y, projectile.getExplosion().getRadius(), projectile.getExplosion().getBlastPower());
         e.projectileId = projectile.getId();
         client.sendObject(e);
     }
@@ -447,6 +457,12 @@ public class NetworkWorldHandler extends WorldHandler {
     protected void onWormInfected(Worm worm) {
         WormEvent event = new WormEvent(0, GameEvent.Type.WORM_INFECTED, worm.getPlayerNumber(), worm.getCharacterNumber());
         client.sendObject(event);
+    }
+
+    @Override
+    protected void onWormTookDamage(Worm.DamageEvent event) {
+        WormDamageEvent gameEvent = new WormDamageEvent(0, event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber(), event.getDamage());
+        client.sendObject(gameEvent);
     }
 
     @Override

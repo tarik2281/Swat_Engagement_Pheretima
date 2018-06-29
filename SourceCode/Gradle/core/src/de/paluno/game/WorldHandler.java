@@ -34,26 +34,35 @@ public abstract class WorldHandler implements Disposable {
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
-            case WormDied:
-                if (shouldWorldStep()) {
-                    Worm worm = (Worm) data;
-                    world.forgetAfterUpdate(worm);
+            case WormDied: {
+                Worm worm = (Worm) data;
 
+                if (shouldWorldStep()) {
                     if (getCurrentPlayer().getCurrentWorm() == worm) {
                         System.out.println("Current worm died, setting to waiting");
                         setWaiting();
                     }
 
-                    players.get(worm.getPlayerNumber()).removeWorm(worm);
                     onWormDied(worm);
                 }
+
+                world.forgetAfterUpdate(worm);
+                players.get(worm.getPlayerNumber()).removeWorm(worm);
                 break;
+            }
             case WormInfected:
                 if (shouldWorldStep()) {
                     Worm worm = (Worm)data;
                     onWormInfected(worm);
                 }
                 break;
+            case WormTookDamage: {
+                if (shouldWorldStep()) {
+                    Worm.DamageEvent event = (Worm.DamageEvent)data;
+                    onWormTookDamage(event);
+                }
+                break;
+            }
             case ProjectileExploded:
                 if (shouldWorldStep()) {
                     Projectile projectile = (Projectile) data;
@@ -69,6 +78,7 @@ public abstract class WorldHandler implements Disposable {
     protected abstract boolean shouldWorldStep();
     protected abstract void requestNextTurn();
 
+    protected void onWormTookDamage(Worm.DamageEvent event) {}
     protected void onWormDied(Worm worm) {}
     protected void onWormInfected(Worm worm) {}
     protected void onProjectileExploded(Projectile projectile) {}
@@ -105,14 +115,22 @@ public abstract class WorldHandler implements Disposable {
 
         currentGameState = GameState.NONE;
 
-        EventManager.getInstance().addListener(EventManager.Type.WormDied, listener);
-        EventManager.getInstance().addListener(EventManager.Type.WormInfected, listener);
-        EventManager.getInstance().addListener(EventManager.Type.ProjectileExploded, listener);
+        EventManager.getInstance().addListener(listener,
+                EventManager.Type.WormDied,
+                EventManager.Type.WormInfected,
+                EventManager.Type.ProjectileExploded,
+                EventManager.Type.WormTookDamage);
     }
 
     @Override
     public void dispose() {
         world.dispose();
+
+        EventManager.getInstance().removeListener(listener,
+                EventManager.Type.WormDied,
+                EventManager.Type.WormInfected,
+                EventManager.Type.ProjectileExploded,
+                EventManager.Type.WormTookDamage);
     }
 
     protected void initializePlayersDefault(int numWorms) {

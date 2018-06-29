@@ -2,6 +2,7 @@ package de.paluno.game;
 
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.screens.WinningPlayer;
 
 public class LocalWorldHandler extends WorldHandler {
 
@@ -15,6 +16,28 @@ public class LocalWorldHandler extends WorldHandler {
 
     @Override
     protected void requestNextTurn() {
+        int numPlayersAlive = 0;
+        WinningPlayer winningPlayer = WinningPlayer.NONE;
+
+        for (Player player : getPlayers()) {
+            if (!player.isDefeated()) {
+                numPlayersAlive++;
+                switch (player.getPlayerNumber()) {
+                    case 0:
+                        winningPlayer = WinningPlayer.PLAYERONE;
+                        break;
+                    case 1:
+                        winningPlayer = WinningPlayer.PLAYERTWO;
+                        break;
+                }
+            }
+        }
+
+        if (numPlayersAlive <= 1) {
+            EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
+            return;
+        }
+
         int playerNumber = getCurrentPlayerIndex();
         if (playerNumber >= 0) {
             getPlayers().get(playerNumber).shiftTurn();

@@ -95,9 +95,9 @@ public class GameServer {
         objectHandlers.put(WorldData.class, worldDataHandler);
         objectHandlers.put(GameSetupData.class, gameSetupDataHandler);
         objectHandlers.put(MessageData.class, messageDataDataHandler);
-        objectHandlers.put(ExplosionEvent.class, eventHandler);
-        objectHandlers.put(ShootEvent.class, eventHandler);
-        objectHandlers.put(WormEvent.class, eventHandler);
+
+        registerDataHandler(eventHandler, ExplosionEvent.class, ShootEvent.class,
+                WormEvent.class, WormDamageEvent.class);
 
         server.addListener(serverListener);
 
@@ -106,6 +106,12 @@ public class GameServer {
         }
         catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void registerDataHandler(DataHandler handler, Class... classes) {
+        for (Class clazz : classes) {
+            objectHandlers.put(clazz, handler);
         }
     }
 
