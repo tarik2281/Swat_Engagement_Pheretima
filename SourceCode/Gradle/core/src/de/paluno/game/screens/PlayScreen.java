@@ -7,9 +7,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.*;
-import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.World2;
-import de.paluno.game.gameobjects.Worm;
 import de.paluno.game.interfaces.*;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
@@ -33,6 +31,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private GameSetupData gameSetupData;
     private GameSetupRequest gameSetupRequest;
     private NetworkClient client;
+    private ChatWindow chatWindow;
 
     public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
         this.game = game;
@@ -80,6 +79,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         worldController = new UserWorldController();
         worldController.initialize(worldHandler);
+
+        //chatWindow = new ChatWindow(client);
+        //chatWindow.initialize();
 
 
         /*if (gameSetupRequest != null) {
@@ -143,6 +145,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         renderPhase(delta);
 
         weaponUI.render(spriteBatch, delta);
+
+        //chatWindow.render(delta);
 
         /*if (disposeReplayAfterUpdate) {
             replayWorld.dispose();

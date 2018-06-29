@@ -2,6 +2,7 @@ package de.paluno.game;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.interfaces.*;
@@ -36,6 +37,9 @@ public class NetworkClient {
             DataHandler handler = dataHandlers.get(object.getClass());
             if (handler != null) {
                 handler.handleData(NetworkClient.this, object);
+            }
+            else if (!(object instanceof FrameworkMessage.KeepAlive)){
+                System.err.println("No DataHandler registered for " + object.getClass().getName());
             }
         }
     };

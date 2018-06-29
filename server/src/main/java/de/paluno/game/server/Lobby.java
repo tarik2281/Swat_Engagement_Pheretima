@@ -70,7 +70,7 @@ public class Lobby {
                 player.ready = true;
 
                 if (i == currentPlayerIndex)
-                    broadcast(connection, new EndTurnEvent());
+                    broadcast(connection, new GameEvent(0, GameEvent.Type.END_TURN));
 
                 break;
             }
@@ -109,6 +109,15 @@ public class Lobby {
     }
 
     public void onReceiveGameEvent(Connection source, GameEvent event) {
+        switch (event.getType()) {
+            case WORM_DIED: {
+                WormEvent wormEvent = (WormEvent)event;
+                Player player = players.get(wormEvent.getPlayerNumber());
+                player.worms.get(wormEvent.getWormNumber()).isDead = true;
+                break;
+            }
+        }
+
         broadcast(source, event);
     }
 
@@ -137,12 +146,18 @@ public class Lobby {
     }
 
     public void shiftTurn() {
+        System.out.println("Shifting turn");
 
         if (currentPlayerIndex != -1) {
             Player player = players.get(currentPlayerIndex);
-            player.currentWormIndex = (player.currentWormIndex + 1) % player.worms.size();
+
+            do {
+                player.currentWormIndex = (player.currentWormIndex + 1) % player.worms.size();
+            } while (player.worms.get(player.currentWormIndex).isDead);
         }
 
         currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+
+        System.out.println("Turn shifted");
     }
 }

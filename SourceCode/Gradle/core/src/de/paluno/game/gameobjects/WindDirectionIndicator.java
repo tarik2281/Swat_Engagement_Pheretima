@@ -31,9 +31,9 @@ public class WindDirectionIndicator extends WorldObject {
 
     @Override
     public void render(SpriteBatch batch, float delta) {
-        if (Math.abs(windHandler.getX()) <= 1)
+        if (Math.abs(windHandler.getWind()) <= 1)
             sprite.setTexture(greenTexture);
-        else if (Math.abs(windHandler.getX()) <= 3)
+        else if (Math.abs(windHandler.getWind()) <= 3)
             sprite.setTexture(orangeTexture);
         else
             sprite.setTexture(redTexture);

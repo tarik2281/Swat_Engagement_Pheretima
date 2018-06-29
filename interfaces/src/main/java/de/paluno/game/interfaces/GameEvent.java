@@ -1,11 +1,12 @@
 package de.paluno.game.interfaces;
 
-public abstract class GameEvent extends GameData {
+public class GameEvent extends GameData {
     public enum Type {
         WORM_DIED,
         WORM_INFECTED,
         EXPLOSION,
         SHOOT,
+        END_TURN,
         GAME_STATE_CHANGED
     }
 

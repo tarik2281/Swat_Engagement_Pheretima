@@ -39,6 +39,7 @@ public class Worm extends WorldObject {
 	private boolean isStatic = false;
 	private boolean isPlaying;
 	private boolean isInfected = false;
+	private boolean isDead = false;
 	private boolean createVirusFixture = false;
 	private Fixture virusFixture;
 
@@ -371,9 +372,12 @@ public class Worm extends WorldObject {
 	 * Method to handle characters death - cleanup and stuff
 	 */
 	public void die() {
-		EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
-		//this.player.characterDied(this.characterNumber);
-		//this.setBodyToNullReference();
+		if (!isDead) {
+			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
+			//this.player.characterDied(this.characterNumber);
+			//this.setBodyToNullReference();
+			isDead = true;
+		}
 
 	}
 	
@@ -382,9 +386,7 @@ public class Worm extends WorldObject {
 	 * @return Character on ground and allowed to move?
 	 */
 	public boolean canJump() {
-		return this.isStandsOnGround() &&
-				this.player.isPlayerTurn() &&
-				this.characterNumber == this.player.getTurn();
+		return this.isStandsOnGround();
 	}
 	/**
 	 * Getter method for character's shoot status

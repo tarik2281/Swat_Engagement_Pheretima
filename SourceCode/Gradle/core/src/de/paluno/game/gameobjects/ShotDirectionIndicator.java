@@ -51,7 +51,7 @@ public class ShotDirectionIndicator extends WorldObject {
 	@Override
 	public void render(SpriteBatch batch, float delta) {
 		if (getParent() != null) {
-			Vector2 position = Constants.getScreenSpaceVector(getParent().getBody().getPosition());
+			Vector2 position = Constants.getScreenSpaceVector(getParent().getPosition());
 
 			sprite.setOriginCenter();
 			sprite.setRotation(degrees);

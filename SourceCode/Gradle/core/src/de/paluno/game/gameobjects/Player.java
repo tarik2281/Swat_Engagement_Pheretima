@@ -1,12 +1,6 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.assets.AssetManager;
-
 import de.paluno.game.*;
-import de.paluno.game.interfaces.GameSetupData;
-import de.paluno.game.interfaces.PlayerData;
-import de.paluno.game.interfaces.WormData;
-import de.paluno.game.screens.WeaponUI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +29,6 @@ public class Player implements Updatable {
 	private int turn = 0;
 	private boolean isRoundEnded = false;
 
-	private boolean isRemotePlayer;
 	private int clientId;
 
 	/**
@@ -100,11 +93,6 @@ public class Player implements Updatable {
 
 		return true;
 	};
-	
-	/**
-	 * Empty constructor for cloning purposes
-	 */
-	public Player() {}
 
 	public Player(int playerNumber) {
 		this.playerNum = playerNumber;
@@ -124,15 +112,20 @@ public class Player implements Updatable {
 	}
 
 	public void removeWorm(Worm worm) {
-		worms.remove(worm);
+		int index;
+		for (index = 0; index < worms.size(); index++) {
+			if (worms.get(index) == worm)
+				break;
+		}
+
+		if (turn > 0 && turn >= index)
+			turn--;
+
+		worms.remove(index);
 	}
 
 	public List<Worm> getWorms() {
 		return worms;
-	}
-
-	public void setIsRemotePlayer(boolean isRemotePlayer) {
-		this.isRemotePlayer = isRemotePlayer;
 	}
 
 	public void setClientId(int clientId) {
@@ -143,11 +136,18 @@ public class Player implements Updatable {
 		return clientId;
 	}
 
-	public boolean isRemotePlayer() {
-		return isRemotePlayer;
-	}
+	public void setTurn(int wormNumber) {
+		int turn = -1;
+		for (int i = 0; i < worms.size(); i++) {
+			if (worms.get(i).getCharacterNumber() == wormNumber) {
+				turn = i;
+				break;
+			}
+		}
 
-	public void setTurn(int turn) {
+		if (turn == -1)
+			throw new IllegalArgumentException("Worm with the given wormNumber=" + wormNumber +" is not in the list");
+
 		this.turn = turn;
 	}
 
@@ -157,7 +157,11 @@ public class Player implements Updatable {
 	 * @return Worm behind given number
 	 */
 	public Worm getWormByNumber(int characterNumber) {
-		return worms.get(characterNumber);
+		for (Worm worm : worms)
+			if (worm.getCharacterNumber() == characterNumber)
+				return worm;
+
+		return null;
 	}
 
 	/**
@@ -183,13 +187,13 @@ public class Player implements Updatable {
 	 * Soft setter method for the character's turn
 	 * Shift through all still available characters to find the next one whose turn it is
 	 */
-	protected void shiftTurn() {
+	public void shiftTurn() {
 	    // Noone left - shouldn't happen, nothing to do
-		if (numCharacters <= 0)
+		if (worms.isEmpty())
 	        return;
 
 		turn++;
-		if (turn == worms.size()) {
+		if (turn >= worms.size()) {
 			// Handle int-overflow (i.e. higher number than possible characters)
 			turn = 0;
 			isRoundEnded = true;
@@ -260,7 +264,7 @@ public class Player implements Updatable {
 	 * @return Any characters left?
 	 */
 	public boolean isDefeated() {
-		return numCharacters <= 0;
+		return worms.isEmpty();
 	}
 	
 	/**

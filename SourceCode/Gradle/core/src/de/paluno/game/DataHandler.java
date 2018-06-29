@@ -1,8 +1,6 @@
 package de.paluno.game;
 
-public class DataHandler<T> {
+public interface DataHandler<T> {
 
-    public void handleData(NetworkClient client, T data) {
-
-    }
+    void handleData(NetworkClient client, T data);
 }

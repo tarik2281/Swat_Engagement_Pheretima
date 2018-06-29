@@ -97,6 +97,7 @@ public class GameServer {
         objectHandlers.put(MessageData.class, messageDataDataHandler);
         objectHandlers.put(ExplosionEvent.class, eventHandler);
         objectHandlers.put(ShootEvent.class, eventHandler);
+        objectHandlers.put(WormEvent.class, eventHandler);
 
         server.addListener(serverListener);
 
