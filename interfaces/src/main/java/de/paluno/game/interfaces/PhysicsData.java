@@ -55,4 +55,18 @@ public class PhysicsData{
         this.angle = angle;
         return this;
     }
+
+    public PhysicsData interpolate(PhysicsData fromData, PhysicsData toData, float ratio) {
+        if (toData == null)
+            return fromData;
+
+        float from = 1.0f - ratio;
+        positionX = fromData.positionX * from + toData.positionX * ratio;
+        positionY = fromData.positionY * from + toData.positionY * ratio;
+        velocityX = fromData.velocityX * from + toData.velocityX * ratio;
+        velocityY = fromData.velocityY * from + toData.velocityY * ratio;
+        angle = fromData.angle * from + toData.angle * ratio;
+
+        return this;
+    }
 }

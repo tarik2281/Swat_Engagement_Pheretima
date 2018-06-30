@@ -22,4 +22,7 @@ public class PlayerData {
         return worms;
     }
 
+    public WormData getWormByNumber(int number) {
+        return worms[number];
+    }
 }

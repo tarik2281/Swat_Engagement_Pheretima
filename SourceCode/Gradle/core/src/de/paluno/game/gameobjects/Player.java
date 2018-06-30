@@ -1,11 +1,12 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player implements Updatable {
+public class Player implements Updatable, Disposable {
 
 	/**
      * Inner class to create a copy of the data necessary for the replay
@@ -24,12 +25,24 @@ public class Player implements Updatable {
 
 	private int numCharacters;
 	private ArrayList<Worm> worms;
+	private int numWormsAlive;
 	private ArrayList<Weapon> weapons;
 	private Weapon currentWeapon;
 	private int turn = 0;
 	private boolean isRoundEnded = false;
 
 	private int clientId;
+
+	private EventManager.Listener eventListener = (eventType, data) -> {
+		switch (eventType) {
+			case WormDied: {
+				Worm worm = (Worm)data;
+				if (worm.getPlayerNumber() == playerNum)
+					numWormsAlive--;
+				break;
+			}
+		}
+	};
 
 	/**
 	 * Inner KeyListener object to dynamically register reactions to certain input keys pressed
@@ -99,6 +112,13 @@ public class Player implements Updatable {
 
 		worms = new ArrayList<>();
 		weapons = new ArrayList<>();
+
+		EventManager.getInstance().addListener(eventListener, EventManager.Type.WormDied);
+	}
+
+	@Override
+	public void dispose() {
+		EventManager.getInstance().removeListener(eventListener, EventManager.Type.WormDied);
 	}
 
 	public void addWeapon(Weapon weapon) {
@@ -108,10 +128,11 @@ public class Player implements Updatable {
 	public Worm addWorm(int wormNumber) {
 		Worm worm = new Worm(this, wormNumber);
 		worms.add(wormNumber, worm);
+		numWormsAlive++;
 		return worm;
 	}
 
-	public void removeWorm(Worm worm) {
+	private void removeWorm(Worm worm) {
 		int index;
 		for (index = 0; index < worms.size(); index++) {
 			if (worms.get(index) == worm)
@@ -189,17 +210,24 @@ public class Player implements Updatable {
 	 */
 	public void shiftTurn() {
 	    // Noone left - shouldn't happen, nothing to do
-		if (worms.isEmpty())
+		if (isDefeated())
 	        return;
 
-		turn++;
+		do {
+			if (++turn >= worms.size()) {
+				turn = 0;
+				isRoundEnded = true;
+			}
+		} while (worms.get(turn).isDead());
+
+		/*turn++;
 		if (turn >= worms.size()) {
 			// Handle int-overflow (i.e. higher number than possible characters)
 			turn = 0;
 			isRoundEnded = true;
 		}
 		// This character isn't alive anymore? Choose another one
-		if (worms.get(turn) == null) shiftTurn();
+		if (worms.get(turn) == null) shiftTurn();*/
 	}
 	
 	/**
@@ -264,7 +292,7 @@ public class Player implements Updatable {
 	 * @return Any characters left?
 	 */
 	public boolean isDefeated() {
-		return worms.isEmpty();
+		return numWormsAlive <= 0;
 	}
 	
 	/**

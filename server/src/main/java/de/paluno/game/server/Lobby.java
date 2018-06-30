@@ -4,11 +4,15 @@ import com.esotericsoftware.kryonet.Connection;
 import de.paluno.game.interfaces.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Lobby {
 
     private int currentPlayerIndex;
     private ArrayList<Player> players;
+    private int numPlayersAlive;
+
+    private Random windRandomizer = new Random();
 
     private boolean closed;
 
@@ -23,7 +27,7 @@ public class Lobby {
 
     public boolean isInLobby(Connection connection) {
         for (Player player : players) {
-            if (player.connection.getID() == connection.getID())
+            if (player.getConnection().getID() == connection.getID())
                 return true;
         }
 
@@ -35,12 +39,9 @@ public class Lobby {
             return;
 
         MessageData data = new MessageData(MessageData.Type.PlayerJoined);
-        players.forEach(player -> player.connection.sendTCP(data));
+        players.forEach(player -> player.getConnection().sendTCP(data));
 
-        Player player = new Player();
-        player.connection = connection;
-        player.ready = false;
-        player.currentWormIndex = 0;
+        Player player = new Player(connection, players.size());
         players.add(player);
 
         if (players.size() == 2) {
@@ -53,21 +54,23 @@ public class Lobby {
         int[] clientIds = new int[players.size()];
         int[] playerNumbers = new int[players.size()];
 
+        numPlayersAlive = 0;
         for (int i = 0; i < players.size(); i++) {
             Player player = players.get(i);
-            clientIds[i] = player.connection.getID();
-            playerNumbers[i] = i;
+            clientIds[i] = player.getConnection().getID();
+            playerNumbers[i] = player.getNumber();
+            numPlayersAlive++;
         }
 
         GameSetupRequest setupRequest = new GameSetupRequest(clientIds, playerNumbers);
-        players.get(0).connection.sendTCP(setupRequest);
+        players.get(0).getConnection().sendTCP(setupRequest);
     }
 
     public void setClientReady(Connection connection) {
         for (int i = 0; i < players.size(); i++) {
             Player player = players.get(i);
-            if (player.connection.getID() == connection.getID()) {
-                player.ready = true;
+            if (player.getConnection().getID() == connection.getID()) {
+                player.setReady(true);
 
                 if (i == currentPlayerIndex)
                     broadcast(connection, new GameEvent(0, GameEvent.Type.END_TURN));
@@ -81,25 +84,79 @@ public class Lobby {
         }
     }
 
-    private void startTurn() {
-        StartTurnEvent event = new StartTurnEvent();
+    private void applyWormInfectionDamage() {
+        Player currentPlayer = getCurrentPlayer();
+        Worm worm = currentPlayer.getCurrentWorm();
 
-        shiftTurn();
+        if (worm.isInfected()) {
+            WormDamageEvent damageEvent = worm.takeDamage(5, Constants.DAMAGE_TYPE_VIRUS);
 
-        event.playerNumber = currentPlayerIndex;
-        event.wormNumber = players.get(currentPlayerIndex).worms.get(players.get(currentPlayerIndex).currentWormIndex).wormNumber;
+            if (worm.isDead()) {
+                broadcast(null, new WormEvent(0, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getWormNumber()));
+                wormDied(worm.getPlayerNumber(), worm.getWormNumber());
 
-        for (Player player : players) {
-            player.connection.sendTCP(event);
-            player.ready = false;
+                if (numPlayersAlive >= 2) {
+                    if (currentPlayer.isDefeated()) {
+                        shiftTurn(false);
+                        applyWormInfectionDamage();
+                    }
+                    else {
+                        currentPlayer.shiftTurn();
+                    }
+                }
+            }
+            else {
+                broadcast(null, damageEvent);
+            }
         }
+    }
+
+    private void startTurn() {
+        shiftTurn(true);
+
+        applyWormInfectionDamage();
+
+        if (numPlayersAlive <= 1) {
+            int winningPlayer = -1;
+            for (Player player : players) {
+                if (!player.isDefeated()) {
+                    winningPlayer = player.getNumber();
+                    break;
+                }
+            }
+
+            GameOverEvent gameOverEvent = new GameOverEvent();
+            gameOverEvent.winningPlayer = winningPlayer;
+            broadcast(null, gameOverEvent);
+        }
+        else {
+            StartTurnEvent startTurnEvent = new StartTurnEvent();
+
+            Player currentPlayer = getCurrentPlayer();
+            startTurnEvent.playerNumber = currentPlayer.getNumber();
+            startTurnEvent.wormNumber = currentPlayer.getCurrentWorm().getWormNumber();
+            startTurnEvent.wind = windRandomizer.nextInt(11) - 5;
+
+            for (Player player : players) {
+                player.getConnection().sendTCP(startTurnEvent);
+                player.setReady(false);
+            }
+        }
+    }
+
+    public void wormDied(int playerNumber, int wormNumber) {
+        Player player = getPlayerByNumber(playerNumber);
+        player.wormDied(wormNumber);
+
+        if (player.isDefeated())
+            numPlayersAlive--;
     }
 
     private boolean allClientsReady() {
         boolean ready = true;
 
         for (Player player : players) {
-            if (!player.ready) {
+            if (!player.isReady()) {
                 ready = false;
                 break;
             }
@@ -112,13 +169,34 @@ public class Lobby {
         switch (event.getType()) {
             case WORM_DIED: {
                 WormEvent wormEvent = (WormEvent)event;
-                Player player = players.get(wormEvent.getPlayerNumber());
-                player.worms.get(wormEvent.getWormNumber()).isDead = true;
+                wormDied(wormEvent.getPlayerNumber(), wormEvent.getWormNumber());
+                break;
+            }
+            case WORM_TOOK_DAMAGE: {
+                WormDamageEvent wormEvent = (WormDamageEvent)event;
+                getWorm(wormEvent).applyDamage(wormEvent);
+                break;
+            }
+            case WORM_INFECTED: {
+                WormEvent wormEvent = (WormEvent)event;
+                getWorm(wormEvent).setInfected(true);
                 break;
             }
         }
 
         broadcast(source, event);
+    }
+
+    public Player getCurrentPlayer() {
+        return players.get(currentPlayerIndex);
+    }
+
+    public Player getPlayerByNumber(int number) {
+        return players.get(number);
+    }
+
+    public Worm getWorm(WormEvent event) {
+        return getPlayerByNumber(event.getPlayerNumber()).getWormByNumber(event.getWormNumber());
     }
 
     public void onReceiveWorldData(Connection source, WorldData data) {
@@ -128,11 +206,7 @@ public class Lobby {
     public void onReceiveGameSetupData(Connection source, GameSetupData data) {
         for (PlayerData playerData : data.getPlayerData()) {
             Player player = players.get(playerData.getPlayerNumber());
-            for (WormData wormData : playerData.getWorms()) {
-                Worm worm = new Worm();
-                worm.wormNumber = wormData.wormNumber;
-                player.worms.add(worm);
-            }
+            player.setupFromData(playerData);
         }
 
         broadcast(source, data);
@@ -140,24 +214,21 @@ public class Lobby {
 
     private void broadcast(Connection source, Object data) {
         for (Player player : players) {
-            if (source == null || player.connection.getID() != source.getID())
-                player.connection.sendTCP(data);
+            if (source == null || player.getConnection().getID() != source.getID())
+                player.getConnection().sendTCP(data);
         }
     }
 
-    public void shiftTurn() {
-        System.out.println("Shifting turn");
+    public void shiftTurn(boolean shiftWorms) {
+        if (numPlayersAlive <= 0)
+            return;
 
-        if (currentPlayerIndex != -1) {
-            Player player = players.get(currentPlayerIndex);
-
-            do {
-                player.currentWormIndex = (player.currentWormIndex + 1) % player.worms.size();
-            } while (player.worms.get(player.currentWormIndex).isDead);
+        if (shiftWorms && currentPlayerIndex != -1) {
+            players.get(currentPlayerIndex).shiftTurn();
         }
 
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-
-        System.out.println("Turn shifted");
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+        } while (getPlayerByNumber(currentPlayerIndex).isDefeated());
     }
 }

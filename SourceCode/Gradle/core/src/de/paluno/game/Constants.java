@@ -63,6 +63,9 @@ public class Constants {
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
 
+	public static final int DAMAGE_TYPE_VIRUS = 1;
+	public static final int DAMAGE_TYPE_PROJECTILE = 2;
+
 
 	// key bindings
     public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;

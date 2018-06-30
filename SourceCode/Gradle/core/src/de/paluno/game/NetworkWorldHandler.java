@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
+import de.paluno.game.screens.WinningPlayer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,6 +32,7 @@ public class NetworkWorldHandler extends WorldHandler {
     private int numWorms;
     private GameSetupRequest gameSetupRequest;
     private GameSetupData gameSetupData;
+    private PhysicsData physicsCache = new PhysicsData();
 
     private DataHandler<StartTurnEvent> startTurnHandler = (client, data) -> {
         System.out.println("Received start turn request");
@@ -41,7 +43,18 @@ public class NetworkWorldHandler extends WorldHandler {
     };
 
     private DataHandler<GameOverEvent> gameOverHandler = (client, data) -> {
-        Gdx.app.postRunnable(() -> EventManager.getInstance().queueEvent(EventManager.Type.GameOver, data.winningPlayer));
+        Gdx.app.postRunnable(() -> {
+            WinningPlayer winningPlayer = WinningPlayer.NONE;
+            switch (data.winningPlayer) {
+                case 0:
+                    winningPlayer = WinningPlayer.PLAYERONE;
+                    break;
+                case 1:
+                    winningPlayer = WinningPlayer.PLAYERTWO;
+                    break;
+            }
+            EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
+        });
     };
 
     private DataHandler<WorldData> worldDataHandler = (client, data) -> {
@@ -108,6 +121,7 @@ public class NetworkWorldHandler extends WorldHandler {
         client.registerDataHandler(ShootEvent.class, eventHandler);
         client.registerDataHandler(WormEvent.class, eventHandler);
         client.registerDataHandler(WormDamageEvent.class, eventHandler);
+        client.registerDataHandler(GameOverEvent.class, gameOverHandler);
 
         if (gameSetupRequest != null) {
             PlayerData[] playerData = new PlayerData[gameSetupRequest.getPlayerNumbers().length];
@@ -125,14 +139,12 @@ public class NetworkWorldHandler extends WorldHandler {
                     Worm worm = addWorm(player, j);
                     worm.setPosition(getRandomSpawnPosition());
 
-                    WormData wormD = new WormData();
-                    wormD.playerNumber = player.getPlayerNumber();
-                    wormD.wormNumber = j;
-                    wormD.setPhysicsData(new PhysicsData()
-                            .setPositionX(worm.getPosition().x)
-                            .setPositionY(worm.getPosition().y));
-
-                    wormData[j] = wormD;
+                    wormData[j] = new WormData()
+                            .setPlayerNumber(player.getPlayerNumber())
+                            .setWormNumber(j)
+                            .setPhysicsData(new PhysicsData()
+                                    .setPositionX(worm.getPosition().x)
+                                    .setPositionY(worm.getPosition().y));
                 }
 
                 playerData[i] = new PlayerData(player.getPlayerNumber(), wormData);
@@ -155,7 +167,7 @@ public class NetworkWorldHandler extends WorldHandler {
                 addWeapon(player, WeaponType.WEAPON_SPECIAL);
 
                 for (WormData wormData : playerData.getWorms()) {
-                    Worm worm = addWorm(player, wormData.wormNumber);
+                    Worm worm = addWorm(player, wormData.getWormNumber());
                     worm.setPosition(wormData.getPhysicsData().getPositionX(),
                             wormData.getPhysicsData().getPositionY());
                     // TODO: setup worms
@@ -198,15 +210,17 @@ public class NetworkWorldHandler extends WorldHandler {
 
             int index = 0;
             for (Worm worm : player.getWorms()) {
-                WormData wormData = new WormData();
-                wormData.numGroundContacts = worm.getNumContacts();
-                wormData.playerNumber = player.getPlayerNumber();
-                wormData.wormNumber = worm.getCharacterNumber();
-                wormData.setPhysicsData(new PhysicsData().setPositionX(worm.getPosition().x).setPositionY(worm.getPosition().y)
-                        .setVelocityX(worm.getVelocity().x).setVelocityY(worm.getVelocity().y));
-                wormData.setMovement(worm.getMovement());
-                wormData.setOrientation(worm.getOrientation());
-                wormDataArray[index++] = wormData;
+                wormDataArray[index++] = new WormData()
+                        .setPlayerNumber(worm.getPlayerNumber())
+                        .setWormNumber(worm.getCharacterNumber())
+                        .setNumGroundContacts(worm.getNumContacts())
+                        .setMovement(worm.getMovement())
+                        .setOrientation(worm.getOrientation())
+                        .setPhysicsData(new PhysicsData()
+                                .setPositionX(worm.getPosition().x)
+                                .setPositionY(worm.getPosition().y)
+                                .setVelocityX(worm.getVelocity().x)
+                                .setVelocityY(worm.getVelocity().y));
             }
 
             playerDataArray[i++] = new PlayerData(player.getPlayerNumber(), wormDataArray);
@@ -224,12 +238,15 @@ public class NetworkWorldHandler extends WorldHandler {
 
     public void interpolateWorldSnapshots() {
         float shiftedTime = updateCurrentSnapshots();
-        float ratio = 0.0f;
-
-        if (currentSnapshot != null && nextSnapshot != null)
-            ratio = getSnapshotsRatio(shiftedTime);
 
         if (currentSnapshot != null) {
+            float to = 0.0f;
+
+            if (nextSnapshot != null)
+                to = getSnapshotsRatio(shiftedTime);
+
+            float from = 1.0f - to;
+
             if (currentSnapshot.currentWeapon != -1) {
                 Worm currentWorm = getCurrentPlayer().getCurrentWorm();
                 if (currentWorm.getCurrentWeapon() != null && currentWorm.getCurrentWeapon().getWeaponType().ordinal() != currentSnapshot.currentWeapon) {
@@ -239,74 +256,50 @@ public class NetworkWorldHandler extends WorldHandler {
 
             float angle = currentSnapshot.shootingAngle;
             if (nextSnapshot != null)
-                angle = angle * (1.0f - ratio) + nextSnapshot.shootingAngle * ratio;
+                angle = angle * from + nextSnapshot.shootingAngle * to;
             getShotDirectionIndicator().setAngle(angle);
 
             if (currentSnapshot.projectiles != null) {
                 for (ProjectileData projectileData : currentSnapshot.projectiles) {
-                    float x = projectileData.getPhysicsData().getPositionX();
-                    float y = projectileData.getPhysicsData().getPositionY();
-                    float velX = projectileData.getPhysicsData().getVelocityX();
-                    float velY = projectileData.getPhysicsData().getVelocityY();
-                    float projectileAngle = projectileData.getPhysicsData().getAngle();
+                    Projectile projectile = getProjectileById(projectileData.id);
+                    if (projectile == null) {
+                        System.out.println("No projectile found for " + projectileData.id);
+                        continue;
+                    }
+
+                    PhysicsData physics = null;
 
                     if (nextSnapshot != null && nextSnapshot.projectiles != null) {
                         for (ProjectileData nextProjectileData : nextSnapshot.projectiles) {
                             if (nextProjectileData.id == projectileData.id) {
-                                x = x * (1.0f - ratio) + nextProjectileData.getPhysicsData().getPositionX() * ratio;
-                                y = y * (1.0f - ratio) + nextProjectileData.getPhysicsData().getPositionY() * ratio;
-                                velX = velX * (1.0f - ratio) + nextProjectileData.getPhysicsData().getVelocityX() * ratio;
-                                velY = velY * (1.0f - ratio) + nextProjectileData.getPhysicsData().getVelocityY() * ratio;
-                                projectileAngle = projectileAngle * (1.0f - ratio) + nextProjectileData.getPhysicsData().getAngle() * ratio;
+                                physics = nextProjectileData.getPhysicsData();
                                 break;
                             }
                         }
                     }
 
-                    Projectile projectile = getProjectileById(projectileData.id);
-                    if (projectile == null) {
-                        System.out.println("No projectile found for " + projectileData.id);
-                    }
-                    if (projectile != null) {
-                        projectile.setPosition(x, y);
-                        projectile.setVelocity(velX, velY);
-                        projectile.setAngle(projectileAngle);
-                    }
+                    physics = physicsCache.interpolate(projectileData.getPhysicsData(), physics, to);
+                    projectile.setPhysics(physics);
                 }
             }
 
-            for (int i = 0; i < currentSnapshot.players.length; i++) {
-                PlayerData playerData = currentSnapshot.players[i];
+            for (PlayerData playerData : currentSnapshot.players) {
                 Player player = getPlayers().get(playerData.getPlayerNumber());
 
-                for (int j = 0; j < playerData.getWorms().length; j++) {
-                    WormData wormData = playerData.getWorms()[j];
+                for (WormData wormData : playerData.getWorms()) {
+                    Worm worm = player.getWormByNumber(wormData.getWormNumber());
 
-                    Worm worm = player.getWormByNumber(wormData.wormNumber);
-
-                    if (worm != null) {
-
-                        float x = wormData.getPhysicsData().getPositionX();
-                        float y = wormData.getPhysicsData().getPositionY();
-                        float velX = wormData.getPhysicsData().getVelocityX();
-                        float velY = wormData.getPhysicsData().getVelocityY();
+                    if (worm != null && !worm.isDead()) {
+                        PhysicsData physics = null;
 
                         if (nextSnapshot != null) {
-                            for (int k = 0; k < nextSnapshot.players[i].getWorms().length; k++) {
-                                if (nextSnapshot.players[i].getWorms()[k].wormNumber == wormData.wormNumber) {
-                                    x = x * (1.0f - ratio) + nextSnapshot.players[i].getWorms()[k].getPhysicsData().getPositionX() * ratio;
-                                    y = y * (1.0f - ratio) + nextSnapshot.players[i].getWorms()[k].getPhysicsData().getPositionY() * ratio;
-                                    velX = velX * (1.0f - ratio) + nextSnapshot.players[i].getWorms()[k].getPhysicsData().getVelocityX() * ratio;
-                                    velY = velX * (1.0f - ratio) + nextSnapshot.players[i].getWorms()[k].getPhysicsData().getVelocityY() * ratio;
-                                }
-                            }
+                            physics = nextSnapshot.getPlayer(player.getPlayerNumber()).getWormByNumber(wormData.getWormNumber()).getPhysicsData();
                         }
 
-                        worm.setNumContacts(wormData.numGroundContacts);
-
-                        worm.setPosition(x, y);
-                        worm.setVelocity(velX, velY);
+                        physics = physicsCache.interpolate(wormData.getPhysicsData(), physics, to);
+                        worm.setPhysics(physics);
                         worm.setMovement(wormData.getMovement());
+                        worm.setNumContacts(wormData.getNumGroundContacts());
                     }
                 }
             }
@@ -322,6 +315,54 @@ public class NetworkWorldHandler extends WorldHandler {
     protected void onUpdate(float delta) {
         currentTime += delta;
 
+        GameEvent currentEvent;
+        while ((currentEvent = pollEvents()) != null) {
+            switch (currentEvent.getType()) {
+                case EXPLOSION: {
+                    ExplosionEvent ex = (ExplosionEvent)currentEvent;
+                    Projectile projectile = getProjectileById(ex.projectileId);
+                    getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
+                            ex.getRadius(), ex.getBlastPower()));
+                    removeProjectile(projectile);
+                    break;
+                }
+                case SHOOT: {
+                    for (ProjectileData data : ((ShootEvent) currentEvent).projectiles) {
+                        Projectile projectile = new Projectile(null, WeaponType.values()[data.getType()],
+                                new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
+                        addProjectile(projectile);
+                        projectile.setId(data.id);
+                    }
+                    break;
+                }
+                case END_TURN: {
+                    setIdle();
+                    break;
+                }
+                case WORM_DIED: {
+                    WormEvent event = (WormEvent)currentEvent;
+                    Player player = getPlayers().get(event.getPlayerNumber());
+                    Worm worm = player.getWormByNumber(event.getWormNumber());
+                    worm.die();
+                    break;
+                }
+                case WORM_INFECTED: {
+                    WormEvent event = (WormEvent)currentEvent;
+                    Player player = getPlayers().get(event.getPlayerNumber());
+                    Worm worm = player.getWormByNumber(event.getWormNumber());
+                    worm.setIsInfected(true);
+                    break;
+                }
+                case WORM_TOOK_DAMAGE: {
+                    WormDamageEvent event = (WormDamageEvent)currentEvent;
+                    Player player = getPlayers().get(event.getPlayerNumber());
+                    Worm worm = player.getWormByNumber(event.getWormNumber());
+                    worm.takeDamage(event.getDamage(), event.getDamageType());
+                    break;
+                }
+            }
+        }
+
         if (isControllingCurrentPlayer()) {
             updateTimer += delta;
 
@@ -333,54 +374,6 @@ public class NetworkWorldHandler extends WorldHandler {
         }
         else {
             interpolateWorldSnapshots();
-
-            GameEvent currentEvent;
-            while ((currentEvent = pollEvents()) != null) {
-                switch (currentEvent.getType()) {
-                    case EXPLOSION: {
-                        ExplosionEvent ex = (ExplosionEvent)currentEvent;
-                        Projectile projectile = getProjectileById(ex.projectileId);
-                        getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
-                                ex.getRadius(), ex.getBlastPower()));
-                        removeProjectile(projectile);
-                        break;
-                    }
-                    case SHOOT: {
-                        for (ProjectileData data : ((ShootEvent) currentEvent).projectiles) {
-                            Projectile projectile = new Projectile(null, WeaponType.values()[data.getType()],
-                                    new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
-                            addProjectile(projectile);
-                            projectile.setId(data.id);
-                        }
-                        break;
-                    }
-                    case END_TURN: {
-                        setIdle();
-                        break;
-                    }
-                    case WORM_DIED: {
-                        WormEvent event = (WormEvent)currentEvent;
-                        Player player = getPlayers().get(event.getPlayerNumber());
-                        Worm worm = player.getWormByNumber(event.getWormNumber());
-                        worm.die();
-                        break;
-                    }
-                    case WORM_INFECTED: {
-                        WormEvent event = (WormEvent)currentEvent;
-                        Player player = getPlayers().get(event.getPlayerNumber());
-                        Worm worm = player.getWormByNumber(event.getWormNumber());
-                        worm.setIsInfected(true);
-                        break;
-                    }
-                    case WORM_TOOK_DAMAGE: {
-                        WormDamageEvent event = (WormDamageEvent)currentEvent;
-                        Player player = getPlayers().get(event.getPlayerNumber());
-                        Worm worm = player.getWormByNumber(event.getWormNumber());
-                        worm.takeDamage(event.getDamage());
-                        break;
-                    }
-                }
-            }
         }
     }
 
@@ -461,7 +454,11 @@ public class NetworkWorldHandler extends WorldHandler {
 
     @Override
     protected void onWormTookDamage(Worm.DamageEvent event) {
-        WormDamageEvent gameEvent = new WormDamageEvent(0, event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber(), event.getDamage());
+        if (event.getDamageType() == Constants.DAMAGE_TYPE_VIRUS)
+            return;
+
+        WormDamageEvent gameEvent = new WormDamageEvent(0, event.getWorm().getPlayerNumber(),
+                event.getWorm().getCharacterNumber(), event.getDamage(), event.getDamageType());
         client.sendObject(gameEvent);
     }
 

@@ -15,4 +15,8 @@ public class WorldData extends GameData {
     public WorldData(int tick) {
         super(tick);
     }
+
+    public PlayerData getPlayer(int number) {
+        return players[number];
+    }
 }

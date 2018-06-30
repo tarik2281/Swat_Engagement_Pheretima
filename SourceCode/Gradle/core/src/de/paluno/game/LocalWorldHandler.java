@@ -49,6 +49,8 @@ public class LocalWorldHandler extends WorldHandler {
         Player player = getPlayers().get(playerNumber);
 
         setCurrentPlayerTurn(playerNumber, player.getCurrentWorm().getCharacterNumber());
+        if (player.getCurrentWorm().isInfected())
+            player.getCurrentWorm().takeDamage(Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
         getWindHandler().nextWind();
     }
 

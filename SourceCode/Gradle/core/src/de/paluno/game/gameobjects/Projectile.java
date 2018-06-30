@@ -220,13 +220,13 @@ public class Projectile extends WorldObject {
 
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null)
-                    directHitWorm.takeDamage(Math.round(weaponType.getDamage()));
+                    directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
             }
             else {
                 ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
 
                 for (Worm worm : affectedWorms) {
-                    worm.takeDamage((int)weaponType.getDamage());
+                    worm.takeDamage((int)weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
 
                     if (weaponType == WeaponType.WEAPON_SPECIAL)
                         worm.setIsInfected(true);

@@ -25,10 +25,12 @@ public class Worm extends WorldObject {
     public static class DamageEvent {
 		private Worm worm;
 		private int damage;
+		private int damageType;
 
-		private DamageEvent(Worm worm, int damage) {
+		private DamageEvent(Worm worm, int damage, int damageType) {
 			this.worm = worm;
 			this.damage = damage;
+			this.damageType = damageType;
 		}
 
 		public Worm getWorm() {
@@ -37,6 +39,10 @@ public class Worm extends WorldObject {
 
 		public int getDamage() {
 			return damage;
+		}
+
+		public int getDamageType() {
+			return damageType;
 		}
 	}
 
@@ -261,6 +267,10 @@ public class Worm extends WorldObject {
 		createVirusFixture = false;
 	}
 
+	public boolean isDead() {
+		return isDead;
+	}
+
 	/**
 	 * Setter method for our current playstate - if this worm is playing right now or not
 	 * @param isPlaying - Is this worm playing right now?
@@ -271,9 +281,9 @@ public class Worm extends WorldObject {
 		if (isPlaying) {
 			// We're playing now, so wake up!
 			setIsStatic(false);
-			if (isInfected)
+			//if (isInfected)
 				// This worm is entering another turn - let the infection do it's thing
-				takeDamage(Constants.VIRUS_DAMAGE);
+			//	takeDamage(Constants.VIRUS_DAMAGE);
 		}
 	}
 	/**
@@ -371,10 +381,10 @@ public class Worm extends WorldObject {
      * Damage handler method - calculate remaining life and death
      * @param damage - The damage taken as integer
      */
-	public void takeDamage(int damage) {
+	public void takeDamage(int damage, int damageType) {
 		health -= damage;
 
-		EventManager.getInstance().queueEvent(EventManager.Type.WormTookDamage, new DamageEvent(this, damage));
+		EventManager.getInstance().queueEvent(EventManager.Type.WormTookDamage, new DamageEvent(this, damage, damageType));
 
 		if (health <= 0) {
 			// Is dead, kill it

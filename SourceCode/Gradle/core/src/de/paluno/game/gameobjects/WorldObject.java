@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
+import de.paluno.game.interfaces.PhysicsData;
 
 import java.util.ArrayList;
 
@@ -106,6 +107,12 @@ public class WorldObject {
             angularVelocity = body.getAngularVelocity();
 
         return angularVelocity;
+    }
+
+    public void setPhysics(PhysicsData data) {
+        setPosition(data.getPositionX(), data.getPositionY());
+        setVelocity(data.getVelocityX(), data.getVelocityY());
+        setAngle(data.getAngle());
     }
 
     public void setPosition(float x, float y) {

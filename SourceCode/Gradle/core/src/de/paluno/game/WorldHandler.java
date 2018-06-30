@@ -31,6 +31,7 @@ public abstract class WorldHandler implements Disposable {
 
     private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
+    private int projectileId = 0;
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
@@ -47,7 +48,6 @@ public abstract class WorldHandler implements Disposable {
                 }
 
                 world.forgetAfterUpdate(worm);
-                players.get(worm.getPlayerNumber()).removeWorm(worm);
                 break;
             }
             case WormInfected:
@@ -126,6 +126,9 @@ public abstract class WorldHandler implements Disposable {
     public void dispose() {
         world.dispose();
 
+        for (Player player : players)
+            player.dispose();
+
         EventManager.getInstance().removeListener(listener,
                 EventManager.Type.WormDied,
                 EventManager.Type.WormInfected,
@@ -155,7 +158,7 @@ public abstract class WorldHandler implements Disposable {
 
     protected void addProjectile(Projectile projectile) {
         projectiles.add(projectile);
-        projectile.setId(projectiles.size());
+        projectile.setId(projectileId++);
         world.registerAfterUpdate(projectile);
         world.getCamera().setCameraFocus(projectile);
 
@@ -346,7 +349,7 @@ public abstract class WorldHandler implements Disposable {
 
         for (Player player : players) {
             for (Worm worm : player.getWorms()) {
-                if (worm.getBody().isAwake()) {
+                if (worm.getBody() != null && worm.getBody().isAwake()) {
                     if (velocity == null) {
                         velocity = worm.getBody().getLinearVelocity();
                         nextWorm = worm;
