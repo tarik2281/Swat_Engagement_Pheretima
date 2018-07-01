@@ -18,7 +18,8 @@ public abstract class WorldHandler implements Disposable {
 
     private World2 world;
 
-    private int currentPlayer;
+    protected int currentPlayer;
+    private int numPlayersAlive;
     private ArrayList<Player> players;
     private GameState currentGameState = GameState.NONE;
 
@@ -35,6 +36,11 @@ public abstract class WorldHandler implements Disposable {
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
+            case PlayerDefeated: {
+                Player player = (Player)data;
+                numPlayersAlive--;
+                break;
+            }
             case WormDied: {
                 Worm worm = (Worm) data;
 
@@ -111,6 +117,7 @@ public abstract class WorldHandler implements Disposable {
         world.initialize(map);
         world.registerAfterUpdate(windHandler);
 
+        numPlayersAlive = 0;
         onInitializePlayers();
 
         currentGameState = GameState.NONE;
@@ -119,7 +126,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormDied,
                 EventManager.Type.WormInfected,
                 EventManager.Type.ProjectileExploded,
-                EventManager.Type.WormTookDamage);
+                EventManager.Type.WormTookDamage,
+                EventManager.Type.PlayerDefeated);
     }
 
     @Override
@@ -133,7 +141,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormDied,
                 EventManager.Type.WormInfected,
                 EventManager.Type.ProjectileExploded,
-                EventManager.Type.WormTookDamage);
+                EventManager.Type.WormTookDamage,
+                EventManager.Type.PlayerDefeated);
     }
 
     protected void initializePlayersDefault(int numWorms) {
@@ -163,6 +172,8 @@ public abstract class WorldHandler implements Disposable {
         world.getCamera().setCameraFocus(projectile);
 
         endPlayerTurn();
+
+        currentGameState = GameState.SHOOTING;
     }
 
     protected void removeProjectile(Projectile projectile) {
@@ -197,6 +208,7 @@ public abstract class WorldHandler implements Disposable {
             player.setWormsStatic(true);
 
             if (player.getPlayerNumber() == playerNumber) {
+                System.out.println("Starting player turn for playerNumber: " + playerNumber);
                 player.setTurn(wormNumber);
                 Worm worm = player.getWormByNumber(wormNumber);
                 worm.setIsPlaying(true);
@@ -210,9 +222,13 @@ public abstract class WorldHandler implements Disposable {
 
     protected void endPlayerTurn() {
         if (currentGameState == GameState.PLAYERTURN) {
+            System.out.println("ending player turn");
             Worm worm = getCurrentPlayer().getCurrentWorm();
+            worm.setMovement(Constants.MOVEMENT_NO_MOVEMENT);
             worm.unequipWeapon();
             worm.setIsPlaying(false);
+
+            shotDirectionIndicator.setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 
             worm.removeChild(shotDirectionIndicator);
             worm.removeChild(windDirectionIndicator);
@@ -233,8 +249,13 @@ public abstract class WorldHandler implements Disposable {
         return spawnPositions.remove(new Random().nextInt(spawnPositions.size()));
     }
 
+    public int getNumPlayersAlive() {
+        return numPlayersAlive;
+    }
+
     public Player addPlayer(int playerNumber) {
         // TODO: remove playerNumber parameter
+        numPlayersAlive++;
         Player player = new Player(playerNumber);
         players.add(playerNumber, player);
         return player;

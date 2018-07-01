@@ -4,7 +4,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import de.paluno.game.gameobjects.WeaponType;
 
-public class UserWorldController extends WorldController {
+public class UserWorldController {
 
     private WorldHandler worldHandler;
 

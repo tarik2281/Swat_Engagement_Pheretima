@@ -37,8 +37,9 @@ public class Player implements Updatable, Disposable {
 		switch (eventType) {
 			case WormDied: {
 				Worm worm = (Worm)data;
-				if (worm.getPlayerNumber() == playerNum)
-					numWormsAlive--;
+				if (worm.getPlayerNumber() == playerNum && !isDefeated() && --numWormsAlive <= 0) {
+					EventManager.getInstance().queueEvent(EventManager.Type.PlayerDefeated, this);
+				}
 				break;
 			}
 		}

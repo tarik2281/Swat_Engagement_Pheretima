@@ -86,7 +86,7 @@ public class GameCamera {
     }
 
     public void update(float delta) {
-        if (cameraFocus != null) {
+        if (cameraFocus != null && cameraFocus.getBody() != null) {
             // smooth following the object
             focusDirectionVector.set(cameraFocus.getBody().getPosition()).add(-debugPosition.x, -debugPosition.y);
             focusDirectionVector.nor();

@@ -7,7 +7,8 @@ import java.util.HashMap;
 public class EventManager {
     public enum Type {
         WormTookDamage, WormEquipWeapon, WormInfected, WormJumped,
-        WormMovement, WormDied, WeaponShoot, ProjectileExploded, GameOver
+        WormMovement, WormDied, WeaponShoot, ProjectileExploded, GameOver,
+        PlayerDefeated
     }
 
     public interface Listener {
@@ -61,12 +62,16 @@ public class EventManager {
 
         Data eventData;
         while ((eventData = queues[processingQueue].pollFirst()) != null) {
-            ArrayList<Listener> listeners = listenerMap.get(eventData.type);
+            triggerEvent(eventData.type, eventData.data);
+        }
+    }
 
-            if (listeners != null) {
-                for (Listener l : listeners) {
-                    l.handleEvent(eventData.type, eventData.data);
-                }
+    public void triggerEvent(Type type, Object data) {
+        ArrayList<Listener> listeners = listenerMap.get(type);
+
+        if (listeners != null) {
+            for (Listener l : listeners) {
+                l.handleEvent(type, data);
             }
         }
     }

@@ -155,6 +155,7 @@ public class World2 implements Disposable {
     }
 
     private void addObject(WorldObject object) {
+        System.out.println("Adding object: " + object.toString());
         object.setWorld(this);
         object.setupAssets(worldHandler.getAssetManager());
         object.setupBody(world);
@@ -166,14 +167,18 @@ public class World2 implements Disposable {
     }
 
     private void removeObject(WorldObject object) {
+        System.out.println("Removing object: " + object.toString());
+
         if (object.getBody() != null)
             world.destroyBody(object.getBody());
         object.setBodyToNullReference();
 
         objects.remove(object);
 
-        for (WorldObject child : object.getChildren())
+        for (WorldObject child : object.getChildren()) {
+            System.out.println("Removing child object: " + child.toString() + " from: " + object.toString());
             removeObject(child);
+        }
 
         object.setWorld(null);
 

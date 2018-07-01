@@ -10,6 +10,7 @@ public class Player {
 
     private Connection connection;
 
+    private Runnable defeatedListener;
     private int number;
     private boolean ready;
     private int currentWormIndex;
@@ -22,13 +23,25 @@ public class Player {
         this.number = number;
     }
 
+    public void setDefeatedListener(Runnable listener) {
+        this.defeatedListener = listener;
+    }
+
     public void setupFromData(PlayerData data) {
         currentWormIndex = 0;
         numWormsAlive = 0;
 
         worms = new ArrayList<>(data.getWorms().length);
         for (WormData wormData : data.getWorms()) {
-            worms.add(new Worm(wormData));
+            Worm worm = new Worm(wormData);
+
+            worm.setDeathListener(() ->  {
+                if (--numWormsAlive == 0 && defeatedListener != null)
+                    defeatedListener.run();
+            });
+
+            worms.add(worm);
+
             numWormsAlive++;
         }
     }
@@ -40,11 +53,6 @@ public class Player {
         do {
             currentWormIndex = (currentWormIndex + 1) % worms.size();
         } while (worms.get(currentWormIndex).isDead());
-    }
-
-    public void wormDied(int wormNumber) {
-        worms.get(wormNumber).setDead(true);
-        numWormsAlive--;
     }
 
     public Worm getCurrentWorm() {

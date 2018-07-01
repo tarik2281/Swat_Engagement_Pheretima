@@ -5,6 +5,7 @@ import de.paluno.game.interfaces.WormData;
 
 public class Worm {
 
+    private Runnable deathListener;
     private int playerNumber;
     private int wormNumber;
     private int health;
@@ -17,6 +18,10 @@ public class Worm {
         this.health = 100;
         this.isDead = false;
         this.isInfected = false;
+    }
+
+    public void setDeathListener(Runnable runnable) {
+        this.deathListener = runnable;
     }
 
     public void applyDamage(WormDamageEvent event) {
@@ -49,6 +54,9 @@ public class Worm {
     }
 
     public void setDead(boolean dead) {
+        if (!isDead && dead && deathListener != null)
+            deathListener.run();
+
         isDead = dead;
     }
 

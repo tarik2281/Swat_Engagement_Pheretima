@@ -93,6 +93,10 @@ public class NetworkWorldHandler extends WorldHandler {
 
     @Override
     protected void requestNextTurn() {
+        currentSnapshot = null;
+        nextSnapshot = null;
+        receivedGameData.clear();
+
         MessageData messageData = new MessageData(MessageData.Type.ClientReady);
         client.sendObject(messageData);
     }

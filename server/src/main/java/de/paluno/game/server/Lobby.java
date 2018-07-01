@@ -42,6 +42,7 @@ public class Lobby {
         players.forEach(player -> player.getConnection().sendTCP(data));
 
         Player player = new Player(connection, players.size());
+        player.setDefeatedListener(() -> numPlayersAlive--);
         players.add(player);
 
         if (players.size() == 2) {
@@ -93,7 +94,6 @@ public class Lobby {
 
             if (worm.isDead()) {
                 broadcast(null, new WormEvent(0, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getWormNumber()));
-                wormDied(worm.getPlayerNumber(), worm.getWormNumber());
 
                 if (numPlayersAlive >= 2) {
                     if (currentPlayer.isDefeated()) {
@@ -114,8 +114,6 @@ public class Lobby {
     private void startTurn() {
         shiftTurn(true);
 
-        applyWormInfectionDamage();
-
         if (numPlayersAlive <= 1) {
             int winningPlayer = -1;
             for (Player player : players) {
@@ -130,6 +128,8 @@ public class Lobby {
             broadcast(null, gameOverEvent);
         }
         else {
+            applyWormInfectionDamage();
+
             StartTurnEvent startTurnEvent = new StartTurnEvent();
 
             Player currentPlayer = getCurrentPlayer();
@@ -142,14 +142,6 @@ public class Lobby {
                 player.setReady(false);
             }
         }
-    }
-
-    public void wormDied(int playerNumber, int wormNumber) {
-        Player player = getPlayerByNumber(playerNumber);
-        player.wormDied(wormNumber);
-
-        if (player.isDefeated())
-            numPlayersAlive--;
     }
 
     private boolean allClientsReady() {
@@ -169,7 +161,7 @@ public class Lobby {
         switch (event.getType()) {
             case WORM_DIED: {
                 WormEvent wormEvent = (WormEvent)event;
-                wormDied(wormEvent.getPlayerNumber(), wormEvent.getWormNumber());
+                getWorm(wormEvent).setDead(true);
                 break;
             }
             case WORM_TOOK_DAMAGE: {
