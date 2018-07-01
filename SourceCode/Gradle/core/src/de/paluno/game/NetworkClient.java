@@ -4,13 +4,11 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
 import com.esotericsoftware.kryonet.Listener;
-import de.paluno.game.gameobjects.Player;
 import de.paluno.game.interfaces.*;
+import de.paluno.game.interfaces.Constants;
 
 import java.io.IOException;
-import java.net.Inet4Address;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 public class NetworkClient {
 
@@ -62,7 +60,7 @@ public class NetworkClient {
 
             try {
                 // TODO: hardcoded TCP port
-                client.connect(5000, remoteAddress, 5000, 5001);
+                client.connect(5000, remoteAddress, Constants.TCP_PORT, Constants.UDP_PORT);
             } catch (IOException e) {
                 // TODO: client connection error handling
                 e.printStackTrace();

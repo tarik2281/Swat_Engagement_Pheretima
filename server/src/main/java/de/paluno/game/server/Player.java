@@ -33,7 +33,7 @@ public class Player {
 
         worms = new ArrayList<>(data.getWorms().length);
         for (WormData wormData : data.getWorms()) {
-            Worm worm = new Worm(wormData);
+            Worm worm = new Worm(wormData.getPlayerNumber(), wormData.getWormNumber());
 
             worm.setDeathListener(() ->  {
                 if (--numWormsAlive == 0 && defeatedListener != null)

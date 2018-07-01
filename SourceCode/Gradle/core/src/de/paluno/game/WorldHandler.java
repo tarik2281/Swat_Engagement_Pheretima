@@ -25,7 +25,8 @@ public abstract class WorldHandler implements Disposable {
 
     private WindHandler windHandler;
 
-    private ShotDirectionIndicator shotDirectionIndicator;
+    private WeaponIndicator currentWeaponIndicator;
+    private HashMap<WeaponIndicator.Type, WeaponIndicator> weaponIndicators;
     private WindDirectionIndicator windDirectionIndicator;
 
     private ArrayList<Vector2> spawnPositions;
@@ -110,7 +111,6 @@ public abstract class WorldHandler implements Disposable {
         windHandler = new WindHandler();
         windHandler.setProjectiles(projectiles);
 
-        shotDirectionIndicator = new ShotDirectionIndicator();
         windDirectionIndicator = new WindDirectionIndicator(windHandler);
 
         world = new World2(this);
@@ -190,6 +190,21 @@ public abstract class WorldHandler implements Disposable {
         }
     }
 
+    public void equipWeapon(WeaponType weaponType) {
+        if (currentWeaponIndicator.getType() == weaponType.getIndicatorType())
+            return;
+
+        Worm currentWorm = getCurrentPlayer().getCurrentWorm();
+
+        if (currentWeaponIndicator != null)
+
+
+        getCurrentPlayer().equipWeapon(weaponType);
+
+        currentWeaponIndicator = weaponIndicators.computeIfAbsent(weaponType.getIndicatorType(), WeaponIndicator.Type::newInstance);
+        currentWorm.addChild(indicator);
+    }
+
     protected Projectile getProjectileById(int id) {
         for (Projectile projectile : projectiles) {
             if (projectile.getId() == id)
@@ -212,7 +227,6 @@ public abstract class WorldHandler implements Disposable {
                 player.setTurn(wormNumber);
                 Worm worm = player.getWormByNumber(wormNumber);
                 worm.setIsPlaying(true);
-                worm.addChild(shotDirectionIndicator);
                 worm.addChild(windDirectionIndicator);
                 world.getCamera().setCameraFocus(worm);
                 player.equipWeapon(WeaponType.WEAPON_BAZOOKA);

@@ -102,7 +102,7 @@ public class GameServer {
         server.addListener(serverListener);
 
         try {
-            server.bind(5000, 5001);
+            server.bind(Constants.TCP_PORT, Constants.UDP_PORT);
         }
         catch (IOException e) {
             e.printStackTrace();

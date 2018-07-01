@@ -56,6 +56,13 @@ public class PhysicsData{
         return this;
     }
 
+    /**
+     * Linearly interpolates between fromData and toData and saves the results into this instance.
+     * @param fromData
+     * @param toData
+     * @param ratio interpolation ratio
+     * @return this, or fromData if toData is null
+     */
     public PhysicsData interpolate(PhysicsData fromData, PhysicsData toData, float ratio) {
         if (toData == null)
             return fromData;

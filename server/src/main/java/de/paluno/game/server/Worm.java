@@ -1,7 +1,7 @@
 package de.paluno.game.server;
 
+import de.paluno.game.interfaces.Constants;
 import de.paluno.game.interfaces.WormDamageEvent;
-import de.paluno.game.interfaces.WormData;
 
 public class Worm {
 
@@ -12,10 +12,10 @@ public class Worm {
     private boolean isDead;
     private boolean isInfected;
 
-    public Worm(WormData data) {
-        this.playerNumber = data.getPlayerNumber();
-        this.wormNumber = data.getWormNumber();
-        this.health = 100;
+    public Worm(int playerNumber, int wormNumber) {
+        this.playerNumber = playerNumber;
+        this.wormNumber = wormNumber;
+        this.health = Constants.WORM_MAX_HEALTH;
         this.isDead = false;
         this.isInfected = false;
     }
@@ -24,10 +24,20 @@ public class Worm {
         this.deathListener = runnable;
     }
 
-    public void applyDamage(WormDamageEvent event) {
-        health -= event.getDamage();
+    /**
+     * apply damage as received from clients without further death handling
+     * @param damage
+     */
+    public void applyDamage(int damage) {
+        health -= damage;
     }
 
+    /**
+     * apply damage to be sent to clients also handling worm death
+     * @param damage
+     * @param damageType
+     * @return event which should be sent to the clients
+     */
     public WormDamageEvent takeDamage(int damage, int damageType) {
         health -= damage;
 

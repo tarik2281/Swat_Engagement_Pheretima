@@ -90,12 +90,12 @@ public class Lobby {
         Worm worm = currentPlayer.getCurrentWorm();
 
         if (worm.isInfected()) {
-            WormDamageEvent damageEvent = worm.takeDamage(5, Constants.DAMAGE_TYPE_VIRUS);
+            WormDamageEvent damageEvent = worm.takeDamage(Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
 
             if (worm.isDead()) {
                 broadcast(null, new WormEvent(0, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getWormNumber()));
 
-                if (numPlayersAlive >= 2) {
+                if (numPlayersAlive >= Constants.NUM_MIN_PLAYERS) {
                     if (currentPlayer.isDefeated()) {
                         shiftTurn(false);
                         applyWormInfectionDamage();
@@ -114,7 +114,7 @@ public class Lobby {
     private void startTurn() {
         shiftTurn(true);
 
-        if (numPlayersAlive <= 1) {
+        if (numPlayersAlive < Constants.NUM_MIN_PLAYERS) {
             int winningPlayer = -1;
             for (Player player : players) {
                 if (!player.isDefeated()) {
@@ -135,7 +135,7 @@ public class Lobby {
             Player currentPlayer = getCurrentPlayer();
             startTurnEvent.playerNumber = currentPlayer.getNumber();
             startTurnEvent.wormNumber = currentPlayer.getCurrentWorm().getWormNumber();
-            startTurnEvent.wind = windRandomizer.nextInt(11) - 5;
+            startTurnEvent.wind = windRandomizer.nextInt(Constants.WIND_RANGE + 1) + Constants.WIND_START;
 
             for (Player player : players) {
                 player.getConnection().sendTCP(startTurnEvent);
@@ -166,7 +166,7 @@ public class Lobby {
             }
             case WORM_TOOK_DAMAGE: {
                 WormDamageEvent wormEvent = (WormDamageEvent)event;
-                getWorm(wormEvent).applyDamage(wormEvent);
+                getWorm(wormEvent).applyDamage(wormEvent.getDamage());
                 break;
             }
             case WORM_INFECTED: {
@@ -192,7 +192,10 @@ public class Lobby {
     }
 
     public void onReceiveWorldData(Connection source, WorldData data) {
-        broadcast(source, data);
+        if (data.isUsingTCP())
+            broadcast(source, data);
+        else
+            broadcastUDP(source, data);
     }
 
     public void onReceiveGameSetupData(Connection source, GameSetupData data) {
@@ -208,6 +211,13 @@ public class Lobby {
         for (Player player : players) {
             if (source == null || player.getConnection().getID() != source.getID())
                 player.getConnection().sendTCP(data);
+        }
+    }
+
+    private void broadcastUDP(Connection source, Object data) {
+        for (Player player : players) {
+            if (source == null || player.getConnection().getID() != source.getID())
+                player.getConnection().sendUDP(data);
         }
     }
 
