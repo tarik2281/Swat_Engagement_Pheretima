@@ -27,5 +27,6 @@ public class KryoInterface {
         kryo.register(WormEvent.class);
         kryo.register(WormDamageEvent.class);
         kryo.register(GameOverEvent.class);
+        kryo.register(ShotDirectionData.class);
     }
 }

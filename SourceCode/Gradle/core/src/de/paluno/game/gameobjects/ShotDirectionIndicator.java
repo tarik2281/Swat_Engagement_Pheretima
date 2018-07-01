@@ -7,10 +7,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
-import de.paluno.game.GameState;
-import de.paluno.game.screens.Loadable;
+import de.paluno.game.interfaces.ShotDirectionData;
 
-public class ShotDirectionIndicator extends WorldObject {
+public class ShotDirectionIndicator extends WeaponIndicator<ShotDirectionData> {
 
 	private static final float MOVEMENT_SPEED = 90.0f; // in degrees
 
@@ -75,5 +74,27 @@ public class ShotDirectionIndicator extends WorldObject {
 
 	public void setAngle(float angle) {
 		this.degrees = angle;
+	}
+
+	@Override
+	public ShotDirectionData makeSnapshot() {
+		ShotDirectionData data = new ShotDirectionData();
+		data.angle = getAngle();
+		return data;
+	}
+
+	@Override
+	public void interpolateSnapshots(ShotDirectionData from, ShotDirectionData to, float ratio) {
+		if (from == null)
+			return;
+		if (to == null)
+			setAngle(from.angle);
+		else
+			setAngle(from.angle * (1.0f - ratio) + to.angle * ratio);
+	}
+
+	@Override
+	public Type getType() {
+		return Type.ShotDirection;
 	}
 }

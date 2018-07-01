@@ -58,6 +58,7 @@ public class PhysicsData{
 
     /**
      * Linearly interpolates between fromData and toData and saves the results into this instance.
+     * This method should only be used on a cache object.
      * @param fromData
      * @param toData
      * @param ratio interpolation ratio

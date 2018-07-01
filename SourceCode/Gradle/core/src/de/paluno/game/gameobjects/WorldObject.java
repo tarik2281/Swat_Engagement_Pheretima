@@ -38,6 +38,11 @@ public class WorldObject {
     }
 
     public void removeChild(WorldObject object) {
+        if (object.parent != this) {
+            System.err.println("Trying to remove a child which does not belong to this object (" + toString() + ").");
+            return;
+        }
+
         if (getWorld() != null)
             getWorld().forgetAfterUpdate(object);
         children.remove(object);

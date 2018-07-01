@@ -25,6 +25,11 @@ public class ReplayWorldHandler extends WorldHandler {
     }
 
     @Override
+    protected boolean shouldCreateReplay() {
+        return false;
+    }
+
+    @Override
     protected void requestNextTurn() {
 
     }

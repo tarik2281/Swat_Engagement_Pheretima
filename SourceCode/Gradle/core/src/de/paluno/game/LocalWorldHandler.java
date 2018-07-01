@@ -106,4 +106,9 @@ public class LocalWorldHandler extends WorldHandler {
     public void onInitializePlayers() {
         initializePlayersDefault(numWorms);
     }
+
+    @Override
+    protected boolean shouldCreateReplay() {
+        return true;
+    }
 }

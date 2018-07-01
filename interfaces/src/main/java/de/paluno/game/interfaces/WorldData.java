@@ -5,7 +5,6 @@ public class WorldData extends GameData {
     private boolean usingTCP;
     private PlayerData[] players;
     private Object indicatorData;
-    private float shootingAngle;
     private ProjectileData[] projectiles;
     private int currentWeapon = -1;
 
@@ -36,15 +35,6 @@ public class WorldData extends GameData {
         return this;
     }
 
-    public float getShootingAngle() {
-        return shootingAngle;
-    }
-
-    public WorldData setShootingAngle(float shootingAngle) {
-        this.shootingAngle = shootingAngle;
-        return this;
-    }
-
     public ProjectileData[] getProjectiles() {
         return projectiles;
     }
@@ -69,6 +59,15 @@ public class WorldData extends GameData {
 
     public WorldData setCurrentWeapon(int currentWeapon) {
         this.currentWeapon = currentWeapon;
+        return this;
+    }
+
+    public Object getIndicatorData() {
+        return indicatorData;
+    }
+
+    public WorldData setIndicatorData(Object indicatorData) {
+        this.indicatorData = indicatorData;
         return this;
     }
 }

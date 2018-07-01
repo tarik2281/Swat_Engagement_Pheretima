@@ -8,6 +8,7 @@ import java.util.Random;
 
 public class Lobby {
 
+    private String name;
     private int currentPlayerIndex;
     private ArrayList<Player> players;
     private int numPlayersAlive;

@@ -10,6 +10,7 @@ public class Player {
 
     private Connection connection;
 
+    private String name;
     private Runnable defeatedListener;
     private int number;
     private boolean ready;

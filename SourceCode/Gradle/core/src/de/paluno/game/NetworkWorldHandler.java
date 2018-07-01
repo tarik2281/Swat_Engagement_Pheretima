@@ -187,7 +187,8 @@ public class NetworkWorldHandler extends WorldHandler {
 
     public void sendWorldSnapshot(boolean usingTCP) {
         WorldData data = new WorldData(0, usingTCP);
-        data.setShootingAngle(getShotDirectionIndicator().getAngle());
+        if (getShotDirectionIndicator() != null)
+        data.setIndicatorData(getShotDirectionIndicator().makeSnapshot());
 
         if (!getProjectiles().isEmpty()) {
             ProjectileData[] projectiles = new ProjectileData[getProjectiles().size()];
@@ -261,13 +262,15 @@ public class NetworkWorldHandler extends WorldHandler {
                 Worm currentWorm = getCurrentPlayer().getCurrentWorm();
 
                 if (currentWorm.getCurrentWeapon() != null && currentWorm.getCurrentWeapon().getWeaponType().ordinal() != currentWeapon)
-                    getCurrentPlayer().equipWeapon(WeaponType.values()[currentWeapon]);
+                    equipWeapon(WeaponType.values()[currentWeapon]);
             }
 
-            float angle = currentSnapshot.getShootingAngle();
+            Object fromData = currentSnapshot.getIndicatorData();
+            Object toData = null;
             if (nextSnapshot != null)
-                angle = angle * from + nextSnapshot.getShootingAngle() * to;
-            getShotDirectionIndicator().setAngle(angle);
+                toData = nextSnapshot.getIndicatorData();
+            if (getShotDirectionIndicator() != null)
+            getShotDirectionIndicator().interpolateSnapshots(fromData, toData, to);
 
             for (Projectile projectile : getProjectiles()) {
                 ProjectileData currentData = currentSnapshot.getProjectileById(projectile.getId());
@@ -471,5 +474,10 @@ public class NetworkWorldHandler extends WorldHandler {
 
     public int getClientId() {
         return client.getClientId();
+    }
+
+    @Override
+    protected boolean shouldCreateReplay() {
+        return true;
     }
 }

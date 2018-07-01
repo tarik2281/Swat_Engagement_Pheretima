@@ -5,6 +5,7 @@ import de.paluno.game.interfaces.WormDamageEvent;
 
 public class Worm {
 
+    private String name;
     private Runnable deathListener;
     private int playerNumber;
     private int wormNumber;

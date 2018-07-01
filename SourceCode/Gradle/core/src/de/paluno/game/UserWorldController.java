@@ -2,12 +2,17 @@ package de.paluno.game;
 
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
+import de.paluno.game.gameobjects.ShotDirectionIndicator;
+import de.paluno.game.gameobjects.WeaponIndicator;
 import de.paluno.game.gameobjects.WeaponType;
+import de.paluno.game.interfaces.ShotDirectionData;
 
 public class UserWorldController {
 
     private WorldHandler worldHandler;
 
+    private int cameraVerticalMovement;
+    private int cameraHorizontalMovement;
     private int wormMovement;
     private int angleRotationMovement;
 
@@ -15,6 +20,18 @@ public class UserWorldController {
         @Override
         public boolean keyDown(int keycode) {
             switch (keycode) {
+                case Constants.KEY_MOVE_CAMERA_LEFT:
+                    startCamHorizMovement(Constants.MOVEMENT_LEFT);
+                    break;
+                case Constants.KEY_MOVE_CAMERA_RIGHT:
+                    startCamHorizMovement(Constants.MOVEMENT_RIGHT);
+                    break;
+                case Constants.KEY_MOVE_CAMERA_UP:
+                    startCamVertMovement(Constants.MOVEMENT_UP);
+                    break;
+                case Constants.KEY_MOVE_CAMERA_DOWN:
+                    startCamVertMovement(Constants.MOVEMENT_DOWN);
+                    break;
                 case Constants.KEY_MOVE_LEFT:
                     wormMovement = Constants.MOVEMENT_LEFT;
                     worldHandler.applyWormMovement(wormMovement);
@@ -29,11 +46,21 @@ public class UserWorldController {
                     break;
                 case Constants.KEY_ROTATE_INDICATOR_UP:
                     angleRotationMovement = Constants.MOVEMENT_UP;
-                    worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                {
+                    WeaponIndicator indicator = worldHandler.getCurrentWeaponIndicator();
+                    if (indicator instanceof ShotDirectionIndicator) {
+                        ((ShotDirectionIndicator) indicator).setRotationMovement(angleRotationMovement);
+                    }
+                }
                     break;
                 case Constants.KEY_ROTATE_INDICATOR_DOWN:
                     angleRotationMovement = Constants.MOVEMENT_DOWN;
-                    worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                {
+                    WeaponIndicator indicator = worldHandler.getCurrentWeaponIndicator();
+                    if (indicator instanceof ShotDirectionIndicator) {
+                        ((ShotDirectionIndicator) indicator).setRotationMovement(angleRotationMovement);
+                    }
+                }
                     break;
                 case Constants.KEY_DO_ACTION:
                     worldHandler.shoot();
@@ -50,6 +77,7 @@ public class UserWorldController {
                 case Constants.KEY_SELECT_WEAPON_4:
                     worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
                     break;
+
             }
 
             return super.keyDown(keycode);
@@ -58,6 +86,18 @@ public class UserWorldController {
         @Override
         public boolean keyUp(int keycode) {
             switch (keycode) {
+                case Constants.KEY_MOVE_CAMERA_LEFT:
+                    stopCamHorizMovement(Constants.MOVEMENT_LEFT);
+                    break;
+                case Constants.KEY_MOVE_CAMERA_RIGHT:
+                    stopCamHorizMovement(Constants.MOVEMENT_RIGHT);
+                    break;
+                case Constants.KEY_MOVE_CAMERA_UP:
+                    stopCamVertMovement(Constants.MOVEMENT_UP);
+                    break;
+                case Constants.KEY_MOVE_CAMERA_DOWN:
+                    stopCamVertMovement(Constants.MOVEMENT_DOWN);
+                    break;
                 case Constants.KEY_MOVE_LEFT:
                     if (wormMovement == Constants.MOVEMENT_LEFT) {
                         wormMovement = Constants.MOVEMENT_NO_MOVEMENT;
@@ -73,19 +113,53 @@ public class UserWorldController {
                 case Constants.KEY_ROTATE_INDICATOR_UP:
                     if (angleRotationMovement == Constants.MOVEMENT_UP) {
                         angleRotationMovement = Constants.MOVEMENT_NO_MOVEMENT;
-                        worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                        {
+                            WeaponIndicator indicator = worldHandler.getCurrentWeaponIndicator();
+                            if (indicator instanceof ShotDirectionIndicator) {
+                                ((ShotDirectionIndicator) indicator).setRotationMovement(angleRotationMovement);
+                            }
+                        }
                     }
                     break;
                 case Constants.KEY_ROTATE_INDICATOR_DOWN:
                     if (angleRotationMovement == Constants.MOVEMENT_DOWN) {
                         angleRotationMovement = Constants.MOVEMENT_NO_MOVEMENT;
-                        worldHandler.applyShotDirectionMovement(angleRotationMovement);
+                        {
+                            WeaponIndicator indicator = worldHandler.getCurrentWeaponIndicator();
+                            if (indicator instanceof ShotDirectionIndicator) {
+                                ((ShotDirectionIndicator) indicator).setRotationMovement(angleRotationMovement);
+                            }
+                        }
                     }
                     break;
             }
             return super.keyUp(keycode);
         }
     };
+
+    private void startCamVertMovement(int movement) {
+        cameraVerticalMovement = movement;
+        worldHandler.applyCameraMovement(cameraVerticalMovement, cameraHorizontalMovement);
+    }
+
+    private void startCamHorizMovement(int movement) {
+        cameraHorizontalMovement = movement;
+        worldHandler.applyCameraMovement(cameraVerticalMovement, cameraHorizontalMovement);
+    }
+
+    private void stopCamHorizMovement(int movement) {
+        if (cameraHorizontalMovement == movement)
+            cameraHorizontalMovement = Constants.MOVEMENT_NO_MOVEMENT;
+
+        worldHandler.applyCameraMovement(cameraVerticalMovement, cameraHorizontalMovement);
+    }
+
+    private void stopCamVertMovement(int movement) {
+        if (cameraVerticalMovement == movement)
+            cameraVerticalMovement = Constants.MOVEMENT_NO_MOVEMENT;
+
+        worldHandler.applyCameraMovement(cameraVerticalMovement, cameraHorizontalMovement);
+    }
 
     public void initialize(WorldHandler handler) {
         this.worldHandler = handler;

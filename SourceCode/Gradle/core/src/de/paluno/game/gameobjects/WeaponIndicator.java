@@ -18,5 +18,4 @@ public abstract class WeaponIndicator<T> extends WorldObject {
     public abstract T makeSnapshot();
     public abstract void interpolateSnapshots(T from, T to, float ratio);
     public abstract Type getType();
-    public abstract boolean isCameraMovable();
 }
