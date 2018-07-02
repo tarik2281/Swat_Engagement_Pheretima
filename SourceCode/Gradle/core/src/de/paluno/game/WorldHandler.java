@@ -159,6 +159,7 @@ public abstract class WorldHandler implements Disposable {
             addWeapon(player, WeaponType.WEAPON_GRENADE);
             addWeapon(player, WeaponType.WEAPON_GUN);
             addWeapon(player, WeaponType.WEAPON_SPECIAL);
+            addWeapon(player, WeaponType.WEAPON_AIRSTRIKE);
 
             for (int j = 0; j < numWorms; j++) {
                 Worm worm = addWorm(player, j);
@@ -348,8 +349,7 @@ public abstract class WorldHandler implements Disposable {
 
     public void applyEquipWeapon(WeaponType weaponType) {
         if (shouldAcceptInput()) {
-            Player player = getCurrentPlayer();
-            player.equipWeapon(weaponType);
+        	equipWeapon(weaponType);
         }
     }
 

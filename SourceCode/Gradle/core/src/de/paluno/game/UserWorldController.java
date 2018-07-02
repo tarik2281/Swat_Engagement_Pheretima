@@ -77,6 +77,9 @@ public class UserWorldController {
                 case Constants.KEY_SELECT_WEAPON_4:
                     worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
                     break;
+                case Constants.KEY_SELECT_WEAPON_5:
+                	worldHandler.applyEquipWeapon(WeaponType.WEAPON_AIRSTRIKE);
+                	break;
 
             }
 

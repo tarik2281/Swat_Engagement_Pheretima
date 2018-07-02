@@ -9,6 +9,8 @@ public abstract class WeaponIndicator<T> extends WorldObject {
             switch (this) {
                 case ShotDirection:
                     return new ShotDirectionIndicator();
+                case Pointer:
+                	return new AirstrikeIndicator();
             }
 
             return null;
