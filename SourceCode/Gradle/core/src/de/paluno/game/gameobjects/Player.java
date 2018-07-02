@@ -5,6 +5,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import de.paluno.game.*;
 import de.paluno.game.screens.WeaponUI;
 
+import java.util.List;
+
 public class Player implements Updatable {
 
 	/**
@@ -69,6 +71,18 @@ public class Player implements Updatable {
 				case Constants.KEY_SELECT_WEAPON_4:
 					equipWeapon(WeaponType.WEAPON_SPECIAL);
 					break;
+//				case Constants.KEY_SELECT_WEAPON_5:
+//					equipWeapon(WeaponType.TELEPORTER);
+//					break;
+				case Constants.KEY_SELECT_WEAPON_6:
+					equipWeapon(WeaponType.TELEPORTER);
+					break;
+//				case Constants.KEY_SELECT_WEAPON_7:
+//					equipWeapon(WeaponType.WEAPON_SPECIAL);
+//					break;
+//				case Constants.KEY_SELECT_WEAPON_8:
+//					equipWeapon(WeaponType.WEAPON_SPECIAL);
+//					break;
 			}
 		}
 		else {
@@ -106,14 +120,14 @@ public class Player implements Updatable {
 	 * @param numWorms - Number of characters this player begins with
 	 * @param world - Reference to the world we are playing in
 	 */
-	public Player(int playerNum, int numWorms, World world) {
+	public Player(int playerNum, int numWorms, World world, List<String> names) {
 		
 		this.numCharacters = numWorms;
 		this.playerNum = playerNum;
 		this.world = world;
 
         setupWeapons();
-        setupWorms();
+        setupWorms(names);
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
 
 	}
@@ -158,11 +172,11 @@ public class Player implements Updatable {
 	/**
 	 * Method to generate and setup all of our characters
 	 */
-	private void setupWorms() {
+	private void setupWorms(List<String> names) {
         this.characters = new Worm[numCharacters];
 
         for(int i = 0; i < numCharacters; i++) {
-            characters[i] = new Worm(this, i);
+            characters[i] = new Worm(this, i, names.remove(0));
             HealthBar healthBar = new HealthBar(world, characters[i]);
             world.registerAfterUpdate(characters[i]);
             world.registerAfterUpdate(healthBar);
@@ -196,6 +210,7 @@ public class Player implements Updatable {
         weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
         weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
         weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
+        weapons[4] = new Weapon(this,WeaponType.TELEPORTER);
     }
 	/**
 	 * Method to generate all our weapons from existing SnapshotData
@@ -269,6 +284,8 @@ public class Player implements Updatable {
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_5, keyListener);
+		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_6, keyListener);
 	}
 	/**
 	 * Method to deregister all objects and handlers when this player's turn is over
@@ -304,6 +321,8 @@ public class Player implements Updatable {
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_5, keyListener);
+        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_6, keyListener);
 	}
 
 	/**

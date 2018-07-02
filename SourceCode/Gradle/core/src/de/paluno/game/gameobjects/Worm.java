@@ -48,6 +48,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
 
+	private String name;
+
 	private int health;
 
 	/**
@@ -60,8 +62,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param player - reference to the player we belong to
 	 * @param charNum - Our character number
 	 */
-	public Worm(Player player, int charNum) {
+	public Worm(Player player, int charNum, String name) {
 	    characterNumber = charNum;
+	    this.name = name;
 
 		// Link references
 		this.player = player;
@@ -117,6 +120,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		this.isInfected = data.isInfected;
 
 		updateAnimation();
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	/**

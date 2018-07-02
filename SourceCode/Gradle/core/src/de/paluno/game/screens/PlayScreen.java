@@ -7,8 +7,12 @@ import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.World;
+
+import java.util.List;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
 
@@ -24,14 +28,20 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     private int mapNumber;
     private int numWorms;
+    int playerNumber;
+    private int modi;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
+    private List<String> names;
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
         this.game = game;
-
         this.mapNumber = mapNumber;
         this.numWorms = numWorms;
+        this.modi = modi;
+        this.names = names;
+        this.playerNumber = playerNumber;
+
 
         spriteBatch = new SpriteBatch();
     }
@@ -44,7 +54,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         world = new World(this);
-        world.initializeNew(mapNumber, numWorms);
+        world.initializeNew(mapNumber, numWorms, names);
         weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 

@@ -1,10 +1,13 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
@@ -14,19 +17,19 @@ import java.util.ArrayList;
 
 public class Projectile implements Updatable, PhysicsObject, Renderable {
 
-	public static class SnapshotData {
+    public static class SnapshotData {
 
-		private Vector2 position;
-		private Vector2 direction;
-		private WeaponType weaponType;
+        private Vector2 position;
+        private Vector2 direction;
+        private WeaponType weaponType;
 
-		private int playerNumber;
-		private int wormNumber;
+        private int playerNumber;
+        private int wormNumber;
 
-		public Vector2 getPosition() {
-			return position;
-		}
-	}
+        public Vector2 getPosition() {
+            return position;
+        }
+    }
 
     // in meters
     private static final float PROJECTILE_RADIUS = 0.03f;
@@ -67,19 +70,19 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public Projectile(World world, SnapshotData data) {
-    	this.world = world;
-    	this.position = data.position;
-    	this.direction = data.direction;
+        this.world = world;
+        this.position = data.position;
+        this.direction = data.direction;
 
-    	this.weaponType = data.weaponType;
+        this.weaponType = data.weaponType;
 
-    	texture = world.getAssetManager().get(weaponType.getProjectileAsset());
-    	sprite = new Sprite(texture);
+        texture = world.getAssetManager().get(weaponType.getProjectileAsset());
+        sprite = new Sprite(texture);
 
-    	sprite.setOriginCenter();
+        sprite.setOriginCenter();
 
-    	this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
-	}
+        this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
+    }
 
     @Override
     public void update(float delta, GameState gameState) {
@@ -147,9 +150,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.applyLinearImpulse(impulse, body.getPosition(), true);
 
             // CollisionHandler Identifier
-            fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
-        }
-        else if (weaponType == WeaponType.WEAPON_BAZOOKA) {
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        } else if (weaponType == WeaponType.WEAPON_BAZOOKA) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
             fixtureDef.density = BAZOOKA_DENSITY;
@@ -158,9 +160,8 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.setGravityScale(1.0f);
             Vector2 impulse = new Vector2(direction).scl(body.getMass() * 7.0f);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
-            fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
-        }
-        else if (weaponType == WeaponType.WEAPON_GRENADE || weaponType == WeaponType.WEAPON_SPECIAL) {
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        } else if (weaponType == WeaponType.WEAPON_GRENADE || weaponType == WeaponType.WEAPON_SPECIAL) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
             fixtureDef.density = GRENADE_DENSITY;
@@ -173,7 +174,14 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             body.applyAngularImpulse(-0.01f * body.getMass(), true);
-            fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        } else if (weaponType == WeaponType.TELEPORTER) {
+            Vector3 vector3 = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            world.getCamera().getWorldCamera().unproject(vector3);
+            world.getCurrentPlayer().getCurrentWorm().getBody().setTransform(vector3.x, vector3.y, 0);
+            world.registerAfterUpdate(world.getCurrentPlayer().getCurrentWorm());
+
+
         }
 
         shape.dispose();
@@ -197,7 +205,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         return wormContactEnded;
     }
 
-    public WeaponType getWeaponType(){
+    public WeaponType getWeaponType() {
         return weaponType;
     }
 
@@ -212,13 +220,12 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null)
                     directHitWorm.takeDamage(Math.round(weaponType.getDamage()));
-            }
-            else {
+            } else {
                 ArrayList<Worm> affectedWorms = world.addExplosion(new Explosion(body.getPosition(),
                         weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower()));
 
                 for (Worm worm : affectedWorms) {
-                    worm.takeDamage((int)weaponType.getDamage());
+                    worm.takeDamage((int) weaponType.getDamage());
 
                     if (weaponType == WeaponType.WEAPON_SPECIAL)
                         worm.setIsInfected(true);
@@ -231,14 +238,14 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
     }
 
     public SnapshotData makeSnapshot() {
-		SnapshotData data = new SnapshotData();
+        SnapshotData data = new SnapshotData();
 
-		data.position= new Vector2(position);
-		data.direction= new Vector2(direction);
-		data.weaponType = weaponType;
-		data.playerNumber = shootingWorm.getPlayerNumber();
-		data.wormNumber = shootingWorm.getCharacterNumber();
+        data.position = new Vector2(position);
+        data.direction = new Vector2(direction);
+        data.weaponType = weaponType;
+        data.playerNumber = shootingWorm.getPlayerNumber();
+        data.wormNumber = shootingWorm.getCharacterNumber();
 
-		return data;
-	}
+        return data;
+    }
 }

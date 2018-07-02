@@ -15,96 +15,71 @@ import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Renderable;
 
+import java.util.ArrayList;
+
 public class WeaponUI implements Renderable {
 
-    // TODO:  density of projectiles ok?
-
-
     private PlayScreen playScreen;
-
+    private ElementGUI elementGUI;
     //takes the whole screen
     private Stage stage;
-    // hold the image of our button
-    private Texture gun, grenade, bazooka, weaponSpecial, airStrike, teleport, mine, artillery;
-    // defines rectangular area of a texture
-    private TextureRegion textureRegionGun, textureRegionGrenade, textureRegionBazooka, textureRegionWeaponSpecial,
-            textureRegionAirStrike, textureRegionTeleport, textureRegionMine, textureRegionArtillery;
-    // draws the texture in the given size
-    private TextureRegionDrawable regionDrawableGun, regionDrawableGrenade, regionDrawableBazooka, regionDrawableWeaponSpecial,
-            regionDrawableAirStrike, regionDrawableTeleport, regionDrawableMine, regionDrawableArtillery;
     // Icons
     private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonWeaponSpecial,
-            buttonAirStrike, buttonTeleport, buttonMine, buttonArtillery;
+            buttonAirStrike, buttonTeleport, buttonMine, buttonArtillery, weaponMenuButton;
     // Is implemented into the stage
     private Table table, table2;
 
     // Background of the table
     private Image image, image2;
-    private Texture textureBackground, textureBackground2;
     private Player player;
 
 
     public WeaponUI(PlayScreen playScreen) {
         this.playScreen = playScreen;
-
+        this.elementGUI = new ElementGUI();
 
         // Table Background
-        textureBackground = playScreen.getAssetManager().get(Assets.weaponUI);
-        image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
+        image = new Image((new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI)))));
+        image2 = new Image(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI2))));
 
-        textureBackground2 = playScreen.getAssetManager().get(Assets.weaponUI2);
-        image2 = new Image(new TextureRegionDrawable(new TextureRegion(textureBackground2)));
-
-        //Gun Button
-        gun = playScreen.getAssetManager().get(Assets.iconGun);
-        textureRegionGun = new TextureRegion(gun);
-        regionDrawableGun = new TextureRegionDrawable(textureRegionGun);
-        buttonGun = new ImageButton(regionDrawableGun);
+        //Gun ElementGUI
+        buttonGun = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconGun));
         buttonGun.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Gun Button Clicked");
+                System.out.println("Gun ElementGUI Clicked");
                 player.equipWeapon(WeaponType.WEAPON_GUN);
 
             }
         }));
 
 
-        // Grenade Button
-        grenade = playScreen.getAssetManager().get(Assets.iconGrenade);
-        textureRegionGrenade = new TextureRegion(grenade);
-        regionDrawableGrenade = new TextureRegionDrawable(textureRegionGrenade);
-        buttonGrenade = new ImageButton(regionDrawableGrenade);
+        // Grenade ElementGUI
+        buttonGrenade = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconGrenade));
         buttonGrenade.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Grenade Button Clicked");
+                System.out.println("Grenade ElementGUI Clicked");
                 player.equipWeapon(WeaponType.WEAPON_GRENADE);
             }
         }));
 
-        // Bazooka Button
-        bazooka = playScreen.getAssetManager().get(Assets.iconBazooka);
-        textureRegionBazooka = new TextureRegion(bazooka);
-        regionDrawableBazooka = new TextureRegionDrawable(textureRegionBazooka);
-        buttonBazooka = new ImageButton(regionDrawableBazooka);
+        // Bazooka ElementGUI
+        buttonBazooka = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconBazooka));
         buttonBazooka.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Bazooka Button Clicked");
+                System.out.println("Bazooka ElementGUI Clicked");
                 player.equipWeapon(WeaponType.WEAPON_BAZOOKA);
             }
         }));
 
-        // SpecialWeapon Button
-        weaponSpecial = playScreen.getAssetManager().get(Assets.iconSpecial);
-        textureRegionWeaponSpecial = new TextureRegion(weaponSpecial);
-        regionDrawableWeaponSpecial = new TextureRegionDrawable(textureRegionWeaponSpecial);
-        buttonWeaponSpecial = new ImageButton(regionDrawableWeaponSpecial);
+        // SpecialWeapon ElementGUI
+        buttonWeaponSpecial = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconSpecial));
         buttonWeaponSpecial.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("SpecialWeapon Button Clicked");
+                System.out.println("SpecialWeapon ElementGUI Clicked");
                 player.equipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
@@ -136,62 +111,80 @@ public class WeaponUI implements Renderable {
         stage.addActor(table);
 
 
-        // Airstrike Button
-        airStrike = playScreen.getAssetManager().get(Assets.iconAirStrike);
-        textureRegionAirStrike = new TextureRegion(airStrike);
-        regionDrawableAirStrike = new TextureRegionDrawable(textureRegionAirStrike);
-        buttonAirStrike = new ImageButton(regionDrawableAirStrike);
+        // Airstrike ElementGUI
+        buttonAirStrike = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconAirStrike));
         buttonAirStrike.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Airstrike Button Clicked");
+                System.out.println("Airstrike ElementGUI Clicked");
                 //player.equipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
-        // Teleport Button
-        teleport = playScreen.getAssetManager().get(Assets.iconTeleport);
-        textureRegionTeleport = new TextureRegion(teleport);
-        regionDrawableTeleport = new TextureRegionDrawable(textureRegionTeleport);
-        buttonTeleport = new ImageButton(regionDrawableTeleport);
+        // Teleport ElementGUI
+        buttonTeleport = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconTeleport));
         buttonTeleport.addListener((new ClickListener() {
+
+//                        Vector3 selectedTeleportPosition = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(x, y, 0));
+//                        player.getCurrentWorm().getBody().setTransform(selectedTeleportPosition.x, selectedTeleportPosition.y, 0);
+
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Teleport Button Clicked");
-               // player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                System.out.println("Teleport Clicked");
+                player.equipWeapon(WeaponType.TELEPORTER);
+
             }
         }));
+        // player.equipWeapon(WeaponType.WEAPON_SPECIAL);
 
-        // Mine Button
-        mine = playScreen.getAssetManager().get(Assets.iconMine);
-        textureRegionMine = new TextureRegion(mine);
-        regionDrawableMine = new TextureRegionDrawable(textureRegionMine);
-        buttonMine = new ImageButton(regionDrawableMine);
+
+        // Mine ElementGUI
+        buttonMine = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconMine));
         buttonMine.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Mine Button Clicked");
-              //  player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                System.out.println("Mine ElementGUI Clicked");
+                //  player.equipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
-        // SpecialWeapon Button
-        artillery = playScreen.getAssetManager().get(Assets.iconArtillery);
-        textureRegionArtillery = new TextureRegion(artillery);
-        regionDrawableArtillery = new TextureRegionDrawable(textureRegionArtillery);
-        buttonArtillery = new ImageButton(regionDrawableArtillery);
+        // SpecialWeapon ElementGUI
+        buttonArtillery = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconArtillery));
         buttonArtillery.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Artillery Button Clicked");
-               // player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                System.out.println("Artillery ElementGUI Clicked");
+                // player.equipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
+
+        //Weapon Menu Button
+        weaponMenuButton = elementGUI.createButton(playScreen.getAssetManager().get(Assets.weaponMenuButton));
+        weaponMenuButton.addListener(new ClickListener() {
+            int weaponClick = 0;
+
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (weaponClick == 0) {
+                    table.setVisible(true);
+                    table2.setVisible(true);
+                    weaponClick = 1;
+                } else {
+                    table.setVisible(false);
+                    table2.setVisible(false);
+                    weaponClick = 0;
+                }
+
+
+                System.out.println("Weapon Menu Clicked");
+            }
+        });
+        weaponMenuButton.setPosition(1275, 320);
 
         table2 = new Table();
 
         table2.setBackground(image2.getDrawable());
-        table2.setPosition(1180, 2);
+        table2.setPosition(1180, 25);
 
         table2.add(buttonAirStrike);
         table2.add(buttonTeleport);
@@ -206,13 +199,12 @@ public class WeaponUI implements Renderable {
         buttonAirStrike.pad(5);
         buttonTeleport.pad(5);
 
-
+        stage.addActor(weaponMenuButton);
         stage.addActor(table2);
-       // stage.setDebugAll(true);
+        // stage.setDebugAll(true);
 
-
-
-
+        table.setVisible(false);
+        table2.setVisible(false);
     }
 
 
@@ -232,3 +224,5 @@ public class WeaponUI implements Renderable {
         this.player = player;
     }
 }
+
+

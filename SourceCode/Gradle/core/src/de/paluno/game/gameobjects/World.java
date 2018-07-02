@@ -15,6 +15,7 @@ import de.paluno.game.screens.WinningPlayer;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class World implements Disposable {
 
@@ -108,7 +109,7 @@ public class World implements Disposable {
         players = new Player[Constants.NUM_PLAYERS];
     }
 
-    public void initializeNew(int mapNumber, int numWorms) {
+    public void initializeNew(int mapNumber, int numWorms, List<String> names) {
         ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
@@ -117,8 +118,8 @@ public class World implements Disposable {
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
 
-        initializePlayer(Constants.PLAYER_NUMBER_1, numWorms);
-        initializePlayer(Constants.PLAYER_NUMBER_2, numWorms);
+        initializePlayer(Constants.PLAYER_NUMBER_1, numWorms, names);
+        initializePlayer(Constants.PLAYER_NUMBER_2, numWorms, names);
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
@@ -155,8 +156,8 @@ public class World implements Disposable {
         camera.setCameraPosition(data.projectile.getPosition());
     }
 
-    private void initializePlayer(int playerNumber, int numWorms) {
-        players[playerNumber] = new Player(playerNumber, numWorms, this);
+    private void initializePlayer(int playerNumber, int numWorms, List<String> names) {
+        players[playerNumber] = new Player(playerNumber, numWorms, this, names);
         players[playerNumber].setWindHandler(windHandler);
     }
 

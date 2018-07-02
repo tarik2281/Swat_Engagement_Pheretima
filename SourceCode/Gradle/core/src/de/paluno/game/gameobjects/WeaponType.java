@@ -18,9 +18,11 @@ public enum WeaponType {
 	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade, Assets.weaponGrenade, Assets.projectileGrenade,
 			7.0f, 0.5f, 0.003f, 3.0f, 50),
 	WEAPON_SPECIAL(3, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
-			7.0f, 0.35f, 0.0f, 0.0f, 0);
+			7.0f, 0.35f, 0.0f, 0.0f, 0),
+	TELEPORTER(3, Assets.iconTeleport, Assets.teleporter, Assets.projectileSpecial,
+			0.0f, 0.0f, 0.0f, 0.0f, 0);
 
-	public static final int NUM_WEAPONS = 4;
+	public static final int NUM_WEAPONS = 5;
 
 	private final int maxAmmo;
 	private final AssetDescriptor<Texture> icon;

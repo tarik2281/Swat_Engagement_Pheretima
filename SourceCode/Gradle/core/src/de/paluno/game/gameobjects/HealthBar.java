@@ -37,12 +37,13 @@ public class HealthBar implements Renderable {
             world.forgetAfterUpdate(this);
             return;
         }
-
-        setText(String.valueOf(worm.getHealth()));
+        if (worm.getName() != null) {
+            setText(String.valueOf(worm.getName() + "\n" + worm.getHealth()));
+        }
 
         Vector2 position = Constants.getScreenSpaceVector(body.getPosition());
 
-        font.draw(batch, layout, position.x, position.y + 30);
+        font.draw(batch, layout, position.x, position.y + 60);
     }
 
     private void setText(CharSequence text) {

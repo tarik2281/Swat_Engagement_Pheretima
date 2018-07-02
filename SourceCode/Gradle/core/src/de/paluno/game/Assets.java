@@ -8,6 +8,8 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 public class Assets {
     public static final AssetDescriptor<Texture> menuBackground =
             new AssetDescriptor<Texture>("MENU.png", Texture.class);
+    public static final AssetDescriptor<Texture> teamMenuScreenBackground =
+            new AssetDescriptor<Texture>("TeamMenuScreen.png", Texture.class);
     public static final AssetDescriptor<Texture> map1Thumbnail =
             new AssetDescriptor<Texture>("Map1SEPThumb.png", Texture.class);
     public static final AssetDescriptor<Texture> map2Thumbnail =
@@ -30,6 +32,41 @@ public class Assets {
             new AssetDescriptor<Texture>("Worms4.png", Texture.class);
     public static final AssetDescriptor<Texture> worms5Button =
             new AssetDescriptor<Texture>("Worms5.png", Texture.class);
+
+    public static final AssetDescriptor<Texture> weaponMenuButton =
+            new AssetDescriptor<Texture>("target.png", Texture.class);
+
+    //TeamMenuScreen
+    public static final AssetDescriptor<Texture> teamMenuScreen2 =
+            new AssetDescriptor<Texture>("TeamMenuScreen2.png", Texture.class);
+    public static final AssetDescriptor<Texture> teamMenuScreen3 =
+            new AssetDescriptor<Texture>("TeamMenuScreen3.png", Texture.class);
+    public static final AssetDescriptor<Texture> teamMenuScreen4 =
+            new AssetDescriptor<Texture>("TeamMenuScreen4.png", Texture.class);
+    public static final AssetDescriptor<Texture> teamMenuScreen5 =
+            new AssetDescriptor<Texture>("TeamMenuScreen5.png", Texture.class);
+
+    //PlayerMenuScreen
+    public static final AssetDescriptor<Texture> playerMenuScreen2 =
+            new AssetDescriptor<Texture>("PlayerMenuScreen2.png", Texture.class);
+    public static final AssetDescriptor<Texture> playerMenuScreen3 =
+            new AssetDescriptor<Texture>("PlayerMenuScreen3.png", Texture.class);
+    public static final AssetDescriptor<Texture> playerMenuScreen4 =
+            new AssetDescriptor<Texture>("PlayerMenuScreen4.png", Texture.class);
+    public static final AssetDescriptor<Texture> playerMenuScreen5 =
+            new AssetDescriptor<Texture>("PlayerMenuScreen5.png", Texture.class);
+    public static final AssetDescriptor<Texture> random =
+            new AssetDescriptor<Texture>("random.png", Texture.class);
+
+    //Multiplayer Number
+    public static final AssetDescriptor<Texture> playerNumber2 =
+            new AssetDescriptor<Texture>("2Player.png", Texture.class);
+    public static final AssetDescriptor<Texture> playerNumber3 =
+            new AssetDescriptor<Texture>("3Player.png", Texture.class);
+    public static final AssetDescriptor<Texture> playerNumber4 =
+            new AssetDescriptor<Texture>("4Player.png", Texture.class);
+    public static final AssetDescriptor<Texture> playerNumber5 =
+            new AssetDescriptor<Texture>("5Player.png", Texture.class);
 
     public static final AssetDescriptor<TiledMap> map1 =
             new AssetDescriptor<TiledMap>("Map1SEP.tmx", TiledMap.class);
@@ -113,9 +150,9 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileSpecial.png", Texture.class);
 
     public static final AssetDescriptor<Texture> multi =
-            new AssetDescriptor<Texture>("Multiplayer.png", Texture.class);
+            new AssetDescriptor<Texture>("ButtonMulti.png", Texture.class);
     public static final AssetDescriptor<Texture> local =
-            new AssetDescriptor<Texture>("Local.png", Texture.class);
+            new AssetDescriptor<Texture>("ButtonLocal.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> weaponGun =
             new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
@@ -125,7 +162,8 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WeaponBazooka.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> weaponSpecial =
             new AssetDescriptor<AnimationData>("WeaponSpecial.xml", AnimationData.class);
-
+    public static final AssetDescriptor<AnimationData> teleporter =
+            new AssetDescriptor<AnimationData>("Teleporter.xml", AnimationData.class);
 
 
     public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
@@ -135,13 +173,13 @@ public class Assets {
 
     public static final AssetDescriptor[] MenuScreenAssets = {
             menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
-            worms2Button, worms3Button, worms4Button, worms5Button, multi, local,
+            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground
     };
 
     public static final AssetDescriptor[] PlayScreenAssets = {
             arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
             weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI,weaponUI2, windGreen, windOrange, windRed,
-            iconAirStrike, iconMine,iconTeleport,iconArtillery
+            iconAirStrike, iconMine,iconTeleport,iconArtillery,teleporter, weaponMenuButton
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {
@@ -149,6 +187,15 @@ public class Assets {
     };
 
     public static final AssetDescriptor[] TeamMenuScreenAssets = {
-            playButton
+            playButton,teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5,teamMenuScreenBackground,random
+    };
+
+    public static final AssetDescriptor[] PlayerMenuScreenAssets = {
+            playButton,playerMenuScreen2,playerMenuScreen3,playerMenuScreen4,playerMenuScreen5,teamMenuScreenBackground,random,
+            teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5
+    };
+
+    public static final AssetDescriptor[] ModiScreenAssets = {
+            multi,local,playButton,menuBackground,playerNumber3,playerNumber2,playerNumber4,playerNumber5,
     };
 }
