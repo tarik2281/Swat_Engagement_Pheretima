@@ -1,5 +1,7 @@
 package de.paluno.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
@@ -12,15 +14,26 @@ import java.util.HashMap;
 
 public class NetworkClient {
 
+    public interface ConnectionListener {
+        void onConnectionResult(NetworkClient client, int result);
+    }
+
+    public static final int RESULT_CONNECTION_FAILED = -1;
+    public static final int RESULT_CONNECTION_SUCCESS = 0;
+
     private String remoteAddress;
     private Client client;
+    private ConnectionListener connectionListener;
 
     private HashMap<Class, DataHandler> dataHandlers;
 
     private Listener networkListener = new Listener() {
         @Override
         public void connected(Connection connection) {
-            super.connected(connection);
+            Gdx.app.postRunnable(() -> {
+                if (connectionListener != null)
+                    connectionListener.onConnectionResult(NetworkClient.this, RESULT_CONNECTION_SUCCESS);
+            });
         }
 
         @Override
@@ -48,6 +61,10 @@ public class NetworkClient {
         dataHandlers = new HashMap<>();
     }
 
+    public void setConnectionListener(ConnectionListener listener) {
+        this.connectionListener = listener;
+    }
+
     public void connect() {
         if (client == null) {
             client = new Client();
@@ -58,13 +75,19 @@ public class NetworkClient {
 
             client.addListener(networkListener);
 
-            try {
-                // TODO: hardcoded TCP port
-                client.connect(5000, remoteAddress, Constants.TCP_PORT, Constants.UDP_PORT);
-            } catch (IOException e) {
-                // TODO: client connection error handling
-                e.printStackTrace();
-            }
+            new Thread(() -> {
+                try {
+                    // TODO: hardcoded TCP port
+                    client.connect(5000, remoteAddress, Constants.TCP_PORT, Constants.UDP_PORT);
+                } catch (IOException e) {
+                    Gdx.app.postRunnable(() -> {
+                        if (connectionListener != null)
+                            connectionListener.onConnectionResult(NetworkClient.this, RESULT_CONNECTION_FAILED);
+                    });
+
+                    e.printStackTrace();
+                }
+            }).start();
         }
     }
 

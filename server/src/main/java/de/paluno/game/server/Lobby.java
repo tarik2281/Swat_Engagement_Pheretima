@@ -234,4 +234,23 @@ public class Lobby {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         } while (getPlayerByNumber(currentPlayerIndex).isDefeated());
     }
+
+    public void broadcastMessage(Connection source, MessageData data) {
+        switch (data.getType()) {
+            case ChatMessage: {
+                ChatMessage message = (ChatMessage)data;
+
+                for (Player player : players) {
+                    if (player.getConnection().getID() == source.getID()) {
+                        message.setPlayer(player.getNumber());
+                        break;
+                    }
+                }
+
+                broadcast(null, data);
+
+                break;
+            }
+        }
+    }
 }

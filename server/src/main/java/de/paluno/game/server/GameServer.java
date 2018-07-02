@@ -71,11 +71,18 @@ public class GameServer {
     private DataHandler<GameEvent> eventHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameEvent(connection, data);
 
     private DataHandler<MessageData> messageDataDataHandler = (connection, data) -> {
+        Lobby lobby = getLobbyForConnection(connection);
+
         switch (data.getType()) {
             case ClientReady:
-                Lobby lobby = getLobbyForConnection(connection);
+                lobby = getLobbyForConnection(connection);
                 if (lobby != null) {
                     lobby.setClientReady(connection);
+                }
+                break;
+            case ChatMessage:
+                if (lobby != null) {
+                    lobby.broadcastMessage(connection, data);
                 }
                 break;
         }
@@ -95,6 +102,7 @@ public class GameServer {
         objectHandlers.put(WorldData.class, worldDataHandler);
         objectHandlers.put(GameSetupData.class, gameSetupDataHandler);
         objectHandlers.put(MessageData.class, messageDataDataHandler);
+        objectHandlers.put(ChatMessage.class, messageDataDataHandler);
 
         registerDataHandler(eventHandler, ExplosionEvent.class, ShootEvent.class,
                 WormEvent.class, WormDamageEvent.class);

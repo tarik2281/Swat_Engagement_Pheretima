@@ -7,7 +7,8 @@ public class MessageData {
         GameStarted,
         RequestGameSetup,
         RequestGameSetupResult,
-        ClientReady
+        ClientReady,
+        ChatMessage
     }
 
     private Type type;

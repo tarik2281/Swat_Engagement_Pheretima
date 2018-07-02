@@ -67,9 +67,13 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         if (gameSetupRequest != null) {
             worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest, mapNumber, numWorms);
+            chatWindow = new ChatWindow(client);
+            chatWindow.initialize();
         }
         else if (gameSetupData != null) {
             worldHandler = new NetworkWorldHandler(this, client, gameSetupData);
+            chatWindow = new ChatWindow(client);
+            chatWindow.initialize();
         }
         else {
             worldHandler = new LocalWorldHandler(this, mapNumber, numWorms);
@@ -123,7 +127,11 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         weaponUI = new WeaponUI(this);
         //weaponUI.setPlayer(world.getCurrentPlayer());
 
-        InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), worldController.getInputProcessor());
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        if (chatWindow != null)
+            inputMultiplexer.addProcessor(chatWindow.getInputProcessor());
+        inputMultiplexer.addProcessor(weaponUI.getInputProcessor());
+        inputMultiplexer.addProcessor(worldController.getInputProcessor());
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
@@ -146,7 +154,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         weaponUI.render(spriteBatch, delta);
 
-        //chatWindow.render(delta);
+        if (chatWindow != null)
+        chatWindow.render(delta);
 
         /*if (disposeReplayAfterUpdate) {
             replayWorld.dispose();
@@ -166,6 +175,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     @Override
     public void hide() {
         worldHandler.dispose();
+
+        if (chatWindow != null)
+            chatWindow.dispose();
 
         if (client != null)
             client.disconnect();
