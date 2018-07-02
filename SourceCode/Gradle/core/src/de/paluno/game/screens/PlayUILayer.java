@@ -70,22 +70,18 @@ public class PlayUILayer {
         // set the message and message color according to the current GameState
         switch (gameState) {
             case PLAYERTURN:
-                if (currentPlayer == Constants.PLAYER_NUMBER_1) {
-                    message = "Spieler 1 ist am Zug!";
-                    color = Constants.PLAYER_1_COLOR;
-                }
-                else {
-                    message = "Spieler 2 ist am Zug!";
-                    color = Constants.PLAYER_2_COLOR;
-                }
+                   message = "Spieler "+(currentPlayer+1)+" ist am Zug!";
+                   color = Constants.PLAYER_COLORS[currentPlayer];
                 break;
-            case GAMEOVERPLAYERONEWON:
-                message = "Spieler 1 hat gewonnen!";
-                color = Constants.PLAYER_1_COLOR;
-                break;
-            case GAMEOVERPLAYERTWOWON:
-                message = "Spieler 2 hat gewonnen!";
-                color = Constants.PLAYER_2_COLOR;
+            case GAMEOVER:
+                if(currentPlayer != -1) {
+                	message = "Spieler "+(currentPlayer+1)+" hat gewonnen!";
+                	color = Constants.PLAYER_COLORS[currentPlayer];
+                } else {
+                	message = "Unentschieden!";
+                	color = Color.LIGHT_GRAY;
+                }
+                
                 break;
         }
 

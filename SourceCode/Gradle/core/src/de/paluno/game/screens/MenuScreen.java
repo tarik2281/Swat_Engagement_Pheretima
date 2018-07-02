@@ -42,6 +42,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
     private int mapNumber;
     private int numWorms;
+    private int numPlayers = 2;
 
     public MenuScreen(SEPGame game) {
         super();
@@ -141,7 +142,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setPlayScreen(mapNumber, numWorms);
+                game.setPlayScreen(mapNumber, numWorms, numPlayers);
                 System.out.println("Play Clicked");
             }
         });

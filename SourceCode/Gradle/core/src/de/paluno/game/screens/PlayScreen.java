@@ -20,18 +20,20 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 	private boolean disposeReplayAfterUpdate;
     private World.SnapshotData worldSnapshot;
 
-    private WinningPlayer winningPlayer = WinningPlayer.NONE;
+    private int winningPlayer = -2;
 
     private int mapNumber;
     private int numWorms;
+    private int numPlayers;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms, int numPlayers) {
         this.game = game;
 
         this.mapNumber = mapNumber;
         this.numWorms = numWorms;
+        this.numPlayers = numPlayers;
 
         spriteBatch = new SpriteBatch();
     }
@@ -44,7 +46,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         world = new World(this);
-        world.initializeNew(mapNumber, numWorms);
+        world.initializeNew(mapNumber, numWorms, numPlayers);
         weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 
@@ -75,7 +77,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
             disposeReplayAfterUpdate = false;
         }
 
-        if (winningPlayer != WinningPlayer.NONE && replayWorld == null) {
+        if (winningPlayer != -2 && replayWorld == null) {
             game.setGameOver(winningPlayer);
         }
     }
@@ -106,7 +108,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     }
 
     public void setGameState(World world, GameState gameState, int currentPlayer) {
-        uiLayer.setGameState(gameState, currentPlayer);
+        if(winningPlayer != -2) uiLayer.setGameState(gameState, winningPlayer);
+        else uiLayer.setGameState(gameState, currentPlayer);
 
         if (this.world == world && gameState == GameState.SHOOTING)
         	worldSnapshot = world.makeSnapshot();
@@ -115,7 +118,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
             disposeReplayAfterUpdate = true;
         }
 
-        if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
+        if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVER)) {
             if (world.isWormDied() && worldSnapshot != null) {
                 replayWorld = new World(this);
                 replayWorld.initializeFromSnapshot(worldSnapshot);
@@ -126,7 +129,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         }
     }
 
-    public void setGameOver(WinningPlayer winningPlayer) {
+    public void setGameOver(int winningPlayer) {
         this.winningPlayer = winningPlayer;
     }
 }

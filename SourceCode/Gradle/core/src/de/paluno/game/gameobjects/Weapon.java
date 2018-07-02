@@ -52,6 +52,8 @@ public class Weapon {
 
 	/**
 	 * Method to generate a projectile if allowed to
+	 * @param worm - The worm that is firing
+	 * @param angle - The angle in which the projectile is being shot
 	 */
 	public void shoot(Worm worm, float angle) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
@@ -64,7 +66,7 @@ public class Weapon {
 				player.getWorld().spawnProjectile(projectile);
 			}
 
-			currentAmmo--;
+			if(type.getMaxAmmo() != Constants.WEAPON_AMMO_INF) currentAmmo--;
 		}
 	}
 	
@@ -112,4 +114,10 @@ public class Weapon {
 
 		return data;
 	}
+	
+	/**
+	 * Method to increase the amount of available ammo
+	 * @param amount - The amount to increase
+	 */
+	public void addAmmo(int amount) {this.currentAmmo += amount;}
 }

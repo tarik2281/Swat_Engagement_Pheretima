@@ -37,6 +37,7 @@ public class World implements Disposable {
     private LinkedList<Object> objectForgetQueue;
     private ArrayList<Renderable> renderableObjects;
     private ArrayList<Updatable> updatableObjects;
+    private ArrayList<Joint> jointsToDestroy;
 
     private com.badlogic.gdx.physics.box2d.World world;
     private Rectangle worldBounds;
@@ -54,6 +55,12 @@ public class World implements Disposable {
     private Box2DDebugRenderer debugRenderer;
     private boolean isReplayWorld;
     private boolean skipFrame = false;
+    
+    private Airdrop airdrop;
+    private AirdropCrate airdropCrate;
+    private boolean dropping = false;
+    private boolean initDrop = false;
+    private int winningPlayer = -1;
 
     private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
         if (keyDown) {
@@ -94,6 +101,7 @@ public class World implements Disposable {
         objectForgetQueue = new LinkedList<>();
         renderableObjects = new ArrayList<>();
         updatableObjects = new ArrayList<>();
+        jointsToDestroy = new ArrayList<>();
 
         world = new com.badlogic.gdx.physics.box2d.World(Constants.GRAVITY, true);
         world.setContactListener(new CollisionHandler());
@@ -104,12 +112,13 @@ public class World implements Disposable {
 
         camera = new GameCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
-
-        players = new Player[Constants.NUM_PLAYERS];
+        
+        airdrop = new Airdrop();
     }
 
-    public void initializeNew(int mapNumber, int numWorms) {
-        ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
+    public void initializeNew(int mapNumber, int numWorms, int numPlayers) {
+        /*DEBUG*/numPlayers = 2;
+    	ground = new Ground(this, screen.getAssetManager().get(Assets.getMapByIndex(mapNumber)), explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
         windHandler = new WindHandler();
@@ -117,8 +126,10 @@ public class World implements Disposable {
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
 
-        initializePlayer(Constants.PLAYER_NUMBER_1, numWorms);
-        initializePlayer(Constants.PLAYER_NUMBER_2, numWorms);
+        players = new Player[numPlayers];
+        for(int i = 0; i < numPlayers; i++) {
+        	initializePlayer(i, numWorms);
+        }
 
         worldBounds.set(ground.getWorldOriginX(), ground.getWorldOriginY(),
                 ground.getWorldWidth(), ground.getWorldHeight());
@@ -144,6 +155,7 @@ public class World implements Disposable {
         worldBounds.set(data.worldBounds);
         camera.setBottomLimit(worldBounds.y);
 
+        players = new Player[data.player.length];
         for (Player.SnapshotData playerData : data.player)
             initializePlayer(playerData);
 
@@ -218,17 +230,30 @@ public class World implements Disposable {
             if (advance)
                 advanceGameState();
         }
-        else if (currentGameState == GameState.RAISE_LIMIT) {
-            worldBounds.y += Constants.RAISE_LIMIT_SPEED * delta;
-            camera.setBottomLimit(worldBounds.y);
-
-            if (worldBounds.y >= targetLimit)
-                advanceGameState();
+        else if (currentGameState == GameState.ROUND_END) {
+            if(dropping) {
+            	this.camera.setCameraFocus(this.airdropCrate);
+            }
+        	
+        	if(worldBounds.y < targetLimit) {
+	            worldBounds.y += Constants.RAISE_LIMIT_SPEED * delta;
+	            camera.setBottomLimit(worldBounds.y);
+        	} else if (worldBounds.y >= targetLimit) {
+        		if(!initDrop) {
+                	this.airdropCrate = (AirdropCrate) airdrop.trigger(this);
+                	dropping = true;
+                	initDrop = true;
+                }
+        		if(initDrop && !dropping)
+        			advanceGameState();
+        	}
         }
 
         for (Updatable updatable : updatableObjects) {
             updatable.update(delta, currentGameState);
         }
+        
+        //if(this.projectile == null) camera.setCameraFocus(this.getCurrentPlayer().getCurrentWorm());
     }
 
     private void physicsPhase(float delta) {
@@ -262,6 +287,10 @@ public class World implements Disposable {
     public void forgetAfterUpdate(Object gameObject) {
         // add object to queue
         objectForgetQueue.add(gameObject);
+    }
+    
+    public void registerDestroyJoint(Joint joint) {
+    	jointsToDestroy.add(joint);
     }
 
     public void setWormDied(boolean wormDied) {
@@ -321,6 +350,10 @@ public class World implements Disposable {
     public Joint createJoint(JointDef jointDef) {
         return world.createJoint(jointDef);
     }
+    
+    public void destroyJoint(Joint joint) {
+    	world.destroyJoint(joint);
+    }
 
     public com.badlogic.gdx.physics.box2d.World getWorld() {
         return world;
@@ -369,16 +402,15 @@ public class World implements Disposable {
                 windHandler.setNextWind();
                 setWormDied(false);
                 break;
-            case GAMEOVERPLAYERONEWON:
-                screen.setGameOver(WinningPlayer.PLAYERONE);
-                break;
-            case GAMEOVERPLAYERTWOWON:
-                screen.setGameOver(WinningPlayer.PLAYERTWO);
+            case GAMEOVER:
+                screen.setGameOver(winningPlayer);
                 break;
             case SHOOTING:
                 break;
-            case RAISE_LIMIT:
-                targetLimit = worldBounds.y + Constants.RAISE_LIMIT_LENGTH;
+            case ROUND_END:
+                //this.airdropCrate = (AirdropCrate)airdrop.trigger(this);
+                //this.dropping = true;
+            	targetLimit = worldBounds.y + Constants.RAISE_LIMIT_LENGTH;
 
                 for (Player player : players)
                     player.setIsRoundEnded(false);
@@ -398,12 +430,18 @@ public class World implements Disposable {
             	if (isReplayWorld())
             		setGameState(GameState.REPLAY_ENDED);
             	else {
-            	    if (players[Constants.PLAYER_NUMBER_1].isDefeated())
-            	        setGameState(GameState.GAMEOVERPLAYERTWOWON);
-            	    else if (players[Constants.PLAYER_NUMBER_2].isDefeated())
-            	        setGameState(GameState.GAMEOVERPLAYERONEWON);
+            	    int remainingPlayers = 0;
+            	    for(int i = 0; i < players.length; i++) {
+            	    	if(!players[i].isDefeated()) {
+            	    		remainingPlayers++;
+            	    		winningPlayer = i;
+            	    	}
+            	    }
+            		if (remainingPlayers < 2)
+            	        setGameState(GameState.GAMEOVER);
             	    else {
-                        boolean raiseLimit = true;
+                        winningPlayer = -1;
+            	    	boolean raiseLimit = true;
 
                         for (Player player : players) {
                             if (!player.isRoundEnded())
@@ -411,14 +449,16 @@ public class World implements Disposable {
                         }
 
                         if (raiseLimit)
-                            setGameState(GameState.RAISE_LIMIT);
+                            setGameState(GameState.ROUND_END);
                         else
                             setGameState(GameState.PLAYERTURN);
             	    }
                 }
                 break;
-            case RAISE_LIMIT:
+            case ROUND_END:
                 setGameState(GameState.PLAYERTURN);
+                dropping = false;
+                initDrop = false;
                 break;
         }
     }
@@ -429,6 +469,10 @@ public class World implements Disposable {
 
     public Vector2 generateSpawnPosition() {
         return ground.getRandomSpawnPosition();
+    }
+    
+    public Vector2 generateDropPosition() {
+    	return ground.getRandomDropPoint();
     }
 
     public boolean isInWorldBounds(Body body) {
@@ -488,12 +532,29 @@ public class World implements Disposable {
             if (gameObject == camera.getCameraFocus())
                 camera.setCameraFocus(null);
         }
+        
+        if(!jointsToDestroy.isEmpty()) {
+	        for(Joint toDestroy : jointsToDestroy) {
+	        	destroyJoint(toDestroy);
+	        }
+        }
 
         objectForgetQueue.clear();
+        jointsToDestroy.clear();
     }
 
     public Player getCurrentPlayer() {
         return players[currentPlayer];
+    }
+    
+    public void spawnDebugDrop(WeaponType drop, float x) {
+    	this.airdrop.debugSpawn(this, new Vector2(Math.round(x), Math.round(ground.getWorldWidth())), drop);
+    }
+    
+    public void setCrateLanded() {
+    	this.dropping = false;
+    	//this.camera.setCameraFocus(this.getCurrentPlayer().getCurrentWorm());
+    	//if(this.currentGameState == GameState.ROUND_END) advanceGameState();
     }
 
 }

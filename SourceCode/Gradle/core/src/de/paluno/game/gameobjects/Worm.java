@@ -566,4 +566,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		return data;
 	}
+	
+	/**
+	 * Passthrough method to give the "weapon picked up, add ammo" order to the player we belong to, who manages the arsenal
+	 * @param weapon - The WeaponType of the weapon picked up
+	 */
+	public void pickupWeapon(WeaponType weapon) {
+		this.player.addAmmo(weapon);
+	}
 }

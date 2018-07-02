@@ -202,6 +202,12 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         int index = random.nextInt(spawnPoints.size());
         return spawnPoints.remove(index);
     }
+    
+    public Vector2 getRandomDropPoint() {
+    	Random random = new Random();
+    	int x = random.nextInt(Math.round(this.getWorldWidth())+1);
+    	return new Vector2(x, (int) this.getWorldHeight());
+    }
 
     private void loadSpawnPositions() {
         MapLayer spawnLayer = tiledMap.getLayers().get(Constants.SPAWN_LAYER);

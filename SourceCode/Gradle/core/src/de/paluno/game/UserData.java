@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 // Holds the information of the fixture on which object it is assigned to
 public class UserData {
     public enum ObjectType {
-        Worm, Ground, WormFoot, Projectile, Virus
+        Worm, Ground, WormFoot, Projectile, Virus, Crate, Chute;
     }
 
     private ObjectType type;

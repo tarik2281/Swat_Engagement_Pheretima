@@ -69,6 +69,9 @@ public class Player implements Updatable {
 				case Constants.KEY_SELECT_WEAPON_4:
 					equipWeapon(WeaponType.WEAPON_SPECIAL);
 					break;
+				case Constants.KEY_DEBUG_DROP_TURRET:
+					spawnDebugDrop(keyCode);
+					break;
 			}
 		}
 		else {
@@ -269,6 +272,7 @@ public class Player implements Updatable {
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
 		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+		input.registerKeyListener(Constants.KEY_DEBUG_DROP_TURRET, keyListener);
 	}
 	/**
 	 * Method to deregister all objects and handlers when this player's turn is over
@@ -304,6 +308,7 @@ public class Player implements Updatable {
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
         input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
+        input.unregisterKeyListener(Constants.KEY_DEBUG_DROP_TURRET, keyListener);
 	}
 
 	/**
@@ -485,5 +490,30 @@ public class Player implements Updatable {
 	 */
 	public void handleAction(int keycode) {
 		this.shoot();
+	}
+	
+	/**
+	 * Method to generate a given debug test Airdrop
+	 * @param keycode - The key registered for a certain weapon type
+	 */
+	public void spawnDebugDrop(int keycode) {
+		WeaponType dropWeapon;
+		switch(keycode) {
+			default: case Constants.KEY_DEBUG_DROP_TURRET: dropWeapon = WeaponType.WEAPON_SPECIAL;
+		}
+		world.spawnDebugDrop(dropWeapon, this.getCurrentWorm().getBody().getPosition().x);
+	}
+	
+	/**
+	 * Method to add one shot to a given picked up weapon
+	 * @param weapon - The WeaponType of the weapon
+	 */
+	public void addAmmo(WeaponType weapon) {
+		for(Weapon check : this.weapons) {
+			if(check.getWeaponType() == weapon) {
+				check.addAmmo(1);
+				break;
+			}
+		}
 	}
 }

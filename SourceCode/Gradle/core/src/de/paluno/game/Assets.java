@@ -100,6 +100,11 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileBazooka.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileSpecial =
             new AssetDescriptor<Texture>("ProjectileSpecial.png", Texture.class);
+    
+    public static final AssetDescriptor<Texture> crate =
+    		new AssetDescriptor<Texture>("crate.png", Texture.class);
+    public static final AssetDescriptor<Texture> chute =
+    		new AssetDescriptor<Texture>("chute.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> weaponGun =
             new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
@@ -122,7 +127,8 @@ public class Assets {
 
     public static final AssetDescriptor[] PlayScreenAssets = {
             arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, windGreen, windOrange, windRed
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI, windGreen, windOrange, windRed,
+            crate, chute
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {

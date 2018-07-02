@@ -22,7 +22,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	
 	protected Sprite sprite;
 	private SpriteBatch batch;
-	private WinningPlayer winningPlayer;
+	private int winningPlayer;
 	private SEPGame game;
 	private Stage restartStage;
 	private Table table;
@@ -32,7 +32,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private TextureRegionDrawable restartButtonTextureDrawable;
 	
 	
-	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
+	public GameOverScreen(SEPGame game, int winningPlayer) {
 		this.winningPlayer = winningPlayer;
 		this.game = game;
 	}
@@ -52,10 +52,10 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		Texture texture = null;
 		
 		switch (winningPlayer) {
-		case PLAYERONE:
+		case 0:
 			texture = game.getAssetManager().get(Assets.gameOverScreen1);
 			break;
-		case PLAYERTWO:
+		case 1:
 			texture = game.getAssetManager().get(Assets.gameOverScreen2);
 			break;
 		}

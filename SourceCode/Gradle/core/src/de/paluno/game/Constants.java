@@ -16,9 +16,17 @@ public class Constants {
 
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
+	public static final int WINNING_PLAYER_NONE = -1;
 
 	public static final Color PLAYER_1_COLOR = Color.TEAL;
 	public static final Color PLAYER_2_COLOR = Color.FIREBRICK;
+	public static final Color[] PLAYER_COLORS = new Color[] {
+			Color.TEAL,
+			Color.FIREBRICK,
+			Color.CYAN,
+			Color.LIME,
+			Color.GOLDENROD
+	};
 
 	public static final String TILE_LAYER = "TileLayer";
 	public static final String COLLISION_LAYER = "CollisionLayer";
@@ -59,6 +67,7 @@ public class Constants {
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
 	public static final float WORM_RADIUS = WORM_HEIGHT / 2.0f;
+	public static final float CRATE_RADIUS = 10.0f * WORLD_SCALE;
 
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
@@ -83,6 +92,8 @@ public class Constants {
     public static final int KEY_MOVE_CAMERA_DOWN = Input.Keys.S;
     public static final int KEY_TOGGLE_CAMERA_FOCUS = Input.Keys.F;
     public static final int KEY_TOGGLE_DEBUG_RENDER = Input.Keys.Y;
+    
+    public static final int KEY_DEBUG_DROP_TURRET = Input.Keys.T;
     
     // Weapon constants
     public static final int WEAPON_AMMO_INF = -1;

@@ -33,11 +33,11 @@ public class SEPGame extends Game {
 		setNextScreen(new MenuScreen(this));
 	}
 
-    public void setPlayScreen(int mapNumber, int numWorms) {
-		setNextScreen(new PlayScreen(this, mapNumber, numWorms));
+    public void setPlayScreen(int mapNumber, int numWorms, int numPlayers) {
+		setNextScreen(new PlayScreen(this, mapNumber, numWorms, numPlayers));
 	}
 
-    public void setGameOver(WinningPlayer winningPlayer) {
+    public void setGameOver(int winningPlayer) {
 	    setNextScreen(new GameOverScreen(this, winningPlayer));
     }
 
