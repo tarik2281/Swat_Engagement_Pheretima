@@ -1,5 +1,7 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.GameState;
 import de.paluno.game.gameobjects.Projectile;
@@ -18,6 +20,8 @@ public class WindHandler implements Updatable {
     private Vector2 wind;
     private Projectile projectile;
     private int x = rand.nextInt(10) - 5;
+    
+    
     public WindHandler() {
 
     }
@@ -30,6 +34,7 @@ public class WindHandler implements Updatable {
     public void update(float delta, GameState gamestate) {
         // magnitude and a direction
         wind = new Vector2(this.x, 0);
+        
 
         // scl = magnitude which manages the speed
         wind.scl(0.0001f);

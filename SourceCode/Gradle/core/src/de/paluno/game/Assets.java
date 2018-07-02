@@ -3,6 +3,7 @@ package de.paluno.game;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 
@@ -125,6 +126,57 @@ public class Assets {
     		new AssetDescriptor<Music>("MenuScreen_ClickSound.mp3", Music.class);
     public static final AssetDescriptor<Music> gameOverSound = 
     		new AssetDescriptor<Music>("GameOverScreen_CrowdCheer.mp3", Music.class);
+    public static final AssetDescriptor<Sound> grenadeExplosionSound = 
+    		new AssetDescriptor<Sound>("GrenadeExplosion2.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> bazookaShotSound = 
+    		new AssetDescriptor<Sound>("ShotGunFire.wav", Sound.class);
+    public static final AssetDescriptor<Sound> gunShotSound = 
+    		new AssetDescriptor<Sound>("ShotGunFire3.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> gunRelease = 
+    		new AssetDescriptor<Sound>("GunRelease.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> airstrikeSound = 
+    		new AssetDescriptor<Sound>("Airstrike.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> airstrikeExplosion = 
+    		new AssetDescriptor<Sound>("AirstrikeExplosion.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> airballSound = 
+    		new AssetDescriptor<Sound>("NoHitNoExplosion.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> raiseLimitSound = 
+    		new AssetDescriptor<Sound>("UnderWaterLoop.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> map1Sound = 
+    		new AssetDescriptor<Sound>("Map1_ArabianNight.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> map2Sound = 
+    		new AssetDescriptor<Sound>("Map2_BuildingNight.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> map3Sound = 
+    		new AssetDescriptor<Sound>("Map3_CamelotDay.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> map4Sound = 
+    		new AssetDescriptor<Sound>("Map4_PrehistoricDay.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> walkLoop = 
+    		new AssetDescriptor<Sound>("WalkLoop.wav", Sound.class);
+    public static final AssetDescriptor<Sound> noAmmo = 
+    		new AssetDescriptor<Sound>("NoAmmoWarning.wav", Sound.class);
+    public static final AssetDescriptor<Sound> fallDown = 
+    		new AssetDescriptor<Sound>("DeadAfterFall.wav", Sound.class);
+    public static final AssetDescriptor<Sound> roundStart = 
+    		new AssetDescriptor<Sound>("StartRound.wav", Sound.class);
+    public static final AssetDescriptor<Sound> landSound = 
+    		new AssetDescriptor<Sound>("WormLanding.wav", Sound.class);
+    public static final AssetDescriptor<Sound> virusSound = 
+    		new AssetDescriptor<Sound>("Cough2.wav", Sound.class);
+    public static final AssetDescriptor<Sound> throwSound = 
+    		new AssetDescriptor<Sound>("Throw.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> windMedium = 
+    		new AssetDescriptor<Sound>("WindMedium.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> windHeavy = 
+    		new AssetDescriptor<Sound>("WindHeavy.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> targetSound = 
+    		new AssetDescriptor<Sound>("TargetAquired.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> grenadeContact = 
+    		new AssetDescriptor<Sound>("GrenadeImpact2.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> popSound = 
+    		new AssetDescriptor<Sound>("WORMPOP.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> destroySound = 
+    		new AssetDescriptor<Sound>("DestroySound.mp3", Sound.class);
+    
 
     public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
         for (AssetDescriptor asset : assets)
@@ -146,6 +198,9 @@ public class Assets {
     };
     
     public static final AssetDescriptor[] Music = {
-    		menuSound, tickSound, gameOverSound
+    		menuSound, tickSound, gameOverSound, grenadeExplosionSound, gunShotSound, gunRelease, airstrikeSound, airstrikeExplosion,
+    		airballSound, bazookaShotSound, raiseLimitSound, map1Sound, map2Sound, map3Sound, map4Sound, walkLoop, noAmmo, fallDown,
+    		roundStart, landSound, virusSound, throwSound, windMedium, windHeavy, targetSound, grenadeContact, popSound, destroySound,
+    		
     };
 }

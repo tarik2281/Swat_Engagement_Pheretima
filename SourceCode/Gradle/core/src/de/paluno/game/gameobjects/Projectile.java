@@ -1,11 +1,15 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+
+import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.GameState;
 import de.paluno.game.UserData;
@@ -44,6 +48,10 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     private Texture texture;
     private Sprite sprite;
+    
+    private Sound grenadeExplosion;
+	private Sound airstrikeExplosion;
+	private Sound airballSound;
 
     private boolean exploded = false;
 
@@ -65,6 +73,10 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         sprite.setOriginCenter();
 
         this.shootingWorm = shootingWorm;
+        
+        grenadeExplosion = world.getAssetManager().get(Assets.grenadeExplosionSound);
+		airstrikeExplosion = world.getAssetManager().get(Assets.airstrikeExplosion);
+        airballSound = world.getAssetManager().get(Assets.airballSound);
     }
 
     public Projectile(World world, SnapshotData data) {
@@ -79,6 +91,9 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
 
     	sprite.setOriginCenter();
 
+    	grenadeExplosion = world.getAssetManager().get(Assets.grenadeExplosionSound);
+		airstrikeExplosion = world.getAssetManager().get(Assets.airstrikeExplosion);
+        airballSound = world.getAssetManager().get(Assets.airballSound);
     	this.shootingWorm = world.getWormForPlayer(data.playerNumber, data.wormNumber);
 	}
 
@@ -87,10 +102,13 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         explosionTimer += delta;
 
         // check if the projectile is inside our world - if not, destroy it
-        if (!world.isInWorldBounds(body) || (weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(body.getPosition())) ||
+        if (weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(body.getPosition()) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
-            explode(null);
-
+            explode(null, true);
+            
+        if(!world.isInWorldBounds(body)) {
+        	explode(null, false);
+        }
         if (!wormContactEnded) {//  
             float distance = shootingWorm.getBody().getPosition().dst(body.getPosition());
             if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
@@ -143,7 +161,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.setGravityScale(0.0f);
 
             // apply an impulse to the body so it flies in the direction we chose
-            Vector2 impulse = new Vector2(direction).scl(0.001f);
+            Vector2 impulse = new Vector2(direction).scl(0.0015f);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
 
             // CollisionHandler Identifier
@@ -183,7 +201,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         	Fixture fix = body.createFixture(fixtureDef);
         	body.setGravityScale(0.0f);
         	body.setAngularDamping(2.0f);
-        	Vector2 impulse = new Vector2(direction).scl(8.0f * body.getMass());
+        	Vector2 impulse = new Vector2(direction).scl(6.0f * body.getMass());
         	body.applyLinearImpulse(impulse, body.getPosition(), true);
         	body.applyAngularImpulse(-0.01f * body.getMass(),  true);
         	fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
@@ -218,18 +236,37 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
         return weaponType.getExplosionTime() == 0.0f;
     }
 
-    public void explode(Worm directHitWorm) {
+    public void explode(Worm directHitWorm, boolean collidedObject) {
         if (!exploded) {
+        	
             exploded = true;
 
+            switch (weaponType) {
+            case WEAPON_GUN:
+            	break;
+            case WEAPON_BAZOOKA:
+            	break;
+            case WEAPON_GRENADE:
+            	grenadeExplosion.play(0.5f);
+            	break;
+            case WEAPON_SPECIAL:
+            	break;
+            case WEAPON_AIRSTRIKE:
+            	airstrikeExplosion.play(0.6f);
+            	break;
+            }
+            
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null)
                     directHitWorm.takeDamage(Math.round(weaponType.getDamage()));
             }
-            else {
+            else if (collidedObject) {
                 ArrayList<Worm> affectedWorms = world.addExplosion(new Explosion(body.getPosition(),
                         weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower()));
-
+                
+                if(affectedWorms.isEmpty()) {
+                	airballSound.play(0.4f);
+                }
                 for (Worm worm : affectedWorms) {
                     worm.takeDamage((int)weaponType.getDamage());
 
@@ -237,7 +274,6 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
                         worm.setIsInfected(true);
                 }
             }
-
             world.forgetAfterUpdate(this);
             world.advanceGameState();
         }

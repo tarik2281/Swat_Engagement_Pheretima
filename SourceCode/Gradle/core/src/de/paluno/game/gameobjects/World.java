@@ -2,6 +2,7 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -21,7 +22,7 @@ public class World implements Disposable {
 	public class SnapshotData{
 		private WindHandler.SnapshotData windHandler;
         private int currentPlayer;
-		private Projectile.SnapshotData projectile;
+		private Projectile.SnapshotData[] projectile;
 		private Player.SnapshotData[] player;
 	    private Rectangle worldBounds;
 		private Ground.SnapshotData ground;
@@ -33,6 +34,9 @@ public class World implements Disposable {
     private GameState currentGameState = GameState.NONE;
     private boolean wormDied = false;
 
+    private Sound raiseLimitSound;
+    private Sound roundStart;
+    private Sound destroySound;
     private LinkedList<Object> objectRegisterQueue;
     private LinkedList<Object> objectForgetQueue;
     private ArrayList<Renderable> renderableObjects;
@@ -109,6 +113,11 @@ public class World implements Disposable {
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
         players = new Player[Constants.NUM_PLAYERS];
+        
+        //sounds
+        raiseLimitSound = getAssetManager().get(Assets.raiseLimitSound);
+        roundStart = getAssetManager().get(Assets.roundStart);
+        destroySound = getAssetManager().get(Assets.destroySound);
     }
 
     public void initializeNew(int mapNumber, int numWorms) {
@@ -152,10 +161,14 @@ public class World implements Disposable {
 
         registerAfterUpdate(ground);
         registerAfterUpdate(windHandler);
-
-        //projectile = new Projectile(this, data.projectile);
-        //spawnProjectile(projectile);
-        camera.setCameraPosition(data.projectile.getPosition());
+        
+        for (Projectile.SnapshotData projectileData : data.projectile) {
+        	Projectile projectile = new Projectile(this, projectileData);
+        	spawnProjectile(projectile);
+        	camera.setCameraPosition(projectileData.getPosition());
+        }
+        
+        
     }
 
     private void initializePlayer(int playerNumber, int numWorms) {
@@ -291,21 +304,28 @@ public class World implements Disposable {
     		data.player[i] = players[i].makeSnapshot();
 
     	data.ground = ground.makeSnapshot();
+    	data.projectile = new Projectile.SnapshotData[projectiles.size()];
+    	
+    	for (int i = 0; i < projectiles.size(); i++) {
+    		data.projectile[i] = projectiles.get(i).makeSnapshot();
+		}
     	//data.projectile = projectile.makeSnapshot();
 
     	return data;
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {
-        if (explosion.getBlastPower() > 0.0f)
+        if (explosion.getBlastPower() > 0.0f) {
             ground.addExplosion(explosion);
+            destroySound.play(0.3f);
+        }
 
         final ArrayList<Worm> affectedWorms = new ArrayList<>();
 
         world.QueryAABB((fixture -> {
             if (UserData.getType(fixture) == UserData.ObjectType.Worm) {
                 Worm worm = UserData.getObject(fixture);
-
+                
                 if (!affectedWorms.contains(worm))
                     affectedWorms.add(worm);
             }
@@ -354,19 +374,23 @@ public class World implements Disposable {
                 shiftPlayers();
                 setWormsStatic(false);
                 break;
+            case RAISE_LIMIT:
+            	raiseLimitSound.stop();
+            	break;
             case SHOOTING:
             	//if (gameState != GameState.SHOOTING)
             		//projectile = null;
+            	projectiles.clear();
             	break;
         }
 
         this.currentGameState = gameState;
-
+        
         screen.setGameState(this, gameState, currentPlayer);
-
 
         switch (gameState) {
             case PLAYERTURN:
+            	roundStart.play(0.5f);
                 setWormsStatic(true);
                 getCurrentPlayer().onBeginTurn();
                 camera.setCameraFocus(getCurrentPlayer().getCurrentWorm());
@@ -383,7 +407,8 @@ public class World implements Disposable {
                 break;
             case RAISE_LIMIT:
                 targetLimit = worldBounds.y + Constants.RAISE_LIMIT_LENGTH;
-
+                raiseLimitSound.loop(0.5f);
+                
                 for (Player player : players)
                     player.setIsRoundEnded(false);
                 break;
@@ -444,16 +469,31 @@ public class World implements Disposable {
     public Rectangle getWorldBounds() {
         return worldBounds;
     }
-
+    
     public void spawnProjectile(Projectile projectile) {
     	numProjectiles++;
-    	//projectiles.add(projectile);
+    	projectiles.add(projectile);
     	//this.projectile = projectile;
     	if (currentGameState != GameState.SHOOTING)
     		setGameState(GameState.SHOOTING);
         windHandler.setProjectile(projectile);
         registerAfterUpdate(projectile);
         camera.setCameraFocus(projectile);
+    }
+    
+    public void spawnProjectile(Projectile projectile1, Projectile projectile2, Projectile projectile3) {
+    	numProjectiles += 3;
+    	projectiles.add(projectile1);
+    	projectiles.add(projectile2);
+    	projectiles.add(projectile3);
+    	
+    	if (currentGameState != GameState.SHOOTING)
+    		setGameState(GameState.SHOOTING);
+        windHandler.setProjectile(projectile1);
+        registerAfterUpdate(projectile1);
+        registerAfterUpdate(projectile2);
+        registerAfterUpdate(projectile3);
+        camera.setCameraFocus(projectile1);
     }
 
     private void registerObjects() {

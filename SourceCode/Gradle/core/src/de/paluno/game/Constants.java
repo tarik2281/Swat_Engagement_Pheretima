@@ -92,7 +92,7 @@ public class Constants {
     // Weapon constants
     public static final int WEAPON_AMMO_INF = -1;
     public static final int WEAPON_AMMO_RIFLE = 10;
-    public static final int WEAPON_AMMO_THROWABLE = 5;
+    public static final int WEAPON_AMMO_THROWABLE = 3;
     public static final int WEAPON_AMMO_SPECIAL = 1;
     
     public static final float WEAPON_RIFLE_SPEED = 5.0f;

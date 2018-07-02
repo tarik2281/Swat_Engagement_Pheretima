@@ -1,6 +1,7 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -48,7 +49,13 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
 
+	private Sound walkLoop;
+	private Sound landSound;
+	private Sound virusSound;
+
 	private int health;
+	
+	private Sound fallDown;
 
 	/**
 	 * Empty constructor for testing purposes
@@ -92,6 +99,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		// Finally setup Animations
 		updateAnimation();
+		
+		//sounds
+		fallDown = getAssets().get(Assets.fallDown);
+		walkLoop = getAssets().get(Assets.walkLoop);
+		landSound = getAssets().get(Assets.landSound);
+		virusSound = getAssets().get(Assets.virusSound);
 	}
 
 	/**
@@ -116,6 +129,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		this.isInfected = data.isInfected;
 
+		fallDown = getAssets().get(Assets.fallDown);
+		walkLoop = getAssets().get(Assets.walkLoop);
+		landSound = getAssets().get(Assets.landSound);
+		virusSound = getAssets().get(Assets.virusSound);
+		
 		updateAnimation();
 	}
 
@@ -132,7 +150,8 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (createVirusFixture)
 			createVirusFixture();
 
-        // Now we apply movements - therefor we need our current position
+		
+        // Now we apply movements - therefore we need our current position
 		Vector2 currentPos = body.getWorldCenter();
 
 		if(this.jump) {
@@ -153,6 +172,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
             switch (movement) {
                 case Constants.MOVEMENT_LEFT:
+                	walkLoop.play(0.1f);
                     desiredVel = -Constants.MOVE_VELOCITY;
                     break;
                 case Constants.MOVEMENT_NO_MOVEMENT:
@@ -160,6 +180,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
                     desiredVel = 0.0f;
                     break;
                 case Constants.MOVEMENT_RIGHT:
+                	walkLoop.play(0.1f);
                     desiredVel = Constants.MOVE_VELOCITY;
                     break;
             }
@@ -171,7 +192,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!world.isInWorldBounds(body)) die();
+		if (!world.isInWorldBounds(body)) {
+			fallDown.play(0.2f);
+			die();
+		}
 	}
 	
 	/**
@@ -189,7 +213,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		if (currentAnimation != null) {
 			if (gunUnequipping && currentAnimation.isAnimationFinished()) {
-				// The weapon should be uneuqipping and is finished with that - update
+				// The weapon should be unequipping and is finished with that - update
 				currentWeapon = null;
 				gunUnequipping = false;
 				updateAnimation();
@@ -340,8 +364,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param isInfected - Is this worm infected now?
 	 */
 	public void setIsInfected(boolean isInfected) {
-		if (!this.isInfected && isInfected)
+		if (!this.isInfected && isInfected) {
 			createVirusFixture = true;
+			virusSound.play(0.4f);
+		}
 
 		this.isInfected = isInfected;
 	}

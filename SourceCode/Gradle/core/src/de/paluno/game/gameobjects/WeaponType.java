@@ -17,10 +17,10 @@ public enum WeaponType {
 			7.0f, 0.0f, 0.0f, 0.0f, 40),
 	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade, Assets.weaponGrenade, Assets.projectileGrenade,
 			7.0f, 0.5f, 0.003f, 3.0f, 50),
-	WEAPON_SPECIAL(3, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
+	WEAPON_SPECIAL(Constants.WEAPON_AMMO_THROWABLE, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
 			7.0f, 0.35f, 0.0f, 0.0f, 0),
-	WEAPON_AIRSTRIKE(1, Assets.iconAirstrike, Assets.weaponAirstrike, Assets.projectileAirstrike,
-			1f, 0.75f, 0.009f, 0.0f, 20);
+	WEAPON_AIRSTRIKE(Constants.WEAPON_AMMO_SPECIAL, Assets.iconAirstrike, Assets.weaponAirstrike, Assets.projectileAirstrike,
+			1f, 0.75f, 0.009f, 0.0f, 25);
 
 	public static final int NUM_WEAPONS = 5;
 

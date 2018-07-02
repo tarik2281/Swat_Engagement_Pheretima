@@ -1,5 +1,6 @@
 package de.paluno.game;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Projectile;
@@ -12,16 +13,20 @@ public class CollisionHandler implements ContactListener {
     // TODO: 11.06.2018 explodeOnCollision Bazooka ? , preSolve, postSolve?
     // Weapon Special on hit
     // Weapon Special close by
-
+	
+	private Sound grenadeContactSound;
+	private Sound popSound;
 
     public CollisionHandler() {
-
     }
 
     private PlayScreen playScreen;
 
     public CollisionHandler(PlayScreen playScreen) {
         this.playScreen = playScreen;
+
+    	grenadeContactSound = playScreen.getAssetManager().get(Assets.grenadeContact);
+    	popSound = playScreen.getAssetManager().get(Assets.popSound);
 
     }
 
@@ -89,14 +94,14 @@ public class CollisionHandler implements ContactListener {
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
 
             if (((Projectile) o1).explodeOnCollision()) {
-                ((Projectile) o1).explode((Worm) o2);
+                ((Projectile) o1).explode((Worm) o2, true);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o2).getHealth());
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
 
             if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode((Worm) o1);
+                ((Projectile) o2).explode((Worm) o1, true);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o1).getHealth());
@@ -106,14 +111,17 @@ public class CollisionHandler implements ContactListener {
 
         // Projectile -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Ground) {
-            if (((Projectile) o1).explodeOnCollision()) {
-                ((Projectile) o1).explode(null);
+        	if (((Projectile) o1).explodeOnCollision()) {
+        		((Projectile) o1).explode(null, true);
+              //  grenadeContactSound.play(0.5f);
             }
+            
             System.out.println("Projectile collided with Ground");
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Ground) {
             if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode(null);
+                ((Projectile) o2).explode(null, true);
+              //  grenadeContactSound.play(0.5f);
             }
             System.out.println("Projectile collided with Ground");
         }

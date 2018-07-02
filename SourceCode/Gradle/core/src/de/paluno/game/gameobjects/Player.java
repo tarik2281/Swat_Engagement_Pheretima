@@ -1,8 +1,9 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 
 import de.paluno.game.*;
 import de.paluno.game.screens.WeaponUI;
@@ -35,6 +36,8 @@ public class Player implements Updatable {
 	private boolean isRoundEnded = false;
 	boolean indicatorAvailable = false;
 	WeaponType currentWeapon;
+	
+	private Sound gunRelease;
 
 	private World world;
 
@@ -63,12 +66,14 @@ public class Player implements Updatable {
 					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
                 case Constants.KEY_SELECT_WEAPON_1:
+                	gunRelease.play(0.1f);
                 	equipWeapon(WeaponType.WEAPON_GUN);
                     break;
                 case Constants.KEY_SELECT_WEAPON_2:
 					equipWeapon(WeaponType.WEAPON_GRENADE);
                     break;
                 case Constants.KEY_SELECT_WEAPON_3:
+                	gunRelease.play(0.1f);
 					equipWeapon(WeaponType.WEAPON_BAZOOKA);
                     break;
 				case Constants.KEY_SELECT_WEAPON_4:
@@ -124,6 +129,8 @@ public class Player implements Updatable {
         setupWorms();
 		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
 		this.airstrikeIndicator = new AirstrikeIndicator(playerNum, world);
+		
+		gunRelease = getAssets().get(Assets.gunRelease);
 	}
 	/**
 	 * Constructor to create a new Player from existing data - for replay purposes
@@ -269,6 +276,8 @@ public class Player implements Updatable {
 		// Attach indicators to the characters whose turn it is*/
 		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
 		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
+		world.registerAfterUpdate(getWindDirectionIndicator());
+
 		indicatorAvailable = false;
 		
 		

@@ -1,5 +1,6 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,12 +18,18 @@ public class WindDirectionIndicator implements Renderable {
     private World world;
     private Worm worm;
 
+    private Sound windMediumSound;
+    private Sound windHeavySound;
+
     public WindDirectionIndicator(int playerNumber, World world, WindHandler windHandler) {
         this.world = world;
         this.playerNumber = playerNumber;
 
         this.windHandler = windHandler;
-
+        
+        //sounds
+        windMediumSound = world.getAssetManager().get(Assets.windMedium);
+        windHeavySound = world.getAssetManager().get(Assets.windHeavy);
 
     }
 

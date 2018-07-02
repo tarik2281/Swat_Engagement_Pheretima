@@ -5,6 +5,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.*;
@@ -27,6 +28,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
 
+    private Sound mapSound;
+    
     public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
         this.game = game;
 
@@ -40,12 +43,29 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     public void show() {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
-
+        
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         world = new World(this);
         world.initializeNew(mapNumber, numWorms);
-        weaponUI = new WeaponUI(this);
+        
+        switch (mapNumber) {
+        	case 0:
+        		mapSound = world.getAssetManager().get(Assets.map1Sound);
+        		break;
+        	case 1:
+        		mapSound = world.getAssetManager().get(Assets.map2Sound);
+        		break;
+        	case 2:
+        		mapSound = world.getAssetManager().get(Assets.map3Sound);
+        		break;
+        	case 3:
+        		mapSound = world.getAssetManager().get(Assets.map4Sound);
+        		break;
+        }
+	//	mapSound.loop(0.5f);
+        
+		weaponUI = new WeaponUI(this);
         weaponUI.setPlayer(world.getCurrentPlayer());
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer(weaponUI.getInputProcessor(), InputHandler.getInstance());
@@ -99,6 +119,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     @Override
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.PlayScreenAssets);
+        Assets.loadAssets(manager, Assets.Music);
 
         manager.load(Assets.getMapByIndex(mapNumber));
 
