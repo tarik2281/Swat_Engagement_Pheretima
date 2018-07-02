@@ -103,9 +103,11 @@ public class Projectile extends WorldObject {
             if (shootingWorm == null) {
                 System.out.println("Null pointer");
             }
-            float distance = shootingWorm.getBody().getPosition().dst(getBody().getPosition());
-            if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
-                wormContactEnded = true;
+            else {
+                float distance = shootingWorm.getPosition().dst(getBody().getPosition());
+                if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
+                    wormContactEnded = true;
+            }
         }
     }
 

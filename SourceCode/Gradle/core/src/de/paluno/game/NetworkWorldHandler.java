@@ -374,7 +374,7 @@ public class NetworkWorldHandler extends WorldHandler {
             if (updateTimer >= UPDATE_FREQUENCY) {
                 updateTimer -= UPDATE_FREQUENCY;
 
-                sendWorldSnapshot(false);
+                sendWorldSnapshot(true);
             }
         }
         else {

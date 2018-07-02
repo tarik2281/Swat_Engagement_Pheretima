@@ -94,7 +94,7 @@ public class MultiplayerScreen extends ScreenAdapter {
         table.add("Connecting to server...");
         table.setFillParent(true);
 
-        client = new NetworkClient("localhost");
+        client = new NetworkClient("178.202.241.10");
         client.setConnectionListener((client, result) -> {
             switch (result) {
                 case NetworkClient.RESULT_CONNECTION_SUCCESS:
