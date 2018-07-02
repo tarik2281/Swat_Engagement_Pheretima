@@ -17,6 +17,8 @@ public class CollisionHandler implements ContactListener {
 	private Sound grenadeContactSound;
 	private Sound popSound;
 
+    private boolean listenForCollisions; // TODO: CollisionHandler listenForCollisions
+
     public CollisionHandler() {
     }
 

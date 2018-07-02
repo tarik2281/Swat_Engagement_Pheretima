@@ -13,9 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
 import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
-import de.paluno.game.gameobjects.Renderable;
 
-public class WeaponUI implements Renderable {
+public class WeaponUI {
 
     // TODO:  density of projectiles ok?
 
@@ -149,7 +148,6 @@ public class WeaponUI implements Renderable {
     }
 
 
-    @Override
     public void render(SpriteBatch batch, float delta) {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();

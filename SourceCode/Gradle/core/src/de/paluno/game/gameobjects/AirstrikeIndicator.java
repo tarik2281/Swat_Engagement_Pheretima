@@ -1,6 +1,7 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -10,30 +11,28 @@ import com.badlogic.gdx.math.Vector3;
 import de.paluno.game.Assets;
 import de.paluno.game.GameState;
 
-public class AirstrikeIndicator implements Updatable, Renderable{
+public class AirstrikeIndicator extends WorldObject {
 	
 	private Worm worm;
 	private int playerNumber;
-	private World world;
+	private GameWorld world;
 	private Texture texture;
 	private Sprite sprite;
 	Vector2 curserPosition = new Vector2();
 
-	public AirstrikeIndicator(int playerNumber, World world) {
+	public AirstrikeIndicator(int playerNumber, GameWorld world) {
 		this.playerNumber = playerNumber;
 		this.world = world;
-		
-		texture = world.getAssetManager().get(Assets.airstrikeCrosshair);
-		sprite  = new Sprite(texture);
 	}
 	
-	public void attachToWorm(Worm worm) {
-		this.worm = worm;
+	@Override
+	public void setupAssets(AssetManager manager) {
+		texture = manager.get(Assets.airstrikeCrosshair);
+		sprite  = new Sprite(texture);
 	}
 
-	@Override
-	public void update(float delta, GameState gamestate) {
-		
+	public void attachToWorm(Worm worm) {
+		this.worm = worm;
 	}
 	
 	@Override

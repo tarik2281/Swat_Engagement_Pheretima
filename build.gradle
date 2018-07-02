@@ -52,6 +52,8 @@ project(":SourceCode/Gradle/core") {
     sourceSets.test.java.srcDirs = ["/test"]
 
     dependencies {
+        compile project(":interfaces")
+        compile "com.esotericsoftware:kryonet:2.22.0-RC1"
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
 

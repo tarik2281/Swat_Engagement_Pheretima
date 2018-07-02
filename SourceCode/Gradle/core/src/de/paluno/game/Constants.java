@@ -67,6 +67,9 @@ public class Constants {
 	public static final Vector2 AIRSTRIKE_SPAWNPOS2 = new Vector2(1320.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS3 = new Vector2(1300.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 
+	public static final int DAMAGE_TYPE_VIRUS = 1;
+	public static final int DAMAGE_TYPE_PROJECTILE = 2;
+
 
 	// key bindings
     public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;
@@ -110,6 +113,10 @@ public class Constants {
 
 	private Constants() {
 		// An instance should not be created of this class
+	}
+
+	public static float toUnits(float pixels) {
+		return pixels * WORLD_SCALE;
 	}
 
 	public static Vector2 getScreenSpaceVector(Vector2 v) {

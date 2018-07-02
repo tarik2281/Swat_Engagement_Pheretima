@@ -10,7 +10,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import de.paluno.game.*;
 import de.paluno.game.UserData.ObjectType;
 
-public class Worm implements Updatable, PhysicsObject, Renderable {
+public class Worm extends WorldObject {
 
     /**
      * Inner class to create a copy of the data necessary for the replay
@@ -23,11 +23,32 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
         private boolean isInfected;
     }
 
+    public static class DamageEvent {
+		private Worm worm;
+		private int damage;
+		private int damageType;
+
+		private DamageEvent(Worm worm, int damage, int damageType) {
+			this.worm = worm;
+			this.damage = damage;
+			this.damageType = damageType;
+		}
+
+		public Worm getWorm() {
+			return worm;
+		}
+
+		public int getDamage() {
+			return damage;
+		}
+
+		public int getDamageType() {
+			return damageType;
+		}
+	}
+
     private int characterNumber;
-	private World world;
-	private Body body;
 	private Player player;
-	private Vector2 spawnPosition;
 
 	private AnimatedSprite currentAnimation;
 	private AnimatedSprite idleAnimation;
@@ -43,6 +64,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	private boolean isStatic = false;
 	private boolean isPlaying;
 	private boolean isInfected = false;
+	private boolean isDead = false;
 	private boolean createVirusFixture = false;
 	private Fixture virusFixture;
 
@@ -57,84 +79,34 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	
 	private Sound fallDown;
 
+	private boolean animationInvalidated;
+
 	/**
 	 * Empty constructor for testing purposes
 	 */
 	public Worm() {}
 
-	/**
-	 * Constructor
-	 * @param player - reference to the player we belong to
-	 * @param charNum - Our character number
-	 */
-	public Worm(Player player, int charNum) {
-	    characterNumber = charNum;
+	public Worm(Player player, int characterNumber) {
+		this.characterNumber = characterNumber;
 
-		// Link references
 		this.player = player;
-		this.world = player.getWorld();
 
-		// Set a random spawning direction, so not every Worm looks the same
-		int o = Math.round((float)Math.random());
-		if(o == 0) this.orientation = Constants.WORM_DIRECTION_LEFT;
-		else this.orientation = Constants.WORM_DIRECTION_RIGHT;
-
-		// Load animations
-		if (player.getAssets() != null) {
-			this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
-			this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-			this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
-		}
-
-		// Get our spawning position
-		if (world != null) {
-			this.spawnPosition = world.generateSpawnPosition();
-		}
-
-		// Health is limited
 		this.health = Constants.WORM_MAX_HEALTH;
+		this.animationInvalidated = true;
 
-		//And of course, we initially are NOT infected
-		this.isInfected = false;
-
-		// Finally setup Animations
-		updateAnimation();
-		
-		//sounds
-		fallDown = getAssets().get(Assets.fallDown);
-		walkLoop = getAssets().get(Assets.walkLoop);
-		landSound = getAssets().get(Assets.landSound);
-		virusSound = getAssets().get(Assets.virusSound);
+		addChild(new HealthBar(this));
 	}
 
-	/**
-	 * Constructor with snapshot data to create a new Worm from existing data - for the replay
-	 * @param player - Reference to the player (copy) we belong to
-	 * @param data - The SnpashotData element to gain our settings from
-	 */
-	public Worm(Player player, SnapshotData data) {
-		characterNumber = data.characterNumber;
-		this.player = player;
-		this.world = player.getWorld();
 
-		this.orientation = data.orientation;
-
-		this.walkAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormWalk));
-		this.idleAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormBreath));
-		this.flyAnimation = new AnimatedSprite(player.getAssets().get(Assets.wormFly));
-
-		this.spawnPosition = data.position;
-
-		this.health = data.health;
-
-		this.isInfected = data.isInfected;
-
-		fallDown = getAssets().get(Assets.fallDown);
-		walkLoop = getAssets().get(Assets.walkLoop);
-		landSound = getAssets().get(Assets.landSound);
-		virusSound = getAssets().get(Assets.virusSound);
-		
-		updateAnimation();
+	@Override
+	public void setupAssets(AssetManager manager) {
+		this.walkAnimation = new AnimatedSprite(manager.get(Assets.wormWalk));
+		this.idleAnimation = new AnimatedSprite(manager.get(Assets.wormBreath));
+		this.flyAnimation = new AnimatedSprite(manager.get(Assets.wormFly));
+		fallDown = manager.get(Assets.fallDown);
+		walkLoop = manager.get(Assets.walkLoop);
+		landSound = manager.get(Assets.landSound);
+		virusSound = manager.get(Assets.virusSound);
 	}
 
 	/**
@@ -142,22 +114,23 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param delta - Time since last update in seconds
 	 * @param state - GameState we are in this round
 	 */
-	public void update(float delta, GameState state) {
+	@Override
+	public void update(float delta) {
 		// No body anymore? Shouldn't happen, catch
-		if(this.body == null) return;
+		if(this.getBody() == null) return;
 
 		// Are we supposed to be the new host of a super deadly virus? Create it!
 		if (createVirusFixture)
 			createVirusFixture();
 
-		
-        // Now we apply movements - therefore we need our current position
-		Vector2 currentPos = body.getWorldCenter();
+        // Now we apply movements - therefor we need our current position
+		Vector2 currentPos = getPosition();
 
 		if(this.jump) {
 			if (canJump()) {
+				EventManager.getInstance().queueEvent(EventManager.Type.WormJumped, this);
 				// We shall jump - AND are allowed to - so let's apply some vertical impulse
-				this.body.applyLinearImpulse(0.0f, body.getMass() * Constants.JUMP_VELOCITY,
+				this.getBody().applyLinearImpulse(0.0f, getBody().getMass() * Constants.JUMP_VELOCITY,
 						currentPos.x, currentPos.y, true);
 			}
 		}
@@ -167,7 +140,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Now we calculate the new movement speed based on current movement impulses
 		// http://www.iforce2d.net/b2dtut/constant-speed
         if (isPlaying) {
-            Vector2 currentVel = body.getLinearVelocity();
+            Vector2 currentVel = getBody().getLinearVelocity();
             float desiredVel = 0.0f;
 
             switch (movement) {
@@ -186,13 +159,13 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
             }
 
             float velChange = desiredVel - currentVel.x;
-            // Finally we calculate the actual impulse force, based on body mass
-            float impulse = body.getMass() * velChange;
-            this.body.applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
+            // Finally we calculate the actual impulse force, based on getBody mass
+            float impulse = getBody().getMass() * velChange;
+            this.getBody().applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!world.isInWorldBounds(body)) {
+		if (!getWorld().isInWorldBounds(getBody())) {
 			fallDown.play(0.2f);
 			die();
 		}
@@ -203,13 +176,21 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param batch - Reference to our SpriteBatch used for rendering
 	 * @param delta - Time since last update in seconds
 	 */
+	@Override
 	public void render(SpriteBatch batch, float delta) {
 		// No body? Shouldn't happen, catch
-		if(this.body == null) return;
+		if(this.getBody() == null) return;
+
+		if (animationInvalidated) {
+			updateAnimation();
+
+			if (currentAnimation != null)
+				animationInvalidated = false;
+		}
 		
 		// Again we need the current position, so we know where to draw our animations
 		// (Based on screen size <-> world size calculations)
-		Vector2 currentPos = Constants.getScreenSpaceVector(this.body.getPosition());
+		Vector2 currentPos = Constants.getScreenSpaceVector(this.getBody().getPosition());
 
 		if (currentAnimation != null) {
 			if (gunUnequipping && currentAnimation.isAnimationFinished()) {
@@ -234,14 +215,14 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Method to setup our actual physics body
 	 */
 	@Override
-	public void setupBody() {
+	public Body onSetupBody(World world) {
 		// Blueprint with spawning position and BodyType
 		BodyDef bodyDef = new BodyDef();
-		bodyDef.position.set(this.spawnPosition.x, this.spawnPosition.y);
+		bodyDef.position.set(getPosition());
 		bodyDef.type = isStatic ? BodyType.StaticBody : BodyType.DynamicBody;
 		
 		// Create the actual physics body in our current game world
-		this.body = world.createBody(bodyDef);
+		Body body = world.createBody(bodyDef);
 		body.setFixedRotation(true);
 		
 		// Now we add some hitboxes - Let's get fancy: two parter with body and feet shape
@@ -258,7 +239,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.restitution = 0.0f;
 		
 		// Create, apply, done
-		Fixture fix = this.body.createFixture(fixtureDef);
+		Fixture fix = body.createFixture(fixtureDef);
 		// CollisionHandler Identifier
 		fix.setUserData(new UserData(UserData.ObjectType.Worm, this));
 		
@@ -278,6 +259,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		// Get rid of temporary material properly
 		bodyRect.dispose();
 		footRect.dispose();
+
+		return body;
+	}
+
+	public void invalidateAnimation() {
+		animationInvalidated = true;
 	}
 	
 	/**
@@ -291,27 +278,16 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		fixtureDef.shape = circle;
 		fixtureDef.isSensor = true;
 
-		virusFixture = this.body.createFixture(fixtureDef);
+		virusFixture = this.getBody().createFixture(fixtureDef);
 		virusFixture.setUserData(new UserData(ObjectType.Virus, this));
 		circle.dispose();
 		createVirusFixture = false;
 	}
 
-	/**
-	 * Getter method for our physics body
-	 * @return body
-	 */
-	public Body getBody() {
-		return this.body;
+	public boolean isDead() {
+		return isDead;
 	}
 
-	/**
-	 * Soft setter method for our physics body - set to null on death
-	 */
-	public void setBodyToNullReference() {
-		this.body = null;
-	}
-	
 	/**
 	 * Setter method for our current playstate - if this worm is playing right now or not
 	 * @param isPlaying - Is this worm playing right now?
@@ -322,9 +298,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (isPlaying) {
 			// We're playing now, so wake up!
 			setIsStatic(false);
-			if (isInfected)
+			//if (isInfected)
 				// This worm is entering another turn - let the infection do it's thing
-				takeDamage(Constants.VIRUS_DAMAGE);
+			//	takeDamage(Constants.VIRUS_DAMAGE);
 		}
 	}
 	/**
@@ -346,10 +322,11 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (isStatic)
 			numContacts = 0;
 
-		if (body != null)
-			body.setType(isStatic ? BodyType.StaticBody : BodyType.DynamicBody);
+		if (getBody() != null)
+			getBody().setType(isStatic ? BodyType.StaticBody : BodyType.DynamicBody);
 
-		updateAnimation();
+		invalidateAnimation();
+		//updateAnimation();
 	}
 	/**
 	 * Getter method for current static-state
@@ -365,8 +342,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public void setIsInfected(boolean isInfected) {
 		if (!this.isInfected && isInfected) {
-			createVirusFixture = true;
 			virusSound.play(0.4f);
+            EventManager.getInstance().queueEvent(EventManager.Type.WormInfected, this);
+            createVirusFixture = true;
 		}
 
 		this.isInfected = isInfected;
@@ -421,8 +399,10 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
      * Damage handler method - calculate remaining life and death
      * @param damage - The damage taken as integer
      */
-	public void takeDamage(int damage) {
+	public void takeDamage(int damage, int damageType) {
 		health -= damage;
+
+		EventManager.getInstance().queueEvent(EventManager.Type.WormTookDamage, new DamageEvent(this, damage, damageType));
 
 		if (health <= 0) {
 			// Is dead, kill it
@@ -441,8 +421,12 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Method to handle characters death - cleanup and stuff
 	 */
 	public void die() {
-		this.player.characterDied(this.characterNumber);
-		//this.setBodyToNullReference();
+		if (!isDead) {
+			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
+			//this.player.characterDied(this.characterNumber);
+			//this.setBodyToNullReference();
+			isDead = true;
+		}
 
 	}
 	
@@ -451,9 +435,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @return Character on ground and allowed to move?
 	 */
 	public boolean canJump() {
-		return this.isStandsOnGround() &&
-				this.player.isPlayerTurn() &&
-				this.characterNumber == this.player.getTurn();
+		return this.isStandsOnGround();
 	}
 	/**
 	 * Getter method for character's shoot status
@@ -477,14 +459,25 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 */
 	public void beginContact() {
 		if (numContacts++ == 0)
-			updateAnimation();
+			invalidateAnimation();
 	}
 	/**
 	 * Method to end one ground contact, if any
 	 */
 	public void endContact() {
 		if (--numContacts == 0)
-			updateAnimation();
+			invalidateAnimation();
+	}
+
+	public void setNumContacts(int numContacts) {
+		if ((this.numContacts == 0 && numContacts > 0) || (this.numContacts > 0 && numContacts == 0))
+			invalidateAnimation();
+
+		this.numContacts = numContacts;
+	}
+
+	public int getNumContacts() {
+		return numContacts;
 	}
 
 	/**
@@ -499,6 +492,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		if (movement == newMovementCode) return;
 
 		this.movement = newMovementCode;
+		invalidateAnimation();
+
+		EventManager.getInstance().queueEvent(EventManager.Type.WormMovement, this);
 
 		if (isStandsOnGround() && movement != Constants.MOVEMENT_NO_MOVEMENT) {
 			// The new movementCode is a move-order? Update orientation
@@ -513,7 +509,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 		}
 
 		// If we got this far - something WILL change, so reset the animations just in case
-		updateAnimation();
+		//updateAnimation();
 	}
 
 	/**
@@ -560,7 +556,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Getter method for global Asset Manager
 	 * @return AssetManager
 	 */
-	public AssetManager getAssets() {return player.getAssets();}
+	//public AssetManager getAssets() {return player.getAssets();}
 	/**
 	 * Getter method for the currently selected weapon
 	 * @return current Weapon
@@ -571,12 +567,13 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
 	 * @param angle - The angle in which the projectile shall fly
 	 */
+	/*
 	public void shoot(float angle) {
 	    if(canShoot() && currentWeapon != null) {
 			currentWeapon.shoot(this, angle);
 			unequipWeapon();
 	    }
-	}
+	}*/
 
 	/**
 	 * Method to generate and fill a SnapshotData object
@@ -586,7 +583,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 
 		data.characterNumber = characterNumber;
 		data.health = health;
-		data.position = new Vector2(body.getPosition());
+		data.position = new Vector2(getBody().getPosition());
 		data.orientation = orientation;
 		data.isInfected = isInfected;
 

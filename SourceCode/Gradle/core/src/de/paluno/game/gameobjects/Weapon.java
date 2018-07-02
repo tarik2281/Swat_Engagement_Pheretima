@@ -3,10 +3,13 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import de.paluno.game.*;
+
+import java.util.List;
 
 public class Weapon {
 
@@ -38,23 +41,21 @@ public class Weapon {
 	 * @param player - Reference to the player we belong to
 	 * @param type - WeaponType of the weapon, to determine it's behavior
 	 */
-	public Weapon(Player player, WeaponType type) {
-		this.player = player;
+	public Weapon(WeaponType type) {
 
 		this.type = type;
 
 		this.currentAmmo = type.getMaxAmmo();
+	}
 
-		if (player.getAssets() != null)
-		animationSet = player.getAssets().get(type.getWeaponAsset());
-		
-		//sounds
-		gunShotSound = player.getAssets().get(Assets.gunShotSound);
-		bazookaShotSound = player.getAssets().get(Assets.bazookaShotSound);
-		airstrikeSound = player.getAssets().get(Assets.airstrikeSound);
-		noAmmoSound = player.getAssets().get(Assets.noAmmo);
-		throwSound = player.getAssets().get(Assets.throwSound);
-		targetSound = player.getAssets().get(Assets.targetSound);
+	public void setupAssets(AssetManager manager) {
+		animationSet = manager.get(type.getWeaponAsset());
+		gunShotSound = manager.get(Assets.gunShotSound);
+		bazookaShotSound = manager.get(Assets.bazookaShotSound);
+		airstrikeSound = manager.get(Assets.airstrikeSound);
+		noAmmoSound = manager.get(Assets.noAmmo);
+		throwSound = manager.get(Assets.throwSound);
+		targetSound = manager.get(Assets.targetSound);
 	}
 	/**
 	 * Constructor to create a new Weapon from given data
@@ -62,71 +63,63 @@ public class Weapon {
 	 * @param data - SnapshotData object to copy from
 	 */
 	public Weapon(Player player, SnapshotData data) {
-		this.player = player;
 
 		this.type = data.type;
 
 		this.currentAmmo = data.currentAmmo;
 
-		animationSet = player.getAssets().get(type.getWeaponAsset());
+		//animationSet = player.getAssets().get(type.getWeaponAsset());
 	}
 
-	/**
-	 * Method to generate a projectile if allowed to
-	 */
-	public void shoot(Worm worm, float angle) {
+	public void shoot(Worm worm, WeaponIndicator indicator, List<Projectile> output) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
-			Vector2 direction = new Vector2(1, 0).rotate(angle);
-
-			if (worm.getBody() != null) {
-				if(getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
-					targetSound.play(0.3f);
-					airstrikeSound.play(0.4f);
-					
-					Vector3 position = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-					Projectile projectile = new Projectile(player.getWorld(), worm, 
-							this.type, Constants.AIRSTRIKE_SPAWNPOS, 
-							 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
-									 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-					
-					Vector3 position2 = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-					Projectile projectile2 = new Projectile(player.getWorld(), worm, 
-							this.type, Constants.AIRSTRIKE_SPAWNPOS2 , 
-							 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
-									 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-					
-					Vector3 position3 = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-					Projectile projectile3 = new Projectile(player.getWorld(), worm, 
-							this.type, Constants.AIRSTRIKE_SPAWNPOS3, 
-							 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
-									 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-					
-					player.getWorld().spawnProjectile(projectile, projectile2, projectile3);
-				}else {
-					Projectile projectile = new Projectile(player.getWorld(), worm,
-							this.type, worm.getBody().getPosition(), direction);
-					
-					switch(projectile.getWeaponType()){
-						case WEAPON_GUN:
-							gunShotSound.play(0.7f);
-							player.getWorld().spawnProjectile(projectile);
-							break;
-						case WEAPON_BAZOOKA:
-							bazookaShotSound.play(0.2f);
-							player.getWorld().spawnProjectile(projectile);
-							break;
-						case WEAPON_SPECIAL:
-							throwSound.play(0.4f);
-							player.getWorld().spawnProjectile(projectile);
-							break;
-						case WEAPON_GRENADE:
-							throwSound.play(0.4f);
-							player.getWorld().spawnProjectile(projectile);
-							break;
-					}
-				}
-			currentAmmo--;
+			if (getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
+				targetSound.play(0.3f);
+				airstrikeSound.play(0.4f);
+				
+				Vector2 position = indicator.getPosition();
+				
+				Projectile projectile = new Projectile(worm, 
+						this.type, Constants.AIRSTRIKE_SPAWNPOS, 
+						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
+								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
+				
+				Projectile projectile2 = new Projectile(worm, 
+						this.type, Constants.AIRSTRIKE_SPAWNPOS2 , 
+						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
+								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
+				
+				Projectile projectile3 = new Projectile(worm, 
+						this.type, Constants.AIRSTRIKE_SPAWNPOS3, 
+						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
+								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
+				
+				output.add(projectile);
+				output.add(projectile2);
+				output.add(projectile3);
 			}
+			else {
+				Vector2 direction = new Vector2(1, 0).rotate(indicator.getAngle());
+				Projectile projectile = new Projectile(worm, type, worm.getPosition(), direction);
+				output.add(projectile);
+				
+				switch(projectile.getWeaponType()){
+					case WEAPON_GUN:
+						gunShotSound.play(0.7f);
+						break;
+					case WEAPON_BAZOOKA:
+						bazookaShotSound.play(0.2f);
+						break;
+					case WEAPON_SPECIAL:
+						throwSound.play(0.4f);
+						break;
+					case WEAPON_GRENADE:
+						throwSound.play(0.4f);
+						break;
+				}
+			}
+
+			currentAmmo--;
 		}else {
 			noAmmoSound.play(0.2f);
 		}

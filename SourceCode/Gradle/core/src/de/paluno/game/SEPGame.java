@@ -14,19 +14,31 @@ public class SEPGame extends Game {
 
 	private AssetManager assetManager;
 
+	private EventManager.Listener listener = (type, data) -> {
+		switch (type) {
+			case GameOver:
+				setGameOver((WinningPlayer)data);
+				break;
+		}
+	};
+
 	public SEPGame() {
 		assetManager = new AssetManager();
         assetManager.setLoader(AnimationData.class, new AnimationData.Loader(new InternalFileHandleResolver()));
-        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
+        assetManager.setLoader(Map.class, new Map.Loader(new InternalFileHandleResolver()));
 	}
 
 	@Override
 	public void create() {
+		EventManager.getInstance().addListener(listener, EventManager.Type.GameOver);
+
 		setMenuScreen();
 	}
 
     @Override
     public void render() {
+		EventManager.getInstance().processEvents();
+
         super.render();
     }
 

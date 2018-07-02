@@ -5,10 +5,13 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 
+import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
-import de.paluno.game.screens.WeaponUI;
 
-public class Player implements Updatable {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Player implements Disposable {
 
 	/**
      * Inner class to create a copy of the data necessary for the replay
@@ -24,22 +27,32 @@ public class Player implements Updatable {
 	}
 
 	private int playerNum;
-	private WeaponUI weaponUI;
 
 	private int numCharacters;
-	private Worm[] characters;
-	private Weapon[] weapons;
-	private ShotDirectionIndicator shotDirectionIndicator;
-	private AirstrikeIndicator airstrikeIndicator;
-	private WindDirectionIndicator windDirectionIndicator;
+
+	private ArrayList<Worm> worms;
+	private int numWormsAlive;
+	private ArrayList<Weapon> weapons;
+	private Weapon currentWeapon;
 	private int turn = 0;
 	private boolean isRoundEnded = false;
 	boolean indicatorAvailable = false;
-	WeaponType currentWeapon;
 	
 	private Sound gunRelease;
 
-	private World world;
+	private int clientId;
+
+	private EventManager.Listener eventListener = (eventType, data) -> {
+		switch (eventType) {
+			case WormDied: {
+				Worm worm = (Worm)data;
+				if (worm.getPlayerNumber() == playerNum && !isDefeated() && --numWormsAlive <= 0) {
+					EventManager.getInstance().queueEvent(EventManager.Type.PlayerDefeated, this);
+				}
+				break;
+			}
+		}
+	};
 
 	/**
 	 * Inner KeyListener object to dynamically register reactions to certain input keys pressed
@@ -60,10 +73,10 @@ public class Player implements Updatable {
                 	shoot();
                     break;
 				case Constants.KEY_ROTATE_INDICATOR_DOWN:
-					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
+					//getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
 					break;
 				case Constants.KEY_ROTATE_INDICATOR_UP:
-					getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
+					//getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
                 case Constants.KEY_SELECT_WEAPON_1:
                 	gunRelease.play(0.1f);
@@ -96,149 +109,96 @@ public class Player implements Updatable {
 						getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
 					break;
 				case Constants.KEY_ROTATE_INDICATOR_DOWN:
-					if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_DOWN)
-						getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					//if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_DOWN)
+					//	getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 					break;
 				case Constants.KEY_ROTATE_INDICATOR_UP:
-					if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_UP)
-						getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					//if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_UP)
+					//	getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 					break;
 			}
 		}
 
 		return true;
 	};
-	
-	/**
-	 * Empty constructor for cloning purposes
-	 */
-	public Player() {}
-	/**
-	 * Constructor
-	 * @param playerNum - Player Number of this player
-	 * @param numWorms - Number of characters this player begins with
-	 * @param world - Reference to the world we are playing in
-	 */
-	public Player(int playerNum, int numWorms, World world) {
-		
-		this.numCharacters = numWorms;
-		this.playerNum = playerNum;
-		this.world = world;
 
-        setupWeapons();
-        setupWorms();
-		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-		this.airstrikeIndicator = new AirstrikeIndicator(playerNum, world);
-		
-		gunRelease = getAssets().get(Assets.gunRelease);
-	}
-	/**
-	 * Constructor to create a new Player from existing data - for replay purposes
-	 * @param data - The SnpashotData to copy from
-	 * @param world - The reference to the (copied) world
-	 */
-	public Player(SnapshotData data, World world) {
-		this.playerNum = data.playerNumber;
-		this.world = world;
 
-		setupWorms(data.wormData);
-		setupWeapons(data.weaponData);
+	public Player(int playerNumber) {
+		this.playerNum = playerNumber;
 
-		this.shotDirectionIndicator = new ShotDirectionIndicator(playerNum, world);
-		this.airstrikeIndicator = new AirstrikeIndicator(playerNum, world);
-	}
-	
-	/**
-	 * Getter method to get this player's ShotDirectionIndicator
-	 * @return shotDirectionIndicator
-	 */
-	public ShotDirectionIndicator getShotDirectionIndicator() {
-		return shotDirectionIndicator;
-	}
-	/**
-	 * Getter method to get this player's AirstrikeIndicator
-	 * @return airstrikeIndicator
-	 */
-	public AirstrikeIndicator getAirstrikeIndicator() {
-		return airstrikeIndicator;
-	}
-	/**
-	 * Getter method to get this player's WindDirectionIndicator
-	 * @return windDirectionIndicator
-	 */
-	public WindDirectionIndicator getWindDirectionIndicator() {
-		return windDirectionIndicator;
-	}
-	/**
-	 * Soft setter method to set this player's WindHandler
-	 * @param windHandler - The WindHandler to use for the creation of our windDirectionIndicator
-	 */
-	public void setWindHandler(WindHandler windHandler) {
-		windDirectionIndicator = new WindDirectionIndicator(playerNum, world, windHandler);
+		worms = new ArrayList<>();
+		weapons = new ArrayList<>();
+
+		EventManager.getInstance().addListener(eventListener, EventManager.Type.WormDied);
 	}
 
+	@Override
+	public void dispose() {
+		EventManager.getInstance().removeListener(eventListener, EventManager.Type.WormDied);
+	}
 
-	/**
-	 * Method to generate and setup all of our characters
-	 */
-	private void setupWorms() {
-        this.characters = new Worm[numCharacters];
+	public void addWeapon(Weapon weapon) {
+		weapons.add(weapon);
+	}
 
-        for(int i = 0; i < numCharacters; i++) {
-            characters[i] = new Worm(this, i);
-            HealthBar healthBar = new HealthBar(world, characters[i]);
-            world.registerAfterUpdate(characters[i]);
-            world.registerAfterUpdate(healthBar);
-            world.registerAfterUpdate(windDirectionIndicator);
-        }
-    }
-	/**
-	 * Method to generate all our characters from existing SnapshotData
-	 * @param data - Array of Worm-SnapshotData to use for generation
-	 */
-	private void setupWorms(Worm.SnapshotData[] data) {
-		this.characters = new Worm[data.length];
+	public Worm addWorm(int wormNumber) {
+		Worm worm = new Worm(this, wormNumber);
+		worms.add(wormNumber, worm);
+		numWormsAlive++;
+		return worm;
+	}
 
-		for (int i = 0; i < data.length; i++) {
-			if (data[i] != null) {
-				characters[i] = new Worm(this, data[i]);
-				HealthBar healthBar = new HealthBar(world, characters[i]);
-            	world.registerAfterUpdate(characters[i]);
-            	world.registerAfterUpdate(healthBar);
-            	numCharacters++;
+	private void removeWorm(Worm worm) {
+		int index;
+		for (index = 0; index < worms.size(); index++) {
+			if (worms.get(index) == worm)
+				break;
+		}
+
+		if (turn > 0 && turn >= index)
+			turn--;
+
+		worms.remove(index);
+	}
+
+	public List<Worm> getWorms() {
+		return worms;
+	}
+
+	public void setClientId(int clientId) {
+		this.clientId = clientId;
+	}
+
+	public int getClientId() {
+		return clientId;
+	}
+
+	public void setTurn(int wormNumber) {
+		int turn = -1;
+		for (int i = 0; i < worms.size(); i++) {
+			if (worms.get(i).getCharacterNumber() == wormNumber) {
+				turn = i;
+				break;
 			}
 		}
-	}
-	/**
-	 * Method to generate and setup all our deadly weapons
-	 */
-	private void setupWeapons() {
-        weapons = new Weapon[WeaponType.NUM_WEAPONS];
 
-        weapons[0] = new Weapon(this, WeaponType.WEAPON_GUN);
-        weapons[1] = new Weapon(this, WeaponType.WEAPON_GRENADE);
-        weapons[2] = new Weapon(this, WeaponType.WEAPON_BAZOOKA);
-        weapons[3] = new Weapon(this, WeaponType.WEAPON_SPECIAL);
-        weapons[4] = new Weapon(this, WeaponType.WEAPON_AIRSTRIKE);
-    }
-	/**
-	 * Method to generate all our weapons from existing SnapshotData
-	 * @param data - Array of Weapon-SnapshotData to use for generation
-	 */
-	private void setupWeapons(Weapon.SnapshotData[] data) {
-		weapons = new Weapon[WeaponType.NUM_WEAPONS];
+		if (turn == -1)
+			throw new IllegalArgumentException("Worm with the given wormNumber=" + wormNumber +" is not in the list");
 
-        weapons[0] = new Weapon(this, data[0]);
-        weapons[1] = new Weapon(this, data[1]);
-        weapons[2] = new Weapon(this, data[2]);
+		this.turn = turn;
 	}
+
 	/**
 	 * Soft getter method to get a certain character
 	 * @param characterNumber - Number of the character to fetch
 	 * @return Worm behind given number
 	 */
 	public Worm getWormByNumber(int characterNumber) {
-		return characters[characterNumber];
+		for (Worm worm : worms)
+			if (worm.getCharacterNumber() == characterNumber)
+				return worm;
+
+		return null;
 	}
 
 	/**
@@ -248,12 +208,6 @@ public class Player implements Updatable {
 	 * @param state - Current GameState
 	 */
 	public void update(float delta, GameState state) {}
-	
-	/**
-	 * Getter method for all our worms
-	 * @return Array of Worms
-	 */
-	public Worm[] getCharacters() {return characters;}
 
 	/**
 	 * Getter method for this player's player number
@@ -265,97 +219,31 @@ public class Player implements Updatable {
 	 * @return turn
 	 */
 	public int getTurn() {return this.turn;}
-	
-	/**
-	 * Method to register all objects and handlers when it becomes this player's turn
-	 */
-	public void onBeginTurn() {
-		/*// Register indicators for drawing
-		world.registerAfterUpdate(getShotDirectionIndicator());
-		world.registerAfterUpdate(getWindDirectionIndicator());
-		// Attach indicators to the characters whose turn it is*/
-		getShotDirectionIndicator().attachToWorm(getCurrentWorm());
-		getWindDirectionIndicator().attachToWorm(getCurrentWorm());
-		world.registerAfterUpdate(getWindDirectionIndicator());
-
-		indicatorAvailable = false;
-		
-		
-		// Default weapon
-		equipWeapon(WeaponType.WEAPON_GUN);
-		// Worm's turn it is
-		getCurrentWorm().setIsPlaying(true);
-		
-		// All Keys to listen to
-		InputHandler input = InputHandler.getInstance();
-		input.registerKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
-		input.registerKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
-		input.registerKeyListener(Constants.KEY_DO_ACTION, keyListener);
-		input.registerKeyListener(Constants.KEY_JUMP, keyListener);
-		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
-		input.registerKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
-		input.registerKeyListener(Constants.KEY_SELECT_WEAPON_5, keyListener);
-	}
-	/**
-	 * Method to deregister all objects and handlers when this player's turn is over
-	 */
-	public void onEndTurn() {
-        // No need to draw our indicators anymore
-		world.forgetAfterUpdate(getShotDirectionIndicator());
-        world.forgetAfterUpdate(getWindDirectionIndicator());
-        world.forgetAfterUpdate(getAirstrikeIndicator());
-        // No attachment anymore - Worm might not even exist anymore
-        getShotDirectionIndicator().attachToWorm(null);
-        getAirstrikeIndicator().attachToWorm(null);
-        getWindDirectionIndicator().attachToWorm(null);
-        // Reset angle of indicator to default
-		getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
-		// If Worm still alive, force stop and reset
-		if (getCurrentWorm() != null) {
-            getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-            getCurrentWorm().unequipWeapon();
-            getCurrentWorm().setIsPlaying(false);
-        }
-		
-		// Next time it's another Worm's turn
-        shiftTurn();
-        
-        // No need to listen to these Keys anymore
-		InputHandler input = InputHandler.getInstance();
-		input.unregisterKeyListener(Constants.KEY_MOVE_LEFT, keyListener);
-		input.unregisterKeyListener(Constants.KEY_MOVE_RIGHT, keyListener);
-		input.unregisterKeyListener(Constants.KEY_DO_ACTION, keyListener);
-		input.unregisterKeyListener(Constants.KEY_JUMP, keyListener);
-		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_DOWN, keyListener);
-		input.unregisterKeyListener(Constants.KEY_ROTATE_INDICATOR_UP, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_1, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_2, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_3, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_4, keyListener);
-        input.unregisterKeyListener(Constants.KEY_SELECT_WEAPON_5, keyListener);
-	}
 
 	/**
 	 * Soft setter method for the character's turn
 	 * Shift through all still available characters to find the next one whose turn it is
 	 */
-	protected void shiftTurn() {
+	public void shiftTurn() {
 	    // Noone left - shouldn't happen, nothing to do
-		if (numCharacters <= 0)
+		if (isDefeated())
 	        return;
 
-		turn++;
-		if (turn == characters.length) {
+		do {
+			if (++turn >= worms.size()) {
+				turn = 0;
+				isRoundEnded = true;
+			}
+		} while (worms.get(turn).isDead());
+
+		/*turn++;
+		if (turn >= worms.size()) {
 			// Handle int-overflow (i.e. higher number than possible characters)
 			turn = 0;
 			isRoundEnded = true;
 		}
 		// This character isn't alive anymore? Choose another one
-		if (characters[turn] == null) shiftTurn();
+		if (worms.get(turn) == null) shiftTurn();*/
 	}
 	
 	/**
@@ -377,17 +265,17 @@ public class Player implements Updatable {
 	 * Getter Method for the reference to the Asset Manager
 	 * @return world.AssetManager
 	 */
-	public AssetManager getAssets() {
+	/*public AssetManager getAssets() {
 		return world.getAssetManager();
-	}
+	}*/
 
 	/**
 	 * Getter method for the world we are playing in
 	 * @return world
 	 */
-	public World getWorld() {
+	/*public World getWorld() {
 		return this.world;
-	}
+	}*/
 	
 	/**
 	 * Soft setter method for characterNumber - Set Character as KIA and remove it
@@ -395,16 +283,16 @@ public class Player implements Updatable {
 	 */
 	protected void characterDied(int charNum) {
 		// No characters anymore or this one allready dead? Nothing to do here.
-		if(this.numCharacters <= 0 || this.characters[charNum] == null)
+		if(this.numCharacters <= 0 || this.worms.get(charNum) == null)
 			return;
 
 		// It was this Worm's turn? The game must go on!
-		if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
-		    world.advanceGameState();
+		//if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
+		    //world.advanceGameState();
 
 		// Farewell, rendering reference...!
-		world.forgetAfterUpdate(characters[charNum]);
-		this.characters[charNum] = null;
+		//world.forgetAfterUpdate(characters[charNum]);
+		//this.characters[charNum] = null;
 		this.numCharacters--;
 
 		// It was this Worm's turn? So, someone else must play next time
@@ -412,7 +300,7 @@ public class Player implements Updatable {
 		    shiftTurn();
 		
 		// And finally - is ded
-		world.setWormDied(true);
+		//world.setWormDied(true);
 	}
 	
 	/**
@@ -420,7 +308,7 @@ public class Player implements Updatable {
 	 * @return Any characters left?
 	 */
 	public boolean isDefeated() {
-		return numCharacters <= 0;
+		return numWormsAlive <= 0;
 	}
 	
 	/**
@@ -435,62 +323,33 @@ public class Player implements Updatable {
 
 		return null;
 	}
-    
-    public WeaponType getCurrentWeaponType() {
-    	currentWeapon = getCurrentWorm().getCurrentWeapon().getWeaponType();
+
+	public Weapon getCurrentWeapon() {
     	return currentWeapon;
-    }
+	}
+	
     /**
      * Passthrough method to make our current Worm equip a given Weapon
      * @param weaponType - The WeaponType of the Weapon to select
      */
 	public void equipWeapon(WeaponType weaponType) {
-		getCurrentWorm().equipWeapon(getWeapon(weaponType));
-
-		if(weaponType == WeaponType.WEAPON_AIRSTRIKE && indicatorAvailable == true) {
-			world.registerAfterUpdate(getAirstrikeIndicator());
-			world.forgetAfterUpdate(getShotDirectionIndicator());
-			indicatorAvailable = false;
-		}
-		
-		if(weaponType == WeaponType.WEAPON_BAZOOKA && indicatorAvailable == false) {
-			world.registerAfterUpdate(getShotDirectionIndicator());
-			world.forgetAfterUpdate(getAirstrikeIndicator());
-			indicatorAvailable = true;
-		}
-		
-		if(weaponType == WeaponType.WEAPON_GRENADE && indicatorAvailable == false) {
-			world.registerAfterUpdate(getShotDirectionIndicator());
-			world.forgetAfterUpdate(getAirstrikeIndicator());
-			indicatorAvailable = true;
-		}
-		
-		if(weaponType == WeaponType.WEAPON_GUN && indicatorAvailable == false) {
-			world.registerAfterUpdate(getShotDirectionIndicator());
-			world.forgetAfterUpdate(getAirstrikeIndicator());
-			indicatorAvailable = true;
-		}
-		
-		if(weaponType == WeaponType.WEAPON_SPECIAL && indicatorAvailable == false) {
-			world.registerAfterUpdate(getShotDirectionIndicator());
-			world.forgetAfterUpdate(getAirstrikeIndicator());
-			indicatorAvailable = true;
-		}
+		currentWeapon = getWeapon(weaponType);
+		getCurrentWorm().equipWeapon(currentWeapon);
 	}
 
 	/**
 	 * Getter method for player's turn status
 	 * @return Is it this player's turn?
 	 */
-	public boolean isPlayerTurn() {
-		return world.getCurrentPlayer() == this;
+	public boolean isPlayerTurn() {return true;
+		//return world.getCurrentPlayer() == this;
 	}
 	/**
 	 * Passthrough setter method to set all Worms static or not
 	 * @param isStatic - Shall they be rocks or no?
 	 */
 	public void setWormsStatic(boolean isStatic) {
-		for (Worm worm : characters) {
+		for (Worm worm : worms) {
 			if (worm != null) {
 				worm.setIsStatic(isStatic);
 			}
@@ -501,7 +360,7 @@ public class Player implements Updatable {
 	 * Getter method for the character whose turn it currently is
 	 * @return Worm
 	 */
-	public Worm getCurrentWorm() {return this.characters[this.turn];}
+	public Worm getCurrentWorm() {return this.worms.get(this.turn);}
 	
 	/**
 	 * Passthrough method to give move order to the currently movable worm
@@ -518,8 +377,8 @@ public class Player implements Updatable {
 	 * Passthrough method to give a shoot order to the currently movable worm
 	 */
 	public void shoot() {
-		if(getCurrentWorm() != null)
-			getCurrentWorm().shoot(getShotDirectionIndicator().getAngle());
+		//if(getCurrentWorm() != null)
+		//	getCurrentWorm().shoot(getShotDirectionIndicator().getAngle());
 		// We're shooting. That means, someone could die.
 		// That means, we want to see him suffer again and again in slow motion.
 		// That means: Capture that shit!
@@ -534,15 +393,15 @@ public class Player implements Updatable {
 
 		data.playerNumber = playerNum;
 
-		data.wormData = new Worm.SnapshotData[characters.length];
-		data.weaponData = new Weapon.SnapshotData[weapons.length];
+		//data.wormData = new Worm.SnapshotData[characters.length];
+		//data.weaponData = new Weapon.SnapshotData[weapons.length];
 
-		for (int i = 0; i < characters.length; i++)
+		/*for (int i = 0; i < characters.length; i++)
 			if (characters[i] != null)
-				data.wormData[i] = characters[i].makeSnapshot();
+				data.wormData[i] = characters[i].makeSnapshot();*/
 
-		for (int i = 0; i < weapons.length; i++)
-			data.weaponData[i] = weapons[i].makeSnapshot();
+		//for (int i = 0; i < weapons.length; i++)
+		//	data.weaponData[i] = weapons[i].makeSnapshot();
 
 		return data;
 	}

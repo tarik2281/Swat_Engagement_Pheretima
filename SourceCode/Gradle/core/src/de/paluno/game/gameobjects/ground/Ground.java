@@ -1,49 +1,34 @@
 package de.paluno.game.gameobjects.ground;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.QueryCallback;
-import de.paluno.game.Constants;
-import de.paluno.game.GameState;
+import com.badlogic.gdx.physics.box2d.*;
+import de.paluno.game.Map;
 import de.paluno.game.UserData;
 import de.paluno.game.gameobjects.*;
+import de.paluno.game.gameobjects.GameWorld;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Random;
 
-public class Ground implements PhysicsObject, Renderable, Updatable {
+public class Ground extends WorldObject {
 	
 	public class SnapshotData {
-		private TiledMap tiledMap;
+		private Map map;
 		private ArrayList<CollisionObject.SnapshotData> collisionObjects;
 	    private ArrayList<Explosion> explosions;
 	}
-
-    private Body body;
-    private World world;
 
     private ClipperWrapper clipper;
 
     private ExplosionMaskRenderer maskRenderer;
     private OrthogonalTiledMapRenderer mapRenderer;
-    private TiledMap tiledMap;
+    private Map map;
 
     private ArrayList<CollisionObject> collisionObjects;
     private ArrayList<CollisionObject> queriedObjects;
-
-    private ArrayList<Vector2> spawnPoints;
 
     private ArrayList<Explosion> explosions;
     private LinkedList<Explosion> explosionQueue;
@@ -62,10 +47,8 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         }
     };
 
-    public Ground(World world, TiledMap tiledMap, ExplosionMaskRenderer renderer) {
-        this.world = world;
-
-        this.tiledMap = tiledMap;
+    public Ground(Map map, ExplosionMaskRenderer renderer) {
+        this.map = map;
 
         this.maskRenderer = renderer;
 
@@ -75,15 +58,10 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
         explosions = new ArrayList<Explosion>();
         explosionQueue = new LinkedList<Explosion>();
-
-        spawnPoints = new ArrayList<>();
-
-        loadSpawnPositions();
     }
     
-    public Ground(World world, ExplosionMaskRenderer renderer, SnapshotData data) {
-    	this.world = world;
-    	this.tiledMap = data.tiledMap;
+    public Ground(GameWorld world, ExplosionMaskRenderer renderer, SnapshotData data) {
+        this.map = data.map;
     	this.maskRenderer = renderer;
     	
     	clipper = new ClipperWrapper();
@@ -103,7 +81,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 
     private void executeExplosion(Explosion explosion) {
         queriedObjects.clear();
-        world.getWorld().QueryAABB(explosionQueryCallback, explosion.getLowerX(),
+        getWorld().getWorld().QueryAABB(explosionQueryCallback, explosion.getLowerX(),
                 explosion.getLowerY(), explosion.getUpperX(), explosion.getUpperY());
 
         for (CollisionObject object : queriedObjects) {
@@ -116,13 +94,13 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         float[][] resultPolygons = clipper.clip();
         for (float[] polygon : resultPolygons) {
             CollisionObject object = new CollisionObject(polygon);
-            addCollisionObject(object);
+            addCollisionObject(getBody(), object);
         }
 
         explosions.add(explosion);
     }
 
-    private void addCollisionObject(CollisionObject object) {
+    private void addCollisionObject(Body body, CollisionObject object) {
         if (object.createFixture(body))
             collisionObjects.add(object);
     }
@@ -136,40 +114,23 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
         return explosions;
     }
 
-    public float getWorldOriginX() {
-        return 0.0f;
-    }
-
-    public float getWorldOriginY() {
-        return 0.0f;
-    }
-
-    public float getWorldWidth() {
-        TiledMapTileLayer tileLayer = (TiledMapTileLayer)tiledMap.getLayers().get(Constants.TILE_LAYER);
-        return tileLayer.getWidth() * tileLayer.getTileWidth() * Constants.WORLD_SCALE;
-    }
-
-    public float getWorldHeight() {
-        TiledMapTileLayer tileLayer = (TiledMapTileLayer)tiledMap.getLayers().get(Constants.TILE_LAYER);
-        return tileLayer.getHeight() * tileLayer.getTileHeight() * Constants.WORLD_SCALE;
-    }
-
     @Override
-    public void update(float delta, GameState gamestate) {
-        while (!explosionQueue.isEmpty())
-            executeExplosion(explosionQueue.poll());
+    public void update(float delta) {
     }
 
     @Override
     public void render(SpriteBatch batch, float delta) {
+        while (!explosionQueue.isEmpty())
+            executeExplosion(explosionQueue.poll());
+
         if (mapRenderer == null)
-            mapRenderer = new OrthogonalTiledMapRenderer(tiledMap, batch);
+            mapRenderer = new OrthogonalTiledMapRenderer(map.getTiledMap(), batch);
 
         batch.end();
 
         maskRenderer.enableMask();
 
-        mapRenderer.setView(world.getCamera().getOrthoCamera());
+        mapRenderer.setView(getWorld().getCamera().getOrthoCamera());
         mapRenderer.render();
 
         maskRenderer.disableMask();
@@ -178,61 +139,32 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
     }
 
     @Override
-    public void setBodyToNullReference() {
-        this.body = null;
-    }
-
-    @Override
-    public void setupBody() {
+    public Body onSetupBody(com.badlogic.gdx.physics.box2d.World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
-        body = world.createBody(bodyDef);
+        Body body = world.createBody(bodyDef);
 
-        loadCollisions();
+        loadCollisions(body);
+
+        return body;
     }
 
-    @Override
-    public Body getBody() {
-        return this.body;
-    }
-
-    public Vector2 getRandomSpawnPosition() {
-        Random random = new Random();
-        int index = random.nextInt(spawnPoints.size());
-        return spawnPoints.remove(index);
-    }
-
-    private void loadSpawnPositions() {
-        MapLayer spawnLayer = tiledMap.getLayers().get(Constants.SPAWN_LAYER);
-        if (spawnLayer != null) {
-            for (MapObject object : spawnLayer.getObjects()) {
-                if (object instanceof RectangleMapObject) {
-                    Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
-                    spawnPoints.add(new Vector2(rectangle.getX() * Constants.WORLD_SCALE,
-                            rectangle.getY() * Constants.WORLD_SCALE + Constants.WORM_HEIGHT / 2.0f));
-                }
-            }
-        }
-    }
-
-    private void loadCollisions() {
+    private void loadCollisions(Body body) {
     	if (collisionObjects.isEmpty()) {
-    		MapLayer collisionLayer = tiledMap.getLayers().get(Constants.COLLISION_LAYER);
-    		if (collisionLayer != null) {
-    			for (MapObject object : collisionLayer.getObjects()) {
-    				float[] vertices = ShapeFactory.createVertices(object);
+    	    for (MapObject object : map.getCollisionObjects()) {
+    	        float[] vertices = ShapeFactory.createVertices(object);
 
-    				if (vertices != null)
-    					addCollisionObject(new CollisionObject(vertices));
-    			}
-    		}
+    	        if (vertices != null)
+    	            addCollisionObject(body, new CollisionObject(vertices));
+            }
     	}
     	else {
     		for (CollisionObject object : collisionObjects)
     			object.createFixture(body);
     	}
     }
+
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
@@ -241,7 +173,7 @@ public class Ground implements PhysicsObject, Renderable, Updatable {
 		    data.collisionObjects.add(object.makeSnapshot());
 
 		data.explosions = new ArrayList<>(this.explosions);
-		data.tiledMap = this.tiledMap;
+		data.map = this.map;
 		
 		return data;
 	}
