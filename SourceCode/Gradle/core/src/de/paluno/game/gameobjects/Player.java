@@ -37,8 +37,6 @@ public class Player implements Disposable {
 	private int turn = 0;
 	private boolean isRoundEnded = false;
 	boolean indicatorAvailable = false;
-	
-	private Sound gunRelease;
 
 	private int clientId;
 
@@ -79,14 +77,12 @@ public class Player implements Disposable {
 					//getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
                 case Constants.KEY_SELECT_WEAPON_1:
-                	gunRelease.play(0.1f);
                 	equipWeapon(WeaponType.WEAPON_GUN);
                     break;
                 case Constants.KEY_SELECT_WEAPON_2:
 					equipWeapon(WeaponType.WEAPON_GRENADE);
                     break;
                 case Constants.KEY_SELECT_WEAPON_3:
-                	gunRelease.play(0.1f);
 					equipWeapon(WeaponType.WEAPON_BAZOOKA);
                     break;
 				case Constants.KEY_SELECT_WEAPON_4:

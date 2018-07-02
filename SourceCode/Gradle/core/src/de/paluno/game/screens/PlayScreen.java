@@ -96,6 +96,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 			mapSound = getAssetManager().get(Assets.map4Sound);
 			break;
 		}
+		mapSound.loop(0.2f);
 
         worldHandler.initialize();
 

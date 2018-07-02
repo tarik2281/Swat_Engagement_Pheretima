@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
+import de.paluno.game.EventManager.Type;
 import de.paluno.game.UserData.ObjectType;
 
 public class Worm extends WorldObject {
@@ -145,7 +146,7 @@ public class Worm extends WorldObject {
 
             switch (movement) {
                 case Constants.MOVEMENT_LEFT:
-                	walkLoop.play(0.1f);
+                	//walkLoop.play(0.1f);
                     desiredVel = -Constants.MOVE_VELOCITY;
                     break;
                 case Constants.MOVEMENT_NO_MOVEMENT:
@@ -153,7 +154,7 @@ public class Worm extends WorldObject {
                     desiredVel = 0.0f;
                     break;
                 case Constants.MOVEMENT_RIGHT:
-                	walkLoop.play(0.1f);
+                	//walkLoop.play(0.1f);
                     desiredVel = Constants.MOVE_VELOCITY;
                     break;
             }
@@ -362,6 +363,7 @@ public class Worm extends WorldObject {
 	 * @param weapon - The weapon to equip, handled in Player
 	 */
 	public void equipWeapon(Weapon weapon) {
+		EventManager.getInstance().queueEvent(Type.WormEquipWeapon, weapon);
 		currentWeapon = weapon;
 		weaponAnimation = weapon.createAnimatedSprite();
 
@@ -458,8 +460,10 @@ public class Worm extends WorldObject {
 	 * Method to begin a new contact with a new ground piece
 	 */
 	public void beginContact() {
-		if (numContacts++ == 0)
+		if (numContacts++ == 0) {
+			EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
 			invalidateAnimation();
+		}
 	}
 	/**
 	 * Method to end one ground contact, if any

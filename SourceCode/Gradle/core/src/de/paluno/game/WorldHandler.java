@@ -1,6 +1,7 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
@@ -37,50 +38,85 @@ public abstract class WorldHandler implements Disposable {
     private int projectileId = 0;
 
     private Replay replay;
+    
+    private Sound gunRelease;
+    private Sound grenadeContact;
+    private Sound popSound;
+    private Sound walkLoop;
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
-            case PlayerDefeated: {
-                Player player = (Player)data;
-                numPlayersAlive--;
-                break;
-            }
-            case WormDied: {
-                Worm worm = (Worm) data;
-
-                    if (getCurrentPlayer().getCurrentWorm() == worm) {
-                        System.out.println("Current worm died, setting to waiting");
-                        setWaiting();
-                    }
-
-                if (shouldWorldStep()) {
-                    onWormDied(worm);
-                }
-
-                world.forgetAfterUpdate(worm);
-                break;
-            }
-            case WormInfected:
-                if (shouldWorldStep()) {
-                    Worm worm = (Worm)data;
-                    onWormInfected(worm);
-                }
-                break;
-            case WormTookDamage: {
-                if (shouldWorldStep()) {
-                    Worm.DamageEvent event = (Worm.DamageEvent)data;
-                    onWormTookDamage(event);
-                }
-                break;
-            }
-            case ProjectileExploded:
-                if (shouldWorldStep()) {
-                    Projectile projectile = (Projectile) data;
-                    removeProjectile(projectile);
-                    onProjectileExploded(projectile);
-                }
-                break;
+        case WormEquipWeapon: {
+        	Weapon weapon = (Weapon)data;
+        	switch (weapon.getWeaponType()) {
+	        	case WEAPON_GUN:
+	        	case WEAPON_BAZOOKA:
+	        		gunRelease.play(0.3f);
+	        		break;
+	        	}
+	        }
+        	break;
+        case GrenadeCollision:
+        	grenadeContact.play();
+        	break;
+        case FeetCollision:
+        	popSound.play();
+        	break;
+        case PlayerDefeated: {
+            Player player = (Player)data;
+            numPlayersAlive--;
+            break;
         }
+        case WormMovement: {
+        	Worm worm = (Worm)data;
+        	switch (worm.getMovement()) {
+        	case Constants.MOVEMENT_NO_MOVEMENT:
+        		walkLoop.stop();
+        		break;
+        	case Constants.MOVEMENT_LEFT:
+        	case Constants.MOVEMENT_RIGHT:
+        		walkLoop.stop();
+        		walkLoop.loop();
+        		break;
+        	}
+        	break;
+        }
+        case WormDied: {
+            Worm worm = (Worm) data;
+
+                if (getCurrentPlayer().getCurrentWorm() == worm) {
+                    System.out.println("Current worm died, setting to waiting");
+                    setWaiting();
+                }
+
+            if (shouldWorldStep()) {
+                onWormDied(worm);
+            }
+
+            world.forgetAfterUpdate(worm);
+            break;
+        }
+        case WormInfected:
+            if (shouldWorldStep()) {
+                Worm worm = (Worm)data;
+                onWormInfected(worm);
+            }
+            break;
+        case WormTookDamage: {
+            if (shouldWorldStep()) {
+                Worm.DamageEvent event = (Worm.DamageEvent)data;
+                onWormTookDamage(event);
+            }
+            break;
+        }
+        case ProjectileExploded:
+            if (shouldWorldStep()) {
+                Projectile projectile = (Projectile) data;
+                removeProjectile(projectile);
+                onProjectileExploded(projectile);
+            }
+            break;
+    }
     };
 
     protected abstract void onInitializePlayers();
@@ -113,6 +149,11 @@ public abstract class WorldHandler implements Disposable {
     public void initialize() {
         map = screen.getAssetManager().get(Assets.getMapByIndex(mapNumber));
         spawnPositions = new ArrayList<>(Arrays.asList(map.getSpawnPoints()));
+        
+        gunRelease = screen.getAssetManager().get(Assets.gunRelease);
+        grenadeContact = screen.getAssetManager().get(Assets.grenadeContact);
+        popSound = screen.getAssetManager().get(Assets.popSound);
+        walkLoop = screen.getAssetManager().get(Assets.walkLoop);
 
         windHandler = new WindHandler();
         windHandler.setProjectiles(projectiles);
@@ -133,7 +174,11 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormInfected,
                 EventManager.Type.ProjectileExploded,
                 EventManager.Type.WormTookDamage,
-                EventManager.Type.PlayerDefeated);
+                EventManager.Type.PlayerDefeated,
+                EventManager.Type.WormEquipWeapon,
+                EventManager.Type.GrenadeCollision,
+                EventManager.Type.FeetCollision,
+                EventManager.Type.WormMovement);
     }
 
     @Override
@@ -148,7 +193,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormInfected,
                 EventManager.Type.ProjectileExploded,
                 EventManager.Type.WormTookDamage,
-                EventManager.Type.PlayerDefeated);
+                EventManager.Type.PlayerDefeated,
+                EventManager.Type.WormEquipWeapon);
     }
 
     protected void initializePlayersDefault(int numWorms) {

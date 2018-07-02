@@ -117,6 +117,9 @@ public class CollisionHandler implements ContactListener {
         		((Projectile) o1).explode(null, true);
               //  grenadeContactSound.play(0.5f);
             }
+        	else {
+        		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
+        	}
             
             System.out.println("Projectile collided with Ground");
 
@@ -125,6 +128,9 @@ public class CollisionHandler implements ContactListener {
                 ((Projectile) o2).explode(null, true);
               //  grenadeContactSound.play(0.5f);
             }
+            else {
+        		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
+        	}
             System.out.println("Projectile collided with Ground");
         }
     }
