@@ -7,7 +7,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.*;
-import de.paluno.game.gameobjects.World2;
+import de.paluno.game.gameobjects.World;
 import de.paluno.game.interfaces.*;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
@@ -201,7 +201,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         return false;
     }
 
-    public void setGameState(World2 world, GameState gameState, int currentPlayer) {
+    public void setGameState(World world, GameState gameState, int currentPlayer) {
         uiLayer.setGameState(gameState, currentPlayer);
 
         //if (this.world == world && gameState == GameState.SHOOTING)

@@ -4,14 +4,13 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 import de.paluno.game.interfaces.PhysicsData;
 
 import java.util.ArrayList;
 
 public class WorldObject {
 
-    private World2 world;
+    private World world;
     private Body body;
     private WorldObject parent;
 
@@ -22,11 +21,11 @@ public class WorldObject {
 
     private ArrayList<WorldObject> children = new ArrayList<>();
 
-    public void setWorld(World2 world) {
+    public void setWorld(World world) {
         this.world = world;
     }
 
-    public World2 getWorld() {
+    public World getWorld() {
         return world;
     }
 
@@ -72,7 +71,7 @@ public class WorldObject {
         body = null;
     }
 
-    public void setupBody(World world) {
+    public void setupBody(com.badlogic.gdx.physics.box2d.World world) {
         body = onSetupBody(world);
         if (body != null)
             body.setUserData(this);
@@ -82,7 +81,7 @@ public class WorldObject {
         return body;
     }
 
-    protected Body onSetupBody(World world) {
+    protected Body onSetupBody(com.badlogic.gdx.physics.box2d.World world) {
         return null;
     }
 

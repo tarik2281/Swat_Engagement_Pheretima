@@ -17,7 +17,7 @@ public abstract class WorldHandler implements Disposable {
 
     private Map map;
 
-    private World2 world;
+    private World world;
 
     protected int currentPlayer;
     private int numPlayersAlive;
@@ -119,7 +119,7 @@ public abstract class WorldHandler implements Disposable {
 
         windDirectionIndicator = new WindDirectionIndicator(windHandler);
 
-        world = new World2(this);
+        world = new World(this);
         world.initialize(map);
         world.registerAfterUpdate(windHandler);
 
@@ -488,7 +488,7 @@ public abstract class WorldHandler implements Disposable {
         requestNextTurn();
     }
 
-    public World2 getWorld() {
+    public World getWorld() {
         return world;
     }
 }

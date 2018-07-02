@@ -6,7 +6,7 @@ import de.paluno.game.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Player implements Updatable, Disposable {
+public class Player implements Disposable {
 
 	/**
      * Inner class to create a copy of the data necessary for the replay

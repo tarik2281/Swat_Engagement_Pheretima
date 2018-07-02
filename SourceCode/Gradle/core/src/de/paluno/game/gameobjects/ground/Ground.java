@@ -5,10 +5,10 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 import com.badlogic.gdx.physics.box2d.*;
-import de.paluno.game.GameState;
 import de.paluno.game.Map;
 import de.paluno.game.UserData;
 import de.paluno.game.gameobjects.*;
+import de.paluno.game.gameobjects.World;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -60,7 +60,7 @@ public class Ground extends WorldObject {
         explosionQueue = new LinkedList<Explosion>();
     }
     
-    public Ground(World2 world, ExplosionMaskRenderer renderer, SnapshotData data) {
+    public Ground(World world, ExplosionMaskRenderer renderer, SnapshotData data) {
         this.map = data.map;
     	this.maskRenderer = renderer;
     	
@@ -139,7 +139,7 @@ public class Ground extends WorldObject {
     }
 
     @Override
-    public Body onSetupBody(World world) {
+    public Body onSetupBody(com.badlogic.gdx.physics.box2d.World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
