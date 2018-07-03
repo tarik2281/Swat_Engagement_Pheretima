@@ -108,6 +108,8 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileSpecial.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileAirstrike =
             new AssetDescriptor<Texture>("ProjectileAirstrike.png", Texture.class);
+    public static final AssetDescriptor<Texture> projectileMine =
+            new AssetDescriptor<Texture>("ProjectileMine.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> weaponGun =
             new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
@@ -119,6 +121,8 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WeaponSpecial.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> weaponAirstrike =
             new AssetDescriptor<AnimationData>("WeaponAirstrike.xml", AnimationData.class);
+    public static final AssetDescriptor<AnimationData> weaponMine =
+            new AssetDescriptor<AnimationData>("WeaponMine.xml", AnimationData.class);
     
     public static final AssetDescriptor<Music> menuSound = 
     		new AssetDescriptor<Music>("MenuScreen_ThemeSong.mp3", Music.class);
@@ -190,7 +194,8 @@ public class Assets {
 
     public static final AssetDescriptor[] PlayScreenAssets = {
             airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, windGreen, windOrange, windRed
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, windGreen, windOrange, windRed,
+            weaponMine, projectileMine
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {

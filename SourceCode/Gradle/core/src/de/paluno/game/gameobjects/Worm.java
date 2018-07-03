@@ -145,7 +145,7 @@ public class Worm extends WorldObject {
 
             switch (movement) {
                 case Constants.MOVEMENT_LEFT:
-                	walkLoop.play(0.1f);
+                	//walkLoop.play(0.1f);
                     desiredVel = -Constants.MOVE_VELOCITY;
                     break;
                 case Constants.MOVEMENT_NO_MOVEMENT:
@@ -153,7 +153,7 @@ public class Worm extends WorldObject {
                     desiredVel = 0.0f;
                     break;
                 case Constants.MOVEMENT_RIGHT:
-                	walkLoop.play(0.1f);
+                	//walkLoop.play(0.1f);
                     desiredVel = Constants.MOVE_VELOCITY;
                     break;
             }

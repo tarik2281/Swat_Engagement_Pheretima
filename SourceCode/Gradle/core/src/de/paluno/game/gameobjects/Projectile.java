@@ -40,7 +40,8 @@ public class Projectile extends WorldObject {
     private static final float PROJECTILE_DENSITY = 0.1f;
     private static final float BAZOOKA_DENSITY = 0.07f;
     private static final float GRENADE_DENSITY = 0.2f;
-    private static final float AIRSTRIKE_DENSITY = 1f;
+    private static final float AIRSTRIKE_DENSITY = 1f;	
+    private static final float MINE_DENSITY = 1000.0f;
     
 
     private int id;
@@ -201,6 +202,21 @@ public class Projectile extends WorldObject {
         	body.applyLinearImpulse(impulse, body.getPosition(), true);
         	body.applyAngularImpulse(-0.01f * body.getMass(),  true);
         	fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        }
+        else if (weaponType == WeaponType.WEAPON_MINE) {
+   		 	FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = MINE_DENSITY;
+            fixtureDef.friction = 1.0f;
+            fixtureDef.restitution = 0.6f;
+            body = world.createBody(bodyDef);
+            Fixture fix = body.createFixture(fixtureDef);
+            body.setGravityScale(1.0f);
+            Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
+            //body.applyLinearImpulse(impulse, body.getPosition(), true);
+            //body.applyAngularImpulse(-0.01f * body.getMass(), true);
+   	     	fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
+   	
         }
         
         shape.dispose();

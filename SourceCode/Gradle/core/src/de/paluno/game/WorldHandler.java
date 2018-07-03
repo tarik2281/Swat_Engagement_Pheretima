@@ -4,6 +4,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Timer;
+
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.GameData;
 import de.paluno.game.screens.PlayScreen;
@@ -21,6 +23,7 @@ public abstract class WorldHandler implements Disposable {
 
     protected int currentPlayer;
     private int numPlayersAlive;
+    private boolean canShoot;
     private ArrayList<Player> players;
     private GameState currentGameState = GameState.NONE;
 
@@ -34,7 +37,15 @@ public abstract class WorldHandler implements Disposable {
 
     private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
+    private ArrayList<Projectile> mines;
     private int projectileId = 0;
+    private Timer.Task mineEndTurnTask = new Timer.Task() {
+		
+		@Override
+		public void run() {
+			setWaiting();
+		}
+	};
 
     private Replay replay;
 
@@ -104,6 +115,7 @@ public abstract class WorldHandler implements Disposable {
         this.players = new ArrayList<>();
 
         this.projectiles = new ArrayList<>();
+        this.mines = new ArrayList<>();
         this.weaponProjectileCache = new ArrayList<>();
         weaponIndicators = new HashMap<>();
 
@@ -160,6 +172,7 @@ public abstract class WorldHandler implements Disposable {
             addWeapon(player, WeaponType.WEAPON_GUN);
             addWeapon(player, WeaponType.WEAPON_SPECIAL);
             addWeapon(player, WeaponType.WEAPON_AIRSTRIKE);
+            addWeapon(player, WeaponType.WEAPON_MINE);
 
             for (int j = 0; j < numWorms; j++) {
                 Worm worm = addWorm(player, j);
@@ -172,7 +185,22 @@ public abstract class WorldHandler implements Disposable {
         return projectiles;
     }
 
+    protected void addMine(Projectile projectile) {
+    	unequipWeapon();
+    	mines.add(projectile);
+    	world.registerAfterUpdate(projectile);
+    	
+    	canShoot = false;
+    	
+    	Timer.schedule(mineEndTurnTask, 3.0f);
+    }
+    
     protected void addProjectile(Projectile projectile) {
+    	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE) {
+    		addMine(projectile);
+    		return;
+    	}
+    	
         projectiles.add(projectile);
         projectile.setId(projectileId++);
         world.registerAfterUpdate(projectile);
@@ -184,7 +212,14 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void removeProjectile(Projectile projectile) {
-        projectiles.remove(projectile);
+    	if (mineEndTurnTask.isScheduled())
+    		mineEndTurnTask.cancel();
+    	
+    	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE)
+    		mines.remove(projectile);
+    	else
+    		projectiles.remove(projectile);
+    	
         world.forgetAfterUpdate(projectile);
 
         if (world.getCamera().getCameraFocus() == projectile) {
@@ -233,6 +268,7 @@ public abstract class WorldHandler implements Disposable {
 
     protected void setCurrentPlayerTurn(int playerNumber, int wormNumber) {
         currentGameState = GameState.PLAYERTURN;
+        canShoot = true;
 
         currentPlayer = playerNumber;
 
@@ -380,7 +416,7 @@ public abstract class WorldHandler implements Disposable {
     }*/
 
     public void shoot() {
-        if (shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
+        if (canShoot && shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
             Player player = getCurrentPlayer();
             Worm worm = player.getCurrentWorm();
             weaponProjectileCache.clear();

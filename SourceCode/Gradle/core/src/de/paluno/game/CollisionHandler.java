@@ -95,15 +95,27 @@ public class CollisionHandler implements ContactListener {
 
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
 
-            if (((Projectile) o1).explodeOnCollision()) {
-                ((Projectile) o1).explode((Worm) o2, true);
+        	Projectile projectile = UserData.getObject(fixA);
+        	Worm worm = UserData.getObject(fixB);
+        	
+        	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
+        		projectile.explode(worm, true);
+        	}
+        	else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+                projectile.explode(worm, true);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o2).getHealth());
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
 
-            if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode((Worm) o1, true);
+        	Projectile projectile = UserData.getObject(fixB);
+        	Worm worm = UserData.getObject(fixA);
+        	
+        	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
+        		projectile.explode(worm, true);
+        	}
+        	else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+                projectile.explode(worm, true);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o1).getHealth());
@@ -113,18 +125,20 @@ public class CollisionHandler implements ContactListener {
 
         // Projectile -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Ground) {
-        	if (((Projectile) o1).explodeOnCollision()) {
-        		((Projectile) o1).explode(null, true);
-              //  grenadeContactSound.play(0.5f);
-            }
+
+        	Projectile projectile = UserData.getObject(fixA);
+        	
+        	if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision())
+        		projectile.explode(null, true);
             
             System.out.println("Projectile collided with Ground");
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Ground) {
-            if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode(null, true);
-              //  grenadeContactSound.play(0.5f);
-            }
+        	Projectile projectile = UserData.getObject(fixB);
+        	
+        	if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision())
+        		projectile.explode(null, true);
+        	
             System.out.println("Projectile collided with Ground");
         }
     }

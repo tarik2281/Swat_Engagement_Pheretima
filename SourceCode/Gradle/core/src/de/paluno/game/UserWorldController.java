@@ -1,5 +1,6 @@
 package de.paluno.game;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import de.paluno.game.gameobjects.ShotDirectionIndicator;
@@ -79,6 +80,9 @@ public class UserWorldController {
                     break;
                 case Constants.KEY_SELECT_WEAPON_5:
                 	worldHandler.applyEquipWeapon(WeaponType.WEAPON_AIRSTRIKE);
+                	break;
+                case Constants.KEY_SELECT_WEAPON_6:
+                	worldHandler.applyEquipWeapon(WeaponType.WEAPON_MINE);
                 	break;
 
             }
