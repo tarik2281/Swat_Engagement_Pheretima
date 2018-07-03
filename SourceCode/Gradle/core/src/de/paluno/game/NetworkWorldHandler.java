@@ -24,6 +24,7 @@ public class NetworkWorldHandler extends WorldHandler {
     private float currentTime;
     private int currentTick;
     private float updateTimer;
+    private float idleTime;
     private boolean sendGameData;
 
     private WorldData currentSnapshot;
@@ -58,13 +59,14 @@ public class NetworkWorldHandler extends WorldHandler {
     };
 
     private DataHandler<WorldData> worldDataHandler = (client, data) -> {
-        data.setReceivingTimeStamp(currentTime);
+        data.setReceivingTimeStamp(data.getTick() * UPDATE_FREQUENCY + idleTime);
+        System.out.println("Tick time: " + (data.getTick() * UPDATE_FREQUENCY + idleTime) + ", currentTime: " + currentTime);
 
         Gdx.app.postRunnable(() -> receivedGameData.add(data));
     };
 
     private DataHandler<GameEvent> eventHandler = (client, data) -> {
-        data.setReceivingTimeStamp(currentTime);
+        data.setReceivingTimeStamp(data.getTick() * UPDATE_FREQUENCY + idleTime);
 
         Gdx.app.postRunnable(() -> receivedGameEvents.add(data));
     };
@@ -120,6 +122,7 @@ public class NetworkWorldHandler extends WorldHandler {
 
     @Override
     public void onInitializePlayers() {
+        currentTick = 0;
         client.registerDataHandler(StartTurnEvent.class, startTurnHandler);
         client.registerDataHandler(WorldData.class, worldDataHandler);
         client.registerDataHandler(ExplosionEvent.class, eventHandler);
@@ -186,7 +189,7 @@ public class NetworkWorldHandler extends WorldHandler {
     }
 
     public void sendWorldSnapshot(boolean usingTCP) {
-        WorldData data = new WorldData(0, usingTCP);
+        WorldData data = new WorldData(currentTick, usingTCP);
         if (getShotDirectionIndicator() != null)
         data.setIndicatorData(getShotDirectionIndicator().makeSnapshot());
 
@@ -368,18 +371,22 @@ public class NetworkWorldHandler extends WorldHandler {
             }
         }
 
-        if (isControllingCurrentPlayer()) {
+        if (getCurrentGameState() != GameState.NONE && getCurrentGameState() != GameState.IDLE) {
             updateTimer += delta;
-
             if (updateTimer >= UPDATE_FREQUENCY) {
                 updateTimer -= UPDATE_FREQUENCY;
+                currentTick++;
 
-                sendWorldSnapshot(true);
+                if (isControllingCurrentPlayer()) {
+                    sendWorldSnapshot(false);
+                }
             }
         }
-        else {
+        else
+            idleTime += delta;
+
+        if (!isControllingCurrentPlayer())
             interpolateWorldSnapshots();
-        }
     }
 
     @Override
@@ -397,7 +404,7 @@ public class NetworkWorldHandler extends WorldHandler {
             projectilesArray[index++] = data;
         }
 
-        ShootEvent event = new ShootEvent(0, projectilesArray);
+        ShootEvent event = new ShootEvent(currentTick, projectilesArray);
         client.sendObject(event);
     }
 
@@ -440,20 +447,20 @@ public class NetworkWorldHandler extends WorldHandler {
     @Override
     public void onProjectileExploded(Projectile projectile) {
         Vector2 pos = projectile.getExplosion().getCenter();
-        ExplosionEvent e = new ExplosionEvent(0, pos.x, pos.y, projectile.getExplosion().getRadius(), projectile.getExplosion().getBlastPower());
+        ExplosionEvent e = new ExplosionEvent(currentTick, pos.x, pos.y, projectile.getExplosion().getRadius(), projectile.getExplosion().getBlastPower());
         e.projectileId = projectile.getId();
         client.sendObject(e);
     }
 
     @Override
     protected void onWormDied(Worm worm) {
-        WormEvent event = new WormEvent(0, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getCharacterNumber());
+        WormEvent event = new WormEvent(currentTick, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getCharacterNumber());
         client.sendObject(event);
     }
 
     @Override
     protected void onWormInfected(Worm worm) {
-        WormEvent event = new WormEvent(0, GameEvent.Type.WORM_INFECTED, worm.getPlayerNumber(), worm.getCharacterNumber());
+        WormEvent event = new WormEvent(currentTick, GameEvent.Type.WORM_INFECTED, worm.getPlayerNumber(), worm.getCharacterNumber());
         client.sendObject(event);
     }
 
@@ -462,7 +469,7 @@ public class NetworkWorldHandler extends WorldHandler {
         if (event.getDamageType() == Constants.DAMAGE_TYPE_VIRUS)
             return;
 
-        WormDamageEvent gameEvent = new WormDamageEvent(0, event.getWorm().getPlayerNumber(),
+        WormDamageEvent gameEvent = new WormDamageEvent(currentTick, event.getWorm().getPlayerNumber(),
                 event.getWorm().getCharacterNumber(), event.getDamage(), event.getDamageType());
         client.sendObject(gameEvent);
     }
