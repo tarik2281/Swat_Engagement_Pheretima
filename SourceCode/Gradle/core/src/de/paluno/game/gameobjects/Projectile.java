@@ -175,11 +175,7 @@ public class Projectile implements Updatable, PhysicsObject, Renderable {
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             body.applyAngularImpulse(-0.01f * body.getMass(), true);
             fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
-        } else if (weaponType == WeaponType.TELEPORTER) {
-            Vector3 vector3 = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            world.getCamera().getWorldCamera().unproject(vector3);
-            world.getCurrentPlayer().getCurrentWorm().getBody().setTransform(vector3.x, vector3.y, 0);
-            world.registerAfterUpdate(world.getCurrentPlayer().getCurrentWorm());
+
 
 
         }

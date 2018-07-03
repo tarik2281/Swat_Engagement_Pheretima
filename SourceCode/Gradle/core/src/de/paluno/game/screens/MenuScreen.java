@@ -4,12 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
@@ -22,10 +22,10 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
     private Stage menuStage;
     private Table menuTable, menuTable2, menuTable3, menuTableModi;
     private Image image;
-    private Texture map1, map2, map3, map4, textureBackground, play, worm1, worm2, worm3, worm4, worm5;
     // Icons
     private ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4, buttonPlay, buttonWorm1, buttonWorm2,
             buttonWorm3, buttonWorm4, buttonWorm5;
+    private TextField username;
 
     private ImageButton selectedWormButton;
     private ImageButton selectedMapButton;
@@ -56,10 +56,11 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
     public void show() {
 
+        //Username Textfield
+        username = elementGUI.createTextField("Lobbyname");
 
         // Map Buttons
-        map1 = game.getAssetManager().get(Assets.map1Thumbnail);
-        buttonMap1 = elementGUI.createButton(map1);
+        buttonMap1 = elementGUI.createButton(game.getAssetManager().get(Assets.map1Thumbnail));
         buttonMap1.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap1.addListener(new ClickListener() {
 
@@ -72,8 +73,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         });
 
 
-        map2 = game.getAssetManager().get(Assets.map2Thumbnail);
-        buttonMap2 = elementGUI.createButton(map2);
+        buttonMap2 = elementGUI.createButton(game.getAssetManager().get(Assets.map2Thumbnail));
         buttonMap2.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap2.addListener(new ClickListener() {
 
@@ -85,8 +85,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        map3 = game.getAssetManager().get(Assets.map3Thumbnail);
-        buttonMap3 = elementGUI.createButton(map3);
+        buttonMap3 = elementGUI.createButton(game.getAssetManager().get(Assets.map3Thumbnail));
         buttonMap3.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap3.addListener(new ClickListener() {
 
@@ -98,8 +97,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        map4 = game.getAssetManager().get(Assets.map4Thumbnail);
-        buttonMap4 = elementGUI.createButton(map4);
+        buttonMap4 = elementGUI.createButton(game.getAssetManager().get(Assets.map4Thumbnail));
         buttonMap4.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonMap4.addListener(new ClickListener() {
 
@@ -114,8 +112,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
 
         // Play ElementGUI
-        play = game.getAssetManager().get(Assets.playButton);
-        buttonPlay = elementGUI.createButton(play);
+        buttonPlay = elementGUI.createButton(game.getAssetManager().get(Assets.playButton));
         buttonPlay.addListener(new ClickListener() {
 
 
@@ -129,8 +126,8 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
 
         // Worm Number Buttons
-        worm1 = game.getAssetManager().get(Assets.worms1Button);
-        buttonWorm1 = elementGUI.createButton(worm1);
+
+        buttonWorm1 = elementGUI.createButton( game.getAssetManager().get(Assets.worms1Button));
         buttonWorm1.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm1.addListener(new ClickListener() {
 
@@ -142,8 +139,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        worm2 = game.getAssetManager().get(Assets.worms2Button);
-        buttonWorm2 = elementGUI.createButton(worm2);
+        buttonWorm2 = elementGUI.createButton(game.getAssetManager().get(Assets.worms2Button));
         buttonWorm2.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm2.addListener(new ClickListener() {
 
@@ -155,8 +151,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        worm3 = game.getAssetManager().get(Assets.worms3Button);
-        buttonWorm3 = elementGUI.createButton(worm3);
+        buttonWorm3 = elementGUI.createButton(game.getAssetManager().get(Assets.worms3Button));
         buttonWorm3.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm3.addListener(new ClickListener() {
 
@@ -168,8 +163,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        worm4 = game.getAssetManager().get(Assets.worms4Button);
-        buttonWorm4 = elementGUI.createButton(worm4);
+        buttonWorm4 = elementGUI.createButton(game.getAssetManager().get(Assets.worms4Button));
         buttonWorm4.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm4.addListener(new ClickListener() {
 
@@ -181,8 +175,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        worm5 = game.getAssetManager().get(Assets.worms5Button);
-        buttonWorm5 = elementGUI.createButton(worm5);
+        buttonWorm5 = elementGUI.createButton(game.getAssetManager().get(Assets.worms5Button));
         buttonWorm5.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         buttonWorm5.addListener(new ClickListener() {
 
@@ -202,8 +195,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         menuTable2 = new Table();
 
         // Menu Background
-        textureBackground = game.getAssetManager().get(Assets.menuBackground);
-        image = elementGUI.createBackground(textureBackground);
+        image = elementGUI.createBackground(game.getAssetManager().get(Assets.menuBackground));
 
         menuStage.setDebugAll(false);
         //menuTable.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -253,6 +245,8 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         menuTableModi.padLeft(160);
         menuTableModi.padTop(200);
 
+        menuStage.addActor(username);
+        username.setPosition(250,620);
 
         setSelectedMapButton(buttonMap1);
         mapNumber = 0;

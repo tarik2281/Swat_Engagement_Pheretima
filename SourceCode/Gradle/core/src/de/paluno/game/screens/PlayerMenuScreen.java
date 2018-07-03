@@ -108,11 +108,15 @@ public class PlayerMenuScreen extends ScreenAdapter implements Loadable {
             public void clicked(InputEvent event, float x, float y) {
 //                Collections.shuffle(randomTeamNames);
 //                Collections.shuffle(randomPlayerNames);
-                for (int i = 0; i < playerTextFieldList.size(); i++) {
-                    for (int j = 0; j < numWorms; j++) {
-                        playerTextFieldList.get(j).setText(randomPlayerNames.get(j));
+                int field = 0;
+                int j = 0;
+                int k = 0;
+                int nameNum = 5 - numWorms;
+                for (int i = 0; i < playerNumber; i++) {
+                        k+= nameNum;
+                    for (; j < (numWorms*playerNumber) ; j++,k++) {
+                        playerTextFieldList.get(j).setText(randomPlayerNames.get(k));
                     }
-
                 }
 
                 for (int i = 0; i < playerNumber; i++) {
@@ -136,11 +140,11 @@ public class PlayerMenuScreen extends ScreenAdapter implements Loadable {
 
 
         for (int i = 0; i < (numWorms * playerNumber); i++) {
-            playerTextFieldList.add(elementGUI.createTextField());
+            playerTextFieldList.add(elementGUI.createTextField(""));
         }
 
         for (int i = 0; i < playerNumber; i++) {
-            teamTextFieldList.add(elementGUI.createTextField());
+            teamTextFieldList.add(elementGUI.createTextField(""));
         }
 
 

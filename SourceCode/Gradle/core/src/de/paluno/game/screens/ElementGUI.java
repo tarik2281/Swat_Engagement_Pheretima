@@ -33,12 +33,12 @@ public class ElementGUI {
         return imageButton;
     }
 
-    public TextField createTextField() {
+    public TextField createTextField(String name) {
         Text text;
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 //        textField = new TextField("", skin);
         textFieldStyle = skin.get(TextField.TextFieldStyle.class);
-        textField = new TextField("", textFieldStyle);
+        textField = new TextField(name, textFieldStyle);
         textField.setSize(150, 50);
 //        textFieldStyle.font.getData().setScale(1);
 

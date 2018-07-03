@@ -1,6 +1,8 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import de.paluno.game.*;
 
 public class Weapon {
@@ -58,10 +60,17 @@ public class Weapon {
 			Vector2 direction = new Vector2(1, 0).rotate(angle);
 
 			if (worm.getBody() != null) {
-				Projectile projectile = new Projectile(player.getWorld(), worm,
-						this.type, worm.getBody().getPosition(), direction);
+				if (worm.getCurrentWeapon().getWeaponType() != WeaponType.TELEPORTER) {
+					Projectile projectile = new Projectile(player.getWorld(), worm,
+							this.type, worm.getBody().getPosition(), direction);
 
-				player.getWorld().spawnProjectile(projectile);
+
+					player.getWorld().spawnProjectile(projectile);
+				}else{
+					Vector3 vector3 = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+					player.getWorld().getCamera().getWorldCamera().unproject(vector3);
+					worm.getBody().setTransform(vector3.x, vector3.y, 0);
+				}
 			}
 
 			currentAmmo--;
