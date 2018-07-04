@@ -1,6 +1,7 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -397,6 +398,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
      */
 	public void takeDamage(int damage) {
 		health -= damage;
+		
+		HoverText info = new HoverText(this.world, this, "-"+damage, Color.RED);
+		world.registerAfterUpdate(info);
 
 		if (health <= 0) {
 			// Is dead, kill it
@@ -574,7 +578,7 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	public void pickupWeapon(WeaponType weapon) {
 		if(weapon == null) return;
 		this.player.addAmmo(weapon);
-		CratePickupText info = new CratePickupText(this.world, this, weapon.getName());
+		HoverText info = new HoverText(this.world, this, "+1 "+weapon.getName(), Constants.PLAYER_COLORS[this.getPlayerNumber()]);
 		world.registerAfterUpdate(info);
 	}
 }

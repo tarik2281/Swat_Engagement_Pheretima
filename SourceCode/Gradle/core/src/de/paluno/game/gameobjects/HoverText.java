@@ -10,21 +10,23 @@ import com.badlogic.gdx.utils.Align;
 
 import de.paluno.game.Constants;
 
-public class CratePickupText implements Renderable {
+public class HoverText implements Renderable {
 	
 	private World world;
-	private Worm worm;
+	private PhysicsObject target;
 	
 	private BitmapFont font;
     private GlyphLayout layout;
+    private Color color;
     
     private float opacity = 1;
     private float offset = 0;
     private boolean fade = false;
 	
-	public CratePickupText(World world, Worm target, String content) {
+	public HoverText(World world, PhysicsObject target, String text, Color color) {
 		this.world = world;
-        this.worm = target;
+        this.target = target;
+        this.color = color;
 
         font = new BitmapFont();
         // the text moves shaky if we use integer positions
@@ -32,14 +34,14 @@ public class CratePickupText implements Renderable {
 
         layout = new GlyphLayout();
         
-        this.setText(content);
+        this.setText(text);
 	}
 
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		Body body = worm.getBody();
+		Body body = target.getBody();
         if (body == null) {
-            // the worm associated with this HealthBar does not exist anymore so just remove this object from the game
+            // the target associated with this text does not exist anymore, so just remove this object from the game
             world.forgetAfterUpdate(this);
             return;
         }
@@ -61,17 +63,18 @@ public class CratePickupText implements Renderable {
 	}
 	
 	private void setText(String text) {
-		layout.setText(font, "+1 "+text, getColor(), 0, Align.center, false);
+		layout.setText(font, text, getColor(), 0, Align.center, false);
 	}
 	
 	private void setColorRGBA(Color color, float alpha) {
 		this.font.setColor(color.r, color.g, color.b, alpha);
 	}
 	
-	private Color getColor() {
-		Color color = Constants.PLAYER_COLORS[worm.getPlayerNumber()];
-
-        return color;
+	private Color getColor() {return color;}
+	
+	public void updateText(String text) {
+		this.setText(text);
+		this.setColorRGBA(color, opacity);
 	}
 
 }
