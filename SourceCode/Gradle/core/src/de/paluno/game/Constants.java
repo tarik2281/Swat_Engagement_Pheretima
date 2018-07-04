@@ -51,6 +51,10 @@ public class Constants {
 	public static final float CAMERA_MOVE_VELOCITY = 3.0f; // m/s
 
 	public static final float MESSAGE_DURATION = 2.0f; // in seconds
+	
+	//Turret
+	public static final float TURRET_DENSITY = 13234.0f;
+	public static final float TURRET_RADIUS = 25.0f * WORLD_SCALE;
 
 	/**
 	 * game object attributes in world space (in meters)
@@ -84,6 +88,7 @@ public class Constants {
     public static final int KEY_SELECT_WEAPON_4 = Input.Keys.F4;
     public static final int KEY_SELECT_WEAPON_5 = Input.Keys.F5;
     public static final int KEY_SELECT_WEAPON_6 = Input.Keys.F6;
+    public static final int KEY_SELECT_WEAPON_7 = Input.Keys.F7;
     
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;

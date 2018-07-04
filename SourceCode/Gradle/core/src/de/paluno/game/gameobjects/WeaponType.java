@@ -22,8 +22,11 @@ public enum WeaponType {
 	WEAPON_AIRSTRIKE(Constants.WEAPON_AMMO_SPECIAL, Assets.iconAirstrike, Assets.weaponAirstrike, Assets.projectileAirstrike,
 			WeaponIndicator.Type.Pointer, 1f, 0.75f, 0.009f, 0.0f, 25),
 	WEAPON_MINE(3, Assets.iconSpecial, Assets.weaponMine, Assets.projectileMine,
-			WeaponIndicator.Type.ShotDirection, 7.0f, 0.35f, 0.003f, 0.0f, 10);
-	public static final int NUM_WEAPONS = 6;
+			WeaponIndicator.Type.ShotDirection, 7.0f, 0.35f, 0.003f, 0.0f, 10),
+	WEAPON_TURRET(1, Assets.iconSpecial, Assets.wormBreath , Assets.weaponTurret,
+			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 30);
+	
+	public static final int NUM_WEAPONS = 7;
 
 	private final int maxAmmo;
 	private final AssetDescriptor<Texture> icon;

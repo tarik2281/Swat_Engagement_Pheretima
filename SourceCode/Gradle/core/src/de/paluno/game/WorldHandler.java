@@ -38,6 +38,7 @@ public abstract class WorldHandler implements Disposable {
     private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
     private ArrayList<Projectile> mines;
+    private ArrayList<Projectile> turrets;
     private int projectileId = 0;
     private Timer.Task mineEndTurnTask = new Timer.Task() {
 		
@@ -116,6 +117,7 @@ public abstract class WorldHandler implements Disposable {
 
         this.projectiles = new ArrayList<>();
         this.mines = new ArrayList<>();
+        this.turrets = new ArrayList<>();
         this.weaponProjectileCache = new ArrayList<>();
         weaponIndicators = new HashMap<>();
 
@@ -173,6 +175,7 @@ public abstract class WorldHandler implements Disposable {
             addWeapon(player, WeaponType.WEAPON_SPECIAL);
             addWeapon(player, WeaponType.WEAPON_AIRSTRIKE);
             addWeapon(player, WeaponType.WEAPON_MINE);
+            addWeapon(player, WeaponType.WEAPON_TURRET);
 
             for (int j = 0; j < numWorms; j++) {
                 Worm worm = addWorm(player, j);
@@ -195,9 +198,23 @@ public abstract class WorldHandler implements Disposable {
     	Timer.schedule(mineEndTurnTask, 3.0f);
     }
     
+    protected void addTurret(Projectile projectile) {
+    	unequipWeapon();
+    	turrets.add(projectile);
+    	world.registerAfterUpdate(projectile);
+    	
+    	canShoot = false;
+    	
+    	Timer.schedule(mineEndTurnTask, 5.0f);
+    	
+    }
+    
     protected void addProjectile(Projectile projectile) {
     	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE) {
     		addMine(projectile);
+    		return;
+    	}else if(projectile.getWeaponType() == WeaponType.WEAPON_TURRET) {
+    		addTurret(projectile);
     		return;
     	}
     	
@@ -254,6 +271,8 @@ public abstract class WorldHandler implements Disposable {
             currentWorm.removeChild(currentWeaponIndicator);
 
         currentWeaponIndicator = weaponIndicators.computeIfAbsent(weaponType.getIndicatorType(), WeaponIndicator.Type::newInstance);
+        
+        if (currentWeaponIndicator != null)
         currentWorm.addChild(currentWeaponIndicator);
     }
 

@@ -143,6 +143,8 @@ public class Projectile extends WorldObject {
 
         CircleShape shape = new CircleShape();
         shape.setRadius(PROJECTILE_RADIUS);
+        CircleShape poly = new CircleShape();
+        poly.setRadius(Constants.TURRET_RADIUS);
 
         //Vector2 impulse = new Vector2(direction).scl(body.getMass() * weaponType.getShootingImpulse());
 
@@ -212,11 +214,22 @@ public class Projectile extends WorldObject {
             body = world.createBody(bodyDef);
             Fixture fix = body.createFixture(fixtureDef);
             body.setGravityScale(1.0f);
-            Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
+            // Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
             //body.applyLinearImpulse(impulse, body.getPosition(), true);
             //body.applyAngularImpulse(-0.01f * body.getMass(), true);
    	     	fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
    	
+        }else if(weaponType == WeaponType.WEAPON_TURRET) {
+        	bodyDef.position.set(shootingWorm.getPosition().x  + (shootingWorm.getOrientation()* 50.0f * Constants.WORLD_SCALE), shootingWorm.getPosition().y);;
+        	bodyDef.fixedRotation = true;
+        	FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = poly;
+            fixtureDef.density = Constants.TURRET_DENSITY;
+            body = world.createBody(bodyDef);
+            Fixture fix = body.createFixture(fixtureDef);
+            body.setGravityScale(1.0f);
+
+            fix.setUserData(new UserData(UserData.ObjectType.turret,this));
         }
         
         shape.dispose();
@@ -245,7 +258,10 @@ public class Projectile extends WorldObject {
     }
 
     public void explode(Worm directHitWorm, boolean collidedObject) {
-        if (!exploded) {
+    	if (weaponType == WeaponType.WEAPON_TURRET) {
+			return;
+		}
+    	else if(!exploded) {
         	
             exploded = true;
             explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());

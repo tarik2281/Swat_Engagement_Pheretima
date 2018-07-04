@@ -97,7 +97,14 @@ public class Weapon {
 				output.add(projectile);
 				output.add(projectile2);
 				output.add(projectile3);
+			}else if(getWeaponType() == WeaponType.WEAPON_TURRET) {
+				Projectile projectile = new Projectile(worm,
+						this.type, Constants.AIRSTRIKE_SPAWNPOS,
+						Constants.AIRSTRIKE_SPAWNPOS2);
+				
+				output.add(projectile);
 			}
+			
 			else {
 				Vector2 direction = new Vector2(1, 0).rotate(indicator.getAngle());
 				Projectile projectile = new Projectile(worm, type, worm.getPosition(), direction);

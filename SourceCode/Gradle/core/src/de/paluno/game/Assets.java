@@ -110,7 +110,15 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileAirstrike.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileMine =
             new AssetDescriptor<Texture>("ProjectileMine.png", Texture.class);
+    public static final AssetDescriptor<Texture> projectileTurret =
+            new AssetDescriptor<Texture>("ProjectileTurret.png", Texture.class);
 
+    
+    
+    
+    
+    public static final AssetDescriptor<Texture> weaponTurret =
+            new AssetDescriptor<Texture>("WeaponTurret.png", Texture.class);
     public static final AssetDescriptor<AnimationData> weaponGun =
             new AssetDescriptor<AnimationData>("WeaponGun.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> weaponGrenade =
@@ -122,6 +130,8 @@ public class Assets {
     public static final AssetDescriptor<AnimationData> weaponAirstrike =
             new AssetDescriptor<AnimationData>("WeaponAirstrike.xml", AnimationData.class);
     public static final AssetDescriptor<AnimationData> weaponMine =
+            new AssetDescriptor<AnimationData>("WeaponMine.xml", AnimationData.class);
+    public static final AssetDescriptor<AnimationData> weapon =
             new AssetDescriptor<AnimationData>("WeaponMine.xml", AnimationData.class);
     
     public static final AssetDescriptor<Music> menuSound = 
@@ -195,7 +205,7 @@ public class Assets {
     public static final AssetDescriptor[] PlayScreenAssets = {
             airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
             weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, windGreen, windOrange, windRed,
-            weaponMine, projectileMine
+            weaponMine, projectileMine,weaponTurret ,projectileTurret,
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {

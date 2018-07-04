@@ -34,13 +34,19 @@ public class GameWorld implements Disposable {
     private ContactFilter contactFilter = (fixtureA, fixtureB) -> {
         if (UserData.getType(fixtureA) == UserData.ObjectType.Worm && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
             Projectile projectile = UserData.getObject(fixtureB);
-            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA))
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA)) {
                 return false;
+            }else {
+            	
+            }
         }
         else if (UserData.getType(fixtureB) == UserData.ObjectType.Worm && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
             Projectile projectile = UserData.getObject(fixtureA);
-            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB)) {
                 return false;
+            }else {
+            	
+            }
         }
 
         return true;
@@ -76,6 +82,10 @@ public class GameWorld implements Disposable {
         world.dispose();
         debugRenderer.dispose();
         explosionMaskRenderer.dispose();
+    }
+    
+    public WorldHandler getWorldHandler() {
+    	return worldHandler;
     }
 
     public com.badlogic.gdx.physics.box2d.World getWorld() {
