@@ -110,9 +110,9 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		if(opacity == 0) removeCrate();
 		
 		// Crate finally landed, make it static so it doesn't move and doesn't need much render capacity
-		if(body.getType() == BodyType.DynamicBody && body.getLinearVelocity() == new Vector2(0,0)) {
+		/*if(body.getType() == BodyType.DynamicBody && body.getLinearVelocity() == new Vector2(0,0)) {
 			body.setType(BodyType.StaticBody);
-		}
+		}*/
 		
 		if (!world.isInWorldBounds(body)) {
 			if(chute != null) removeChute();
@@ -139,9 +139,9 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		
 		FixtureDef fDef = new FixtureDef();
 		fDef.shape = bodyRect;
-		fDef.density = 0.1f;
-		fDef.friction = 0.0f;
-		fDef.restitution = 0.0f;
+		fDef.density = 0.5f;
+		fDef.friction = 1.0f;
+		fDef.restitution = 0.1f;
 		
 		this.fix = body.createFixture(fDef);
 		fix.setUserData(new UserData(UserData.ObjectType.Crate, this));
@@ -166,13 +166,9 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		this.chute.destroy();
 		System.out.println("Chute destruction triggered, chaging crate specs.");
 		// Update the crate body, to make it affected by gravity
-		for(Fixture f : body.getFixtureList()) {
-			f.setDensity(0.5f);
-			f.setRestitution(0.1f);
-			f.setFriction(0.5f);
-		}
 		body.setGravityScale(1.0f);
 		body.resetMassData();
+		body.setLinearVelocity(0.0f, 0.0f);
 		System.out.println("Done!");
 	}
 	

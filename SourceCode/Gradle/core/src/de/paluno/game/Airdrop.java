@@ -31,7 +31,9 @@ public class Airdrop implements GameEvent {
 		
 		// Select a new random drop content
 		WeaponType[] possibleDrops = WeaponType.values();
-		WeaponType drop = possibleDrops[ThreadLocalRandom.current().nextInt(0, possibleDrops.length)];
+		int i = ThreadLocalRandom.current().nextInt(0, possibleDrops.length);
+		WeaponType drop = possibleDrops[i];
+		System.out.println("Crate spawned - i = "+i+" - Weapon is "+drop.getName());
 		
 		// Create the Airdrop
 		AirdropCrate crate = new AirdropCrate(world, spawn, drop);

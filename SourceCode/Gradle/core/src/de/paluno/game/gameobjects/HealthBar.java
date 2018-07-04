@@ -52,14 +52,15 @@ public class HealthBar implements Renderable {
     private Color getColor() {
         Color color = Color.BLACK;
 
-        switch (worm.getPlayerNumber()) {
+        /*switch (worm.getPlayerNumber()) {
             case Constants.PLAYER_NUMBER_1:
                 color = Constants.PLAYER_1_COLOR;
                 break;
             case Constants.PLAYER_NUMBER_2:
                 color = Constants.PLAYER_2_COLOR;
                 break;
-        }
+        }*/
+        color = Constants.PLAYER_COLORS[worm.getPlayerNumber()];
 
         return color;
     }

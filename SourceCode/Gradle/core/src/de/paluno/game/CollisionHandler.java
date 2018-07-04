@@ -136,6 +136,13 @@ public class CollisionHandler implements ContactListener {
         	System.out.println("Crate landed!");
         	((AirdropCrate) o2).land();
         }
+        
+        //Crate <-> Crate
+        if(UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Crate) {
+        	System.out.println("Crate landed!");
+        	((AirdropCrate) o1).land();
+        	((AirdropCrate) o2).land();
+        }
     }
 
     /**

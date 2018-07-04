@@ -548,7 +548,7 @@ public class World implements Disposable {
     }
     
     public void spawnDebugDrop(WeaponType drop, float x) {
-    	this.airdrop.debugSpawn(this, new Vector2(Math.round(x), Math.round(ground.getWorldWidth())), drop);
+    	this.airdrop.debugSpawn(this, new Vector2(x, ground.getWorldHeight()), drop);
     }
     
     public void setCrateLanded() {

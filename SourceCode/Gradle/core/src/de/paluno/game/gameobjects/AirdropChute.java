@@ -50,8 +50,9 @@ public class AirdropChute implements Renderable, Updatable, PhysicsObject {
 	@Override
 	public void setupBody() {
 		BodyDef def = new BodyDef();
-		def.type = BodyType.KinematicBody;
+		def.type = BodyType.DynamicBody;
 		def.fixedRotation = false;
+		def.gravityScale = 0;
 		Vector2 bodyPos = this.crate.getBody().getPosition();
 		def.position.set(bodyPos.x, bodyPos.y + 20*Constants.WORLD_SCALE);
 		def.linearVelocity.set(0, -1.5f);
@@ -63,11 +64,12 @@ public class AirdropChute implements Renderable, Updatable, PhysicsObject {
 		
 		FixtureDef fDef = new FixtureDef();
 		fDef.shape = bodyRect;
-		fDef.density = 0.0f;
-		fDef.friction = 0.0f;
+		fDef.density = 1.0f;
+		fDef.friction = 1.0f;
 		fDef.restitution = 0.0f;
 		
 		this.fix = body.createFixture(fDef);
+		this.body.applyTorque(0.01f, true);
 		fix.setUserData(new UserData(UserData.ObjectType.Chute, this));
 		
 		// Join them together, so they'll stay near, while still being able to wiggle
@@ -103,11 +105,15 @@ public class AirdropChute implements Renderable, Updatable, PhysicsObject {
 	@Override
 	public void update(float delta, GameState gamestate) {
 		if(opacity == 0) crate.removeChute();
-		else if(this.crate.getBody().getAngle() >= 22 * TORAD) {
-			this.joint.setMotorSpeed(-22 * TORAD);
-		} else if(this.crate.getBody().getAngle() <= -22 * TORAD) {
-			this.joint.setMotorSpeed(22 * TORAD);
+		else if(joint != null) {
+			if(this.crate.getBody().getAngle() >= 22 * TORAD) {
+				this.joint.setMotorSpeed(-22 * TORAD);
+			} else if(this.crate.getBody().getAngle() <= -22 * TORAD) {
+				this.joint.setMotorSpeed(22 * TORAD);
+			}
 		}
+		if(this.body.getAngle() >= 20 * TORAD) this.body.applyTorque(-0.01f, true);
+		else if(this.body.getAngle() <= -20 * TORAD) this.body.applyTorque(0.01f, true);
 	}
 
 	@Override

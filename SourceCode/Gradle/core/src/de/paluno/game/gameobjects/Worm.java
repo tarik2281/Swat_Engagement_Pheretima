@@ -572,6 +572,9 @@ public class Worm implements Updatable, PhysicsObject, Renderable {
 	 * @param weapon - The WeaponType of the weapon picked up
 	 */
 	public void pickupWeapon(WeaponType weapon) {
+		if(weapon == null) return;
 		this.player.addAmmo(weapon);
+		CratePickupText info = new CratePickupText(this.world, this, weapon.getName());
+		world.registerAfterUpdate(info);
 	}
 }
