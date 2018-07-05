@@ -2,6 +2,7 @@ package de.paluno.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
+import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
@@ -10,6 +11,7 @@ import de.paluno.game.interfaces.*;
 import de.paluno.game.interfaces.Constants;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class NetworkClient {
@@ -18,14 +20,20 @@ public class NetworkClient {
         void onConnectionResult(NetworkClient client, int result);
     }
 
+    public interface DisconnectionListener {
+        void onDisconnected(NetworkClient client);
+    }
+
     public static final int RESULT_CONNECTION_FAILED = -1;
     public static final int RESULT_CONNECTION_SUCCESS = 0;
 
     private String remoteAddress;
     private Client client;
     private ConnectionListener connectionListener;
+    private DisconnectionListener disconnectionListener;
 
-    private HashMap<Class, DataHandler> dataHandlers;
+    private ArrayList<DataHandler> dataHandlers;
+    //private HashMap<Class, DataHandler> dataHandlers;
 
     private Listener networkListener = new Listener() {
         @Override
@@ -38,31 +46,49 @@ public class NetworkClient {
 
         @Override
         public void disconnected(Connection connection) {
-            super.disconnected(connection);
+            Gdx.app.postRunnable(() -> {
+                if (disconnectionListener != null)
+                    disconnectionListener.onDisconnected(NetworkClient.this);
+            });
         }
 
         @Override
         public void received(Connection connection, Object object) {
             //System.out.println("Data received: " + object.toString());
 
-            DataHandler handler = dataHandlers.get(object.getClass());
+            if (!(object instanceof FrameworkMessage.KeepAlive))
+                Gdx.app.postRunnable(() -> {
+                    for (DataHandler dataHandler : dataHandlers)
+                        dataHandler.handleData(NetworkClient.this, object);
+                });
+            /*DataHandler handler = dataHandlers.get(object.getClass());
             if (handler != null) {
                 handler.handleData(NetworkClient.this, object);
             }
             else if (!(object instanceof FrameworkMessage.KeepAlive)){
                 System.err.println("No DataHandler registered for " + object.getClass().getName());
-            }
+            }*/
         }
     };
 
     public NetworkClient(String remoteAddress) {
         this.remoteAddress = remoteAddress;
 
-        dataHandlers = new HashMap<>();
+        dataHandlers = new ArrayList<>();
     }
 
     public void setConnectionListener(ConnectionListener listener) {
         this.connectionListener = listener;
+    }
+
+    public void setDisconnectionListener(DisconnectionListener listener) {
+        this.disconnectionListener = listener;
+    }
+
+    public void requestLogin(String userName, String[] wormNames) {
+        if (client.isConnected()) {
+            client.sendTCP(new UserLoginRequest(userName, wormNames));
+        }
     }
 
     public void connect() {
@@ -115,11 +141,19 @@ public class NetworkClient {
         client.sendUDP(object);
     }
 
-    public <T> void registerDataHandler(Class<T> tClass, DataHandler handler) {
+    public void registerDataHandler(DataHandler handler) {
+        dataHandlers.add(handler);
+    }
+
+    public void unregisterDataHandler(DataHandler handler) {
+        dataHandlers.remove(handler);
+    }
+
+    /*public <T> void registerDataHandler(Class<T> tClass, DataHandler handler) {
         dataHandlers.put(tClass, handler);
     }
 
     public <T> void unregisterDataHandler(Class<T> tClass, DataHandler handler) {
         dataHandlers.remove(tClass);
-    }
+    }*/
 }

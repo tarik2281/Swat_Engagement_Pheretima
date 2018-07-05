@@ -29,5 +29,10 @@ public class KryoInterface {
         kryo.register(GameOverEvent.class);
         kryo.register(ShotDirectionData.class);
         kryo.register(ChatMessage.class);
+
+        kryo.register(UserLoginRequest.class);
+        kryo.register(UserLoginRequest.Result.class);
+
+        kryo.register(String[].class);
     }
 }

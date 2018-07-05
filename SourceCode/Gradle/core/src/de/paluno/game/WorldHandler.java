@@ -48,7 +48,7 @@ public abstract class WorldHandler implements Disposable {
             case WormDied: {
                 Worm worm = (Worm) data;
 
-                    if (getCurrentPlayer().getCurrentWorm() == worm) {
+                    if (currentGameState == GameState.PLAYERTURN && getCurrentPlayer().getCurrentWorm() == worm) {
                         System.out.println("Current worm died, setting to waiting");
                         setWaiting();
                     }

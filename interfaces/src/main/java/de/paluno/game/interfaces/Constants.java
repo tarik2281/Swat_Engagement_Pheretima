@@ -13,6 +13,7 @@ public class Constants {
     public static final int VIRUS_DAMAGE = 5;
 
     public static final int NUM_MIN_PLAYERS = 2;
+    public static final int NUM_MAX_PLAYERS = 5;
 
     public static final int WIND_RANGE = 10;
     public static final int WIND_START = -5;

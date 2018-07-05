@@ -12,8 +12,13 @@ import java.util.HashMap;
 public class GameServer {
 
     private Server server;
-    private HashMap<Class, DataHandler> objectHandlers;
+    //private HashMap<Class, DataHandler> objectHandlers;
+
+
+    private int nextLobbyId;
     private ArrayList<Lobby> lobbies;
+    private HashMap<Integer, Lobby2> lobbyMap;
+    private HashMap<Integer, User> loggedInUsers;
 
     private Lobby getLobbyForConnection(Connection connection) {
         for (Lobby lobby : lobbies) {
@@ -46,6 +51,7 @@ public class GameServer {
 
         @Override
         public void disconnected(Connection connection) {
+
             //Lobby lobby = getLobbyForConnection(connection);
             //connections.remove(connection);
             //clientStates.removeIf(clientState -> clientState.clientId == connection.getID());
@@ -57,14 +63,27 @@ public class GameServer {
 
             //System.out.println("Data received: " + object.toString());
 
-            DataHandler handler = objectHandlers.get(object.getClass());
+            if (object instanceof UserLoginRequest) {
+                UserLoginRequest request = (UserLoginRequest)object;
+                loggedInUsers.computeIfAbsent(connection.getID(), (k) -> new User(connection, request.getName(), request.getWormNames()));
+
+                connection.sendTCP(new UserLoginRequest.Result(true));
+            }
+            else if (object instanceof LobbyCreateRequest) {
+                LobbyCreateRequest request = (LobbyCreateRequest)object;
+
+                Lobby2 lobby = new Lobby2(getNextLobbyId(), request.getName(), request.getMapNumber(), request.getNumWorms());
+                lobbyMap.put(lobby.getId(), lobby);
+            }
+
+            /*DataHandler handler = objectHandlers.get(object.getClass());
             if (handler != null) {
                 handler.handle(connection, object);
-            }
+            }*/
         }
     };
 
-    private DataHandler<GameSetupData> gameSetupDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameSetupData(connection, data);
+    /*private DataHandler<GameSetupData> gameSetupDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameSetupData(connection, data);
 
     private DataHandler<WorldData> worldDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveWorldData(connection, data);
 
@@ -86,11 +105,17 @@ public class GameServer {
                 }
                 break;
         }
-    };
+    };*/
 
     public GameServer() {
+        nextLobbyId = 0;
         lobbies = new ArrayList<>();
-        objectHandlers = new HashMap<>();
+        loggedInUsers = new HashMap<>();
+        //objectHandlers = new HashMap<>();
+    }
+
+    private int getNextLobbyId() {
+        return nextLobbyId++;
     }
 
     public void initialize() {
@@ -99,13 +124,13 @@ public class GameServer {
 
         KryoInterface.registerClasses(server.getKryo());
 
-        objectHandlers.put(WorldData.class, worldDataHandler);
+        /*objectHandlers.put(WorldData.class, worldDataHandler);
         objectHandlers.put(GameSetupData.class, gameSetupDataHandler);
         objectHandlers.put(MessageData.class, messageDataDataHandler);
         objectHandlers.put(ChatMessage.class, messageDataDataHandler);
 
         registerDataHandler(eventHandler, ExplosionEvent.class, ShootEvent.class,
-                WormEvent.class, WormDamageEvent.class);
+                WormEvent.class, WormDamageEvent.class);*/
 
         server.addListener(serverListener);
 
@@ -117,11 +142,11 @@ public class GameServer {
         }
     }
 
-    private void registerDataHandler(DataHandler handler, Class... classes) {
+    /*private void registerDataHandler(DataHandler handler, Class... classes) {
         for (Class clazz : classes) {
             objectHandlers.put(clazz, handler);
         }
-    }
+    }*/
 
     public static void main(String[] args) {
         GameServer server = new GameServer();
