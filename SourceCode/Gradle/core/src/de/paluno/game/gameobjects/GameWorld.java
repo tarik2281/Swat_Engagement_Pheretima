@@ -42,6 +42,16 @@ public class GameWorld implements Disposable {
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
                 return false;
         }
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Headshot && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+            Projectile projectile = UserData.getObject(fixtureB);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA))
+                return false;
+        }
+        else if (UserData.getType(fixtureB) == UserData.ObjectType.Headshot && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            Projectile projectile = UserData.getObject(fixtureA);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
+                return false;
+        }
 
         return true;
     };

@@ -50,10 +50,6 @@ public class Projectile extends WorldObject {
 
     private Texture texture;
     private Sprite sprite;
-    
-    private Sound grenadeExplosion;
-	private Sound airstrikeExplosion;
-	private Sound airballSound;
 
     private boolean exploded = false;
 
@@ -85,9 +81,6 @@ public class Projectile extends WorldObject {
         texture = manager.get(weaponType.getProjectileAsset());
         sprite = new Sprite(texture);
         sprite.setOriginCenter();
-        grenadeExplosion = manager.get(Assets.grenadeExplosionSound);
-		airstrikeExplosion = manager.get(Assets.airstrikeExplosion);
-        airballSound = manager.get(Assets.airballSound);
     }
 
     @Override
@@ -98,10 +91,10 @@ public class Projectile extends WorldObject {
 
         if ( //(weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(getBody().getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
-            explode(null, true);
+            explode(null, true, false);
             
         if(!getWorld().isInWorldBounds(getBody())) {
-        	explode(null, false);
+        	explode(null, false, false);
         }
         if (!wormContactEnded) {//  
         	if (shootingWorm != null) {
@@ -228,7 +221,7 @@ public class Projectile extends WorldObject {
         return explosion;
     }
 
-    public void explode(Worm directHitWorm, boolean collidedObject) {
+    public void explode(Worm directHitWorm, boolean collidedObject, boolean collidedHead) {
         if (!exploded) {
         	
             exploded = true;
@@ -241,28 +234,33 @@ public class Projectile extends WorldObject {
             case WEAPON_BAZOOKA:
             	break;
             case WEAPON_GRENADE:
-            	grenadeExplosion.play(0.5f);
             	break;
             case WEAPON_SPECIAL:
             	break;
             case WEAPON_AIRSTRIKE:
-            	airstrikeExplosion.play(0.6f);
             	break;
             }
             
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null)
                     directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
+                if(collidedHead == true)
+                	directHitWorm.takeDamage(Constants.HEADSHOT_DAMAGE, Constants.DAMAGE_TYPE_PROJECTILE);
+                if(directHitWorm == null)
+                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
+                
             }
+   
             else if (collidedObject) {
                 ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
                 
                 if(affectedWorms.isEmpty()) {
-                	airballSound.play(0.4f);
+                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
                 }
+                
                 for (Worm worm : affectedWorms) {
                     worm.takeDamage((int)weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
-
+                
                     if (weaponType == WeaponType.WEAPON_SPECIAL)
                         worm.setIsInfected(true);
                 }

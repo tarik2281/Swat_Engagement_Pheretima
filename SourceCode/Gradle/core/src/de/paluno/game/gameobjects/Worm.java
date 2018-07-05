@@ -72,14 +72,8 @@ public class Worm extends WorldObject {
 	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
 
-	private Sound walkLoop;
-	private Sound landSound;
-	private Sound virusSound;
-
 	private int health;
 	
-	private Sound fallDown;
-
 	private boolean animationInvalidated;
 
 	/**
@@ -104,10 +98,6 @@ public class Worm extends WorldObject {
 		this.walkAnimation = new AnimatedSprite(manager.get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(manager.get(Assets.wormBreath));
 		this.flyAnimation = new AnimatedSprite(manager.get(Assets.wormFly));
-		fallDown = manager.get(Assets.fallDown);
-		walkLoop = manager.get(Assets.walkLoop);
-		landSound = manager.get(Assets.landSound);
-		virusSound = manager.get(Assets.virusSound);
 	}
 
 	/**
@@ -124,7 +114,7 @@ public class Worm extends WorldObject {
 		if (createVirusFixture)
 			createVirusFixture();
 
-        // Now we apply movements - therefor we need our current position
+        // Now we apply movements - therefore we need our current position
 		Vector2 currentPos = getPosition();
 
 		if(this.jump) {
@@ -146,7 +136,6 @@ public class Worm extends WorldObject {
 
             switch (movement) {
                 case Constants.MOVEMENT_LEFT:
-                	//walkLoop.play(0.1f);
                     desiredVel = -Constants.MOVE_VELOCITY;
                     break;
                 case Constants.MOVEMENT_NO_MOVEMENT:
@@ -154,7 +143,6 @@ public class Worm extends WorldObject {
                     desiredVel = 0.0f;
                     break;
                 case Constants.MOVEMENT_RIGHT:
-                	//walkLoop.play(0.1f);
                     desiredVel = Constants.MOVE_VELOCITY;
                     break;
             }
@@ -165,9 +153,9 @@ public class Worm extends WorldObject {
             this.getBody().applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
         }
 		
-		// Worm fell off the world rim? Is ded.
-		if (!getWorld().isInWorldBounds(getBody())) {
-			fallDown.play(0.2f);
+		// Worm fell off the world rim? Is dead.
+		if (!getWorld().isInWorldBounds(getBody()) && !isDead()) {
+			EventManager.getInstance().queueEvent(EventManager.Type.FallOut, null);
 			die();
 		}
 	}
@@ -229,9 +217,13 @@ public class Worm extends WorldObject {
 		// Now we add some hitboxes - Let's get fancy: two parter with body and feet shape
 		CircleShape bodyRect = new CircleShape();
 		bodyRect.setRadius(Constants.WORM_RADIUS);
+		bodyRect.setPosition(new Vector2(0 * Constants.WORLD_SCALE, -3 * Constants.WORLD_SCALE));
 		PolygonShape footRect = new PolygonShape();
 		footRect.setAsBox(Constants.WORM_WIDTH / 4.0f, Constants.WORM_WIDTH / 4.0f, new Vector2(0.0f, -Constants.WORM_HEIGHT / 2.0f), 0.0f);
-
+		CircleShape headshot = new CircleShape();
+		headshot.setRadius(Constants.HEAD_AREA_RADIUS);
+		headshot.setPosition(new Vector2(1 * Constants.WORLD_SCALE, 5 * Constants.WORLD_SCALE));
+		
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
@@ -251,8 +243,17 @@ public class Worm extends WorldObject {
 		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;
 		fix = body.createFixture(fixtureDef);
-		fix.setUserData(new UserData(UserData.ObjectType.WormFoot,this));
+		fix.setUserData(new UserData(UserData.ObjectType.WormFoot, this));
 
+		// headshot fixture - ibo
+		fixtureDef.shape = headshot;
+		fixtureDef.isSensor = true;
+		fixtureDef.density = 0.0f;
+		fixtureDef.friction = 0.0f;
+		fixtureDef.restitution = 0.0f;
+		fix = body.createFixture(fixtureDef);
+		fix.setUserData(new UserData(UserData.ObjectType.Headshot, this));
+		
 		// Infected this round - breed the devastating virus!
 		if (isInfected)
 			createVirusFixture();
@@ -260,6 +261,7 @@ public class Worm extends WorldObject {
 		// Get rid of temporary material properly
 		bodyRect.dispose();
 		footRect.dispose();
+		headshot.dispose();
 
 		return body;
 	}
@@ -343,7 +345,6 @@ public class Worm extends WorldObject {
 	 */
 	public void setIsInfected(boolean isInfected) {
 		if (!this.isInfected && isInfected) {
-			virusSound.play(0.4f);
             EventManager.getInstance().queueEvent(EventManager.Type.WormInfected, this);
             createVirusFixture = true;
 		}

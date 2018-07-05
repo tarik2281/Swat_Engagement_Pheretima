@@ -41,83 +41,150 @@ public abstract class WorldHandler implements Disposable {
     
     private Sound gunRelease;
     private Sound grenadeContact;
-    private Sound popSound;
     private Sound walkLoop;
+    private Sound fallOut;
+    private Sound virusSound;
+    private Sound airstrikeUse;
+    private Sound onGroundSound;
+    private Sound grenadeExplosionSound;
+    private Sound airstrikeExplosionSound;
+    private Sound airballSound;
+    private Sound destroySound;
+    private Sound headshotSound;
+    private Sound gunShotSound;
+    private Sound bazookaShotSound;
+    private Sound throwSound;
+    private Sound targetSound;
+    private Sound airstrikeSound;
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
-        case WormEquipWeapon: {
-        	Weapon weapon = (Weapon)data;
-        	switch (weapon.getWeaponType()) {
-	        	case WEAPON_GUN:
-	        	case WEAPON_BAZOOKA:
-	        		gunRelease.play(0.3f);
-	        		break;
-	        	}
-	        }
-        	break;
-        case GrenadeCollision:
-        	grenadeContact.play();
-        	break;
-        case FeetCollision:
-        	popSound.play();
-        	break;
-        case PlayerDefeated: {
-            Player player = (Player)data;
-            numPlayersAlive--;
-            break;
-        }
-        case WormMovement: {
-        	Worm worm = (Worm)data;
-        	switch (worm.getMovement()) {
-        	case Constants.MOVEMENT_NO_MOVEMENT:
-        		walkLoop.stop();
-        		break;
-        	case Constants.MOVEMENT_LEFT:
-        	case Constants.MOVEMENT_RIGHT:
-        		walkLoop.stop();
-        		walkLoop.loop();
+        	case WeaponShoot:{
+        		Weapon weapon = (Weapon)data;
+        		switch (weapon.getWeaponType()) {
+        		case WEAPON_GUN:
+					gunShotSound.play();
+        			break;
+        		case WEAPON_BAZOOKA:
+					bazookaShotSound.play();
+					break;
+        		case WEAPON_SPECIAL:
+					throwSound.play();
+					break;
+        		case WEAPON_GRENADE:
+					throwSound.play();
+        			break;
+        		case WEAPON_AIRSTRIKE:
+    				targetSound.play();
+    				airstrikeSound.play();
+        			break;
+        		}
         		break;
         	}
-        	break;
-        }
-        case WormDied: {
-            Worm worm = (Worm) data;
+	        case WormEquipWeapon: {
+	        	Weapon weapon = (Weapon)data;
+	        	switch (weapon.getWeaponType()) {
+		        	case WEAPON_GUN:
+		        	case WEAPON_BAZOOKA:
+		        		gunRelease.play();
+		        		break;
+		        	case WEAPON_AIRSTRIKE:
+		        		airstrikeUse.play();
+		        		break;
+		        	}
+		        }
+	        	break;
+	        case GrenadeCollision:
+	        	grenadeContact.play();
+	        	break;
+	        case FeetCollision:
+	        	onGroundSound.play();
+	        	break;
+	        case FallOut:
+	        	fallOut.play();
+	        	break;
+	        case PlayerDefeated: {
+	            Player player = (Player)data;
+	            numPlayersAlive--;
+	            break;
+	        }
+	        case WormMovement: {
+	        	Worm worm = (Worm)data;
+	        	switch (worm.getMovement()) {
+	        	case Constants.MOVEMENT_NO_MOVEMENT:
+	        		walkLoop.stop();
+	        		break;
+	        	case Constants.MOVEMENT_LEFT:
+	        	case Constants.MOVEMENT_RIGHT:
+	        		walkLoop.stop();
+	        		walkLoop.loop();
+	        		break;
+	        	}
+	        	break;
+	        }
+	        case WormDied: {
+	            Worm worm = (Worm) data;
+	
+	                if (getCurrentPlayer().getCurrentWorm() == worm) {
+	                    System.out.println("Current worm died, setting to waiting");
+	                    setWaiting();
+	                }
+	
+	            if (shouldWorldStep()) {
+	                onWormDied(worm);
+	            }
+	
+	            world.forgetAfterUpdate(worm);
+	            break;
+	        }
+	        case WormInfected:
+	            if (shouldWorldStep()) {
+	                Worm worm = (Worm)data;
+	                onWormInfected(worm);
+	                virusSound.play();
+	            }
+	            break;
+	        case WormTookDamage: {
+	            if (shouldWorldStep()) {
+	                Worm.DamageEvent event = (Worm.DamageEvent)data;
+	                onWormTookDamage(event);
+	            }
+	            break;
+	        }
+	        case ProjectileExploded:{
+	        	Projectile projectile = (Projectile)data;
+	        	switch (projectile.getWeaponType()) {
+		        	case WEAPON_GUN:
+		        		break;
+		        	case WEAPON_BAZOOKA:
+		        		destroySound.play();
+		        		break;
+		        	case WEAPON_GRENADE:
+		        		destroySound.play();
+		        		grenadeExplosionSound.play();
+		        		break;
+		        	case WEAPON_AIRSTRIKE:
+		        		destroySound.play();
+		        		airstrikeExplosionSound.play();
+		        		break;
+		        	}
 
-                if (getCurrentPlayer().getCurrentWorm() == worm) {
-                    System.out.println("Current worm died, setting to waiting");
-                    setWaiting();
-                }
-
-            if (shouldWorldStep()) {
-                onWormDied(worm);
-            }
-
-            world.forgetAfterUpdate(worm);
-            break;
-        }
-        case WormInfected:
-            if (shouldWorldStep()) {
-                Worm worm = (Worm)data;
-                onWormInfected(worm);
-            }
-            break;
-        case WormTookDamage: {
-            if (shouldWorldStep()) {
-                Worm.DamageEvent event = (Worm.DamageEvent)data;
-                onWormTookDamage(event);
-            }
-            break;
-        }
-        case ProjectileExploded:
-            if (shouldWorldStep()) {
-                Projectile projectile = (Projectile) data;
-                removeProjectile(projectile);
-                onProjectileExploded(projectile);
-            }
-            break;
-    }
-    };
+	            if (shouldWorldStep()) {
+	                projectile = (Projectile) data;
+	                removeProjectile(projectile);
+	                onProjectileExploded(projectile);
+	            }
+	            break;
+		        }
+	        case AirBall:
+	        	airballSound.play();
+	        	break;
+	        case Headshot:
+	        	headshotSound.play();
+	        	break;
+        	}
+        	
+    	};
 
     protected abstract void onInitializePlayers();
     protected abstract boolean shouldAcceptInput();
@@ -152,8 +219,22 @@ public abstract class WorldHandler implements Disposable {
         
         gunRelease = screen.getAssetManager().get(Assets.gunRelease);
         grenadeContact = screen.getAssetManager().get(Assets.grenadeContact);
-        popSound = screen.getAssetManager().get(Assets.popSound);
         walkLoop = screen.getAssetManager().get(Assets.walkLoop);
+        fallOut = screen.getAssetManager().get(Assets.fallDown);
+        virusSound = screen.getAssetManager().get(Assets.virusSound);
+        airstrikeUse = screen.getAssetManager().get(Assets.airstrikeUse);
+        onGroundSound = screen.getAssetManager().get(Assets.onGroundSound);
+        grenadeExplosionSound = screen.getAssetManager().get(Assets.grenadeExplosionSound);
+        airstrikeExplosionSound = screen.getAssetManager().get(Assets.airstrikeExplosion);
+        airballSound = screen.getAssetManager().get(Assets.airballSound);
+        destroySound = screen.getAssetManager().get(Assets.destroySound);
+        headshotSound = screen.getAssetManager().get(Assets.headshotSound);
+        gunShotSound = screen.getAssetManager().get(Assets.gunShotSound);
+        bazookaShotSound = screen.getAssetManager().get(Assets.bazookaShotSound);
+        throwSound = screen.getAssetManager().get(Assets.throwSound);
+        targetSound = screen.getAssetManager().get(Assets.targetSound);
+        airstrikeSound = screen.getAssetManager().get(Assets.airstrikeSound);
+        
 
         windHandler = new WindHandler();
         windHandler.setProjectiles(projectiles);
@@ -178,7 +259,11 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormEquipWeapon,
                 EventManager.Type.GrenadeCollision,
                 EventManager.Type.FeetCollision,
-                EventManager.Type.WormMovement);
+                EventManager.Type.WormMovement,
+                EventManager.Type.WeaponShoot,
+                EventManager.Type.FallOut,
+                EventManager.Type.AirBall,
+                EventManager.Type.Headshot);
     }
 
     @Override
@@ -292,7 +377,7 @@ public abstract class WorldHandler implements Disposable {
                 worm.setIsPlaying(true);
                 worm.addChild(windDirectionIndicator);
                 world.getCamera().setCameraFocus(worm);
-                equipWeapon(WeaponType.WEAPON_BAZOOKA);
+                equipWeapon(WeaponType.WEAPON_GUN);
             }
         }
     }

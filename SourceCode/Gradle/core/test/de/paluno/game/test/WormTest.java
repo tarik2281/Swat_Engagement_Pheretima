@@ -1,6 +1,7 @@
 package de.paluno.game.test;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,31 +11,20 @@ import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.GameWorld;
 import de.paluno.game.gameobjects.Worm;
 
-class WormTest {
+public class WormTest {
 	
 	Worm wormToTest;
 	Player player_Mock;
 	
 	@Before
 	public void setUp(){
-		/*player_Mock = new Player() {
-			@Override
-			public GameWorld getWorld() {
-				return null;
-			}
-			
-			@Override
-			public AssetManager getAssets() {
-				return null;
-			}
-		};*/
+		player_Mock = mock(Player.class);
 	}
 	
 	@Test
-	void testTakeDamage(){
-		setUp();
+	public void testTakeDamage(){
 		wormToTest = new Worm(player_Mock, 2);
-		//wormToTest.takeDamage(10);
+		wormToTest.takeDamage(10, 1);
 		assertTrue("Damage falsch kalkuliert", 90 == wormToTest.getHealth());
 	}
 

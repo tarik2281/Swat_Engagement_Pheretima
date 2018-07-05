@@ -13,9 +13,6 @@ public class CollisionHandler implements ContactListener {
     // TODO: 11.06.2018 explodeOnCollision Bazooka ? , preSolve, postSolve?
     // Weapon Special on hit
     // Weapon Special close by
-	
-	private Sound grenadeContactSound;
-	private Sound popSound;
 
     private boolean listenForCollisions; // TODO: CollisionHandler listenForCollisions
 
@@ -26,10 +23,6 @@ public class CollisionHandler implements ContactListener {
 
     public CollisionHandler(PlayScreen playScreen) {
         this.playScreen = playScreen;
-
-    	grenadeContactSound = playScreen.getAssetManager().get(Assets.grenadeContact);
-    	popSound = playScreen.getAssetManager().get(Assets.popSound);
-
     }
 
     /**
@@ -96,14 +89,14 @@ public class CollisionHandler implements ContactListener {
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
 
             if (((Projectile) o1).explodeOnCollision()) {
-                ((Projectile) o1).explode((Worm) o2, true);
+                ((Projectile) o1).explode((Worm) o2, true, false);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o2).getHealth());
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
 
             if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode((Worm) o1, true);
+                ((Projectile) o2).explode((Worm) o1, true, false);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o1).getHealth());
@@ -114,8 +107,7 @@ public class CollisionHandler implements ContactListener {
         // Projectile -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Ground) {
         	if (((Projectile) o1).explodeOnCollision()) {
-        		((Projectile) o1).explode(null, true);
-              //  grenadeContactSound.play(0.5f);
+        		((Projectile) o1).explode(null, true, false);
             }
         	else {
         		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
@@ -125,13 +117,29 @@ public class CollisionHandler implements ContactListener {
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Ground) {
             if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode(null, true);
-              //  grenadeContactSound.play(0.5f);
+                ((Projectile) o2).explode(null, true, false);
             }
             else {
         		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
         	}
             System.out.println("Projectile collided with Ground");
+        }
+        
+
+        
+        // Worm Headshot
+        if (UserData.getType(fixA) == UserData.ObjectType.Headshot && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
+        	 if (((Projectile) o2).explodeOnCollision()) {
+                 ((Projectile) o2).explode((Worm) o1, true, true);
+                 if(((Projectile) o2).getWeaponType() == WeaponType.WEAPON_GUN)
+                	 EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
+             }
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Headshot && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
+        	 if (((Projectile) o1).explodeOnCollision()) {
+                 ((Projectile) o1).explode((Worm) o2, true, true);
+                 if(((Projectile) o1).getWeaponType() == WeaponType.WEAPON_GUN)
+                 	EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
+             }
         }
     }
 
