@@ -24,10 +24,11 @@ public class ChatWindow implements Disposable {
     private Table chatTable;
     private ScrollPane chatScrollPane;
 
-    private DataHandler<ChatMessage> messageHandler = (client, data) -> {
-        Gdx.app.postRunnable(() -> {
-            addMessage(data.getPlayer(), data.getMessage());
-        });
+    private DataHandler messageHandler = (client, data) -> {
+        if (data instanceof ChatMessage) {
+            ChatMessage chatMessage = (ChatMessage)data;
+            addMessage(chatMessage.getPlayer(), chatMessage.getMessage());
+        }
     };
 
     public ChatWindow(NetworkClient client) {
@@ -49,11 +50,11 @@ public class ChatWindow implements Disposable {
 
     private void sendMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message);
-        client.sendObject(chatMessage);
+        client.send(chatMessage);
     }
 
     public void initialize() {
-        client.registerDataHandler(ChatMessage.class, messageHandler);
+        client.registerDataHandler(messageHandler);
 
         skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
 
@@ -99,6 +100,8 @@ public class ChatWindow implements Disposable {
 
     @Override
     public void dispose() {
+        client.unregisterDataHandler(messageHandler);
+
         stage.dispose();
         skin.dispose();
     }

@@ -1,8 +1,6 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Net;
-import com.badlogic.gdx.utils.Disposable;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
@@ -12,7 +10,6 @@ import de.paluno.game.interfaces.Constants;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class NetworkClient {
 
@@ -32,8 +29,9 @@ public class NetworkClient {
     private ConnectionListener connectionListener;
     private DisconnectionListener disconnectionListener;
 
+    private ArrayList<DataHandler> addQueue;
+    private ArrayList<DataHandler> removeQueue;
     private ArrayList<DataHandler> dataHandlers;
-    //private HashMap<Class, DataHandler> dataHandlers;
 
     private Listener networkListener = new Listener() {
         @Override
@@ -55,25 +53,25 @@ public class NetworkClient {
         @Override
         public void received(Connection connection, Object object) {
             //System.out.println("Data received: " + object.toString());
-
             if (!(object instanceof FrameworkMessage.KeepAlive))
                 Gdx.app.postRunnable(() -> {
+                    dataHandlers.addAll(addQueue);
+                    dataHandlers.removeAll(removeQueue);
+
+                    addQueue.clear();
+                    removeQueue.clear();
+
                     for (DataHandler dataHandler : dataHandlers)
                         dataHandler.handleData(NetworkClient.this, object);
                 });
-            /*DataHandler handler = dataHandlers.get(object.getClass());
-            if (handler != null) {
-                handler.handleData(NetworkClient.this, object);
-            }
-            else if (!(object instanceof FrameworkMessage.KeepAlive)){
-                System.err.println("No DataHandler registered for " + object.getClass().getName());
-            }*/
         }
     };
 
     public NetworkClient(String remoteAddress) {
         this.remoteAddress = remoteAddress;
 
+        addQueue = new ArrayList<>();
+        removeQueue = new ArrayList<>();
         dataHandlers = new ArrayList<>();
     }
 
@@ -83,12 +81,6 @@ public class NetworkClient {
 
     public void setDisconnectionListener(DisconnectionListener listener) {
         this.disconnectionListener = listener;
-    }
-
-    public void requestLogin(String userName, String[] wormNames) {
-        if (client.isConnected()) {
-            client.sendTCP(new UserLoginRequest(userName, wormNames));
-        }
     }
 
     public void connect() {
@@ -103,7 +95,6 @@ public class NetworkClient {
 
             new Thread(() -> {
                 try {
-                    // TODO: hardcoded TCP port
                     client.connect(5000, remoteAddress, Constants.TCP_PORT, Constants.UDP_PORT);
                 } catch (IOException e) {
                     Gdx.app.postRunnable(() -> {
@@ -133,20 +124,20 @@ public class NetworkClient {
         return client.getID();
     }
 
-    public void sendObject(Object object) {
+    public void send(Object object) {
         client.sendTCP(object);
     }
 
-    public void sendObjectUDP(Object object) {
+    public void sendUDP(Object object) {
         client.sendUDP(object);
     }
 
     public void registerDataHandler(DataHandler handler) {
-        dataHandlers.add(handler);
+        addQueue.add(handler);
     }
 
     public void unregisterDataHandler(DataHandler handler) {
-        dataHandlers.remove(handler);
+        removeQueue.add(handler);
     }
 
     /*public <T> void registerDataHandler(Class<T> tClass, DataHandler handler) {

@@ -35,40 +35,38 @@ public class NetworkWorldHandler extends WorldHandler {
     private GameSetupData gameSetupData;
     private PhysicsData physicsCache = new PhysicsData();
 
-    private DataHandler<StartTurnEvent> startTurnHandler = (client, data) -> {
-        System.out.println("Received start turn request");
-        Gdx.app.postRunnable(() -> {
-            setCurrentPlayerTurn(data.playerNumber, data.wormNumber);
-            getWindHandler().setWind(data.wind);
-        });
-    };
-
-    private DataHandler<GameOverEvent> gameOverHandler = (client, data) -> {
-        Gdx.app.postRunnable(() -> {
-            WinningPlayer winningPlayer = WinningPlayer.NONE;
-            switch (data.winningPlayer) {
-                case 0:
-                    winningPlayer = WinningPlayer.PLAYERONE;
-                    break;
-                case 1:
-                    winningPlayer = WinningPlayer.PLAYERTWO;
-                    break;
+    private DataHandler dataHandler = new DataHandler() {
+        @Override
+        public void handleData(NetworkClient client, Object data) {
+            if (data instanceof StartTurnEvent) {
+                StartTurnEvent event = (StartTurnEvent)data;
+                setCurrentPlayerTurn(event.playerNumber, event.wormNumber);
+                getWindHandler().setWind(event.wind);
             }
-            EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
-        });
-    };
-
-    private DataHandler<WorldData> worldDataHandler = (client, data) -> {
-        data.setReceivingTimeStamp(data.getTick() * UPDATE_FREQUENCY + idleTime);
-        System.out.println("Tick time: " + (data.getTick() * UPDATE_FREQUENCY + idleTime) + ", currentTime: " + currentTime);
-
-        Gdx.app.postRunnable(() -> receivedGameData.add(data));
-    };
-
-    private DataHandler<GameEvent> eventHandler = (client, data) -> {
-        data.setReceivingTimeStamp(data.getTick() * UPDATE_FREQUENCY + idleTime);
-
-        Gdx.app.postRunnable(() -> receivedGameEvents.add(data));
+            else if (data instanceof GameOverEvent) {
+                GameOverEvent event = (GameOverEvent)data;
+                WinningPlayer winningPlayer = WinningPlayer.NONE;
+                switch (event.winningPlayer) {
+                    case 0:
+                        winningPlayer = WinningPlayer.PLAYERONE;
+                        break;
+                    case 1:
+                        winningPlayer = WinningPlayer.PLAYERTWO;
+                        break;
+                }
+                EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
+            }
+            else if (data instanceof WorldData) {
+                WorldData worldData = (WorldData)data;
+                worldData.setReceivingTimeStamp(worldData.getTick() * UPDATE_FREQUENCY + idleTime);
+                receivedGameData.add(worldData);
+            }
+            else if (data instanceof GameEvent) {
+                GameEvent event = (GameEvent)data;
+                event.setReceivingTimeStamp(event.getTick() * UPDATE_FREQUENCY + idleTime);
+                receivedGameEvents.add(event);
+            }
+        }
     };
 
     public NetworkWorldHandler(PlayScreen screen, NetworkClient client, GameSetupData data) {
@@ -102,8 +100,7 @@ public class NetworkWorldHandler extends WorldHandler {
         nextSnapshot = null;
         receivedGameData.clear();
 
-        MessageData messageData = new MessageData(MessageData.Type.ClientReady);
-        client.sendObject(messageData);
+        client.send(Message.clientReady());
     }
 
     private GameEvent pollEvents() {
@@ -123,26 +120,15 @@ public class NetworkWorldHandler extends WorldHandler {
     @Override
     public void onInitializePlayers() {
         currentTick = 0;
-        client.registerDataHandler(StartTurnEvent.class, startTurnHandler);
-        client.registerDataHandler(WorldData.class, worldDataHandler);
-        client.registerDataHandler(ExplosionEvent.class, eventHandler);
-        client.registerDataHandler(EndTurnEvent.class, eventHandler);
-        client.registerDataHandler(GameEvent.class, eventHandler);
-        client.registerDataHandler(ShootEvent.class, eventHandler);
-        client.registerDataHandler(WormEvent.class, eventHandler);
-        client.registerDataHandler(WormDamageEvent.class, eventHandler);
-        client.registerDataHandler(GameOverEvent.class, gameOverHandler);
+        client.registerDataHandler(dataHandler);
 
         if (gameSetupRequest != null) {
-            PlayerData[] playerData = new PlayerData[gameSetupRequest.getPlayerNumbers().length];
+            PlayerData[] playerData = new PlayerData[gameSetupRequest.getPlayers().length];
 
-            for (int i = 0; i < gameSetupRequest.getPlayerNumbers().length; i++) {
-                Player player = addPlayer(gameSetupRequest.getPlayerNumbers()[i]);
-                player.setClientId(gameSetupRequest.getClientIds()[i]);
-                addWeapon(player, WeaponType.WEAPON_BAZOOKA);
-                addWeapon(player, WeaponType.WEAPON_GRENADE);
-                addWeapon(player, WeaponType.WEAPON_GUN);
-                addWeapon(player, WeaponType.WEAPON_SPECIAL);
+            int playerIndex = 0;
+            for (GameSetupRequest.Player setupPlayer : gameSetupRequest.getPlayers()) {
+                Player player = addPlayer(playerIndex);
+                player.setClientId(setupPlayer.getClientId());
 
                 WormData[] wormData = new WormData[numWorms];
                 for (int j = 0; j < numWorms; j++) {
@@ -157,12 +143,12 @@ public class NetworkWorldHandler extends WorldHandler {
                                     .setPositionY(worm.getPosition().y));
                 }
 
-                playerData[i] = new PlayerData(player.getPlayerNumber(), wormData);
+                playerData[playerIndex++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormData);
             }
 
-            GameSetupData data = new GameSetupData(gameSetupRequest.getClientIds(), playerData);
+            GameSetupData data = new GameSetupData(null, playerData);
             data.mapNumber = getMapNumber();
-            client.sendObject(data);
+            client.send(data);
         }
         else if (gameSetupData != null) {
             for (int i = 0; i < gameSetupData.getPlayerData().length; i++) {
@@ -171,10 +157,6 @@ public class NetworkWorldHandler extends WorldHandler {
 
                 Player player = addPlayer(playerData.getPlayerNumber());
                 player.setClientId(clientId);
-                addWeapon(player, WeaponType.WEAPON_BAZOOKA);
-                addWeapon(player, WeaponType.WEAPON_GRENADE);
-                addWeapon(player, WeaponType.WEAPON_GUN);
-                addWeapon(player, WeaponType.WEAPON_SPECIAL);
 
                 for (WormData wormData : playerData.getWorms()) {
                     Worm worm = addWorm(player, wormData.getWormNumber());
@@ -233,7 +215,7 @@ public class NetworkWorldHandler extends WorldHandler {
                                 .setVelocityY(worm.getVelocity().y));
             }
 
-            playerDataArray[i++] = new PlayerData(player.getPlayerNumber(), wormDataArray);
+            playerDataArray[i++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormDataArray);
         }
 
         data.setPlayers(playerDataArray);
@@ -244,9 +226,9 @@ public class NetworkWorldHandler extends WorldHandler {
         }
 
         if (usingTCP)
-            client.sendObject(data);
+            client.send(data);
         else
-            client.sendObjectUDP(data);
+            client.sendUDP(data);
     }
 
     public void interpolateWorldSnapshots() {
@@ -405,7 +387,7 @@ public class NetworkWorldHandler extends WorldHandler {
         }
 
         ShootEvent event = new ShootEvent(currentTick, projectilesArray);
-        client.sendObject(event);
+        client.send(event);
     }
 
     private float getSnapshotsRatio(float shiftedTime) {
@@ -449,19 +431,19 @@ public class NetworkWorldHandler extends WorldHandler {
         Vector2 pos = projectile.getExplosion().getCenter();
         ExplosionEvent e = new ExplosionEvent(currentTick, pos.x, pos.y, projectile.getExplosion().getRadius(), projectile.getExplosion().getBlastPower());
         e.projectileId = projectile.getId();
-        client.sendObject(e);
+        client.send(e);
     }
 
     @Override
     protected void onWormDied(Worm worm) {
         WormEvent event = new WormEvent(currentTick, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getCharacterNumber());
-        client.sendObject(event);
+        client.send(event);
     }
 
     @Override
     protected void onWormInfected(Worm worm) {
         WormEvent event = new WormEvent(currentTick, GameEvent.Type.WORM_INFECTED, worm.getPlayerNumber(), worm.getCharacterNumber());
-        client.sendObject(event);
+        client.send(event);
     }
 
     @Override
@@ -471,7 +453,7 @@ public class NetworkWorldHandler extends WorldHandler {
 
         WormDamageEvent gameEvent = new WormDamageEvent(currentTick, event.getWorm().getPlayerNumber(),
                 event.getWorm().getCharacterNumber(), event.getDamage(), event.getDamageType());
-        client.sendObject(gameEvent);
+        client.send(gameEvent);
     }
 
     @Override

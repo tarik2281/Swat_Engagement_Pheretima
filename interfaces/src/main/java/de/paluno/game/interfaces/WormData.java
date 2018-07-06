@@ -2,6 +2,7 @@ package de.paluno.game.interfaces;
 
 public class WormData {
 
+    private String name;
     private int playerNumber;
     private int wormNumber;
 
@@ -66,6 +67,15 @@ public class WormData {
 
     public WormData setOrientation(int orientation) {
         this.orientation = orientation;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public WormData setName(String name) {
+        this.name = name;
         return this;
     }
 }

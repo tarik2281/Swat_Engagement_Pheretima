@@ -1,11 +1,8 @@
 package de.paluno.game.interfaces;
 
-public class LobbyListRequest {
+public class LobbyLeaveRequest {
 
     public static class Result {
-
-        public LobbyData[] lobbies;
+        public boolean success;
     }
-
-
 }

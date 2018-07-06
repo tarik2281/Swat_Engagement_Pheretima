@@ -10,6 +10,16 @@ public class LobbyCreateRequest {
     private int mapNumber;
     private int numWorms;
 
+    public LobbyCreateRequest() {
+
+    }
+
+    public LobbyCreateRequest(String name, int mapNumber, int numWorms) {
+        this.name = name;
+        this.mapNumber = mapNumber;
+        this.numWorms = numWorms;
+    }
+
     public String getName() {
         return name;
     }

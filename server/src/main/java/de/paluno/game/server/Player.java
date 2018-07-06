@@ -8,9 +8,8 @@ import java.util.ArrayList;
 
 public class Player {
 
-    private Connection connection;
+    private User controllingUser;
 
-    private String name;
     private Runnable defeatedListener;
     private int number;
     private boolean ready;
@@ -18,14 +17,25 @@ public class Player {
     private ArrayList<Worm> worms;
     private int numWormsAlive;
 
-    public Player(Connection connection, int number) {
-        this.connection = connection;
+    public Player(User user, int number) {
+        this.controllingUser = user;
 
         this.number = number;
     }
 
     public void setDefeatedListener(Runnable listener) {
         this.defeatedListener = listener;
+    }
+
+    public Worm addWorm(int wormNumber) {
+        Worm worm = new Worm(number, wormNumber);
+        worm.setDeathListener(() -> {
+            if (--numWormsAlive == 0 && defeatedListener != null)
+                defeatedListener.run();
+        });
+        numWormsAlive++;
+        worms.add(worm);
+        return worm;
     }
 
     public void setupFromData(PlayerData data) {
@@ -65,7 +75,7 @@ public class Player {
     }
 
     public Connection getConnection() {
-        return connection;
+        return null;
     }
 
     public int getNumber() {

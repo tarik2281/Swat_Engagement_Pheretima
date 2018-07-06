@@ -155,12 +155,6 @@ public abstract class WorldHandler implements Disposable {
         for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
             Player player = addPlayer(i);
 
-            addWeapon(player, WeaponType.WEAPON_BAZOOKA);
-            addWeapon(player, WeaponType.WEAPON_GRENADE);
-            addWeapon(player, WeaponType.WEAPON_GUN);
-            addWeapon(player, WeaponType.WEAPON_SPECIAL);
-            addWeapon(player, WeaponType.WEAPON_AIRSTRIKE);
-
             for (int j = 0; j < numWorms; j++) {
                 Worm worm = addWorm(player, j);
                 worm.setPosition(getRandomSpawnPosition());
@@ -287,13 +281,16 @@ public abstract class WorldHandler implements Disposable {
         numPlayersAlive++;
         Player player = new Player(playerNumber);
         players.add(playerNumber, player);
+        addWeapons(player);
         return player;
     }
 
-    public void addWeapon(Player player, WeaponType type) {
-        Weapon weapon = new Weapon(type);
-        weapon.setupAssets(getAssetManager());
-        player.addWeapon(weapon);
+    private void addWeapons(Player player) {
+        for (WeaponType type : WeaponType.values()) {
+            Weapon weapon = new Weapon(type);
+            weapon.setupAssets(getAssetManager());
+            player.addWeapon(weapon);
+        }
     }
 
     public Worm addWorm(Player player, int wormNumber) {

@@ -39,10 +39,7 @@ public class Lobby {
         if (isClosed())
             return;
 
-        MessageData data = new MessageData(MessageData.Type.PlayerJoined);
-        players.forEach(player -> player.getConnection().sendTCP(data));
-
-        Player player = new Player(connection, players.size());
+        Player player = new Player(null, players.size());
         player.setDefeatedListener(() -> numPlayersAlive--);
         players.add(player);
 
@@ -64,7 +61,7 @@ public class Lobby {
             numPlayersAlive++;
         }
 
-        GameSetupRequest setupRequest = new GameSetupRequest(clientIds, playerNumbers);
+        GameSetupRequest setupRequest = new GameSetupRequest();
         players.get(0).getConnection().sendTCP(setupRequest);
     }
 
@@ -235,7 +232,7 @@ public class Lobby {
         } while (getPlayerByNumber(currentPlayerIndex).isDefeated());
     }
 
-    public void broadcastMessage(Connection source, MessageData data) {
+    public void broadcastMessage(Connection source, Message data) {
         switch (data.getType()) {
             case ChatMessage: {
                 ChatMessage message = (ChatMessage)data;

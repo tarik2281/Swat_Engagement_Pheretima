@@ -7,115 +7,207 @@ import de.paluno.game.interfaces.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class GameServer {
 
     private Server server;
-    //private HashMap<Class, DataHandler> objectHandlers;
-
-
     private int nextLobbyId;
-    private ArrayList<Lobby> lobbies;
+
     private HashMap<Integer, Lobby2> lobbyMap;
     private HashMap<Integer, User> loggedInUsers;
-
-    private Lobby getLobbyForConnection(Connection connection) {
-        for (Lobby lobby : lobbies) {
-            if (lobby.isInLobby(connection))
-                return lobby;
-        }
-
-        return null;
-    }
 
     private Listener serverListener = new Listener() {
         @Override
         public void connected(Connection connection) {
-            Lobby lobby = null;
 
-            if (!lobbies.isEmpty()) {
-                lobby = lobbies.get(lobbies.size() - 1);
-                if (lobby.isClosed()) {
-                    lobby = new Lobby();
-                    lobbies.add(lobby);
-                }
-            }
-            else {
-                lobby = new Lobby();
-                lobbies.add(lobby);
-            }
-
-            lobby.addPlayerConnection(connection);
         }
 
         @Override
         public void disconnected(Connection connection) {
-
-            //Lobby lobby = getLobbyForConnection(connection);
-            //connections.remove(connection);
-            //clientStates.removeIf(clientState -> clientState.clientId == connection.getID());
+            logoutUser(connection.getID());
         }
 
         @Override
         public void received(Connection connection, Object object) {
             super.received(connection, object);
 
-            //System.out.println("Data received: " + object.toString());
-
             if (object instanceof UserLoginRequest) {
                 UserLoginRequest request = (UserLoginRequest)object;
-                loggedInUsers.computeIfAbsent(connection.getID(), (k) -> new User(connection, request.getName(), request.getWormNames()));
+                loginUser(connection, request.getName(), request.getWormNames());
 
                 connection.sendTCP(new UserLoginRequest.Result(true));
             }
             else if (object instanceof LobbyCreateRequest) {
                 LobbyCreateRequest request = (LobbyCreateRequest)object;
 
-                Lobby2 lobby = new Lobby2(getNextLobbyId(), request.getName(), request.getMapNumber(), request.getNumWorms());
-                lobbyMap.put(lobby.getId(), lobby);
-            }
+                User user = getUserById(connection.getID());
+                if (user != null) {
+                    Lobby2 lobby = createLobby(request.getName(), request.getMapNumber(), request.getNumWorms(), user);
 
-            /*DataHandler handler = objectHandlers.get(object.getClass());
-            if (handler != null) {
-                handler.handle(connection, object);
-            }*/
+                    LobbyCreateRequest.Result result = new LobbyCreateRequest.Result();
+                    result.lobbyId = lobby.getId();
+                    connection.sendTCP(result);
+                }
+            }
+            else if (object instanceof LobbyJoinRequest) {
+                LobbyJoinRequest request = (LobbyJoinRequest)object;
+
+                boolean joined = false;
+                Lobby2 lobby = lobbyMap.get(request.lobbyId);
+                if (lobby != null) {
+                    User user = getUserById(connection.getID());
+                    if (user != null)
+                        joined = lobby.joinUser(user);
+                }
+
+                LobbyJoinRequest.Result result = new LobbyJoinRequest.Result();
+                result.success = joined;
+                if (joined)
+                    result.lobbyId = lobby.getId();
+                else
+                    result.lobbyId = Lobby2.ID_NONE;
+                connection.sendTCP(result);
+            }
+            else if (object instanceof LobbyLeaveRequest) {
+                User user = getUserById(connection.getID());
+                if (user != null) {
+                    Lobby2 lobby = lobbyMap.get(user.getCurrentLobbyId());
+                    if (lobby != null)
+                        lobby.leaveUser(user);
+
+                    LobbyLeaveRequest.Result result = new LobbyLeaveRequest.Result();
+                    result.success = true;
+                    connection.sendTCP(result);
+                }
+            }
+            else if (object instanceof LobbyListRequest) {
+                ArrayList<LobbyData> lobbies = new ArrayList<>();
+
+                for (Lobby2 lobby : lobbyMap.values()) {
+                    if (lobby.isOpen()) {
+                        LobbyData data = new LobbyData();
+                        data.id = lobby.getId();
+                        data.name = lobby.getName();
+                        lobbies.add(data);
+                    }
+                }
+
+                LobbyListRequest.Result result = new LobbyListRequest.Result();
+                result.lobbies = lobbies.toArray(new LobbyData[0]);
+                connection.sendTCP(result);
+            }
+            else if (object instanceof LobbyDataRequest) {
+                LobbyDataRequest request = (LobbyDataRequest)object;
+
+                LobbyData lobbyData = null;
+                Lobby2 lobby = getLobbyById(request.lobbyId);
+                if (lobby != null) {
+                    lobbyData = new LobbyData();
+                    lobbyData.id = lobby.getId();
+                    lobbyData.name = lobby.getName();
+                    lobbyData.mapNumber = lobby.getMapNumber();
+                    lobbyData.numWorms = lobby.getNumWorms();
+                    lobbyData.creatingUserId = lobby.getCreatingUser().getId();
+                }
+
+                LobbyDataRequest.Result result = new LobbyDataRequest.Result();
+                result.lobbyData = lobbyData;
+                if (lobby != null)
+                    result.users = lobby.getUsers();
+                connection.sendTCP(result);
+            }
+            else if (object instanceof StartMatchRequest) {
+                StartMatchRequest request = (StartMatchRequest)object;
+                User user = getUserById(connection.getID());
+                if (user != null) {
+                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    if (lobby != null && lobby.getCreatingUser().getId() == user.getId()) {
+                        lobby.startMatch();
+                    }
+                }
+            }
+            else if (object instanceof ChatMessage) {
+                ChatMessage message = (ChatMessage)object;
+                User user = getUserById(connection.getID());
+                if (user != null) {
+                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+
+                    if (lobby != null) {
+                        message.setUserName(user.getName());
+
+                        lobby.broadcastChatMessage(message);
+                    }
+                }
+            }
+            else if (object instanceof GameSetupData) {
+                User user = getUserById(connection.getID());
+                if (user != null) {
+                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    if (lobby != null) {
+                        lobby.setupMatch((GameSetupData)object);
+                    }
+                }
+            }
+            else if (object instanceof GameData) {
+                User user = getUserById(connection.getID());
+                if (user != null) {
+                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    if (lobby != null) {
+                        lobby.handleGameData(user, (GameData)object);
+                    }
+                }
+            }
         }
     };
 
-    /*private DataHandler<GameSetupData> gameSetupDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameSetupData(connection, data);
-
-    private DataHandler<WorldData> worldDataHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveWorldData(connection, data);
-
-    private DataHandler<GameEvent> eventHandler = (connection, data) -> getLobbyForConnection(connection).onReceiveGameEvent(connection, data);
-
-    private DataHandler<MessageData> messageDataDataHandler = (connection, data) -> {
-        Lobby lobby = getLobbyForConnection(connection);
-
-        switch (data.getType()) {
-            case ClientReady:
-                lobby = getLobbyForConnection(connection);
-                if (lobby != null) {
-                    lobby.setClientReady(connection);
-                }
-                break;
-            case ChatMessage:
-                if (lobby != null) {
-                    lobby.broadcastMessage(connection, data);
-                }
-                break;
-        }
-    };*/
-
     public GameServer() {
         nextLobbyId = 0;
-        lobbies = new ArrayList<>();
+        lobbyMap = new HashMap<>();
         loggedInUsers = new HashMap<>();
-        //objectHandlers = new HashMap<>();
     }
 
     private int getNextLobbyId() {
         return nextLobbyId++;
+    }
+
+    private User getUserById(int id) {
+        return loggedInUsers.get(id);
+    }
+
+    private Lobby2 getLobbyById(int id) {
+        return lobbyMap.get(id);
+    }
+
+    private User loginUser(Connection connection, String name, String[] wormNames) {
+        User user = new User(connection, name, wormNames);
+        loggedInUsers.put(connection.getID(), user);
+
+        System.out.printf("User logged in (id: %d, name: %s, worms: %s)\n", user.getId(), user.getName(), Arrays.toString(user.getWormNames()));
+        return user;
+    }
+
+    private void logoutUser(int id) {
+        User user = loggedInUsers.remove(id);
+
+        if (user != null) {
+            Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+            if (lobby != null)
+                lobby.leaveUser(user);
+
+            System.out.printf("User logged out (id: %d, name: %s)\n", user.getId(), user.getName());
+        }
+    }
+
+    private Lobby2 createLobby(String name, int mapNumber, int numWorms, User creatingUser) {
+        Lobby2 lobby = new Lobby2(getNextLobbyId(), name, mapNumber, numWorms, creatingUser);
+        lobby.setDestroyListener(() -> lobbyMap.remove(lobby.getId()));
+        lobbyMap.put(lobby.getId(), lobby);
+
+        System.out.printf("Created lobby with name: %s, map: %d, worms: %d, creatingUser: %d\n", name, mapNumber, numWorms, creatingUser.getId());
+
+        return lobby;
     }
 
     public void initialize() {
@@ -123,14 +215,6 @@ public class GameServer {
         server.start();
 
         KryoInterface.registerClasses(server.getKryo());
-
-        /*objectHandlers.put(WorldData.class, worldDataHandler);
-        objectHandlers.put(GameSetupData.class, gameSetupDataHandler);
-        objectHandlers.put(MessageData.class, messageDataDataHandler);
-        objectHandlers.put(ChatMessage.class, messageDataDataHandler);
-
-        registerDataHandler(eventHandler, ExplosionEvent.class, ShootEvent.class,
-                WormEvent.class, WormDamageEvent.class);*/
 
         server.addListener(serverListener);
 
@@ -141,12 +225,6 @@ public class GameServer {
             e.printStackTrace();
         }
     }
-
-    /*private void registerDataHandler(DataHandler handler, Class... classes) {
-        for (Class clazz : classes) {
-            objectHandlers.put(clazz, handler);
-        }
-    }*/
 
     public static void main(String[] args) {
         GameServer server = new GameServer();
