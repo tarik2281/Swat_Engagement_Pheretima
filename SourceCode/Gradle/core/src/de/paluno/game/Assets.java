@@ -62,10 +62,8 @@ public class Assets {
     public static final AssetDescriptor<Texture> airstrikeCrosshair =
             new AssetDescriptor<Texture>("AirstrikeCrosshair.png", Texture.class);
     
-    public static final AssetDescriptor<Texture> gameOverScreen1 =
-            new AssetDescriptor<Texture>("GameOverPlay1.png", Texture.class);
-    public static final AssetDescriptor<Texture> gameOverScreen2 =
-            new AssetDescriptor<Texture>("GameOverPlay2.png", Texture.class);
+    public static final AssetDescriptor<Texture> gameOverScreen =
+            new AssetDescriptor<Texture>("GameOverScreen.png", Texture.class);
 
     public static final AssetDescriptor<AnimationData> wormBreath =
             new AssetDescriptor<AnimationData>("WormBreath.xml", AnimationData.class);
@@ -199,7 +197,7 @@ public class Assets {
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {
-            gameOverScreen1, gameOverScreen2, menuButton
+    		gameOverScreen, menuButton
     };
     
     public static final AssetDescriptor[] Music = {

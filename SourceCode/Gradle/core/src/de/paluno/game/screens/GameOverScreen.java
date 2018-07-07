@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -18,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
+import de.paluno.game.gameobjects.Worm;
 
 public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Loadable {
 	
@@ -32,6 +35,9 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private TextureRegion restartButtonTextureRegion;
 	private TextureRegionDrawable restartButtonTextureDrawable;
 	private Music overSound;
+	private BitmapFont font;
+	private CharSequence str;
+	private boolean first;
 	
 	
 	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
@@ -50,24 +56,28 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		//GameOverScreen
 		batch = new SpriteBatch();
 		table = new Table();
+		color = new Color();
+		font = new BitmapFont();
 		
 		Texture texture = null;
 		
 		overSound = game.getAssetManager().get(Assets.gameOverSound);
 		overSound.setLooping(false);
-		overSound.setVolume(0.1f);
+		overSound.setVolume(1f);
 		
 		switch (winningPlayer) {
-		case PLAYERONE:
-			overSound.play();
-			texture = game.getAssetManager().get(Assets.gameOverScreen1);
-			break;
-		case PLAYERTWO:
-			overSound.play();
-			texture = game.getAssetManager().get(Assets.gameOverScreen2);
-			break;
+			case PLAYERONE:
+				overSound.play();
+				first = true;
+				texture = game.getAssetManager().get(Assets.gameOverScreen);
+				break;
+			case PLAYERTWO:
+				overSound.play();
+				first = false;
+				texture = game.getAssetManager().get(Assets.gameOverScreen);
+				break;
 		}
-		
+		font.setColor(254, 0, 0, 0);
 		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
 		
 		//Restart button
@@ -95,7 +105,13 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	
 	public void render(float delta) {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		
 		batch.begin();
+		if(first) {
+			font.draw(batch, "hat gewonnen.", 325, 425);
+		}else {
+			font.draw(batch, "hat gewonnen.", 325, 425);
+		}		
 		sprite.draw(batch);
 		batch.end();
 		
@@ -107,5 +123,6 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		batch.dispose();
 		restartStage.dispose();
 		overSound.dispose();
+		font.dispose();
 	}
 }
