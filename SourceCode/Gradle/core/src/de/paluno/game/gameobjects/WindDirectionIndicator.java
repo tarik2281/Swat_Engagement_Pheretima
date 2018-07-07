@@ -46,8 +46,8 @@ public class WindDirectionIndicator extends WorldObject {
         else
             sprite.setTexture(redTexture);
 
-        Vector2 screenPosition = Constants.getScreenSpaceVector(getParent().getPosition());
-        sprite.setOriginBasedPosition(screenPosition.x, screenPosition.y + 100);
+            Vector2 screenPosition = Constants.getScreenSpaceVector(getParent().getPosition());
+            sprite.setOriginBasedPosition(screenPosition.x, screenPosition.y + 100);
         sprite.setFlip(windHandler.flipped(), false);
         sprite.draw(batch);
     }

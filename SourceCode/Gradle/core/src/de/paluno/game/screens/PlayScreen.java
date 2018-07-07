@@ -45,8 +45,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         spriteBatch = new SpriteBatch();
     }
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms, NetworkClient client, GameSetupRequest request) {
-        this(game, mapNumber, numWorms);
+    public PlayScreen(SEPGame game, NetworkClient client, GameSetupRequest request) {
+        this(game, request.getMapNumber(), request.getNumWorms());
 
         this.client = client;
 
@@ -69,7 +69,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         if (gameSetupRequest != null) {
-            worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest, mapNumber, numWorms);
+            worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest);
             chatWindow = new ChatWindow(client);
             chatWindow.initialize();
         }

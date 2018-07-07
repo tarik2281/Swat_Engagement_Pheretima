@@ -6,6 +6,10 @@ public class GameSetupRequest {
         private int clientId;
         private String[] wormNames;
 
+        public Player() {
+
+        }
+
         public Player(int clientId, String[] wormNames) {
             this.clientId = clientId;
             this.wormNames = wormNames;

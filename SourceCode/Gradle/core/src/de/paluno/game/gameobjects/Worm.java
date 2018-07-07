@@ -47,6 +47,24 @@ public class Worm extends WorldObject {
 		}
 	}
 
+	public static class DeathEvent {
+		private Worm worm;
+		private int deathType;
+
+		public DeathEvent(Worm worm, int deathType) {
+			this.worm = worm;
+			this.deathType = deathType;
+		}
+
+		public Worm getWorm() {
+			return worm;
+		}
+
+		public int getDeathType() {
+			return deathType;
+		}
+	}
+
     private int characterNumber;
 	private Player player;
 
@@ -167,7 +185,7 @@ public class Worm extends WorldObject {
 		// Worm fell off the world rim? Is ded.
 		if (!getWorld().isInWorldBounds(getBody())) {
 			fallDown.play(0.2f);
-			die();
+			die(Constants.DEATH_TYPE_FALL_DOWN);
 		}
 	}
 	
@@ -362,6 +380,9 @@ public class Worm extends WorldObject {
 	 * @param weapon - The weapon to equip, handled in Player
 	 */
 	public void equipWeapon(Weapon weapon) {
+	    if (weapon.getWeaponType() == WeaponType.WEAPON_GUN)
+	        System.out.println("fuck");
+
 		currentWeapon = weapon;
 		weaponAnimation = weapon.createAnimatedSprite();
 
@@ -407,7 +428,7 @@ public class Worm extends WorldObject {
 		if (health <= 0) {
 			// Is dead, kill it
 			health = 0;
-			die();
+			die(Constants.DEATH_TYPE_NO_HEALTH);
 		}
 	}
 
@@ -420,9 +441,9 @@ public class Worm extends WorldObject {
 	/**
 	 * Method to handle characters death - cleanup and stuff
 	 */
-	public void die() {
+	public void die(int deathType) {
 		if (!isDead) {
-			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
+			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, new DeathEvent(this, deathType));
 			//this.player.characterDied(this.characterNumber);
 			//this.setBodyToNullReference();
 			isDead = true;

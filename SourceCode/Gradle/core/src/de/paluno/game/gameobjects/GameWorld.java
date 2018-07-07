@@ -88,12 +88,12 @@ public class GameWorld implements Disposable {
     }
 
     public void step() {
-        world.step(1.0f / 60.0f, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
+        world.step(Constants.REFRESH_RATE, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
     }
 
     public void render(SpriteBatch batch, float delta) {
-        forgetObjects();
         registerObjects();
+        forgetObjects();
 
         camera.update(delta);
 
@@ -107,7 +107,7 @@ public class GameWorld implements Disposable {
 
         batch.end();
 
-        //if (isRenderDebug)
+        if (isRenderDebug)
             debugRenderer.render(world, camera.getDebugProjection());
     }
 

@@ -45,8 +45,8 @@ public class Player implements Disposable {
 	private EventManager.Listener eventListener = (eventType, data) -> {
 		switch (eventType) {
 			case WormDied: {
-				Worm worm = (Worm)data;
-				if (worm.getPlayerNumber() == playerNum && !isDefeated() && --numWormsAlive <= 0) {
+				Worm.DeathEvent deathEvent = (Worm.DeathEvent)data;
+				if (deathEvent.getWorm().getPlayerNumber() == playerNum && !isDefeated() && --numWormsAlive <= 0) {
 					EventManager.getInstance().queueEvent(EventManager.Type.PlayerDefeated, this);
 				}
 				break;
@@ -317,6 +317,9 @@ public class Player implements Disposable {
 	 * @return That Weapon
 	 */
     public Weapon getWeapon(WeaponType type) {
+    	if (type == WeaponType.WEAPON_GUN)
+    		System.out.println("Equipping gun");
+
 		for (Weapon weapon : weapons)
 			if (weapon.getWeaponType() == type)
 				return weapon;

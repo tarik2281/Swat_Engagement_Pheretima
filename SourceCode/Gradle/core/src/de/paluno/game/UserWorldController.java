@@ -80,7 +80,9 @@ public class UserWorldController {
                 case Constants.KEY_SELECT_WEAPON_5:
                 	worldHandler.applyEquipWeapon(WeaponType.WEAPON_AIRSTRIKE);
                 	break;
-
+                case Constants.KEY_TOGGLE_DEBUG_RENDER:
+                    worldHandler.toggleDebugRender();
+                    break;
             }
 
             return super.keyDown(keycode);

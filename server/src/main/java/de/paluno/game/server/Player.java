@@ -1,10 +1,10 @@
 package de.paluno.game.server;
 
-import com.esotericsoftware.kryonet.Connection;
 import de.paluno.game.interfaces.PlayerData;
 import de.paluno.game.interfaces.WormData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
 
@@ -16,15 +16,24 @@ public class Player {
     private int currentWormIndex;
     private ArrayList<Worm> worms;
     private int numWormsAlive;
+    private boolean disconnected;
 
     public Player(User user, int number) {
         this.controllingUser = user;
 
         this.number = number;
+
+        worms = new ArrayList<>();
     }
 
     public void setDefeatedListener(Runnable listener) {
         this.defeatedListener = listener;
+    }
+
+    public void disconnected() {
+        this.disconnected = true;
+
+        worms.forEach(worm -> worm.setDead(true));
     }
 
     public Worm addWorm(int wormNumber) {
@@ -57,6 +66,10 @@ public class Player {
         }
     }
 
+    public List<Worm> getWorms() {
+        return worms;
+    }
+
     public void shiftTurn() {
         if (numWormsAlive == 0)
             return;
@@ -74,10 +87,6 @@ public class Player {
         return worms.get(wormNumber);
     }
 
-    public Connection getConnection() {
-        return null;
-    }
-
     public int getNumber() {
         return number;
     }
@@ -92,5 +101,9 @@ public class Player {
 
     public boolean isDefeated() {
         return numWormsAlive <= 0;
+    }
+
+    public User getControllingUser() {
+        return controllingUser;
     }
 }

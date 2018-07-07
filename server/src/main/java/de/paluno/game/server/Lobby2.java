@@ -61,6 +61,9 @@ public class Lobby2 {
     }
 
     public boolean leaveUser(User leavingUser) {
+        if (match != null)
+            match.userDisconnected(leavingUser);
+
         if (leavingUser.getCurrentLobbyId() == id) {
             users.remove(leavingUser);
 
@@ -68,6 +71,9 @@ public class Lobby2 {
 
             if (users.isEmpty() || (match == null && leavingUser.getId() == creatingUser.getId())) {
                 message = Message.lobbyDestroyed();
+
+                for (User user : users)
+                    user.setCurrentLobbyId(ID_NONE);
 
                 if (destroyListener != null)
                     destroyListener.run();
@@ -89,6 +95,13 @@ public class Lobby2 {
         return false;
     }
 
+    public void broadcastData(User exception, Object data) {
+        for (User user : users) {
+            if (user != exception)
+                user.getConnection().sendTCP(data);
+        }
+    }
+
     public void broadcastChatMessage(ChatMessage message) {
         for (User user : users) {
             user.getConnection().sendTCP(message);
@@ -96,7 +109,8 @@ public class Lobby2 {
     }
 
     public void handleGameData(User sender, GameData gameData) {
-
+        if (match != null)
+            match.handleGameData(sender, gameData);
     }
 
     public void startMatch() {
@@ -107,10 +121,12 @@ public class Lobby2 {
 
         GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
         creatingUser.getConnection().sendTCP(request);
+
+        System.out.printf("Starting match for lobby(id:%d, name:%s)\n", id, name);
     }
 
     public void setupMatch(GameSetupData data) {
-        match = new Match();
+        match = new Match(this);
 
         for (User user : users)
             if (user.getId() != creatingUser.getId())
@@ -123,6 +139,12 @@ public class Lobby2 {
                 Worm worm = player.addWorm(wormData.getWormNumber());
 
             }
+        }
+    }
+
+    public void userReady(User user) {
+        if (match != null) {
+            match.userReady(user);
         }
     }
 

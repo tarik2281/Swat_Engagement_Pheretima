@@ -2,6 +2,7 @@ package de.paluno.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -36,7 +37,9 @@ public class MultiplayerScreen extends ScreenAdapter {
     private Label lobbyName;
 
     private boolean inLobby = false;
+    private ChatWindow chatWindow;
 
+    private InputMultiplexer inputMultiplexer;
 
     private DataHandler dataHandler = (client, data) -> {
         if (data instanceof UserLoginRequest.Result) {
@@ -91,6 +94,14 @@ public class MultiplayerScreen extends ScreenAdapter {
                     break;
             }
         }
+        else if (data instanceof GameSetupRequest) {
+            GameSetupRequest request = (GameSetupRequest)data;
+            game.setNextScreen(new PlayScreen(game, client, request));
+        }
+        else if (data instanceof GameSetupData) {
+            GameSetupData setupData = (GameSetupData)data;
+            game.setNextScreen(new PlayScreen(game, client, setupData));
+        }
     };
 
     public MultiplayerScreen(SEPGame game, int mapNumber, int numWorms) {
@@ -106,9 +117,18 @@ public class MultiplayerScreen extends ScreenAdapter {
         table.center();
 
         TextField textField = new TextField("", skin);
-        table.add(textField);
+        table.add(textField).colspan(3);
         table.row();
+        TextButton menu = new TextButton("Menu", skin);
         TextButton button = new TextButton("Login", skin);
+        menu.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setMenuScreen();
+                client.disconnect();
+                client = null;
+            }
+        });
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -116,11 +136,17 @@ public class MultiplayerScreen extends ScreenAdapter {
                 super.clicked(event, x, y);
             }
         });
-        table.add(button);
+        table.add(menu, button);
         //table.add("Waiting for players...");
     }
 
     private void showLobbies() {
+        if (chatWindow != null) {
+            inputMultiplexer.removeProcessor(chatWindow.getInputProcessor());
+            chatWindow.dispose();
+            chatWindow = null;
+        }
+
         table.clearChildren();
 
         table.center();
@@ -129,10 +155,19 @@ public class MultiplayerScreen extends ScreenAdapter {
         table.add(lobbyList);
         table.row();
         TextField field = new TextField("", skin);
-        table.add(field);
+        table.add(field).colspan(3).width(300);
         table.row();
+        TextButton menu = new TextButton("Menu", skin);
         TextButton join = new TextButton("Join", skin);
         TextButton create = new TextButton("Create", skin);
+        menu.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setMenuScreen();
+                client.disconnect();
+                client = null;
+            }
+        });
         join.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -149,7 +184,7 @@ public class MultiplayerScreen extends ScreenAdapter {
                 client.send(request);
             }
         });
-        table.add(join, create);
+        table.add(menu, join, create);
 
         client.send(new LobbyListRequest());
     }
@@ -184,10 +219,15 @@ public class MultiplayerScreen extends ScreenAdapter {
         startButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                super.clicked(event, x, y);
+                StartMatchRequest startMatchRequest = new StartMatchRequest();
+                client.send(startMatchRequest);
             }
         });
         table.add(leave, startButton);
+
+        chatWindow = new ChatWindow(client);
+        chatWindow.initialize();
+        inputMultiplexer.addProcessor(chatWindow.getInputProcessor());
     }
 
     private void showError() {
@@ -235,7 +275,10 @@ public class MultiplayerScreen extends ScreenAdapter {
         client.registerDataHandler(dataHandler);
         client.connect();
 
-        Gdx.input.setInputProcessor(stage);
+        inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(stage);
+
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     @Override
@@ -245,6 +288,10 @@ public class MultiplayerScreen extends ScreenAdapter {
 
         stage.act(delta);
         stage.draw();
+
+        if (chatWindow != null) {
+            chatWindow.render(delta);
+        }
     }
 
     @Override

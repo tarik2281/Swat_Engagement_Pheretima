@@ -332,7 +332,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         music = game.getAssetManager().get(Assets.menuSound);
         music.setLooping(true);
         music.setVolume(0.1f);
-        music.play();
+        //music.play();
 
         menuStage.act(Gdx.graphics.getDeltaTime());
         menuStage.draw();

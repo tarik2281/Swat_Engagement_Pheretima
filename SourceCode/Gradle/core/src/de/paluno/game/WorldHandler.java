@@ -46,18 +46,18 @@ public abstract class WorldHandler implements Disposable {
                 break;
             }
             case WormDied: {
-                Worm worm = (Worm) data;
+                Worm.DeathEvent event = (Worm.DeathEvent) data;
 
-                    if (currentGameState == GameState.PLAYERTURN && getCurrentPlayer().getCurrentWorm() == worm) {
+                    if (currentGameState == GameState.PLAYERTURN && getCurrentPlayer().getCurrentWorm() == event.getWorm()) {
                         System.out.println("Current worm died, setting to waiting");
                         setWaiting();
                     }
 
                 if (shouldWorldStep()) {
-                    onWormDied(worm);
+                    onWormDied(event);
                 }
 
-                world.forgetAfterUpdate(worm);
+                world.forgetAfterUpdate(event.getWorm());
                 break;
             }
             case WormInfected:
@@ -90,7 +90,7 @@ public abstract class WorldHandler implements Disposable {
     protected abstract boolean shouldCreateReplay();
 
     protected void onWormTookDamage(Worm.DamageEvent event) {}
-    protected void onWormDied(Worm worm) {}
+    protected void onWormDied(Worm.DeathEvent event) {}
     protected void onWormInfected(Worm worm) {}
     protected void onProjectileExploded(Projectile projectile) {}
     protected void onShoot(List<Projectile> projectiles) {}
@@ -151,6 +151,10 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.PlayerDefeated);
     }
 
+    public void toggleDebugRender() {
+        world.toggleDebugRender();
+    }
+
     protected void initializePlayersDefault(int numWorms) {
         for (int i = 0; i < Constants.NUM_PLAYERS; i++) {
             Player player = addPlayer(i);
@@ -167,6 +171,7 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void addProjectile(Projectile projectile) {
+        System.out.println("Adding projectile");
         projectiles.add(projectile);
         projectile.setId(projectileId++);
         world.registerAfterUpdate(projectile);
@@ -178,6 +183,7 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void removeProjectile(Projectile projectile) {
+        System.out.println("Removing projectile");
         projectiles.remove(projectile);
         world.forgetAfterUpdate(projectile);
 
@@ -194,6 +200,9 @@ public abstract class WorldHandler implements Disposable {
     public void unequipWeapon() {
         Worm currentWorm = getCurrentPlayer().getCurrentWorm();
         currentWorm.unequipWeapon();
+
+        if (currentWeaponIndicator instanceof ShotDirectionIndicator)
+            ((ShotDirectionIndicator) currentWeaponIndicator).setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 
         if (currentWeaponIndicator != null)
             currentWorm.removeChild(currentWeaponIndicator);
@@ -378,6 +387,7 @@ public abstract class WorldHandler implements Disposable {
 
     public void shoot() {
         if (shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
+            System.out.println("Shooting started");
             Player player = getCurrentPlayer();
             Worm worm = player.getCurrentWorm();
             weaponProjectileCache.clear();
@@ -406,18 +416,14 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public Worm getNextActiveWorm() {
-        Vector2 velocity = null;
+        float vel = 0.0f;
         Worm nextWorm = null;
 
         for (Player player : players) {
             for (Worm worm : player.getWorms()) {
                 if (worm.getBody() != null && worm.getBody().isAwake()) {
-                    if (velocity == null) {
-                        velocity = worm.getBody().getLinearVelocity();
-                        nextWorm = worm;
-                    }
-                    else if (worm.getBody().getLinearVelocity().len2() > velocity.len2()) {
-                        velocity = worm.getBody().getLinearVelocity();
+                    if (worm.getBody().getLinearVelocity().len2() > vel) {
+                        vel = worm.getBody().getLinearVelocity().len2();
                         nextWorm = worm;
                     }
                 }
@@ -443,6 +449,8 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void setWaiting() {
+        System.out.println("Setting waiting");
+
         endPlayerTurn();
 
         Worm nextActiveWorm = getNextActiveWorm();

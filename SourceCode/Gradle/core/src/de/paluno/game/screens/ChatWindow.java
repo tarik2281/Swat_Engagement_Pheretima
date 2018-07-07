@@ -3,6 +3,7 @@ package de.paluno.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.utils.Timer;
 import de.paluno.game.DataHandler;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.interfaces.ChatMessage;
+import de.paluno.game.interfaces.UserMessage;
 
 public class ChatWindow implements Disposable {
 
@@ -27,7 +29,18 @@ public class ChatWindow implements Disposable {
     private DataHandler messageHandler = (client, data) -> {
         if (data instanceof ChatMessage) {
             ChatMessage chatMessage = (ChatMessage)data;
-            addMessage(chatMessage.getPlayer(), chatMessage.getMessage());
+            addMessage(chatMessage.getUserName(), chatMessage.getMessage());
+        }
+        else if (data instanceof UserMessage) {
+            UserMessage message = (UserMessage)data;
+            switch (message.getType()) {
+                case UserJoined:
+                    addMessage("User " + message.getName() + " joined the lobby.");
+                    break;
+                case UserLeft:
+                    addMessage("User " + message.getName() + " left the lobby.");
+                    break;
+            }
         }
     };
 
@@ -35,8 +48,8 @@ public class ChatWindow implements Disposable {
         this.client = client;
     }
 
-    private void addMessage(int player, String message) {
-        String outMessage = "Player " + (player + 1) + ": " + message;
+    private void addMessage(String userName, String message) {
+        String outMessage = userName + ": " + message;
 
         chatTable.row();
         chatTable.add(outMessage).left();
@@ -51,6 +64,17 @@ public class ChatWindow implements Disposable {
     private void sendMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message);
         client.send(chatMessage);
+    }
+
+    public void addMessage(String message) {
+        chatTable.row();
+        chatTable.add(message, "small", Color.FIREBRICK).left();
+        Timer.post(new Timer.Task() {
+            @Override
+            public void run() {
+                chatScrollPane.scrollTo(0, 0, 0, 0);
+            }
+        });
     }
 
     public void initialize() {

@@ -159,6 +159,20 @@ public class GameServer {
                     }
                 }
             }
+            else if (object instanceof Message) {
+                User user = getUserById(connection.getID());
+
+                Lobby2 lobby = null;
+                if (user != null)
+                    lobby = getLobbyById(user.getCurrentLobbyId());
+
+                switch (((Message) object).getType()) {
+                    case ClientReady:
+                        if (lobby != null)
+                            lobby.userReady(user);
+                        break;
+                }
+            }
         }
     };
 
@@ -184,7 +198,7 @@ public class GameServer {
         User user = new User(connection, name, wormNames);
         loggedInUsers.put(connection.getID(), user);
 
-        System.out.printf("User logged in (id: %d, name: %s, worms: %s)\n", user.getId(), user.getName(), Arrays.toString(user.getWormNames()));
+        System.out.printf("User logged in (id: %d, name: %s, worms: %s, udpEnabled: %b)\n", user.getId(), user.getName(), Arrays.toString(user.getWormNames()), connection.getRemoteAddressUDP() != null);
         return user;
     }
 
@@ -202,10 +216,14 @@ public class GameServer {
 
     private Lobby2 createLobby(String name, int mapNumber, int numWorms, User creatingUser) {
         Lobby2 lobby = new Lobby2(getNextLobbyId(), name, mapNumber, numWorms, creatingUser);
-        lobby.setDestroyListener(() -> lobbyMap.remove(lobby.getId()));
+        lobby.setDestroyListener(() -> {
+            lobbyMap.remove(lobby.getId());
+            System.out.printf("Destroyed lobby (id: %d, name: %s)\n", lobby.getId(), lobby.getName());
+        });
+
         lobbyMap.put(lobby.getId(), lobby);
 
-        System.out.printf("Created lobby with name: %s, map: %d, worms: %d, creatingUser: %d\n", name, mapNumber, numWorms, creatingUser.getId());
+        System.out.printf("Created lobby (id: %d, name: %s, map: %d, worms: %d, creatingUser: %d)\n", lobby.getId(), name, mapNumber, numWorms, creatingUser.getId());
 
         return lobby;
     }

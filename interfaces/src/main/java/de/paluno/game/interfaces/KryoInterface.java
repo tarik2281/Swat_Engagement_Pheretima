@@ -49,5 +49,9 @@ public class KryoInterface {
         kryo.register(UserMessage.class);
 
         kryo.register(String[].class);
+
+        kryo.register(StartMatchRequest.class);
+        kryo.register(GameSetupRequest.Player.class);
+        kryo.register(GameSetupRequest.Player[].class);
     }
 }

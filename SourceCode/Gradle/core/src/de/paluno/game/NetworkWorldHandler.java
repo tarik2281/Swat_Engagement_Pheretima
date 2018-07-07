@@ -1,6 +1,5 @@
 package de.paluno.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
@@ -66,6 +65,18 @@ public class NetworkWorldHandler extends WorldHandler {
                 event.setReceivingTimeStamp(event.getTick() * UPDATE_FREQUENCY + idleTime);
                 receivedGameEvents.add(event);
             }
+            else if (data instanceof UserMessage) {
+                UserMessage message = (UserMessage)data;
+                if (message.getType() == Message.Type.UserLeft) {
+                    for (Player player : getPlayers()) {
+                        if (player.getClientId() == message.getUserId()) {
+                            for (Worm worm : player.getWorms())
+                                worm.die(Constants.DEATH_TYPE_DISCONNECTED);
+                            break;
+                        }
+                    }
+                }
+            }
         }
     };
 
@@ -77,13 +88,13 @@ public class NetworkWorldHandler extends WorldHandler {
         this.gameSetupData = data;
     }
 
-    public NetworkWorldHandler(PlayScreen screen, NetworkClient client, GameSetupRequest request, int mapNumber, int numWorms) {
-        super(screen, mapNumber);
+    public NetworkWorldHandler(PlayScreen screen, NetworkClient client, GameSetupRequest request) {
+        super(screen, request.getMapNumber());
 
         this.client = client;
 
         this.gameSetupRequest = request;
-        this.numWorms = numWorms;
+        this.numWorms = request.getNumWorms();
     }
 
     @Override
@@ -146,23 +157,23 @@ public class NetworkWorldHandler extends WorldHandler {
                 playerData[playerIndex++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormData);
             }
 
-            GameSetupData data = new GameSetupData(null, playerData);
+            GameSetupData data = new GameSetupData(playerData);
             data.mapNumber = getMapNumber();
             client.send(data);
         }
         else if (gameSetupData != null) {
             for (int i = 0; i < gameSetupData.getPlayerData().length; i++) {
                 PlayerData playerData = gameSetupData.getPlayerData()[i];
-                int clientId = gameSetupData.getClientIds()[i];
 
                 Player player = addPlayer(playerData.getPlayerNumber());
-                player.setClientId(clientId);
+                player.setClientId(playerData.getClientId());
 
                 for (WormData wormData : playerData.getWorms()) {
                     Worm worm = addWorm(player, wormData.getWormNumber());
                     worm.setPosition(wormData.getPhysicsData().getPositionX(),
                             wormData.getPhysicsData().getPositionY());
                     // TODO: setup worms
+
                 }
             }
         }
@@ -333,7 +344,14 @@ public class NetworkWorldHandler extends WorldHandler {
                     WormEvent event = (WormEvent)currentEvent;
                     Player player = getPlayers().get(event.getPlayerNumber());
                     Worm worm = player.getWormByNumber(event.getWormNumber());
-                    worm.die();
+                    worm.die(Constants.DEATH_TYPE_NO_HEALTH);
+                    break;
+                }
+                case WORM_FELL_DOWN: {
+                    WormEvent event = (WormEvent)currentEvent;
+                    Player player = getPlayers().get(event.getPlayerNumber());
+                    Worm worm = player.getWormByNumber(event.getWormNumber());
+                    worm.die(Constants.DEATH_TYPE_FALL_DOWN);
                     break;
                 }
                 case WORM_INFECTED: {
@@ -435,9 +453,22 @@ public class NetworkWorldHandler extends WorldHandler {
     }
 
     @Override
-    protected void onWormDied(Worm worm) {
-        WormEvent event = new WormEvent(currentTick, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getCharacterNumber());
-        client.send(event);
+    protected void onWormDied(Worm.DeathEvent event) {
+        if (event.getDeathType() == Constants.DEATH_TYPE_DISCONNECTED)
+            return;
+
+        GameEvent.Type type = null;
+        switch (event.getDeathType()) {
+            case Constants.DEATH_TYPE_NO_HEALTH:
+                type = GameEvent.Type.WORM_DIED;
+                break;
+            case Constants.DEATH_TYPE_FALL_DOWN:
+                type = GameEvent.Type.WORM_FELL_DOWN;
+                break;
+        }
+
+        WormEvent wormEvent = new WormEvent(currentTick, type, event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber());
+        client.send(wormEvent);
     }
 
     @Override
