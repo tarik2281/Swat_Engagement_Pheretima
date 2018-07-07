@@ -28,6 +28,7 @@ public class KryoInterface {
         kryo.register(WormDamageEvent.class);
         kryo.register(GameOverEvent.class);
         kryo.register(ShotDirectionData.class);
+        kryo.register(PointerData.class);
         kryo.register(ChatMessage.class);
 
         kryo.register(UserLoginRequest.class);

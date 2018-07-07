@@ -265,8 +265,13 @@ public class NetworkWorldHandler extends WorldHandler {
             Object toData = null;
             if (nextSnapshot != null)
                 toData = nextSnapshot.getIndicatorData();
-            if (getShotDirectionIndicator() != null)
-            getShotDirectionIndicator().interpolateSnapshots(fromData, toData, to);
+
+            if (getShotDirectionIndicator() != null) {
+                if (toData != null && toData.getClass() != fromData.getClass())
+                    toData = null;
+
+                getShotDirectionIndicator().interpolateSnapshots(fromData, toData, to);
+            }
 
             for (Projectile projectile : getProjectiles()) {
                 ProjectileData currentData = currentSnapshot.getProjectileById(projectile.getId());

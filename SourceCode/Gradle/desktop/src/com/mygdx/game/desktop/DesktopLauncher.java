@@ -7,11 +7,13 @@ import de.paluno.game.SEPGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
+		int refreshRate = LwjglApplicationConfiguration.getDesktopDisplayMode().refreshRate;
+
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 1350;
 		config.height = 900;
-		config.foregroundFPS = 144;
-		Constants.REFRESH_RATE = 1.0f / 144.0f;
+		config.foregroundFPS = refreshRate;
+		Constants.REFRESH_RATE = 1.0f / (float)refreshRate;
 		new LwjglApplication(new SEPGame(), config);
 	}
 }
