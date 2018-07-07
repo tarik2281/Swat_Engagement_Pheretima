@@ -14,6 +14,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -30,6 +32,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private SEPGame game;
 	private Stage restartStage;
 	private Table table;
+	private Label label;
 	private ImageButton restartButton;
 	private Texture restartButtonTexture;
 	private TextureRegion restartButtonTextureRegion;
@@ -37,6 +40,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private Music overSound;
 	private BitmapFont font;
 	private CharSequence str;
+	private Skin skin;
 	private boolean first;
 	
 	
@@ -55,9 +59,10 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	public void show() {
 		//GameOverScreen
 		batch = new SpriteBatch();
-		table = new Table();
-		color = new Color();
+		table = new Table(skin);
+		label = new Label(str, skin);
 		font = new BitmapFont();
+		skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
 		
 		Texture texture = null;
 		
@@ -77,7 +82,6 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 				texture = game.getAssetManager().get(Assets.gameOverScreen);
 				break;
 		}
-		font.setColor(254, 0, 0, 0);
 		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
 		
 		//Restart button
@@ -96,6 +100,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
         });
         
         restartStage.addActor(table);
+        table.add(label);
         table.add(restartButton);
         table.setFillParent(true);
         table.bottom();
