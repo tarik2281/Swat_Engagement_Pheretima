@@ -55,8 +55,10 @@ public class Match {
                 System.out.println("Setting user ready (id: " + user.getId() + ")");
                 player.setReady(true);
 
-                if (player.getNumber() == currentPlayerIndex)
-                    lobby.broadcastData(user, new GameEvent(currentTick, GameEvent.Type.END_TURN));
+                if (player.getNumber() == currentPlayerIndex) {
+                    System.out.println("broadcasting end turn event");
+                    //lobby.broadcastData(user, new GameEvent(currentTick, GameEvent.Type.END_TURN));
+                }
                 break;
             }
 
@@ -77,6 +79,7 @@ public class Match {
                 case WORM_DIED: {
                     WormEvent event = (WormEvent) gameData;
                     getWorm(event).setDead(true);
+
                     break;
                 }
                 case WORM_TOOK_DAMAGE: {
@@ -178,7 +181,7 @@ public class Match {
                 player.setReady(false);
             }
 
-            System.out.println("Starting turn for player: " + startTurnEvent.playerNumber + ", worm: " + startTurnEvent.wormNumber);
+            System.out.println("Starting turn for player: " + startTurnEvent.playerNumber + ", worm: " + startTurnEvent.wormNumber + ", wormDead: " + currentPlayer.getCurrentWorm().isDead());
         }
     }
 
@@ -186,12 +189,15 @@ public class Match {
         if (numPlayersAlive <= 0)
             return;
 
-        if (shiftWorms && currentPlayerIndex != -1) {
-            players.get(currentPlayerIndex).shiftTurn();
-        }
+        boolean shouldShift = true;
+        if (currentPlayerIndex == -1)
+            shouldShift = false;
 
         do {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         } while (players.get(currentPlayerIndex).isDefeated());
+
+        if (shouldShift && shiftWorms)
+            players.get(currentPlayerIndex).shiftTurn();
     }
 }

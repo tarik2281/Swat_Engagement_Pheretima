@@ -9,6 +9,8 @@ public class Constants {
 	public static final float PHYSICSSTEPLENGTH = 0.00800000037997961f;
 	public static final Vector2 GRAVITY = new Vector2(0.0f, -9.81f);
 
+	public static final float UPDATE_FREQUENCY = 1.0f / 30.0f;
+
 	// game play constants
 	public static final int NUM_PLAYERS = 2;
 	public static final int MAX_CHAR_NUM = 5;

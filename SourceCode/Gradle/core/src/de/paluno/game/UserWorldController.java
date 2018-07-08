@@ -5,7 +5,7 @@ import com.badlogic.gdx.InputProcessor;
 import de.paluno.game.gameobjects.ShotDirectionIndicator;
 import de.paluno.game.gameobjects.WeaponIndicator;
 import de.paluno.game.gameobjects.WeaponType;
-import de.paluno.game.interfaces.ShotDirectionData;
+import de.paluno.game.worldhandlers.WorldHandler;
 
 public class UserWorldController {
 

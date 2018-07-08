@@ -59,6 +59,13 @@ public class Ground extends WorldObject {
         explosions = new ArrayList<Explosion>();
         explosionQueue = new LinkedList<Explosion>();
     }
+
+    public void setFromSnapshot(SnapshotData data) {
+        for (CollisionObject.SnapshotData objectData : data.collisionObjects)
+            collisionObjects.add(new CollisionObject(objectData));
+
+        explosions.addAll(data.explosions);
+    }
     
     public Ground(GameWorld world, ExplosionMaskRenderer renderer, SnapshotData data) {
         this.map = data.map;

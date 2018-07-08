@@ -5,16 +5,20 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ContactFilter;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
+import de.paluno.game.worldhandlers.WorldHandler;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class GameWorld implements Disposable {
+
+    public static class SnapshotData {
+        private Ground.SnapshotData ground;
+    }
 
     private WorldHandler worldHandler;
 
@@ -71,11 +75,21 @@ public class GameWorld implements Disposable {
         //camera.setBottomLimit(worldBounds.y);
     }
 
+    public void setFromSnapshot(SnapshotData data) {
+        ground.setFromSnapshot(data.ground);
+    }
+
     @Override
     public void dispose() {
         world.dispose();
         debugRenderer.dispose();
         explosionMaskRenderer.dispose();
+    }
+
+    public SnapshotData makeSnapshot() {
+        SnapshotData data = new SnapshotData();
+        data.ground = ground.makeSnapshot();
+        return data;
     }
 
     public com.badlogic.gdx.physics.box2d.World getWorld() {
@@ -107,7 +121,7 @@ public class GameWorld implements Disposable {
 
         batch.end();
 
-        if (isRenderDebug)
+        //if (isRenderDebug)
             debugRenderer.render(world, camera.getDebugProjection());
     }
 

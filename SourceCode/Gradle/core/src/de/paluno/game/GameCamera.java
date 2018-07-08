@@ -115,6 +115,11 @@ public class GameCamera {
         debugCamera.update();
         camera.update();
     }
+
+    public void setPositionToFocus() {
+        if (cameraFocus != null)
+        debugPosition.set(cameraFocus.getPosition());
+    }
     
     public void setCameraPosition(Vector2 position) {
     	debugPosition.set(position);
@@ -127,6 +132,10 @@ public class GameCamera {
     public Matrix4 getScreenProjection() {
         // return the camera matrix to be used with a SpriteBatch
         return camera.combined;
+    }
+
+    public Vector2 getWorldPosition() {
+        return debugPosition;
     }
 
     public OrthographicCamera getOrthoCamera() {

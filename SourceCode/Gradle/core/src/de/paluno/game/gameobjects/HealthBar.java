@@ -39,7 +39,7 @@ public class HealthBar extends WorldObject {
             return;
         }*/
 
-        setText(String.valueOf(worm.getHealth()));
+        setText(String.valueOf(worm.getHealth()) + " " + worm.getCharacterNumber());
 
         Vector2 position = Constants.getScreenSpaceVector(body.getPosition());
 

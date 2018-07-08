@@ -8,7 +8,7 @@ public class EventManager {
     public enum Type {
         WormTookDamage, WormEquipWeapon, WormInfected, WormJumped,
         WormMovement, WormDied, WeaponShoot, ProjectileExploded, GameOver,
-        PlayerDefeated
+        PlayerDefeated, Replay, ReplayEnded
     }
 
     public interface Listener {

@@ -16,11 +16,12 @@ public class Worm extends WorldObject {
      * Inner class to create a copy of the data necessary for the replay
      */
 	public static class SnapshotData {
-        private int characterNumber;
+        public int characterNumber;
         private Vector2 position;
         private int health;
         private int orientation;
         private boolean isInfected;
+        private boolean isDead;
     }
 
     public static class DamageEvent {
@@ -115,6 +116,15 @@ public class Worm extends WorldObject {
 		addChild(new HealthBar(this));
 	}
 
+	public void setFromSnapshot(SnapshotData data) {
+		this.characterNumber = data.characterNumber;
+		setPosition(data.position);
+		this.health = data.health;
+		this.orientation = data.orientation;
+		this.isInfected = data.isInfected;
+		this.isDead = data.isDead;
+	}
+
 
 	@Override
 	public void setupAssets(AssetManager manager) {
@@ -139,7 +149,7 @@ public class Worm extends WorldObject {
 
 		// Are we supposed to be the new host of a super deadly virus? Create it!
 		if (createVirusFixture)
-			createVirusFixture();
+			createVirusFixture(getBody());
 
         // Now we apply movements - therefor we need our current position
 		Vector2 currentPos = getPosition();
@@ -272,7 +282,7 @@ public class Worm extends WorldObject {
 
 		// Infected this round - breed the devastating virus!
 		if (isInfected)
-			createVirusFixture();
+			createVirusFixture(body);
 
 		// Get rid of temporary material properly
 		bodyRect.dispose();
@@ -288,7 +298,7 @@ public class Worm extends WorldObject {
 	/**
 	 * Method to setup the Fixture of our Virus hitbox sensor for further infection spreading
 	 */
-	private void createVirusFixture() {
+	private void createVirusFixture(Body body) {
 		CircleShape circle = new CircleShape();
 		circle.setRadius(Constants.VIRUS_RADIUS);
 
@@ -296,7 +306,7 @@ public class Worm extends WorldObject {
 		fixtureDef.shape = circle;
 		fixtureDef.isSensor = true;
 
-		virusFixture = this.getBody().createFixture(fixtureDef);
+		virusFixture = body.createFixture(fixtureDef);
 		virusFixture.setUserData(new UserData(ObjectType.Virus, this));
 		circle.dispose();
 		createVirusFixture = false;
@@ -604,9 +614,10 @@ public class Worm extends WorldObject {
 
 		data.characterNumber = characterNumber;
 		data.health = health;
-		data.position = new Vector2(getBody().getPosition());
+		data.position = new Vector2(getPosition());
 		data.orientation = orientation;
 		data.isInfected = isInfected;
+		data.isDead = isDead;
 
 		return data;
 	}
