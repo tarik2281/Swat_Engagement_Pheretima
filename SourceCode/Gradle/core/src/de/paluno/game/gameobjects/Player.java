@@ -274,32 +274,6 @@ public class Player implements Disposable {
 	}*/
 	
 	/**
-	 * Soft setter method for characterNumber - Set Character as KIA and remove it
-	 * @param charNum - The number of the character that died
-	 */
-	protected void characterDied(int charNum) {
-		// No characters anymore or this one allready dead? Nothing to do here.
-		if(this.numCharacters <= 0 || this.worms.get(charNum) == null)
-			return;
-
-		// It was this Worm's turn? The game must go on!
-		//if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
-		    //world.advanceGameState();
-
-		// Farewell, rendering reference...!
-		//world.forgetAfterUpdate(characters[charNum]);
-		//this.characters[charNum] = null;
-		this.numCharacters--;
-
-		// It was this Worm's turn? So, someone else must play next time
-		if (charNum == turn)
-		    shiftTurn();
-		
-		// And finally - is ded
-		//world.setWormDied(true);
-	}
-	
-	/**
 	 * Soft getter method for number of still alive characters
 	 * @return Any characters left?
 	 */

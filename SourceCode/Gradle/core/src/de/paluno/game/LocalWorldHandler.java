@@ -26,17 +26,20 @@ public class LocalWorldHandler extends WorldHandler {
                 }
             }
 
+            String name = null;
             WinningPlayer winningPlayer = WinningPlayer.NONE;
             switch (winningPlayerNumber) {
                 case 0:
+                	name = "Player 1";
                     winningPlayer = WinningPlayer.PLAYERONE;
                     break;
                 case 1:
+                	name = "Player 2";
                     winningPlayer = WinningPlayer.PLAYERTWO;
                     break;
             }
 
-            EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
+            EventManager.getInstance().queueEvent(EventManager.Type.GameOver, name);
         }
         else {
             Player currentPlayer = getCurrentPlayer();

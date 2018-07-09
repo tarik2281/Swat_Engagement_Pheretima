@@ -122,8 +122,8 @@ public class Assets {
     		new AssetDescriptor<Music>("MenuScreen_ThemeSong.mp3", Music.class);
     public static final AssetDescriptor<Music> tickSound = 
     		new AssetDescriptor<Music>("MenuScreen_ClickSound.mp3", Music.class);
-    public static final AssetDescriptor<Music> gameOverSound = 
-    		new AssetDescriptor<Music>("GameOverScreen_CrowdCheer.mp3", Music.class);
+    public static final AssetDescriptor<Sound> gameOverSound = 
+    		new AssetDescriptor<Sound>("GameOverScreen_CrowdCheer.mp3", Sound.class);
     public static final AssetDescriptor<Sound> grenadeExplosionSound = 
     		new AssetDescriptor<Sound>("GrenadeExplosion2.mp3", Sound.class);
     public static final AssetDescriptor<Sound> bazookaShotSound = 

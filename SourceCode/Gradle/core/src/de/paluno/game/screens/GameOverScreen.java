@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -35,19 +36,21 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private Table table;
 	private Table myFontTable;
 	private ImageButton restartButton;
+	private Texture texture;
 	private Texture restartButtonTexture;
 	private TextureRegion restartButtonTextureRegion;
 	private TextureRegionDrawable restartButtonTextureDrawable;
-	private Music overSound;
 	private Label.LabelStyle labelStyle;
 	private BitmapFont myFont;
 	private Label label;
 	private CharSequence text;
+	private String playerName;
+	private Sound gameOver;
 	
 	
-	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
-		this.winningPlayer = winningPlayer;
+	public GameOverScreen(SEPGame game, String playerName) {
 		this.game = game;
+		this.playerName = playerName;
 	}
 
 	@Override
@@ -64,23 +67,11 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		myFontTable = new Table();
 		labelStyle = new Label.LabelStyle();
 		
-		Texture texture = null;
+		//Sound
+		gameOver = game.getAssetManager().get(Assets.gameOverSound);
+		gameOver.play();
 		
-		overSound = game.getAssetManager().get(Assets.gameOverSound);
-		overSound.setLooping(false);
-		overSound.setVolume(1f);
-		
-		switch (winningPlayer) {
-			case PLAYERONE:
-				overSound.play();
-				texture = game.getAssetManager().get(Assets.gameOverScreen);
-				break;
-			case PLAYERTWO:
-				overSound.play();
-				texture = game.getAssetManager().get(Assets.gameOverScreen);
-				break;
-		}
-		
+		texture = game.getAssetManager().get(Assets.gameOverScreen);
 		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
 		
 		//Restart button
@@ -102,7 +93,14 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
         myFont = new BitmapFont(Gdx.files.internal("GameOverScreenFonts.fnt"));
         labelStyle.font = myFont;
         
-		label = new Label("Player 1 hat gewonnen.", labelStyle);
+        String labelText = null;
+        
+        if (playerName != null)
+        	labelText = playerName + " hat gewonnen.";
+        else
+        	labelText = "Das ist Spiel ist unentschieden.";
+        
+		label = new Label(labelText, labelStyle);
         
         stage.addActor(table);
         stage.addActor(myFontTable);
