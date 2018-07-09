@@ -2,6 +2,8 @@ package de.paluno.game;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 
@@ -68,16 +70,16 @@ public class Assets {
     public static final AssetDescriptor<Texture> playerNumber5 =
             new AssetDescriptor<Texture>("5Player.png", Texture.class);
 
-    public static final AssetDescriptor<TiledMap> map1 =
-            new AssetDescriptor<TiledMap>("Map1SEP.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> map2 =
-            new AssetDescriptor<TiledMap>("Map2SEP.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> map3 =
-            new AssetDescriptor<TiledMap>("Map3SEP.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> map4 =
-            new AssetDescriptor<TiledMap>("Map4SEP.tmx", TiledMap.class);
+    public static final AssetDescriptor<Map> map1 =
+            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
+    public static final AssetDescriptor<Map> map2 =
+            new AssetDescriptor<Map>("Map2SEP.tmx", Map.class);
+    public static final AssetDescriptor<Map> map3 =
+            new AssetDescriptor<Map>("Map3SEP.tmx", Map.class);
+    public static final AssetDescriptor<Map> map4 =
+            new AssetDescriptor<Map>("Map4SEP.tmx", Map.class);
 
-    public static AssetDescriptor<TiledMap> getMapByIndex(int index) {
+    public static AssetDescriptor<Map> getMapByIndex(int index) {
         switch (index) {
             case 0:
                 return map1;
@@ -94,7 +96,9 @@ public class Assets {
 
     public static final AssetDescriptor<Texture> arrow =
             new AssetDescriptor<Texture>("Arrow.png", Texture.class);
-    
+    public static final AssetDescriptor<Texture> airstrikeCrosshair =
+            new AssetDescriptor<Texture>("AirstrikeCrosshair.png", Texture.class);
+
     public static final AssetDescriptor<Texture> gameOverScreen1 =
             new AssetDescriptor<Texture>("GameOverPlay1.png", Texture.class);
     public static final AssetDescriptor<Texture> gameOverScreen2 =
@@ -130,6 +134,8 @@ public class Assets {
             new AssetDescriptor<Texture>("IconBazooka.png", Texture.class);
     public static final AssetDescriptor<Texture> iconSpecial =
             new AssetDescriptor<Texture>("IconSpecial.png", Texture.class);
+    public static final AssetDescriptor<Texture> iconAirstrike =
+            new AssetDescriptor<Texture>("IconAirstrike.png", Texture.class);
 
     public static final AssetDescriptor<Texture> iconAirStrike =
             new AssetDescriptor<Texture>("airstrike.png", Texture.class);
@@ -148,6 +154,8 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileBazooka.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileSpecial =
             new AssetDescriptor<Texture>("ProjectileSpecial.png", Texture.class);
+    public static final AssetDescriptor<Texture> projectileAirstrike =
+            new AssetDescriptor<Texture>("ProjectileAirstrike.png", Texture.class);
 
     public static final AssetDescriptor<Texture> multi =
             new AssetDescriptor<Texture>("ButtonMulti.png", Texture.class);
@@ -165,6 +173,66 @@ public class Assets {
     public static final AssetDescriptor<AnimationData> teleporter =
             new AssetDescriptor<AnimationData>("Teleporter.xml", AnimationData.class);
 
+    public static final AssetDescriptor<AnimationData> weaponAirstrike =
+            new AssetDescriptor<AnimationData>("WeaponAirstrike.xml", AnimationData.class);
+
+    public static final AssetDescriptor<Music> menuSound =
+    		new AssetDescriptor<Music>("MenuScreen_ThemeSong.mp3", Music.class);
+    public static final AssetDescriptor<Music> tickSound =
+    		new AssetDescriptor<Music>("MenuScreen_ClickSound.mp3", Music.class);
+    public static final AssetDescriptor<Music> gameOverSound =
+    		new AssetDescriptor<Music>("GameOverScreen_CrowdCheer.mp3", Music.class);
+    public static final AssetDescriptor<Sound> grenadeExplosionSound =
+    		new AssetDescriptor<Sound>("GrenadeExplosion2.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> bazookaShotSound =
+    		new AssetDescriptor<Sound>("ShotGunFire.wav", Sound.class);
+    public static final AssetDescriptor<Sound> gunShotSound =
+    		new AssetDescriptor<Sound>("ShotGunFire3.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> gunRelease =
+    		new AssetDescriptor<Sound>("GunRelease.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> airstrikeSound =
+    		new AssetDescriptor<Sound>("Airstrike.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> airstrikeExplosion =
+    		new AssetDescriptor<Sound>("AirstrikeExplosion.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> airballSound =
+    		new AssetDescriptor<Sound>("NoHitNoExplosion.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> raiseLimitSound =
+    		new AssetDescriptor<Sound>("UnderWaterLoop.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> map1Sound =
+    		new AssetDescriptor<Sound>("Map1_ArabianNight.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> map2Sound =
+    		new AssetDescriptor<Sound>("Map2_BuildingNight.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> map3Sound =
+    		new AssetDescriptor<Sound>("Map3_CamelotDay.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> map4Sound =
+    		new AssetDescriptor<Sound>("Map4_PrehistoricDay.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> walkLoop =
+    		new AssetDescriptor<Sound>("WalkLoop.wav", Sound.class);
+    public static final AssetDescriptor<Sound> noAmmo =
+    		new AssetDescriptor<Sound>("NoAmmoWarning.wav", Sound.class);
+    public static final AssetDescriptor<Sound> fallDown =
+    		new AssetDescriptor<Sound>("DeadAfterFall.wav", Sound.class);
+    public static final AssetDescriptor<Sound> roundStart =
+    		new AssetDescriptor<Sound>("StartRound.wav", Sound.class);
+    public static final AssetDescriptor<Sound> landSound =
+    		new AssetDescriptor<Sound>("WormLanding.wav", Sound.class);
+    public static final AssetDescriptor<Sound> virusSound =
+    		new AssetDescriptor<Sound>("Cough2.wav", Sound.class);
+    public static final AssetDescriptor<Sound> throwSound =
+    		new AssetDescriptor<Sound>("Throw.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> windMedium =
+    		new AssetDescriptor<Sound>("WindMedium.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> windHeavy =
+    		new AssetDescriptor<Sound>("WindHeavy.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> targetSound =
+    		new AssetDescriptor<Sound>("TargetAquired.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> grenadeContact =
+    		new AssetDescriptor<Sound>("GrenadeImpact2.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> popSound =
+    		new AssetDescriptor<Sound>("WORMPOP.WAV", Sound.class);
+    public static final AssetDescriptor<Sound> destroySound =
+    		new AssetDescriptor<Sound>("DestroySound.mp3", Sound.class);
+
 
     public static void loadAssets(AssetManager assetManager, AssetDescriptor[] assets) {
         for (AssetDescriptor asset : assets)
@@ -177,8 +245,8 @@ public class Assets {
     };
 
     public static final AssetDescriptor[] PlayScreenAssets = {
-            arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, weaponUI,weaponUI2, windGreen, windOrange, windRed,
+            airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
+            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI,weaponUI2, windGreen, windOrange, windRed,
             iconAirStrike, iconMine,iconTeleport,iconArtillery,teleporter, weaponMenuButton
     };
 
@@ -197,5 +265,12 @@ public class Assets {
 
     public static final AssetDescriptor[] ModiScreenAssets = {
             multi,local,playButton,menuBackground,playerNumber3,playerNumber2,playerNumber4,playerNumber5,
+    };
+
+    public static final AssetDescriptor[] Music = {
+    		menuSound, tickSound, gameOverSound, grenadeExplosionSound, gunShotSound, gunRelease, airstrikeSound, airstrikeExplosion,
+    		airballSound, bazookaShotSound, raiseLimitSound, map1Sound, map2Sound, map3Sound, map4Sound, walkLoop, noAmmo, fallDown,
+    		roundStart, landSound, virusSound, throwSound, windMedium, windHeavy, targetSound, grenadeContact, popSound, destroySound,
+
     };
 }

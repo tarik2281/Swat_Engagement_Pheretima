@@ -3,7 +3,7 @@ package de.paluno.game;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
-import de.paluno.game.gameobjects.PhysicsObject;
+import de.paluno.game.gameobjects.WorldObject;
 
 
 public class GameCamera {
@@ -13,7 +13,7 @@ public class GameCamera {
     private OrthographicCamera camera;
     // debug camera used for drawing hitboxes, metrics given in meters
     private OrthographicCamera debugCamera;
-    private PhysicsObject cameraFocus;
+    private WorldObject cameraFocus;
 
     private float viewportWidth;
     private float viewportHeight;
@@ -51,11 +51,11 @@ public class GameCamera {
     }
 
     // set the object the camera will follow, or null to follow nothing
-    public void setCameraFocus(PhysicsObject object) {
+    public void setCameraFocus(WorldObject object) {
         cameraFocus = object;
     }
 
-    public PhysicsObject getCameraFocus() {
+    public WorldObject getCameraFocus() {
         return cameraFocus;
     }
 
@@ -85,7 +85,7 @@ public class GameCamera {
     }
 
     public void update(float delta) {
-        if (cameraFocus != null) {
+        if (cameraFocus != null && cameraFocus.getBody() != null) {
             // smooth following the object
             focusDirectionVector.set(cameraFocus.getBody().getPosition()).add(-debugPosition.x, -debugPosition.y);
             focusDirectionVector.nor();

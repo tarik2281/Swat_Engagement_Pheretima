@@ -64,6 +64,13 @@ public class Constants {
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
 
+	public static final Vector2 AIRSTRIKE_SPAWNPOS = new Vector2(1340.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
+	public static final Vector2 AIRSTRIKE_SPAWNPOS2 = new Vector2(1320.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
+	public static final Vector2 AIRSTRIKE_SPAWNPOS3 = new Vector2(1300.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
+
+	public static final int DAMAGE_TYPE_VIRUS = 1;
+	public static final int DAMAGE_TYPE_PROJECTILE = 2;
+
 
 	// key bindings
     public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;
@@ -92,7 +99,7 @@ public class Constants {
     // Weapon constants
     public static final int WEAPON_AMMO_INF = -1;
     public static final int WEAPON_AMMO_RIFLE = 10;
-    public static final int WEAPON_AMMO_THROWABLE = 5;
+    public static final int WEAPON_AMMO_THROWABLE = 3;
     public static final int WEAPON_AMMO_SPECIAL = 1;
     
     public static final float WEAPON_RIFLE_SPEED = 5.0f;
@@ -110,6 +117,10 @@ public class Constants {
 
 	private Constants() {
 		// An instance should not be created of this class
+	}
+
+	public static float toUnits(float pixels) {
+		return pixels * WORLD_SCALE;
 	}
 
 	public static Vector2 getScreenSpaceVector(Vector2 v) {

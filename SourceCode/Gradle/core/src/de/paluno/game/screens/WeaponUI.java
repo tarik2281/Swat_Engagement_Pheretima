@@ -13,11 +13,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
 import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
-import de.paluno.game.gameobjects.Renderable;
 
 import java.util.ArrayList;
 
-public class WeaponUI implements Renderable {
+public class WeaponUI {
 
     private PlayScreen playScreen;
     private ElementGUI elementGUI;
@@ -84,6 +83,19 @@ public class WeaponUI implements Renderable {
             }
         }));
 
+        // Airstrike Button
+        airstrike = playScreen.getAssetManager().get(Assets.iconAirstrike);
+        textureRegionAirstrike = new TextureRegion(airstrike);
+        regionDrawableAirstrike = new TextureRegionDrawable(textureRegionAirstrike);
+        buttonAirstrike = new ImageButton(regionDrawableAirstrike);
+        buttonAirstrike.addListener((new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("SpecialWeapon Button Clicked");
+                player.equipWeapon(WeaponType.WEAPON_AIRSTRIKE);
+            }
+        }));
+
 
         stage = new Stage();
         table = new Table();
@@ -102,7 +114,11 @@ public class WeaponUI implements Renderable {
         table.add(buttonBazooka);
         table.row();
         table.add(buttonWeaponSpecial);
+        table.row();
+        table.add(buttonAirstrike);
         stage.setDebugAll(false);
+
+        buttonAirstrike.padTop(5);
 
         //sets space to the edge of table
         table.padRight(7);
@@ -208,7 +224,6 @@ public class WeaponUI implements Renderable {
     }
 
 
-    @Override
     public void render(SpriteBatch batch, float delta) {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();

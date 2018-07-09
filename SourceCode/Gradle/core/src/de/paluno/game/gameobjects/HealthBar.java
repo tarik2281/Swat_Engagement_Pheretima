@@ -1,5 +1,6 @@
 package de.paluno.game.gameobjects;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -9,18 +10,18 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Align;
 import de.paluno.game.Constants;
 
-public class HealthBar implements Renderable {
-
-    private World world;
+public class HealthBar extends WorldObject {
     private Worm worm;
 
     private BitmapFont font;
     private GlyphLayout layout;
 
-    public HealthBar(World world, Worm worm) {
-        this.world = world;
+    public HealthBar(Worm worm) {
         this.worm = worm;
+    }
 
+    @Override
+    public void setupAssets(AssetManager manager) {
         // TODO: load font from AssetManager
         font = new BitmapFont();
         // the text moves shaky if we use integer positions
@@ -32,11 +33,11 @@ public class HealthBar implements Renderable {
     @Override
     public void render(SpriteBatch batch, float delta) {
         Body body = worm.getBody();
-        if (body == null) {
+        /*if (body == null) {
             // the worm associated with this HealthBar does not exist anymore so just remove this object from the game
             world.forgetAfterUpdate(this);
             return;
-        }
+        }*/
         if (worm.getName() != null) {
             setText(String.valueOf(worm.getName() + "\n" + worm.getHealth()));
         }
