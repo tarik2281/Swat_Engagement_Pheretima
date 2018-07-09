@@ -160,9 +160,10 @@ public abstract class WorldHandler implements Disposable {
             addWeapon(player, WeaponType.WEAPON_GUN);
             addWeapon(player, WeaponType.WEAPON_SPECIAL);
             addWeapon(player, WeaponType.WEAPON_AIRSTRIKE);
+            addWeapon(player, WeaponType.WEAPON_TELEPORTER);
 
             for (int j = 0; j < numWorms; j++) {
-                Worm worm = addWorm(player, j);
+                Worm worm = addWorm(player, j,"");
                 worm.setPosition(getRandomSpawnPosition());
             }
         }
@@ -296,8 +297,8 @@ public abstract class WorldHandler implements Disposable {
         player.addWeapon(weapon);
     }
 
-    public Worm addWorm(Player player, int wormNumber) {
-        Worm worm = player.addWorm(wormNumber);
+    public Worm addWorm(Player player, int wormNumber, String name) {
+        Worm worm = player.addWorm(wormNumber, name);
         world.registerAfterUpdate(worm);
         return worm;
     }

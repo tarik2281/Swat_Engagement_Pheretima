@@ -97,7 +97,7 @@ public class Weapon {
 				output.add(projectile);
 				output.add(projectile2);
 				output.add(projectile3);
-			}
+			} // setTransform Method spawns the current Worm to the selected position
 			else if (type == WeaponType.WEAPON_TELEPORTER){
                 worm.getBody().setTransform(indicator.getPosition().x, indicator.getPosition().y, 0);
             }

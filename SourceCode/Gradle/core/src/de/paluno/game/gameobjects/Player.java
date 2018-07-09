@@ -96,7 +96,7 @@ public class Player implements Disposable {
 					equipWeapon(WeaponType.WEAPON_AIRSTRIKE);
 					break;
                 case Constants.KEY_SELECT_WEAPON_6:
-                    equipWeapon(WeaponType.TELEPORTER);
+                    equipWeapon(WeaponType.WEAPON_TELEPORTER);
                     break;
 			}
 		}
@@ -129,7 +129,7 @@ public class Player implements Disposable {
 	public Player(int playerNumber) {
 		this.playerNum = playerNumber;
 
-		worms = new ArrayList<>(names);
+		worms = new ArrayList<>();
 		weapons = new ArrayList<>();
 
 		EventManager.getInstance().addListener(eventListener, EventManager.Type.WormDied);
@@ -144,8 +144,8 @@ public class Player implements Disposable {
 		weapons.add(weapon);
 	}
 
-	public Worm addWorm(int wormNumber) {
-		Worm worm = new Worm(this, wormNumber);
+	public Worm addWorm(int wormNumber, String name) {
+		Worm worm = new Worm(this, wormNumber, name);
 		worms.add(wormNumber, worm);
 		numWormsAlive++;
 		return worm;

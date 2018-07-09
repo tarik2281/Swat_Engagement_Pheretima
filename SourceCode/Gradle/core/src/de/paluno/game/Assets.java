@@ -48,7 +48,7 @@ public class Assets {
     public static final AssetDescriptor<Texture> teamMenuScreen5 =
             new AssetDescriptor<Texture>("TeamMenuScreen5.png", Texture.class);
 
-    //PlayerMenuScreen
+    //LoginScreen
     public static final AssetDescriptor<Texture> playerMenuScreen2 =
             new AssetDescriptor<Texture>("PlayerMenuScreen2.png", Texture.class);
     public static final AssetDescriptor<Texture> playerMenuScreen3 =
@@ -73,11 +73,11 @@ public class Assets {
     public static final AssetDescriptor<Map> map1 =
             new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
     public static final AssetDescriptor<Map> map2 =
-            new AssetDescriptor<Map>("Map2SEP.tmx", Map.class);
+            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
     public static final AssetDescriptor<Map> map3 =
-            new AssetDescriptor<Map>("Map3SEP.tmx", Map.class);
+            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
     public static final AssetDescriptor<Map> map4 =
-            new AssetDescriptor<Map>("Map4SEP.tmx", Map.class);
+            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
 
     public static AssetDescriptor<Map> getMapByIndex(int index) {
         switch (index) {
@@ -241,7 +241,7 @@ public class Assets {
 
     public static final AssetDescriptor[] MenuScreenAssets = {
             menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
-            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground
+            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground,menuBackground
     };
 
     public static final AssetDescriptor[] PlayScreenAssets = {
@@ -254,17 +254,17 @@ public class Assets {
             gameOverScreen1, gameOverScreen2, menuButton
     };
 
-    public static final AssetDescriptor[] TeamMenuScreenAssets = {
-            playButton,teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5,teamMenuScreenBackground,random
-    };
 
     public static final AssetDescriptor[] PlayerMenuScreenAssets = {
             playButton,playerMenuScreen2,playerMenuScreen3,playerMenuScreen4,playerMenuScreen5,teamMenuScreenBackground,random,
-            teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5
+            teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5,menuBackground
     };
 
-    public static final AssetDescriptor[] ModiScreenAssets = {
-            multi,local,playButton,menuBackground,playerNumber3,playerNumber2,playerNumber4,playerNumber5,
+
+    public static final AssetDescriptor[] LobbyScreenAssets = {
+            map1Thumbnail,map2Thumbnail,map3Thumbnail,map4Thumbnail,worms1Button,
+            worms2Button,worms3Button,worms4Button,worms5Button,menuBackground,  menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
+            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground
     };
 
     public static final AssetDescriptor[] Music = {
