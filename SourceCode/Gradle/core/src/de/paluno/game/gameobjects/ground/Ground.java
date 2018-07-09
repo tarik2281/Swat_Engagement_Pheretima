@@ -2,9 +2,11 @@ package de.paluno.game.gameobjects.ground;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 import com.badlogic.gdx.physics.box2d.*;
+import de.paluno.game.Constants;
 import de.paluno.game.Map;
 import de.paluno.game.UserData;
 import de.paluno.game.gameobjects.*;
@@ -26,6 +28,8 @@ public class Ground extends WorldObject {
     private ExplosionMaskRenderer maskRenderer;
     private OrthogonalTiledMapRenderer mapRenderer;
     private Map map;
+    private TiledMapTileLayer tileLayer;
+    private TiledMapTileLayer backgroundLayer;
 
     private ArrayList<CollisionObject> collisionObjects;
     private ArrayList<CollisionObject> queriedObjects;
@@ -49,6 +53,8 @@ public class Ground extends WorldObject {
 
     public Ground(Map map, ExplosionMaskRenderer renderer) {
         this.map = map;
+        this.tileLayer = (TiledMapTileLayer)map.getTiledMap().getLayers().get(Constants.TILE_LAYER);
+        this.backgroundLayer = (TiledMapTileLayer)map.getTiledMap().getLayers().get(Constants.BACKGROUND_LAYER);
 
         this.maskRenderer = renderer;
 
@@ -135,10 +141,20 @@ public class Ground extends WorldObject {
 
         batch.end();
 
+        mapRenderer.setView(getWorld().getCamera().getOrthoCamera());
+        if (backgroundLayer != null) {
+            batch.begin();
+            mapRenderer.renderTileLayer(backgroundLayer);
+            batch.end();
+        }
+
         maskRenderer.enableMask();
 
-        mapRenderer.setView(getWorld().getCamera().getOrthoCamera());
-        mapRenderer.render();
+        if (tileLayer != null) {
+            batch.begin();
+            mapRenderer.renderTileLayer(tileLayer);
+            batch.end();
+        }
 
         maskRenderer.disableMask();
 

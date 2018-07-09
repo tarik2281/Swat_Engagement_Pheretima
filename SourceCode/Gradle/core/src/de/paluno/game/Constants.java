@@ -25,6 +25,7 @@ public class Constants {
 	public static final Color PLAYER_4_COLOR = Color.VIOLET;
 	public static final Color PLAYER_5_COLOR = Color.LIME;
 
+	public static final String BACKGROUND_LAYER = "BackgroundLayer";
 	public static final String TILE_LAYER = "TileLayer";
 	public static final String COLLISION_LAYER = "CollisionLayer";
 	public static final String SPAWN_LAYER = "SpawnPositions";

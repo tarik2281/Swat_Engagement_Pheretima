@@ -189,15 +189,11 @@ public class Match {
         if (numPlayersAlive <= 0)
             return;
 
-        boolean shouldShift = true;
-        if (currentPlayerIndex == -1)
-            shouldShift = false;
-
         do {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
         } while (players.get(currentPlayerIndex).isDefeated());
 
-        if (shouldShift && shiftWorms)
+        if (shiftWorms)
             players.get(currentPlayerIndex).shiftTurn();
     }
 }

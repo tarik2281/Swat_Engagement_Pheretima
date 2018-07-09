@@ -16,12 +16,15 @@ public class Player {
     private int currentWormIndex;
     private ArrayList<Worm> worms;
     private int numWormsAlive;
+    private boolean roundEnded;
     private boolean disconnected;
 
     public Player(User user, int number) {
         this.controllingUser = user;
 
         this.number = number;
+        currentWormIndex = -1;
+        roundEnded = false;
 
         worms = new ArrayList<>();
     }
@@ -75,6 +78,11 @@ public class Player {
             return;
 
         do {
+            if (++currentWormIndex >= worms.size()) {
+                currentWormIndex = 0;
+                roundEnded = true;
+            }
+
             currentWormIndex = (currentWormIndex + 1) % worms.size();
         } while (worms.get(currentWormIndex).isDead());
     }
@@ -105,5 +113,13 @@ public class Player {
 
     public User getControllingUser() {
         return controllingUser;
+    }
+
+    public boolean isRoundEnded() {
+        return roundEnded;
+    }
+
+    public void setRoundEnded(boolean roundEnded) {
+        this.roundEnded = roundEnded;
     }
 }
