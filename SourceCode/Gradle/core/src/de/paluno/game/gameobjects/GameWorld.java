@@ -49,6 +49,19 @@ public class GameWorld implements Disposable {
             }
         }
 
+       if (UserData.getType(fixtureA) == UserData.ObjectType.turret && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+          return false;
+      }        else if (UserData.getType(fixtureB) == UserData.ObjectType.turret && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            return false;
+       }
+       
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Projectile && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+           return false;
+       }
+        else if (UserData.getType(fixtureB) == UserData.ObjectType.Projectile && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            return false;
+        }
+        
         return true;
     };
 

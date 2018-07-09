@@ -98,11 +98,10 @@ public class Weapon {
 				output.add(projectile2);
 				output.add(projectile3);
 			}else if(getWeaponType() == WeaponType.WEAPON_TURRET) {
-				Projectile projectile = new Projectile(worm,
-						this.type, Constants.AIRSTRIKE_SPAWNPOS,
+				Turret turret = new Turret(worm, type, Constants.AIRSTRIKE_SPAWNPOS,
 						Constants.AIRSTRIKE_SPAWNPOS2);
 				
-				output.add(projectile);
+				output.add(turret);
 			}
 			
 			else {

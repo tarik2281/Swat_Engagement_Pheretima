@@ -1,10 +1,14 @@
 package de.paluno.game.gameobjects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -16,50 +20,48 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.GameState;
 import de.paluno.game.UserData;
 import de.paluno.game.screens.PlayScreen;
 
-public class Turret extends WorldObject {
+public class Turret extends Projectile {
 
 	public static class SnapshotData {
 
 		private Vector2 position;
 		private Vector2 direction;
 		private WeaponType weaponType;
-
+         
 		private int playerNumber;
 		private int wormNumber;
-
+         
 		public Vector2 getPosition() {
 			return position;
 		}
 	}
+	private static float  PROJECTILE_RADIUS = 0.3f;
+	private static float radiusturret= 1007.5f;
+	private static float impulseturret = 0.0f;
 	
 	private GameState currentGameState = GameState.NONE;
-	private	ShotDirectionAction shotdirectionsaction;
+
 	private PlayScreen screen;
 	private Body body;
-	private Vector2 position;
 	private GameWorld world;
 	private Player player;
-	private float timetoshoot=3;
-	private boolean shoot=false;
+	private Projectile projectile;
+
     private Texture texture;
     private Sprite sprite;
     private int numworm;
-    private Worm currentWorm;
+  
+    private float degrees;
+    private Explosion explosionsimulate;
     
 	
-	public Turret(Worm worm ,GameWorld world, Vector2 position) {
-		this.position = position;
-		this.world= world;
-		this.currentWorm= worm;
-		
-		
-		shotdirectionsaction = new ShotDirectionAction();
-		sprite = new Sprite(texture);
-		sprite.setOriginCenter();
+	public Turret(Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
+		super(shootingWorm,weaponType,position,direction);
 		
 	}
 	
@@ -70,26 +72,30 @@ public class Turret extends WorldObject {
 	}
 
 	@Override
-	protected Body onSetupBody(World world) {
-		BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.position.set(currentWorm.getPosition().x, currentWorm.getPosition().y);
+	public Body onSetupBody(World world) {
+		 BodyDef bodyDef = new BodyDef();
+	        bodyDef.type = BodyDef.BodyType.StaticBody;
+	        bodyDef.position.set(position.x, position.y);
+	        bodyDef.bullet = true;
 
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(30 * Constants.WORLD_SCALE, 30 * Constants.WORLD_SCALE);
-      
-        Body body = world.createBody(bodyDef);
-        
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
+	        CircleShape shape = new CircleShape();
+	        shape.setRadius(PROJECTILE_RADIUS);
+	        CircleShape poly = new CircleShape();
+	        poly.setRadius(Constants.TURRET_RADIUS);
+	        Body body = null;
+		bodyDef.position.set(shootingWorm.getPosition().x  + (shootingWorm.getOrientation()* 50.0f * Constants.WORLD_SCALE), shootingWorm.getPosition().y);;
+    	bodyDef.fixedRotation = true;
+    	FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = poly;
         fixtureDef.density = Constants.TURRET_DENSITY;
-        fixtureDef.friction = 1.0f;
-        fixtureDef.restitution = 0.0f;
-        
+        body = world.createBody(bodyDef);
         Fixture fix = body.createFixture(fixtureDef);
-        fix.setUserData(new UserData(UserData.ObjectType.turret, this));
-        
-        shape.dispose();
+        body.setGravityScale(1.0f);
+
+        fix.setUserData(new UserData(UserData.ObjectType.turret,this));
+    
+    
+    shape.dispose();
 
         return body;
 	}
@@ -103,11 +109,63 @@ public class Turret extends WorldObject {
 	@Override
 	public void render(SpriteBatch batch, float delta) {
 		// TODO Auto-generated method stub
-		 Vector2 position = Constants.getScreenSpaceVector(getPosition());
-
-	        sprite.setOriginBasedPosition(position.x, position.y);
-	        sprite.draw(batch);
+		 super.render(batch, delta);
 	}
+	
+	
+	public Vector2 directions() {
+		Vector2 result= new Vector2();
+		
+	Vector2 position1 = Constants.getScreenSpaceVector(getAdversaryWorm().getBody().getPosition());
+	Vector2 position2 = Constants.getScreenSpaceVector(getBody().getPosition());
+		
+	result.x= -position2.x+position1.x;
+	result.y=-position2.y+position1.y;
+		
+	return result;
+		
+	
+	}
+	public float getAngle() {
+	degrees = this.directions().angle(new Vector2(1, 0));
+		return degrees;
+		
+	}
+	
+	public void shoot(List<Projectile> output) {
+
+        	Projectile projectile = new Projectile(null, WeaponType.WEAPON_TURRET_PROJECTILE, getPosition(), directions().nor());
+        	output.add(projectile);
+        	}
+        
+	
+	
+	public Worm getAdversaryWorm() {
+		explosionsimulate = new Explosion(getPosition(),radiusturret, impulseturret);
+        Worm worm =null;
+        int number=1;
+            ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosionsimulate);
+            while (number>0) {
+            	 for (Worm worm2 : affectedWorms) {
+            		 if (worm2 != shootingWorm) {
+						
+				worm = worm2;
+            		 }
+            		 number--;
+            	 }
+				
+            	 
+			}
+            
+	return worm;
+			}
+public void explodeturret() {
+	removeFromWorld();
+    getWorld().forgetAfterUpdate(this);
+    
+}
+	
+	
 	
 	//public void  automaticshoot(Worm worm) {
 		 
@@ -121,15 +179,15 @@ public class Turret extends WorldObject {
 		//world.makeSnapshot();
 		//setshoot(false);
 	//}
-	public void setshotdirectionaction(ShotDirectionAction s) {
-		this.shotdirectionsaction=s;
-	}
-	public ShotDirectionAction getSchotDirectionaction() {
-		return shotdirectionsaction;
-	}
-  
-	  public boolean getShoot() {return shoot;}
-	  public void setshoot(boolean s) {this.shoot=s;}
+//	public void setshotdirectionaction(ShotDirectionAction s) {
+//		this.shotdirectionsaction=s;
+//	}
+//	public ShotDirectionAction getSchotDirectionaction() {
+//		return shotdirectionsaction;
+//	}
+//  
+//	  public boolean getShoot() {return shoot;}
+//	  public void setshoot(boolean s) {this.shoot=s;}
 	  
 	  
 	/* public void AutomaticShoot() {
@@ -143,9 +201,31 @@ public class Turret extends WorldObject {
 	 }
 		*/
 	 
-	  public SnapshotData makeSnapshot() {
-			SnapshotData data = new SnapshotData();
-			return data;
-		}
+//	  public SnapshotData makeSnapshot() {
+//			SnapshotData data = new SnapshotData();
+//			return data;
+//		}
+
+//public Vector2 directions1() {
+//	Vector2 result= new Vector2();
+//	
+//Vector2 position1 = worm.getPosition();
+//Vector2 position2 = getPosition();
+//
+//result.x= -position2.x+position1.x;
+//result.y=-position2.y+position1.y;
+//	
+//return result;
+//	
+//
+//}
+//public void shoot(List<Projectile> output) {
+////	explosion = new Explosion(getPosition(),radiusturret, impulseturret);
+////    ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
+////    for (Worm worm : affectedWorms) {
+////    	if (worm.getPlayerNumber() != shootingWorm.getPlayerNumber()) {
+//    	Projectile projectile = new Projectile(null, WeaponType.WEAPON_TURRET_PROJECTILE, getPosition(), directions().nor());
+//    	output.add(projectile);
+//    	}
 }
 

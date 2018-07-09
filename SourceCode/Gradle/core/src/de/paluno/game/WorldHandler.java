@@ -38,7 +38,7 @@ public abstract class WorldHandler implements Disposable {
     private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
     private ArrayList<Projectile> mines;
-    private ArrayList<Projectile> turrets;
+    private ArrayList<Turret> turrets;
     private int projectileId = 0;
     private Timer.Task mineEndTurnTask = new Timer.Task() {
 		
@@ -198,7 +198,7 @@ public abstract class WorldHandler implements Disposable {
     	Timer.schedule(mineEndTurnTask, 3.0f);
     }
     
-    protected void addTurret(Projectile projectile) {
+    protected void addTurret(Turret projectile) {
     	unequipWeapon();
     	turrets.add(projectile);
     	world.registerAfterUpdate(projectile);
@@ -214,7 +214,7 @@ public abstract class WorldHandler implements Disposable {
     		addMine(projectile);
     		return;
     	}else if(projectile.getWeaponType() == WeaponType.WEAPON_TURRET) {
-    		addTurret(projectile);
+    		addTurret((Turret) projectile);
     		return;
     	}
     	
@@ -536,11 +536,23 @@ public abstract class WorldHandler implements Disposable {
             }
         }
     }
-
+ 
     protected void setIdle() {
         System.out.println("Setting idle");
+        if (currentPlayer != -1)
+        	for (Turret turret : turrets) {
+        		weaponProjectileCache.clear();
+        		turret.shoot(weaponProjectileCache);
+        		weaponProjectileCache.forEach(this::addProjectile);
+        		
+        	
+        	}
         currentGameState = GameState.IDLE;
+        	
+       
         requestNextTurn();
+        
+        
     }
 
     public GameWorld getWorld() {

@@ -1,4 +1,4 @@
-package de.paluno.game;
+ package de.paluno.game;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.physics.box2d.*;
@@ -172,6 +172,24 @@ public class CollisionHandler implements ContactListener {
         	Worm worm = UserData.getObject(fixA);
         	worm.beginContact();
         }
+        
+        // projectile->turret
+        
+        if (UserData.getType(fixA) == UserData.ObjectType.turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
+
+        	Projectile projectile = UserData.getObject(fixA);
+        	
+        		projectile.explode(null, true);
+            
+            System.out.println("Projectile collided with Turret");
+
+        } else if (UserData.getType(fixB) == UserData.ObjectType.turret && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
+        	Projectile projectile = UserData.getObject(fixB);
+        		projectile.explode(null, true);
+        	
+            System.out.println("Projectile collided with Turret");
+        }
+       
     }
 
     /**
