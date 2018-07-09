@@ -19,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 
 import de.paluno.game.Assets;
 import de.paluno.game.SEPGame;
@@ -30,18 +31,18 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private SpriteBatch batch;
 	private WinningPlayer winningPlayer;
 	private SEPGame game;
-	private Stage restartStage;
+	private Stage stage;
 	private Table table;
-	private Label label;
+	private Table myFontTable;
 	private ImageButton restartButton;
 	private Texture restartButtonTexture;
 	private TextureRegion restartButtonTextureRegion;
 	private TextureRegionDrawable restartButtonTextureDrawable;
 	private Music overSound;
-	private BitmapFont font;
-	private CharSequence str;
-	private Skin skin;
-	private boolean first;
+	private Label.LabelStyle labelStyle;
+	private BitmapFont myFont;
+	private Label label;
+	private CharSequence text;
 	
 	
 	public GameOverScreen(SEPGame game, WinningPlayer winningPlayer) {
@@ -59,10 +60,9 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	public void show() {
 		//GameOverScreen
 		batch = new SpriteBatch();
-		table = new Table(skin);
-		label = new Label(str, skin);
-		font = new BitmapFont();
-		skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
+		table = new Table();
+		myFontTable = new Table();
+		labelStyle = new Label.LabelStyle();
 		
 		Texture texture = null;
 		
@@ -73,20 +73,19 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		switch (winningPlayer) {
 			case PLAYERONE:
 				overSound.play();
-				first = true;
 				texture = game.getAssetManager().get(Assets.gameOverScreen);
 				break;
 			case PLAYERTWO:
 				overSound.play();
-				first = false;
 				texture = game.getAssetManager().get(Assets.gameOverScreen);
 				break;
 		}
+		
 		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
 		
 		//Restart button
-		restartStage = new Stage();
-		Gdx.input.setInputProcessor(restartStage);
+		stage = new Stage();
+		Gdx.input.setInputProcessor(stage);
 		
 		restartButtonTexture = game.getAssetManager().get(Assets.menuButton);
         restartButtonTextureRegion = new TextureRegion(restartButtonTexture);
@@ -99,12 +98,24 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
             }
         });
         
-        restartStage.addActor(table);
-        table.add(label);
+        //BitmapFont
+        myFont = new BitmapFont(Gdx.files.internal("GameOverScreenFonts.fnt"));
+        labelStyle.font = myFont;
+        
+		label = new Label("Player 1 hat gewonnen.", labelStyle);
+        
+        stage.addActor(table);
+        stage.addActor(myFontTable);
+        
+        myFontTable.add(label);
+        myFontTable.setFillParent(true);
+        myFontTable.center();
+        myFontTable.padBottom(100);
+        
         table.add(restartButton);
         table.setFillParent(true);
         table.bottom();
-        table.padBottom(100);
+        table.padBottom(200);
         table.padRight(30);
 	}
 	
@@ -112,22 +123,15 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		batch.begin();
-		if(first) {
-			font.draw(batch, "hat gewonnen.", 325, 425);
-		}else {
-			font.draw(batch, "hat gewonnen.", 325, 425);
-		}		
 		sprite.draw(batch);
 		batch.end();
 		
-		restartStage.act(delta);
-		restartStage.draw();
+		stage.act(delta);
+		stage.draw();
 	}
 	
 	public void hide(){
 		batch.dispose();
-		restartStage.dispose();
-		overSound.dispose();
-		font.dispose();
+		stage.dispose();
 	}
 }
