@@ -17,11 +17,12 @@ public class Worm extends WorldObject {
      * Inner class to create a copy of the data necessary for the replay
      */
 	public static class SnapshotData {
-        private int characterNumber;
+        public int characterNumber;
         private Vector2 position;
         private int health;
         private int orientation;
         private boolean isInfected;
+        private boolean isDead;
     }
 
     public static class DamageEvent {
@@ -45,6 +46,24 @@ public class Worm extends WorldObject {
 
 		public int getDamageType() {
 			return damageType;
+		}
+	}
+
+	public static class DeathEvent {
+		private Worm worm;
+		private int deathType;
+
+		public DeathEvent(Worm worm, int deathType) {
+			this.worm = worm;
+			this.deathType = deathType;
+		}
+
+		public Worm getWorm() {
+			return worm;
+		}
+
+		public int getDeathType() {
+			return deathType;
 		}
 	}
 
@@ -92,6 +111,15 @@ public class Worm extends WorldObject {
 		addChild(new HealthBar(this));
 	}
 
+	public void setFromSnapshot(SnapshotData data) {
+		this.characterNumber = data.characterNumber;
+		setPosition(data.position);
+		this.health = data.health;
+		this.orientation = data.orientation;
+		this.isInfected = data.isInfected;
+		this.isDead = data.isDead;
+	}
+
 
 	@Override
 	public void setupAssets(AssetManager manager) {
@@ -112,7 +140,7 @@ public class Worm extends WorldObject {
 
 		// Are we supposed to be the new host of a super deadly virus? Create it!
 		if (createVirusFixture)
-			createVirusFixture();
+			createVirusFixture(getBody());
 
         // Now we apply movements - therefore we need our current position
 		Vector2 currentPos = getPosition();
@@ -153,10 +181,9 @@ public class Worm extends WorldObject {
             this.getBody().applyLinearImpulse(impulse, 0.0f, currentPos.x, currentPos.y, true);
         }
 		
-		// Worm fell off the world rim? Is dead.
-		if (!getWorld().isInWorldBounds(getBody()) && !isDead()) {
-			EventManager.getInstance().queueEvent(EventManager.Type.FallOut, null);
-			die();
+		// Worm fell off the world rim? Is ded.
+		if (!getWorld().isInWorldBounds(getBody())) {
+			die(Constants.DEATH_TYPE_FALL_DOWN);
 		}
 	}
 	
@@ -256,7 +283,7 @@ public class Worm extends WorldObject {
 		
 		// Infected this round - breed the devastating virus!
 		if (isInfected)
-			createVirusFixture();
+			createVirusFixture(body);
 
 		// Get rid of temporary material properly
 		bodyRect.dispose();
@@ -273,7 +300,7 @@ public class Worm extends WorldObject {
 	/**
 	 * Method to setup the Fixture of our Virus hitbox sensor for further infection spreading
 	 */
-	private void createVirusFixture() {
+	private void createVirusFixture(Body body) {
 		CircleShape circle = new CircleShape();
 		circle.setRadius(Constants.VIRUS_RADIUS);
 
@@ -281,7 +308,7 @@ public class Worm extends WorldObject {
 		fixtureDef.shape = circle;
 		fixtureDef.isSensor = true;
 
-		virusFixture = this.getBody().createFixture(fixtureDef);
+		virusFixture = body.createFixture(fixtureDef);
 		virusFixture.setUserData(new UserData(ObjectType.Virus, this));
 		circle.dispose();
 		createVirusFixture = false;
@@ -365,6 +392,7 @@ public class Worm extends WorldObject {
 	 */
 	public void equipWeapon(Weapon weapon) {
 		EventManager.getInstance().queueEvent(Type.WormEquipWeapon, weapon);
+
 		currentWeapon = weapon;
 		weaponAnimation = weapon.createAnimatedSprite();
 
@@ -410,7 +438,7 @@ public class Worm extends WorldObject {
 		if (health <= 0) {
 			// Is dead, kill it
 			health = 0;
-			die();
+			die(Constants.DEATH_TYPE_NO_HEALTH);
 		}
 	}
 
@@ -423,9 +451,10 @@ public class Worm extends WorldObject {
 	/**
 	 * Method to handle characters death - cleanup and stuff
 	 */
-	public void die() {
+	public void die(int deathType) {
 		if (!isDead) {
-			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
+			EventManager.getInstance().queueEvent(EventManager.Type.FallOut, null);
+			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, new DeathEvent(this, deathType));
 			//this.player.characterDied(this.characterNumber);
 			//this.setBodyToNullReference();
 			isDead = true;
@@ -588,9 +617,10 @@ public class Worm extends WorldObject {
 
 		data.characterNumber = characterNumber;
 		data.health = health;
-		data.position = new Vector2(getBody().getPosition());
+		data.position = new Vector2(getPosition());
 		data.orientation = orientation;
 		data.isInfected = isInfected;
+		data.isDead = isDead;
 
 		return data;
 	}

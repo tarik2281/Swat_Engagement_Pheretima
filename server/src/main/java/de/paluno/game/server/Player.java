@@ -1,31 +1,50 @@
 package de.paluno.game.server;
 
-import com.esotericsoftware.kryonet.Connection;
 import de.paluno.game.interfaces.PlayerData;
 import de.paluno.game.interfaces.WormData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
 
-    private Connection connection;
+    private User controllingUser;
 
-    private String name;
     private Runnable defeatedListener;
     private int number;
     private boolean ready;
     private int currentWormIndex;
     private ArrayList<Worm> worms;
     private int numWormsAlive;
+    private boolean disconnected;
 
-    public Player(Connection connection, int number) {
-        this.connection = connection;
+    public Player(User user, int number) {
+        this.controllingUser = user;
 
         this.number = number;
+
+        worms = new ArrayList<>();
     }
 
     public void setDefeatedListener(Runnable listener) {
         this.defeatedListener = listener;
+    }
+
+    public void disconnected() {
+        this.disconnected = true;
+
+        worms.forEach(worm -> worm.setDead(true));
+    }
+
+    public Worm addWorm(int wormNumber) {
+        Worm worm = new Worm(number, wormNumber);
+        worm.setDeathListener(() -> {
+            if (--numWormsAlive == 0 && defeatedListener != null)
+                defeatedListener.run();
+        });
+        numWormsAlive++;
+        worms.add(worm);
+        return worm;
     }
 
     public void setupFromData(PlayerData data) {
@@ -47,6 +66,10 @@ public class Player {
         }
     }
 
+    public List<Worm> getWorms() {
+        return worms;
+    }
+
     public void shiftTurn() {
         if (numWormsAlive == 0)
             return;
@@ -64,10 +87,6 @@ public class Player {
         return worms.get(wormNumber);
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
     public int getNumber() {
         return number;
     }
@@ -82,5 +101,9 @@ public class Player {
 
     public boolean isDefeated() {
         return numWormsAlive <= 0;
+    }
+
+    public User getControllingUser() {
+        return controllingUser;
     }
 }

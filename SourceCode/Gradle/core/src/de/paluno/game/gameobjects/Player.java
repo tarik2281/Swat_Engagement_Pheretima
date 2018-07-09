@@ -18,7 +18,7 @@ public class Player implements Disposable {
      */
 	public static class SnapshotData {
 		private int playerNumber;
-		private Worm.SnapshotData[] wormData;
+		public Worm.SnapshotData[] wormData;
 		private Weapon.SnapshotData[] weaponData;
 
 		public int getPlayerNumber() {
@@ -43,8 +43,8 @@ public class Player implements Disposable {
 	private EventManager.Listener eventListener = (eventType, data) -> {
 		switch (eventType) {
 			case WormDied: {
-				Worm worm = (Worm)data;
-				if (worm.getPlayerNumber() == playerNum && !isDefeated() && --numWormsAlive <= 0) {
+				Worm.DeathEvent deathEvent = (Worm.DeathEvent)data;
+				if (deathEvent.getWorm().getPlayerNumber() == playerNum && !isDefeated() && --numWormsAlive <= 0) {
 					EventManager.getInstance().queueEvent(EventManager.Type.PlayerDefeated, this);
 				}
 				break;
@@ -71,10 +71,10 @@ public class Player implements Disposable {
                 	shoot();
                     break;
 				case Constants.KEY_ROTATE_INDICATOR_DOWN:
-					//getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
+					//getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
 					break;
 				case Constants.KEY_ROTATE_INDICATOR_UP:
-					//getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_UP);
+					//getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
                 case Constants.KEY_SELECT_WEAPON_1:
                 	equipWeapon(WeaponType.WEAPON_GUN);
@@ -105,12 +105,12 @@ public class Player implements Disposable {
 						getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
 					break;
 				case Constants.KEY_ROTATE_INDICATOR_DOWN:
-					//if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_DOWN)
-					//	getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					//if (getWeaponIndicator().getRotationMovement() == Constants.MOVEMENT_DOWN)
+					//	getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 					break;
 				case Constants.KEY_ROTATE_INDICATOR_UP:
-					//if (getShotDirectionIndicator().getRotationMovement() == Constants.MOVEMENT_UP)
-					//	getShotDirectionIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+					//if (getWeaponIndicator().getRotationMovement() == Constants.MOVEMENT_UP)
+					//	getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 					break;
 			}
 		}
@@ -124,13 +124,18 @@ public class Player implements Disposable {
 
 		worms = new ArrayList<>();
 		weapons = new ArrayList<>();
+	}
 
+	public void show() {
 		EventManager.getInstance().addListener(eventListener, EventManager.Type.WormDied);
+	}
+
+	public void hide() {
+		EventManager.getInstance().removeListener(eventListener, EventManager.Type.WormDied);
 	}
 
 	@Override
 	public void dispose() {
-		EventManager.getInstance().removeListener(eventListener, EventManager.Type.WormDied);
 	}
 
 	public void addWeapon(Weapon weapon) {
@@ -287,6 +292,9 @@ public class Player implements Disposable {
 	 * @return That Weapon
 	 */
     public Weapon getWeapon(WeaponType type) {
+    	if (type == WeaponType.WEAPON_GUN)
+    		System.out.println("Equipping gun");
+
 		for (Weapon weapon : weapons)
 			if (weapon.getWeaponType() == type)
 				return weapon;
@@ -348,7 +356,7 @@ public class Player implements Disposable {
 	 */
 	public void shoot() {
 		//if(getCurrentWorm() != null)
-		//	getCurrentWorm().shoot(getShotDirectionIndicator().getAngle());
+		//	getCurrentWorm().shoot(getWeaponIndicator().getAngle());
 		// We're shooting. That means, someone could die.
 		// That means, we want to see him suffer again and again in slow motion.
 		// That means: Capture that shit!
@@ -363,15 +371,15 @@ public class Player implements Disposable {
 
 		data.playerNumber = playerNum;
 
-		//data.wormData = new Worm.SnapshotData[characters.length];
-		//data.weaponData = new Weapon.SnapshotData[weapons.length];
+		data.wormData = new Worm.SnapshotData[worms.size()];
+		data.weaponData = new Weapon.SnapshotData[weapons.size()];
 
-		/*for (int i = 0; i < characters.length; i++)
-			if (characters[i] != null)
-				data.wormData[i] = characters[i].makeSnapshot();*/
+		for (int i = 0; i < worms.size(); i++)
+			if (worms.get(i) != null)
+				data.wormData[i] = worms.get(i).makeSnapshot();
 
-		//for (int i = 0; i < weapons.length; i++)
-		//	data.weaponData[i] = weapons[i].makeSnapshot();
+		for (int i = 0; i < weapons.size(); i++)
+			data.weaponData[i] = weapons.get(i).makeSnapshot();
 
 		return data;
 	}

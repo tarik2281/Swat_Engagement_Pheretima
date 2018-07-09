@@ -9,7 +9,7 @@ public class EventManager {
         WormTookDamage, WormEquipWeapon, WormInfected, WormJumped,
         WormMovement, WormDied, WeaponShoot, ProjectileExploded, GameOver,
         PlayerDefeated, GrenadeCollision, FeetCollision, FallOut, RoundBegin,
-        AirBall, Headshot
+        AirBall, Headshot, Replay, ReplayEnded
     }
 
     public interface Listener {
