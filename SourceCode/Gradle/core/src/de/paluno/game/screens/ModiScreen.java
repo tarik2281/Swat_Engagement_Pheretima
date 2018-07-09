@@ -40,10 +40,20 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         table.setBackground(imageBackground.getDrawable());
 
         textButtonLocal = elementGUI.createTextButton("Local");
-        textButtonLocal.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+        textButtonLocal.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                elementGUI.setSelectedTextButton(textButtonLocal);
+            }
+        });
         textButtonLocal.setSize(300,100);
         textButtonOnline = elementGUI.createTextButton("Online");
-        textButtonOnline.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+        textButtonOnline.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+               elementGUI.setSelectedTextButton(textButtonOnline);
+            }
+        });
         textButtonOnline.setSize(300,100);
         textButtonPlay = elementGUI.createTextButton("Start");
         textButtonPlay.addListener(new ClickListener(){
@@ -53,10 +63,16 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                 game.setLoginScreen();
             }
         });
+        textButtonLocal.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+        textButtonOnline.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+
 
         textButtonLocal.setPosition(330,300);
         textButtonOnline.setPosition(730,300);
         textButtonPlay.setPosition(570,200);
+
+        setSelectedModiButton(textButtonLocal);
+
 
         stage.addActor(table);
         stage.addActor(textButtonLocal);
@@ -66,7 +82,6 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
 
 
         Gdx.input.setInputProcessor(stage);
-        setSelectedModiButton(textButtonLocal);
     }
 
     public void setSelectedModiButton(TextButton button) {

@@ -43,13 +43,14 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private NetworkClient client;
     private ChatWindow chatWindow;
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
+//    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
         this.game = game;
         this.mapNumber = mapNumber;
         this.numWorms = numWorms;
-        this.modi = modi;
-        this.names = names;
-        this.playerNumber = playerNumber;
+//        this.modi = modi;
+//        this.names = names;
+//        this.playerNumber = playerNumber;
 
 
         spriteBatch = new SpriteBatch();
@@ -153,6 +154,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         }
 */
         weaponUI = new WeaponUI(this);
+        weaponUI.setWorldHandler(worldHandler);
         //weaponUI.setPlayer(world.getCurrentPlayer());
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();

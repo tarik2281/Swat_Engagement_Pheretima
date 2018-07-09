@@ -14,7 +14,7 @@ import de.paluno.game.SEPGame;
 import java.util.*;
 
 
-public class PlayerMenuScreen extends ScreenAdapter implements Loadable {
+public class LoginScreen extends ScreenAdapter implements Loadable {
     private SEPGame game;
     private Stage stage;
     private ElementGUI elementGUI;
@@ -31,7 +31,7 @@ public class PlayerMenuScreen extends ScreenAdapter implements Loadable {
             "Chris Brown", "Drake", "Frank Ocean", "Trey Songz", "Eminem",
             "Rihanna", "Beyonce", "Amy Winehouse", "Britney Spears", "J-Lo"));
 
-    public PlayerMenuScreen(SEPGame game) {
+    public LoginScreen(SEPGame game) {
         super();
         this.game = game;
         stage = new Stage();

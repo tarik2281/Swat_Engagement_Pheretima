@@ -330,7 +330,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 }
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
 	default: {
-		font: small
+		font: title
 		fontColorSelected: font-over
 		fontColorUnselected: font-over
 		selection: list-selection

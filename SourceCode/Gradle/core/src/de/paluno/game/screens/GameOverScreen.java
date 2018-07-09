@@ -56,7 +56,8 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 		overSound.setLooping(false);
 		overSound.setVolume(0.1f);switch (winningPlayer) {
 		case PLAYERONE:
-			overSound.play();texture = game.getAssetManager().get(Assets.gameOverScreen1);
+			overSound.play();
+			texture = game.getAssetManager().get(Assets.gameOverScreen1);
 			break;
 		case PLAYERTWO:overSound.play();
 			texture = game.getAssetManager().get(Assets.gameOverScreen2);

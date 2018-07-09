@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
+import de.paluno.game.WorldHandler;
 import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
 
@@ -30,7 +31,7 @@ public class WeaponUI {
 
     // Background of the table
     private Image image, image2;
-    private Player player;
+    private WorldHandler worldHandler;
 
 
     public WeaponUI(PlayScreen playScreen) {
@@ -47,7 +48,7 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Gun ElementGUI Clicked");
-                player.equipWeapon(WeaponType.WEAPON_GUN);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_GUN);
 
             }
         }));
@@ -59,7 +60,7 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Grenade ElementGUI Clicked");
-                player.equipWeapon(WeaponType.WEAPON_GRENADE);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_GRENADE);
             }
         }));
 
@@ -69,7 +70,7 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Bazooka ElementGUI Clicked");
-                player.equipWeapon(WeaponType.WEAPON_BAZOOKA);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_BAZOOKA);
             }
         }));
 
@@ -79,23 +80,9 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("SpecialWeapon ElementGUI Clicked");
-                player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
-
-        // Airstrike Button
-        airstrike = playScreen.getAssetManager().get(Assets.iconAirstrike);
-        textureRegionAirstrike = new TextureRegion(airstrike);
-        regionDrawableAirstrike = new TextureRegionDrawable(textureRegionAirstrike);
-        buttonAirstrike = new ImageButton(regionDrawableAirstrike);
-        buttonAirstrike.addListener((new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println("SpecialWeapon Button Clicked");
-                player.equipWeapon(WeaponType.WEAPON_AIRSTRIKE);
-            }
-        }));
-
 
         stage = new Stage();
         table = new Table();
@@ -114,11 +101,7 @@ public class WeaponUI {
         table.add(buttonBazooka);
         table.row();
         table.add(buttonWeaponSpecial);
-        table.row();
-        table.add(buttonAirstrike);
         stage.setDebugAll(false);
-
-        buttonAirstrike.padTop(5);
 
         //sets space to the edge of table
         table.padRight(7);
@@ -133,7 +116,7 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Airstrike ElementGUI Clicked");
-                //player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                //worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
@@ -147,11 +130,11 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Teleport Clicked");
-                player.equipWeapon(WeaponType.TELEPORTER);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_TELEPORTER);
 
             }
         }));
-        // player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+        // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
 
 
         // Mine ElementGUI
@@ -160,7 +143,7 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Mine ElementGUI Clicked");
-                //  player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                //  worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
@@ -170,7 +153,7 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Artillery ElementGUI Clicked");
-                // player.equipWeapon(WeaponType.WEAPON_SPECIAL);
+                // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
@@ -235,8 +218,8 @@ public class WeaponUI {
         return stage;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
+    public void setWorldHandler(WorldHandler worldHandler) {
+        this.worldHandler = worldHandler;
     }
 }
 

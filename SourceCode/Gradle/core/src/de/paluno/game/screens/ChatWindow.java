@@ -23,6 +23,7 @@ public class ChatWindow implements Disposable {
 
     private Table chatTable;
     private ScrollPane chatScrollPane;
+    private ElementGUI elementGUI;
 
     private DataHandler<ChatMessage> messageHandler = (client, data) -> {
         Gdx.app.postRunnable(() -> {
@@ -32,6 +33,10 @@ public class ChatWindow implements Disposable {
 
     public ChatWindow(NetworkClient client) {
         this.client = client;
+    }
+
+    public Table getTable() {
+        return table;
     }
 
     private void addMessage(int player, String message) {
@@ -52,10 +57,14 @@ public class ChatWindow implements Disposable {
         client.sendObject(chatMessage);
     }
 
+
+
+
     public void initialize() {
         client.registerDataHandler(ChatMessage.class, messageHandler);
+        elementGUI = new ElementGUI();
 
-        skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
+        skin = elementGUI.getSkin();
 
         stage = new Stage();
         table = new Table(skin);
