@@ -2,6 +2,7 @@ package de.paluno.game.interfaces;
 
 public class PlayerData {
 
+    private int clientId;
     private int playerNumber;
     private WormData[] worms;
 
@@ -9,7 +10,8 @@ public class PlayerData {
 
     }
 
-    public PlayerData(int playerNumber, WormData[] worms) {
+    public PlayerData(int clientId, int playerNumber, WormData[] worms) {
+        this.clientId = clientId;
         this.playerNumber = playerNumber;
         this.worms = worms;
     }
@@ -24,5 +26,9 @@ public class PlayerData {
 
     public WormData getWormByNumber(int number) {
         return worms[number];
+    }
+
+    public int getClientId() {
+        return clientId;
     }
 }

@@ -1,8 +1,9 @@
 package de.paluno.game.interfaces;
 
-public class ChatMessage extends MessageData {
+public class ChatMessage extends Message {
 
     private int player;
+    private String userName;
     private String message;
 
     public ChatMessage() {
@@ -13,6 +14,14 @@ public class ChatMessage extends MessageData {
         super(Type.ChatMessage);
 
         this.message = message;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     public void setPlayer(int player) {

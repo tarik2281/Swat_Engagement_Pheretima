@@ -39,7 +39,7 @@ public class HealthBar extends WorldObject {
             return;
         }*/
         if (worm.getName() != null) {
-            setText(String.valueOf(worm.getName() + "\n" + worm.getHealth()));
+            setText(worm.getName() + "\n" + worm.getHealth());
         }
 
         Vector2 position = Constants.getScreenSpaceVector(body.getPosition());
@@ -52,7 +52,7 @@ public class HealthBar extends WorldObject {
     }
 
     private Color getColor() {
-        Color color = Color.BLACK;
+        Color color = Color.WHITE;
 
         switch (worm.getPlayerNumber()) {
             case Constants.PLAYER_NUMBER_1:
@@ -60,6 +60,15 @@ public class HealthBar extends WorldObject {
                 break;
             case Constants.PLAYER_NUMBER_2:
                 color = Constants.PLAYER_2_COLOR;
+                break;
+            case 2:
+                color = Constants.PLAYER_3_COLOR;
+                break;
+            case 3:
+                color = Constants.PLAYER_4_COLOR;
+                break;
+            case 4:
+                color = Constants.PLAYER_5_COLOR;
                 break;
         }
 

@@ -21,14 +21,6 @@ import java.util.ArrayList;
 
 public class Projectile extends WorldObject {
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public static class SnapshotData {
 
         private Vector2 position;
@@ -52,7 +44,6 @@ public class Projectile extends WorldObject {
 
 
     private int id;
-    private Vector2 position;
     private Vector2 direction;
     private WeaponType weaponType;
 
@@ -72,12 +63,20 @@ public class Projectile extends WorldObject {
     private Explosion explosion;
 
     public Projectile(Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
-        this.position = position;
+        setPosition(position);
         this.direction = direction;
 
         this.weaponType = weaponType;
 
         this.shootingWorm = shootingWorm;
+    }
+
+	public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override
@@ -134,7 +133,7 @@ public class Projectile extends WorldObject {
     public Body onSetupBody(World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position.x, position.y);
+        bodyDef.position.set(getPosition());
         bodyDef.bullet = true;
 
         CircleShape shape = new CircleShape();
@@ -257,7 +256,7 @@ public class Projectile extends WorldObject {
     public SnapshotData makeSnapshot() {
         SnapshotData data = new SnapshotData();
 
-        data.position = new Vector2(position);
+        data.position = new Vector2(getPosition());
         data.direction = new Vector2(direction);
         data.weaponType = weaponType;
         data.playerNumber = shootingWorm.getPlayerNumber();

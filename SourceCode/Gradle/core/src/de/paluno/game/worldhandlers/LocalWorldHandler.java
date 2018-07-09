@@ -1,14 +1,19 @@
-package de.paluno.game;
+package de.paluno.game.worldhandlers;
 
 import com.badlogic.gdx.utils.Timer;
+import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Worm;
+import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
 import de.paluno.game.screens.WinningPlayer;
 
 public class LocalWorldHandler extends WorldHandler {
 
     private int numWorms;
+
+    private boolean wormDied;
 
     public LocalWorldHandler(PlayScreen screen, int mapNumber, int numWorms) {
         super(screen, mapNumber);
@@ -43,7 +48,7 @@ public class LocalWorldHandler extends WorldHandler {
             Worm worm = currentPlayer.getCurrentWorm();
 
             if (worm.isInfected()) {
-                worm.takeDamage(Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
+                worm.takeDamage(de.paluno.game.Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
 
                 if (worm.isDead()) {
                     Timer.schedule(new Timer.Task() {
@@ -64,6 +69,8 @@ public class LocalWorldHandler extends WorldHandler {
             setCurrentPlayerTurn(currentPlayer.getPlayerNumber(),
                     currentPlayer.getCurrentWorm().getCharacterNumber());
             getWindHandler().nextWind();
+            getReplay().setWind(getWindHandler().getWind());
+            wormDied = false;
         }
     }
 
@@ -82,6 +89,13 @@ public class LocalWorldHandler extends WorldHandler {
 
     @Override
     protected void requestNextTurn() {
+        if (wormDied && getReplay() != null) {
+            getReplay().addGameData(new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN));
+            EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
+        }
+
+        wormDied = false;
+
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
@@ -90,6 +104,11 @@ public class LocalWorldHandler extends WorldHandler {
                 startTurn();
             }
         }, 0.5f);
+    }
+
+    @Override
+    protected void onWormDied(Worm.DeathEvent event) {
+        wormDied = true;
     }
 
     @Override

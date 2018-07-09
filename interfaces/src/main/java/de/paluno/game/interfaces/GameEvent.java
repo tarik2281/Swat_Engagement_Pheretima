@@ -3,6 +3,7 @@ package de.paluno.game.interfaces;
 public class GameEvent extends GameData {
     public enum Type {
         WORM_DIED,
+        WORM_FELL_DOWN,
         WORM_INFECTED,
         WORM_TOOK_DAMAGE,
         EXPLOSION,
