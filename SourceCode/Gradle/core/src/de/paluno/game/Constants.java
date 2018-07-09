@@ -64,14 +64,17 @@ public class Constants {
 	public static final float CAMERA_FOCUS_TIME = 0.5f;
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
-	public static final float WORM_RADIUS = WORM_HEIGHT / 2.0f;
-
+	public static final float WORM_RADIUS = 7.5f * WORLD_SCALE;
+	
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
 	
 	public static final Vector2 AIRSTRIKE_SPAWNPOS = new Vector2(1340.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS2 = new Vector2(1320.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS3 = new Vector2(1300.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
+	
+	public static final float HEAD_AREA_RADIUS = 6.0f * WORLD_SCALE;
+	public static final int HEADSHOT_DAMAGE = 100;
 
 	public static final int DAMAGE_TYPE_VIRUS = 1;
 	public static final int DAMAGE_TYPE_PROJECTILE = 2;

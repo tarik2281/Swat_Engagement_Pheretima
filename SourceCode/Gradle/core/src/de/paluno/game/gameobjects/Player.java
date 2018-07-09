@@ -37,8 +37,6 @@ public class Player implements Disposable {
 	private int turn = 0;
 	private boolean isRoundEnded = false;
 	boolean indicatorAvailable = false;
-	
-	private Sound gunRelease;
 
 	private int clientId;
 
@@ -79,14 +77,12 @@ public class Player implements Disposable {
 					//getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_UP);
 					break;
                 case Constants.KEY_SELECT_WEAPON_1:
-                	gunRelease.play(0.1f);
                 	equipWeapon(WeaponType.WEAPON_GUN);
                     break;
                 case Constants.KEY_SELECT_WEAPON_2:
 					equipWeapon(WeaponType.WEAPON_GRENADE);
                     break;
                 case Constants.KEY_SELECT_WEAPON_3:
-                	gunRelease.play(0.1f);
 					equipWeapon(WeaponType.WEAPON_BAZOOKA);
                     break;
 				case Constants.KEY_SELECT_WEAPON_4:
@@ -281,32 +277,6 @@ public class Player implements Disposable {
 	/*public World getWorld() {
 		return this.world;
 	}*/
-	
-	/**
-	 * Soft setter method for characterNumber - Set Character as KIA and remove it
-	 * @param charNum - The number of the character that died
-	 */
-	protected void characterDied(int charNum) {
-		// No characters anymore or this one allready dead? Nothing to do here.
-		if(this.numCharacters <= 0 || this.worms.get(charNum) == null)
-			return;
-
-		// It was this Worm's turn? The game must go on!
-		//if (getCurrentWorm() != null && getCurrentWorm().isPlaying())
-		    //world.advanceGameState();
-
-		// Farewell, rendering reference...!
-		//world.forgetAfterUpdate(characters[charNum]);
-		//this.characters[charNum] = null;
-		this.numCharacters--;
-
-		// It was this Worm's turn? So, someone else must play next time
-		if (charNum == turn)
-		    shiftTurn();
-		
-		// And finally - is ded
-		//world.setWormDied(true);
-	}
 	
 	/**
 	 * Soft getter method for number of still alive characters

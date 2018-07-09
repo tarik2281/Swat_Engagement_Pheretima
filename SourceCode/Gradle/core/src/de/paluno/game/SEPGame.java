@@ -17,7 +17,7 @@ public class SEPGame extends Game {
 	private EventManager.Listener listener = (type, data) -> {
 		switch (type) {
 			case GameOver:
-				setGameOver((WinningPlayer)data);
+				setGameOver((String)data);
 				break;
 		}
 	};
@@ -50,8 +50,8 @@ public class SEPGame extends Game {
 		setNextScreen(new PlayScreen(this, mapNumber, numWorms));
 	}
 
-    public void setGameOver(WinningPlayer winningPlayer) {
-	    setNextScreen(new GameOverScreen(this, winningPlayer));
+    public void setGameOver(String name) {
+	    setNextScreen(new GameOverScreen(this, name));
     }
 
 	public AssetManager getAssetManager() {

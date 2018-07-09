@@ -73,10 +73,8 @@ public class Weapon {
 
 	public void shoot(Worm worm, WeaponIndicator indicator, List<Projectile> output) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
+			EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, this);
 			if (getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
-				targetSound.play(0.3f);
-				airstrikeSound.play(0.4f);
-				
 				Vector2 position = indicator.getPosition();
 				
 				Projectile projectile = new Projectile(worm, 
@@ -105,16 +103,12 @@ public class Weapon {
 				
 				switch(projectile.getWeaponType()){
 					case WEAPON_GUN:
-						gunShotSound.play(0.7f);
 						break;
 					case WEAPON_BAZOOKA:
-						bazookaShotSound.play(0.2f);
 						break;
 					case WEAPON_SPECIAL:
-						throwSound.play(0.4f);
 						break;
 					case WEAPON_GRENADE:
-						throwSound.play(0.4f);
 						break;
 				}
 			}
