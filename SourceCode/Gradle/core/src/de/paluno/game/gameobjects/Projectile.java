@@ -45,22 +45,22 @@ public class Projectile extends WorldObject {
     
 
     private int id;
-    private Vector2 position;
-    private Vector2 direction;
-    private WeaponType weaponType;
+    protected Vector2 position;
+    protected Vector2 direction;
+    protected WeaponType weaponType;
 
     private Texture texture;
     private Sprite sprite;
-    
+    private Turret turret;
     private Sound grenadeExplosion;
 	private Sound airstrikeExplosion;
 	private Sound airballSound;
 
     private boolean exploded = false;
 
-    private Worm shootingWorm;
+    protected Worm shootingWorm;
     private boolean wormContactEnded = false;
-
+    private boolean turretContactEnded= false;
     private float explosionTimer = 0.0f;
     private Explosion explosion;
 
@@ -111,6 +111,13 @@ public class Projectile extends WorldObject {
 	                wormContactEnded = true;
         	}
         }
+        if (!turretContactEnded) {
+			if (turret != null) {
+				float distance = turret.getPosition().dst(getPosition());
+	            if (distance > Constants.TURRET_RADIUS + PROJECTILE_RADIUS)
+	                turretContactEnded = true;
+			}
+		}
     }
 
     @Override
@@ -120,6 +127,7 @@ public class Projectile extends WorldObject {
         sprite.setOriginBasedPosition(position.x, position.y);
 
         switch (weaponType) {
+        	case WEAPON_TURRET_PROJECTILE:
             case WEAPON_BAZOOKA:
             case WEAPON_AIRSTRIKE:
                 Vector2 direction = new Vector2(-getVelocity().x, getVelocity().y);
@@ -162,7 +170,7 @@ public class Projectile extends WorldObject {
             body.setGravityScale(0.0f);
 
             // apply an impulse to the body so it flies in the direction we chose
-            Vector2 impulse = new Vector2(direction).scl(0.0015f);
+            Vector2 impulse = new Vector2(direction).scl(0.00015f);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
 
             // CollisionHandler Identifier
@@ -219,17 +227,17 @@ public class Projectile extends WorldObject {
             //body.applyAngularImpulse(-0.01f * body.getMass(), true);
    	     	fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
    	
-        }else if(weaponType == WeaponType.WEAPON_TURRET) {
-        	bodyDef.position.set(shootingWorm.getPosition().x  + (shootingWorm.getOrientation()* 50.0f * Constants.WORLD_SCALE), shootingWorm.getPosition().y);;
-        	bodyDef.fixedRotation = true;
-        	FixtureDef fixtureDef = new FixtureDef();
-            fixtureDef.shape = poly;
-            fixtureDef.density = Constants.TURRET_DENSITY;
+      
+        } else if (weaponType == WeaponType.WEAPON_TURRET_PROJECTILE) {
+            FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = BAZOOKA_DENSITY;
             body = world.createBody(bodyDef);
             Fixture fix = body.createFixture(fixtureDef);
-            body.setGravityScale(1.0f);
-
-            fix.setUserData(new UserData(UserData.ObjectType.turret,this));
+            body.setGravityScale(0.0f);
+            Vector2 impulse = new Vector2(direction).scl(body.getMass() * 7.0f);
+            body.applyLinearImpulse(impulse, body.getPosition(), true);
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
         }
         
         shape.dispose();
@@ -260,8 +268,8 @@ public class Projectile extends WorldObject {
     public void explode(Worm directHitWorm, boolean collidedObject) {
     	if (weaponType == WeaponType.WEAPON_TURRET) {
 			return;
-		}
-    	else if(!exploded) {
+		}else
+    if(!exploded) {
         	
             exploded = true;
             explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());

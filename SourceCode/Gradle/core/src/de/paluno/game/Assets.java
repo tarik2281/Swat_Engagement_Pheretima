@@ -112,8 +112,6 @@ public class Assets {
             new AssetDescriptor<Texture>("ProjectileMine.png", Texture.class);
     public static final AssetDescriptor<Texture> projectileTurret =
             new AssetDescriptor<Texture>("ProjectileTurret.png", Texture.class);
-
-    
     
     
     
