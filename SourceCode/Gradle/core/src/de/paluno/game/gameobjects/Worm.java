@@ -1,7 +1,6 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -453,13 +452,9 @@ public class Worm extends WorldObject {
 	 */
 	public void die(int deathType) {
 		if (!isDead) {
-			EventManager.getInstance().queueEvent(EventManager.Type.FallOut, null);
 			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, new DeathEvent(this, deathType));
-			//this.player.characterDied(this.characterNumber);
-			//this.setBodyToNullReference();
 			isDead = true;
 		}
-
 	}
 	
 	/**
@@ -468,14 +463,6 @@ public class Worm extends WorldObject {
 	 */
 	public boolean canJump() {
 		return this.isStandsOnGround();
-	}
-	/**
-	 * Getter method for character's shoot status
-	 * @return Character allowed to shoot?
-	 */
-	public boolean canShoot() {
-		return this.player.isPlayerTurn() &&
-				this.characterNumber == this.player.getTurn();
 	}
 
 	/**
@@ -586,28 +573,12 @@ public class Worm extends WorldObject {
 	 * @return orientation
 	 */
 	public int getOrientation() {return this.orientation;}
-	/**
-	 * Getter method for global Asset Manager
-	 * @return AssetManager
-	 */
-	//public AssetManager getAssets() {return player.getAssets();}
+
 	/**
 	 * Getter method for the currently selected weapon
 	 * @return current Weapon
 	 */
 	public Weapon getCurrentWeapon() {return currentWeapon;}
-
-	/**
-	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
-	 * @param angle - The angle in which the projectile shall fly
-	 */
-	/*
-	public void shoot(float angle) {
-	    if(canShoot() && currentWeapon != null) {
-			currentWeapon.shoot(this, angle);
-			unequipWeapon();
-	    }
-	}*/
 
 	/**
 	 * Method to generate and fill a SnapshotData object

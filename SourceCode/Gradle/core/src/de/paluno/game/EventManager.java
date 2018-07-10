@@ -6,10 +6,71 @@ import java.util.HashMap;
 
 public class EventManager {
     public enum Type {
-        WormTookDamage, WormEquipWeapon, WormInfected, WormJumped,
-        WormMovement, WormDied, WeaponShoot, ProjectileExploded, GameOver,
-        PlayerDefeated, GrenadeCollision, FeetCollision, FallOut, RoundBegin,
-        AirBall, Headshot, Replay, ReplayEnded
+        /**
+         * data: {@link de.paluno.game.gameobjects.Worm.DamageEvent}
+         */
+        WormTookDamage,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Weapon}
+         */
+        WormEquipWeapon,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Worm}
+         */
+        WormInfected,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Worm}
+         */
+        WormJumped,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Worm}
+         */
+        WormMovement,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Worm.DeathEvent}
+         */
+        WormDied,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Weapon}
+         */
+        WeaponShoot,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Projectile}
+         */
+        ProjectileExploded,
+        /**
+         * data: {@link String} playerName
+         */
+        GameOver,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Player}
+         */
+        PlayerDefeated,
+        /**
+         * data: null
+         */
+        GrenadeCollision,
+        /**
+         * data: null
+         */
+        FeetCollision,
+        RoundBegin,
+        /**
+         * data: null
+         */
+        AirBall,
+        /**
+         * data: null
+         */
+        Headshot,
+        /**
+         * data: {@link de.paluno.game.worldhandlers.Replay}
+         */
+        Replay,
+        /**
+         * data: null
+         */
+        ReplayEnded
     }
 
     public interface Listener {

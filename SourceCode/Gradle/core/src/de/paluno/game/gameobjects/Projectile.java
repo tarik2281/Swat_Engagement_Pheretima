@@ -1,7 +1,5 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -10,12 +8,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
-import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.EventManager;
-import de.paluno.game.GameState;
 import de.paluno.game.UserData;
-import de.paluno.game.screens.Loadable;
 
 import java.util.ArrayList;
 
@@ -41,7 +36,7 @@ public class Projectile extends WorldObject {
     private static final float BAZOOKA_DENSITY = 0.07f;
     private static final float GRENADE_DENSITY = 0.2f;
     private static final float AIRSTRIKE_DENSITY = 1f;
-    
+
 
     private int id;
     private Vector2 direction;
@@ -88,19 +83,17 @@ public class Projectile extends WorldObject {
 
         // check if the projectile is inside our world - if not, destroy it
 
-        if ( //(weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(getBody().getPosition())) ||
+        if ((weaponType == WeaponType.WEAPON_GUN && !getWorld().getWorldBounds().contains(getBody().getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null, true, false);
             
         if(!getWorld().isInWorldBounds(getBody())) {
         	explode(null, false, false);
         }
-        if (!wormContactEnded) {//  
-        	if (shootingWorm != null) {
-	            float distance = shootingWorm.getPosition().dst(getPosition());
-	            if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
-	                wormContactEnded = true;
-        	}
+        if (!wormContactEnded && shootingWorm != null) {
+            float distance = shootingWorm.getPosition().dst(getPosition());
+            if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
+                wormContactEnded = true;
         }
     }
 
@@ -222,34 +215,21 @@ public class Projectile extends WorldObject {
 
     public void explode(Worm directHitWorm, boolean collidedObject, boolean collidedHead) {
         if (!exploded) {
-        	
             exploded = true;
             explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());
             EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, this);
 
-            switch (weaponType) {
-            case WEAPON_GUN:
-            	break;
-            case WEAPON_BAZOOKA:
-            	break;
-            case WEAPON_GRENADE:
-            	break;
-            case WEAPON_SPECIAL:
-            	break;
-            case WEAPON_AIRSTRIKE:
-            	break;
-            }
-            
             if (weaponType.getExplosionRadius() == 0.0f) {
-                if (directHitWorm != null)
-                    directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
-                if(collidedHead == true)
-                	directHitWorm.takeDamage(Constants.HEADSHOT_DAMAGE, Constants.DAMAGE_TYPE_PROJECTILE);
-                if(directHitWorm == null)
+                if (directHitWorm != null) {
+                    if (collidedHead)
+                        directHitWorm.takeDamage(Constants.HEADSHOT_DAMAGE, Constants.DAMAGE_TYPE_PROJECTILE);
+                    else
+                        directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
+                }
+                else
                 	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
                 
             }
-   
             else if (collidedObject) {
                 ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
                 
@@ -264,10 +244,6 @@ public class Projectile extends WorldObject {
                         worm.setIsInfected(true);
                 }
             }
-
-            //removeFromWorld();
-            //getWorld().forgetAfterUpdate(this);
-            //world.advanceGameState();
         }
     }
 

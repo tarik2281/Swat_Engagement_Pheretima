@@ -11,7 +11,6 @@ import de.paluno.game.screens.PlayScreen;
 import de.paluno.game.screens.WinningPlayer;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class NetworkWorldHandler extends InterpolationWorldHandler {
 
@@ -234,12 +233,6 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
     public int getClientId() {
         return client.getClientId();
-    }
-
-    @Override
-    protected void onShoot(List<Projectile> projectiles) {
-        if (getReplay() != null)
-            getReplay().setStartingTick(getCurrentGameTick(), 2.0f);
     }
 
     @Override

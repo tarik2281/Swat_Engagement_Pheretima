@@ -15,6 +15,26 @@ public class LocalWorldHandler extends WorldHandler {
 
     private boolean wormDied;
 
+    private Timer.Task turnTimer = new Timer.Task() {
+        @Override
+        public void run() {
+            shiftTurn(true);
+
+            startTurn();
+        }
+    };
+
+    private EventManager.Listener eventListener = new EventManager.Listener() {
+        @Override
+        public void handleEvent(EventManager.Type eventType, Object data) {
+            switch (eventType) {
+                case ReplayEnded:
+                    Timer.schedule(turnTimer, 0.5f);
+                    break;
+            }
+        }
+    };
+
     public LocalWorldHandler(PlayScreen screen, int mapNumber, int numWorms) {
         super(screen, mapNumber);
 
@@ -78,32 +98,27 @@ public class LocalWorldHandler extends WorldHandler {
         if (getNumPlayersAlive() <= 1)
             return;
 
-        if (shiftWorms && currentPlayer != -1) {
-            getCurrentPlayer().shiftTurn();
-        }
-
         do {
             currentPlayer = (currentPlayer + 1) % getPlayers().size();
         } while (getCurrentPlayer().isDefeated());
+
+        if (shiftWorms) {
+            getCurrentPlayer().shiftTurn();
+        }
     }
 
     @Override
     protected void requestNextTurn() {
         if (wormDied && getReplay() != null) {
+            getReplay().setCameraPosition(getWorld().getCamera().getWorldPosition());
             getReplay().addGameData(new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN));
             EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
         }
+        else {
+            Timer.schedule(turnTimer, 0.5f);
+        }
 
         wormDied = false;
-
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                shiftTurn(true);
-
-                startTurn();
-            }
-        }, 0.5f);
     }
 
     @Override
@@ -123,7 +138,16 @@ public class LocalWorldHandler extends WorldHandler {
 
     @Override
     public void onInitializePlayers() {
+        EventManager.getInstance().addListener(eventListener, EventManager.Type.ReplayEnded);
+
         initializePlayersDefault(numWorms);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+
+        EventManager.getInstance().removeListener(eventListener, EventManager.Type.ReplayEnded);
     }
 
     @Override

@@ -2,6 +2,7 @@ package de.paluno.game.worldhandlers;
 
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
@@ -64,7 +65,7 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                         Projectile projectile = getProjectileById(ex.projectileId);
                         getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
                                 ex.getRadius(), ex.getBlastPower()));
-                        removeProjectile(projectile);
+                        EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, projectile);
                         break;
                     }
                     case SHOOT: {
@@ -74,7 +75,7 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                             addProjectile(projectile);
                             projectile.setId(data.getId());
                         }
-                        onShoot(null);
+                        EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, getCurrentPlayer().getCurrentWeapon());
                         break;
                     }
                     case END_TURN: {
@@ -85,16 +86,14 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                         WormEvent event = (WormEvent) currentEvent;
                         Player player = getPlayers().get(event.getPlayerNumber());
                         Worm worm = player.getWormByNumber(event.getWormNumber());
-                        worm.die(de.paluno.game.Constants.DEATH_TYPE_NO_HEALTH);
-                        onWormDied(new Worm.DeathEvent(worm, de.paluno.game.Constants.DEATH_TYPE_NO_HEALTH));
+                        worm.die(Constants.DEATH_TYPE_NO_HEALTH);
                         break;
                     }
                     case WORM_FELL_DOWN: {
                         WormEvent event = (WormEvent) currentEvent;
                         Player player = getPlayers().get(event.getPlayerNumber());
                         Worm worm = player.getWormByNumber(event.getWormNumber());
-                        worm.die(de.paluno.game.Constants.DEATH_TYPE_FALL_DOWN);
-                        onWormDied(new Worm.DeathEvent(worm, Constants.DEATH_TYPE_FALL_DOWN));
+                        worm.die(Constants.DEATH_TYPE_FALL_DOWN);
                         break;
                     }
                     case WORM_INFECTED: {
@@ -111,6 +110,18 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                         worm.takeDamage(event.getDamage(), event.getDamageType());
                         break;
                     }
+                    case AIR_BALL:
+                        EventManager.getInstance().queueEvent(EventManager.Type.AirBall, null);
+                        break;
+                    case HEADSHOT:
+                        EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
+                        break;
+                    case GRENADE_COLLISION:
+                        EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
+                        break;
+                    case FEET_COLLISION:
+                        EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
+                        break;
                 }
                 onGameDataProcessed(currentEvent);
             }

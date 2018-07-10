@@ -2,6 +2,7 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ContactFilter;
@@ -27,6 +28,8 @@ public class GameWorld implements Disposable {
     private ArrayList<WorldObject> objects;
 
     private com.badlogic.gdx.physics.box2d.World world;
+
+    private Rectangle worldBounds;
 
     private Ground ground;
     private ExplosionMaskRenderer explosionMaskRenderer;
@@ -74,15 +77,16 @@ public class GameWorld implements Disposable {
         world.setContactFilter(contactFilter);
         debugRenderer = new Box2DDebugRenderer();
 
+        worldBounds = new Rectangle(0, 0, map.getWorldWidth(), map.getWorldHeight());
+
         camera = new GameCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setWorldBounds(worldBounds);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
         ground = new Ground(map, explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
         registerAfterUpdate(ground);
-        //windHandler = new WindHandler();
-        //camera.setBottomLimit(worldBounds.y);
     }
 
     public void setFromSnapshot(SnapshotData data) {
@@ -131,7 +135,7 @@ public class GameWorld implements Disposable {
 
         batch.end();
 
-        //if (isRenderDebug)
+        if (isRenderDebug)
             debugRenderer.render(world, camera.getDebugProjection());
     }
 
@@ -141,6 +145,10 @@ public class GameWorld implements Disposable {
 
     public boolean isInWorldBounds(Body body) {
         return body.getWorldCenter().y > 0;
+    }
+
+    public Rectangle getWorldBounds() {
+        return worldBounds;
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {

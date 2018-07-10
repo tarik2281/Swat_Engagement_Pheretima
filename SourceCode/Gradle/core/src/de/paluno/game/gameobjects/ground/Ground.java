@@ -10,7 +10,6 @@ import de.paluno.game.Constants;
 import de.paluno.game.Map;
 import de.paluno.game.UserData;
 import de.paluno.game.gameobjects.*;
-import de.paluno.game.gameobjects.GameWorld;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,7 +17,6 @@ import java.util.LinkedList;
 public class Ground extends WorldObject {
 	
 	public class SnapshotData {
-		private Map map;
 		private ArrayList<CollisionObject.SnapshotData> collisionObjects;
 	    private ArrayList<Explosion> explosions;
 	}
@@ -59,11 +57,11 @@ public class Ground extends WorldObject {
         this.maskRenderer = renderer;
 
         clipper = new ClipperWrapper();
-        collisionObjects = new ArrayList<CollisionObject>();
-        queriedObjects = new ArrayList<CollisionObject>();
+        collisionObjects = new ArrayList<>();
+        queriedObjects = new ArrayList<>();
 
-        explosions = new ArrayList<Explosion>();
-        explosionQueue = new LinkedList<Explosion>();
+        explosions = new ArrayList<>();
+        explosionQueue = new LinkedList<>();
     }
 
     public void setFromSnapshot(SnapshotData data) {
@@ -71,21 +69,6 @@ public class Ground extends WorldObject {
             collisionObjects.add(new CollisionObject(objectData));
 
         explosions.addAll(data.explosions);
-    }
-    
-    public Ground(GameWorld world, ExplosionMaskRenderer renderer, SnapshotData data) {
-        this.map = data.map;
-    	this.maskRenderer = renderer;
-    	
-    	clipper = new ClipperWrapper();
-    	
-    	collisionObjects = new ArrayList<CollisionObject>(data.collisionObjects.size());
-    	for (CollisionObject.SnapshotData objectData : data.collisionObjects)
-    	    collisionObjects.add(new CollisionObject(objectData));
-
-    	queriedObjects = new ArrayList<CollisionObject>();
-    	explosions = new ArrayList<Explosion>(data.explosions);
-    	explosionQueue = new LinkedList<Explosion>();
     }
 
     public void addExplosion(Explosion explosion) {
@@ -125,10 +108,6 @@ public class Ground extends WorldObject {
 
     ArrayList<Explosion> getExplosions() {
         return explosions;
-    }
-
-    @Override
-    public void update(float delta) {
     }
 
     @Override
@@ -196,7 +175,6 @@ public class Ground extends WorldObject {
 		    data.collisionObjects.add(object.makeSnapshot());
 
 		data.explosions = new ArrayList<>(this.explosions);
-		data.map = this.map;
 		
 		return data;
 	}

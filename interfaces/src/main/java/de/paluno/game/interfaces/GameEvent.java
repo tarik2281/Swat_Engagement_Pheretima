@@ -8,6 +8,10 @@ public class GameEvent extends GameData {
         WORM_TOOK_DAMAGE,
         EXPLOSION,
         SHOOT,
+        AIR_BALL,
+        HEADSHOT,
+        GRENADE_COLLISION,
+        FEET_COLLISION,
         END_TURN,
         GAME_STATE_CHANGED
     }

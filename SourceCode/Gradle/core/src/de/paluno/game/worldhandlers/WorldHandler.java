@@ -65,97 +65,105 @@ public abstract class WorldHandler implements Disposable {
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
-        case WeaponShoot:{
-    		Weapon weapon = (Weapon)data;
-    		switch (weapon.getWeaponType()) {
-    		case WEAPON_GUN:
-				gunShotSound.play();
-    			break;
-    		case WEAPON_BAZOOKA:
-				bazookaShotSound.play();
-				break;
-    		case WEAPON_SPECIAL:
-				throwSound.play();
-				break;
-    		case WEAPON_GRENADE:
-				throwSound.play();
-    			break;
-    		case WEAPON_AIRSTRIKE:
-				targetSound.play();
-				airstrikeSound.play();
-    			break;
-    		}
-    		break;
-    	}
-        case WormEquipWeapon: {
-        	Weapon weapon = (Weapon)data;
-        	switch (weapon.getWeaponType()) {
-	        	case WEAPON_GUN:
-	        	case WEAPON_BAZOOKA:
-	        		gunRelease.play();
-	        		break;
-	        	case WEAPON_AIRSTRIKE:
-	        		airstrikeUse.play();
-	        		break;
-	        	}
-	        }
-        	break;
-        case GrenadeCollision:
-        	grenadeContact.play();
-        	break;
-        case FeetCollision:
-        	onGroundSound.play();
-        	break;
-        case FallOut:
-        	fallOut.play();
-        	break;
-        case WormMovement: {
-        	Worm worm = (Worm)data;
-        	switch (worm.getMovement()) {
-        	case Constants.MOVEMENT_NO_MOVEMENT:
-        		walkLoop.stop();
-        		break;
-        	case Constants.MOVEMENT_LEFT:
-        	case Constants.MOVEMENT_RIGHT:
-        		walkLoop.stop();
-        		walkLoop.loop();
-        		break;
-        	}
-        	break;
-        }
+            case WeaponShoot: {
+                Weapon weapon = (Weapon) data;
+                switch (weapon.getWeaponType()) {
+                    case WEAPON_GUN:
+                        gunShotSound.play();
+                        break;
+                    case WEAPON_BAZOOKA:
+                        bazookaShotSound.play();
+                        break;
+                    case WEAPON_SPECIAL:
+                        throwSound.play();
+                        break;
+                    case WEAPON_GRENADE:
+                        throwSound.play();
+                        break;
+                    case WEAPON_AIRSTRIKE:
+                        targetSound.play();
+                        airstrikeSound.play();
+                        break;
+                }
+
+                if (getReplay() != null)
+                    getReplay().setStartingTick(getCurrentGameTick(), 2.0f);
+
+                break;
+            }
+            case WormEquipWeapon: {
+                Weapon weapon = (Weapon) data;
+                switch (weapon.getWeaponType()) {
+                    case WEAPON_GUN:
+                    case WEAPON_BAZOOKA:
+                        gunRelease.play();
+                        break;
+                    case WEAPON_AIRSTRIKE:
+                        airstrikeUse.play();
+                        break;
+                }
+            }
+            break;
+            case GrenadeCollision:
+                grenadeContact.play();
+
+                if (shouldWorldStep())
+                    emitGameEvent(GameEvent.Type.GRENADE_COLLISION);
+                break;
+            case FeetCollision:
+                onGroundSound.play();
+
+                if (shouldWorldStep())
+                    emitGameEvent(GameEvent.Type.FEET_COLLISION);
+                break;
+            case WormMovement: {
+                Worm worm = (Worm) data;
+                switch (worm.getMovement()) {
+                    case Constants.MOVEMENT_NO_MOVEMENT:
+                        walkLoop.stop();
+                        break;
+                    case Constants.MOVEMENT_LEFT:
+                    case Constants.MOVEMENT_RIGHT:
+                        walkLoop.stop();
+                        walkLoop.loop();
+                        break;
+                }
+                break;
+            }
             case PlayerDefeated: {
-                Player player = (Player)data;
+                Player player = (Player) data;
                 numPlayersAlive--;
                 break;
             }
             case WormDied: {
                 Worm.DeathEvent event = (Worm.DeathEvent) data;
 
+                if (event.getDeathType() == Constants.DEATH_TYPE_FALL_DOWN)
+                    fallOut.play();
+
                 if (currentGameState == GameState.PLAYERTURN && getCurrentPlayer().getCurrentWorm() == event.getWorm()) {
                     System.out.println("Current worm died, setting to waiting");
                     setWaiting();
                 }
 
-                if (shouldWorldStep()) {
-                    onWormDied(event);
-
-                    if (event.getDeathType() != de.paluno.game.Constants.DEATH_TYPE_DISCONNECTED) {
-                        GameEvent.Type type = null;
-                        switch (event.getDeathType()) {
-                            case de.paluno.game.Constants.DEATH_TYPE_NO_HEALTH:
-                                type = GameEvent.Type.WORM_DIED;
-                                break;
-                            case de.paluno.game.Constants.DEATH_TYPE_FALL_DOWN:
-                                type = GameEvent.Type.WORM_FELL_DOWN;
-                                if (replay != null)
-                                    replay.setStartingTick(currentGameTick, 5.0f);
-                                break;
-                        }
-
-                        WormEvent wormEvent = new WormEvent(currentGameTick, type, event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber());
+                GameEvent.Type type = null;
+                switch (event.getDeathType()) {
+                    case de.paluno.game.Constants.DEATH_TYPE_NO_HEALTH:
+                        type = GameEvent.Type.WORM_DIED;
+                        break;
+                    case de.paluno.game.Constants.DEATH_TYPE_FALL_DOWN:
+                        type = GameEvent.Type.WORM_FELL_DOWN;
                         if (replay != null)
-                            replay.addGameData(wormEvent);
-                        onEmitGameData(wormEvent);
+                            replay.setStartingTick(currentGameTick, 5.0f);
+                        break;
+                }
+
+                onWormDied(event);
+
+                if (shouldWorldStep()) {
+                    if (event.getDeathType() != de.paluno.game.Constants.DEATH_TYPE_DISCONNECTED) {
+                        WormEvent wormEvent = new WormEvent(currentGameTick, type, event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber());
+                        emitGameData(wormEvent);
                     }
                 }
 
@@ -163,70 +171,68 @@ public abstract class WorldHandler implements Disposable {
                 break;
             }
             case WormInfected:
+                virusSound.play();
+
                 if (shouldWorldStep()) {
-                    Worm worm = (Worm)data;
-                    onWormInfected(worm);
-	                virusSound.play();
+                    Worm worm = (Worm) data;
 
                     WormEvent event = new WormEvent(currentGameTick, GameEvent.Type.WORM_INFECTED, worm.getPlayerNumber(), worm.getCharacterNumber());
-                    if (replay != null)
-                        replay.addGameData(event);
-                    onEmitGameData(event);
+                    emitGameData(event);
                 }
 
                 break;
             case WormTookDamage: {
                 if (shouldWorldStep()) {
-                    Worm.DamageEvent event = (Worm.DamageEvent)data;
-                    onWormTookDamage(event);
+                    Worm.DamageEvent event = (Worm.DamageEvent) data;
 
                     if (event.getDamageType() != de.paluno.game.Constants.DAMAGE_TYPE_VIRUS) {
                         WormDamageEvent gameEvent = new WormDamageEvent(currentGameTick, event.getWorm().getPlayerNumber(),
                                 event.getWorm().getCharacterNumber(), event.getDamage(), event.getDamageType());
-
-                        if (replay != null)
-                            replay.addGameData(gameEvent);
-                        onEmitGameData(gameEvent);
+                        emitGameData(gameEvent);
                     }
                 }
                 break;
             }
             case ProjectileExploded:
-                if (shouldWorldStep()) {
-                    Projectile projectile = (Projectile) data;
-                    removeProjectile(projectile);
-                    onProjectileExploded(projectile);
-                    switch (projectile.getWeaponType()) {
-		        	case WEAPON_GUN:
-		        		break;
-		        	case WEAPON_BAZOOKA:
-		        		destroySound.play();
-		        		break;
-		        	case WEAPON_GRENADE:
-		        		destroySound.play();
-		        		grenadeExplosionSound.play();
-		        		break;
-		        	case WEAPON_AIRSTRIKE:
-		        		destroySound.play();
-		        		airstrikeExplosionSound.play();
-		        		break;
-		        	}
+                Projectile projectile = (Projectile) data;
+                removeProjectile(projectile);
 
+                switch (projectile.getWeaponType()) {
+                    case WEAPON_GUN:
+                        break;
+                    case WEAPON_BAZOOKA:
+                        destroySound.play();
+                        break;
+                    case WEAPON_GRENADE:
+                        destroySound.play();
+                        grenadeExplosionSound.play();
+                        break;
+                    case WEAPON_AIRSTRIKE:
+                        destroySound.play();
+                        airstrikeExplosionSound.play();
+                        break;
+                }
+
+                if (shouldWorldStep()) {
                     Vector2 pos = projectile.getExplosion().getCenter();
                     ExplosionEvent e = new ExplosionEvent(currentGameTick, pos.x, pos.y, projectile.getExplosion().getRadius(), projectile.getExplosion().getBlastPower());
                     e.projectileId = projectile.getId();
-                    if (replay != null)
-                        replay.addGameData(e);
-                    onEmitGameData(e);
+                    emitGameData(e);
                 }
-                break;
 
-	        case AirBall:
-	        	airballSound.play();
-	        	break;
-	        case Headshot:
-	        	headshotSound.play();
-	        	break;
+                break;
+            case AirBall:
+                airballSound.play();
+
+                if (shouldWorldStep())
+                    emitGameEvent(GameEvent.Type.AIR_BALL);
+                break;
+            case Headshot:
+                headshotSound.play();
+
+                if (shouldWorldStep())
+                    emitGameEvent(GameEvent.Type.HEADSHOT);
+                break;
         }
     };
 
@@ -236,11 +242,7 @@ public abstract class WorldHandler implements Disposable {
     protected abstract void requestNextTurn();
     protected abstract boolean shouldCreateReplay();
 
-    protected void onWormTookDamage(Worm.DamageEvent event) {}
     protected void onWormDied(Worm.DeathEvent event) {}
-    protected void onWormInfected(Worm worm) {}
-    protected void onProjectileExploded(Projectile projectile) {}
-    protected void onShoot(List<Projectile> projectiles) {}
     protected void onUpdate(float delta) {}
     protected void onEmitGameData(GameData gameData) {}
     protected boolean shouldStartInstantly() { return false; }
@@ -310,7 +312,6 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.FeetCollision,
                 EventManager.Type.WormMovement,
                 EventManager.Type.WeaponShoot,
-                EventManager.Type.FallOut,
                 EventManager.Type.AirBall,
                 EventManager.Type.Headshot);
 
@@ -333,7 +334,6 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.FeetCollision,
                 EventManager.Type.WormMovement,
                 EventManager.Type.WeaponShoot,
-                EventManager.Type.FallOut,
                 EventManager.Type.AirBall,
                 EventManager.Type.Headshot);
     }
@@ -353,6 +353,16 @@ public abstract class WorldHandler implements Disposable {
         world.toggleDebugRender();
     }
 
+    protected void emitGameEvent(GameEvent.Type type) {
+        emitGameData(new GameEvent(getCurrentGameTick(), type));
+    }
+
+    protected void emitGameData(GameData gameData) {
+        if (getReplay() != null)
+            getReplay().addGameData(gameData);
+        onEmitGameData(gameData);
+    }
+
     protected void initializePlayersDefault(int numWorms) {
         for (int i = 0; i < de.paluno.game.Constants.NUM_PLAYERS; i++) {
             Player player = addPlayer(i);
@@ -369,7 +379,6 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void addProjectile(Projectile projectile) {
-        System.out.println("Adding projectile");
         projectiles.add(projectile);
         projectile.setId(projectileId++);
         world.registerAfterUpdate(projectile);
@@ -381,7 +390,6 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void removeProjectile(Projectile projectile) {
-        System.out.println("Removing projectile");
         projectiles.remove(projectile);
         world.forgetAfterUpdate(projectile);
 
@@ -463,10 +471,12 @@ public abstract class WorldHandler implements Disposable {
 
     protected void endPlayerTurn() {
         if (currentGameState == GameState.PLAYERTURN) {
-            System.out.println("ending player turn");
             Worm worm = getCurrentPlayer().getCurrentWorm();
             worm.setMovement(de.paluno.game.Constants.MOVEMENT_NO_MOVEMENT);
             worm.setIsPlaying(false);
+
+            if (currentWeaponIndicator instanceof ShotDirectionIndicator)
+                ((ShotDirectionIndicator) currentWeaponIndicator).setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
 
             unequipWeapon();
 
@@ -538,7 +548,7 @@ public abstract class WorldHandler implements Disposable {
         return windHandler;
     }
 
-    public WeaponIndicator getWeaponIndicator() {
+    protected WeaponIndicator getWeaponIndicator() {
         return currentWeaponIndicator;
     }
 
@@ -556,7 +566,7 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void applyEquipWeapon(WeaponType weaponType) {
-        if (shouldAcceptInput()) {
+        if (shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
         	equipWeapon(weaponType);
         }
     }
@@ -582,21 +592,16 @@ public abstract class WorldHandler implements Disposable {
 
     public void shoot() {
         if (shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
-            System.out.println("Shooting started");
             Player player = getCurrentPlayer();
             Worm worm = player.getCurrentWorm();
             weaponProjectileCache.clear();
             player.getCurrentWeapon().shoot(worm, currentWeaponIndicator, weaponProjectileCache);
             weaponProjectileCache.forEach(this::addProjectile);
-            onShoot(weaponProjectileCache);
 
-            if (getReplay() != null)
-                getReplay().setStartingTick(getCurrentGameTick(), 2.0f);
-
-            ProjectileData[] projectilesArray = new ProjectileData[projectiles.size()];
+            ProjectileData[] projectilesArray = new ProjectileData[weaponProjectileCache.size()];
 
             int index = 0;
-            for (Projectile projectile : projectiles) {
+            for (Projectile projectile : weaponProjectileCache) {
                 ProjectileData data = new ProjectileData()
                         .setId(projectile.getId())
                         .setType(projectile.getWeaponType().ordinal())
@@ -607,15 +612,8 @@ public abstract class WorldHandler implements Disposable {
             }
 
             ShootEvent event = new ShootEvent(currentGameTick, projectilesArray);
-            if (replay != null)
-                replay.addGameData(event);
-            onEmitGameData(event);
+            emitGameData(event);
         }
-    }
-
-    public boolean queryWeaponAvailable(WeaponType weaponType) {
-        Player player = players.get(currentPlayer);
-        return player.getWeapon(weaponType).getSelectable();
     }
 
     private Worm getNextActiveWorm() {
@@ -652,8 +650,6 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void setWaiting() {
-        System.out.println("Setting waiting");
-
         endPlayerTurn();
 
         Worm nextActiveWorm = getNextActiveWorm();
@@ -684,9 +680,7 @@ public abstract class WorldHandler implements Disposable {
 
                     currentGameTick++;
                     WorldData worldData = makeWorldSnapshot();
-                    if (replay != null)
-                        replay.addGameData(worldData);
-                    onEmitGameData(worldData);
+                    emitGameData(worldData);
                 }
             }
         }
@@ -709,10 +703,8 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void setIdle() {
-        System.out.println("Setting idle");
         currentGameState = GameState.IDLE;
         requestNextTurn();
-        //replay = null;
     }
 
     public GameWorld getWorld() {
