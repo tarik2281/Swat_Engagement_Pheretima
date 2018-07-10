@@ -1,7 +1,5 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -10,12 +8,9 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
-import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.EventManager;
-import de.paluno.game.GameState;
 import de.paluno.game.UserData;
-import de.paluno.game.screens.Loadable;
 
 import java.util.ArrayList;
 
@@ -40,21 +35,16 @@ public class Projectile extends WorldObject {
     private static final float PROJECTILE_DENSITY = 0.1f;
     private static final float BAZOOKA_DENSITY = 0.07f;
     private static final float GRENADE_DENSITY = 0.2f;
-    private static final float AIRSTRIKE_DENSITY = 1f;	
+    private static final float AIRSTRIKE_DENSITY = 1f;
     private static final float MINE_DENSITY = 1000.0f;
-    
 
     private int id;
-    protected Vector2 position;
-    protected Vector2 direction;
-    protected WeaponType weaponType;
+    private Vector2 direction;
+    private WeaponType weaponType;
 
     private Texture texture;
     private Sprite sprite;
     private Turret turret;
-    private Sound grenadeExplosion;
-	private Sound airstrikeExplosion;
-	private Sound airballSound;
 
     private boolean exploded = false;
 
@@ -65,7 +55,7 @@ public class Projectile extends WorldObject {
     private Explosion explosion;
 
     public Projectile(Worm shootingWorm, WeaponType weaponType, Vector2 position, Vector2 direction) {
-        this.position = position;
+        setPosition(position);
         this.direction = direction;
 
         this.weaponType = weaponType;
@@ -86,9 +76,6 @@ public class Projectile extends WorldObject {
         texture = manager.get(weaponType.getProjectileAsset());
         sprite = new Sprite(texture);
         sprite.setOriginCenter();
-        grenadeExplosion = manager.get(Assets.grenadeExplosionSound);
-		airstrikeExplosion = manager.get(Assets.airstrikeExplosion);
-        airballSound = manager.get(Assets.airballSound);
     }
 
     @Override
@@ -97,19 +84,17 @@ public class Projectile extends WorldObject {
 
         // check if the projectile is inside our world - if not, destroy it
 
-        if ( //(weaponType == WeaponType.WEAPON_GUN && !world.getWorldBounds().contains(getBody().getPosition())) ||
+        if ((weaponType == WeaponType.WEAPON_GUN && !getWorld().getWorldBounds().contains(getBody().getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
-            explode(null, true);
+            explode(null, true, false);
             
         if(!getWorld().isInWorldBounds(getBody())) {
-        	explode(null, false);
+        	explode(null, false, false);
         }
-        if (!wormContactEnded) {//  
-        	if (shootingWorm != null) {
-	            float distance = shootingWorm.getPosition().dst(getPosition());
-	            if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
-	                wormContactEnded = true;
-        	}
+        if (!wormContactEnded && shootingWorm != null) {
+            float distance = shootingWorm.getPosition().dst(getPosition());
+            if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
+                wormContactEnded = true;
         }
         if (!turretContactEnded) {
 			if (turret != null) {
@@ -146,7 +131,7 @@ public class Projectile extends WorldObject {
     public Body onSetupBody(World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position.x, position.y);
+        bodyDef.position.set(getPosition());
         bodyDef.bullet = true;
 
         CircleShape shape = new CircleShape();
@@ -226,8 +211,8 @@ public class Projectile extends WorldObject {
             //body.applyLinearImpulse(impulse, body.getPosition(), true);
             //body.applyAngularImpulse(-0.01f * body.getMass(), true);
    	     	fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
-   	
-      
+
+
         } else if (weaponType == WeaponType.WEAPON_TURRET_PROJECTILE) {
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.shape = shape;
@@ -239,7 +224,7 @@ public class Projectile extends WorldObject {
             body.applyLinearImpulse(impulse, body.getPosition(), true);
             fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
         }
-        
+
         shape.dispose();
 
         return body;
@@ -265,41 +250,33 @@ public class Projectile extends WorldObject {
         return explosion;
     }
 
-    public void explode(Worm directHitWorm, boolean collidedObject) {
+    public void explode(Worm directHitWorm, boolean collidedObject, boolean collidedHead) {
     	if (weaponType == WeaponType.WEAPON_TURRET) {
 			return;
 		}else
     if(!exploded) {
-        	
             exploded = true;
             explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());
             EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, this);
 
-            switch (weaponType) {
-            case WEAPON_GUN:
-            	break;
-            case WEAPON_BAZOOKA:
-            	break;
-            case WEAPON_GRENADE:
-            	grenadeExplosion.play(0.5f);
-            	break;
-            case WEAPON_SPECIAL:
-            	break;
-            case WEAPON_AIRSTRIKE:
-            	airstrikeExplosion.play(0.6f);
-            	break;
-            }
-            
             if (weaponType.getExplosionRadius() == 0.0f) {
-                if (directHitWorm != null)
-                    directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
+                if (directHitWorm != null) {
+                    if (collidedHead)
+                        directHitWorm.takeDamage(Constants.HEADSHOT_DAMAGE, Constants.DAMAGE_TYPE_PROJECTILE);
+                    else
+                        directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
+                }
+                else
+                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
+
             }
             else if (collidedObject) {
                 ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
                 
                 if(affectedWorms.isEmpty()) {
-                	airballSound.play(0.4f);
+                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
                 }
+
                 for (Worm worm : affectedWorms) {
                     worm.takeDamage((int)weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
 
@@ -307,17 +284,13 @@ public class Projectile extends WorldObject {
                         worm.setIsInfected(true);
                 }
             }
-
-            //removeFromWorld();
-            //getWorld().forgetAfterUpdate(this);
-            //world.advanceGameState();
         }
     }
 
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
-		data.position= new Vector2(position);
+		data.position= new Vector2(getPosition());
 		data.direction= new Vector2(direction);
 		data.weaponType = weaponType;
 		data.playerNumber = shootingWorm.getPlayerNumber();

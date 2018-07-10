@@ -1,13 +1,13 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.*;
+import de.paluno.game.EventManager.Type;
 import de.paluno.game.UserData.ObjectType;
 
 public class Worm extends WorldObject {
@@ -16,11 +16,12 @@ public class Worm extends WorldObject {
      * Inner class to create a copy of the data necessary for the replay
      */
 	public static class SnapshotData {
-        private int characterNumber;
+        public int characterNumber;
         private Vector2 position;
         private int health;
         private int orientation;
         private boolean isInfected;
+        private boolean isDead;
     }
 
     public static class DamageEvent {
@@ -44,6 +45,24 @@ public class Worm extends WorldObject {
 
 		public int getDamageType() {
 			return damageType;
+		}
+	}
+
+	public static class DeathEvent {
+		private Worm worm;
+		private int deathType;
+
+		public DeathEvent(Worm worm, int deathType) {
+			this.worm = worm;
+			this.deathType = deathType;
+		}
+
+		public Worm getWorm() {
+			return worm;
+		}
+
+		public int getDeathType() {
+			return deathType;
 		}
 	}
 
@@ -71,13 +90,7 @@ public class Worm extends WorldObject {
 	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
 
-	private Sound walkLoop;
-	private Sound landSound;
-	private Sound virusSound;
-
 	private int health;
-	
-	private Sound fallDown;
 
 	private boolean animationInvalidated;
 
@@ -97,16 +110,21 @@ public class Worm extends WorldObject {
 		addChild(new HealthBar(this));
 	}
 
+	public void setFromSnapshot(SnapshotData data) {
+		this.characterNumber = data.characterNumber;
+		setPosition(data.position);
+		this.health = data.health;
+		this.orientation = data.orientation;
+		this.isInfected = data.isInfected;
+		this.isDead = data.isDead;
+	}
+
 
 	@Override
 	public void setupAssets(AssetManager manager) {
 		this.walkAnimation = new AnimatedSprite(manager.get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(manager.get(Assets.wormBreath));
 		this.flyAnimation = new AnimatedSprite(manager.get(Assets.wormFly));
-		fallDown = manager.get(Assets.fallDown);
-		walkLoop = manager.get(Assets.walkLoop);
-		landSound = manager.get(Assets.landSound);
-		virusSound = manager.get(Assets.virusSound);
 	}
 
 	/**
@@ -121,9 +139,9 @@ public class Worm extends WorldObject {
 
 		// Are we supposed to be the new host of a super deadly virus? Create it!
 		if (createVirusFixture)
-			createVirusFixture();
+			createVirusFixture(getBody());
 
-        // Now we apply movements - therefor we need our current position
+        // Now we apply movements - therefore we need our current position
 		Vector2 currentPos = getPosition();
 
 		if(this.jump) {
@@ -145,7 +163,6 @@ public class Worm extends WorldObject {
 
             switch (movement) {
                 case Constants.MOVEMENT_LEFT:
-                	//walkLoop.play(0.1f);
                     desiredVel = -Constants.MOVE_VELOCITY;
                     break;
                 case Constants.MOVEMENT_NO_MOVEMENT:
@@ -153,7 +170,6 @@ public class Worm extends WorldObject {
                     desiredVel = 0.0f;
                     break;
                 case Constants.MOVEMENT_RIGHT:
-                	//walkLoop.play(0.1f);
                     desiredVel = Constants.MOVE_VELOCITY;
                     break;
             }
@@ -166,8 +182,7 @@ public class Worm extends WorldObject {
 		
 		// Worm fell off the world rim? Is ded.
 		if (!getWorld().isInWorldBounds(getBody())) {
-			fallDown.play(0.2f);
-			die();
+			die(Constants.DEATH_TYPE_FALL_DOWN);
 		}
 	}
 	
@@ -228,8 +243,12 @@ public class Worm extends WorldObject {
 		// Now we add some hitboxes - Let's get fancy: two parter with body and feet shape
 		CircleShape bodyRect = new CircleShape();
 		bodyRect.setRadius(Constants.WORM_RADIUS);
+		bodyRect.setPosition(new Vector2(0 * Constants.WORLD_SCALE, -3 * Constants.WORLD_SCALE));
 		PolygonShape footRect = new PolygonShape();
 		footRect.setAsBox(Constants.WORM_WIDTH / 4.0f, Constants.WORM_WIDTH / 4.0f, new Vector2(0.0f, -Constants.WORM_HEIGHT / 2.0f), 0.0f);
+		CircleShape headshot = new CircleShape();
+		headshot.setRadius(Constants.HEAD_AREA_RADIUS);
+		headshot.setPosition(new Vector2(1 * Constants.WORLD_SCALE, 5 * Constants.WORLD_SCALE));
 
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
@@ -250,15 +269,25 @@ public class Worm extends WorldObject {
 		fixtureDef.friction = 0.0f;
 		fixtureDef.restitution = 0.0f;
 		fix = body.createFixture(fixtureDef);
-		fix.setUserData(new UserData(UserData.ObjectType.WormFoot,this));
+		fix.setUserData(new UserData(UserData.ObjectType.WormFoot, this));
+
+		// headshot fixture - ibo
+		fixtureDef.shape = headshot;
+		fixtureDef.isSensor = true;
+		fixtureDef.density = 0.0f;
+		fixtureDef.friction = 0.0f;
+		fixtureDef.restitution = 0.0f;
+		fix = body.createFixture(fixtureDef);
+		fix.setUserData(new UserData(UserData.ObjectType.Headshot, this));
 
 		// Infected this round - breed the devastating virus!
 		if (isInfected)
-			createVirusFixture();
+			createVirusFixture(body);
 
 		// Get rid of temporary material properly
 		bodyRect.dispose();
 		footRect.dispose();
+		headshot.dispose();
 
 		return body;
 	}
@@ -270,7 +299,7 @@ public class Worm extends WorldObject {
 	/**
 	 * Method to setup the Fixture of our Virus hitbox sensor for further infection spreading
 	 */
-	private void createVirusFixture() {
+	private void createVirusFixture(Body body) {
 		CircleShape circle = new CircleShape();
 		circle.setRadius(Constants.VIRUS_RADIUS);
 
@@ -278,7 +307,7 @@ public class Worm extends WorldObject {
 		fixtureDef.shape = circle;
 		fixtureDef.isSensor = true;
 
-		virusFixture = this.getBody().createFixture(fixtureDef);
+		virusFixture = body.createFixture(fixtureDef);
 		virusFixture.setUserData(new UserData(ObjectType.Virus, this));
 		circle.dispose();
 		createVirusFixture = false;
@@ -342,7 +371,6 @@ public class Worm extends WorldObject {
 	 */
 	public void setIsInfected(boolean isInfected) {
 		if (!this.isInfected && isInfected) {
-			virusSound.play(0.4f);
             EventManager.getInstance().queueEvent(EventManager.Type.WormInfected, this);
             createVirusFixture = true;
 		}
@@ -362,6 +390,8 @@ public class Worm extends WorldObject {
 	 * @param weapon - The weapon to equip, handled in Player
 	 */
 	public void equipWeapon(Weapon weapon) {
+		EventManager.getInstance().queueEvent(Type.WormEquipWeapon, weapon);
+
 		currentWeapon = weapon;
 		weaponAnimation = weapon.createAnimatedSprite();
 
@@ -407,7 +437,7 @@ public class Worm extends WorldObject {
 		if (health <= 0) {
 			// Is dead, kill it
 			health = 0;
-			die();
+			die(Constants.DEATH_TYPE_NO_HEALTH);
 		}
 	}
 
@@ -420,14 +450,11 @@ public class Worm extends WorldObject {
 	/**
 	 * Method to handle characters death - cleanup and stuff
 	 */
-	public void die() {
+	public void die(int deathType) {
 		if (!isDead) {
-			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, this);
-			//this.player.characterDied(this.characterNumber);
-			//this.setBodyToNullReference();
+			EventManager.getInstance().queueEvent(EventManager.Type.WormDied, new DeathEvent(this, deathType));
 			isDead = true;
 		}
-
 	}
 	
 	/**
@@ -436,14 +463,6 @@ public class Worm extends WorldObject {
 	 */
 	public boolean canJump() {
 		return this.isStandsOnGround();
-	}
-	/**
-	 * Getter method for character's shoot status
-	 * @return Character allowed to shoot?
-	 */
-	public boolean canShoot() {
-		return this.player.isPlayerTurn() &&
-				this.characterNumber == this.player.getTurn();
 	}
 
 	/**
@@ -458,8 +477,10 @@ public class Worm extends WorldObject {
 	 * Method to begin a new contact with a new ground piece
 	 */
 	public void beginContact() {
-		if (numContacts++ == 0)
+		if (numContacts++ == 0) {
+			EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
 			invalidateAnimation();
+		}
 	}
 	/**
 	 * Method to end one ground contact, if any
@@ -552,28 +573,12 @@ public class Worm extends WorldObject {
 	 * @return orientation
 	 */
 	public int getOrientation() {return this.orientation;}
-	/**
-	 * Getter method for global Asset Manager
-	 * @return AssetManager
-	 */
-	//public AssetManager getAssets() {return player.getAssets();}
+
 	/**
 	 * Getter method for the currently selected weapon
 	 * @return current Weapon
 	 */
 	public Weapon getCurrentWeapon() {return currentWeapon;}
-
-	/**
-	 * Passthrough method to give the shoot order to the currently selected weapon, if any and allowed
-	 * @param angle - The angle in which the projectile shall fly
-	 */
-	/*
-	public void shoot(float angle) {
-	    if(canShoot() && currentWeapon != null) {
-			currentWeapon.shoot(this, angle);
-			unequipWeapon();
-	    }
-	}*/
 
 	/**
 	 * Method to generate and fill a SnapshotData object
@@ -583,9 +588,10 @@ public class Worm extends WorldObject {
 
 		data.characterNumber = characterNumber;
 		data.health = health;
-		data.position = new Vector2(getBody().getPosition());
+		data.position = new Vector2(getPosition());
 		data.orientation = orientation;
 		data.isInfected = isInfected;
+		data.isDead = isDead;
 
 		return data;
 	}

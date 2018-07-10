@@ -11,8 +11,8 @@ public class KryoInterface {
         kryo.register(PlayerData.class);
         kryo.register(WormData.class);
         kryo.register(PhysicsData.class);
-        kryo.register(MessageData.class);
-        kryo.register(MessageData.Type.class);
+        kryo.register(Message.class);
+        kryo.register(Message.Type.class);
         kryo.register(int[].class);
         kryo.register(PlayerData[].class);
         kryo.register(WormData[].class);
@@ -28,6 +28,31 @@ public class KryoInterface {
         kryo.register(WormDamageEvent.class);
         kryo.register(GameOverEvent.class);
         kryo.register(ShotDirectionData.class);
+        kryo.register(PointerData.class);
         kryo.register(ChatMessage.class);
+
+        kryo.register(UserLoginRequest.class);
+        kryo.register(UserLoginRequest.Result.class);
+
+        kryo.register(LobbyData.class);
+        kryo.register(LobbyData[].class);
+        kryo.register(LobbyCreateRequest.class);
+        kryo.register(LobbyCreateRequest.Result.class);
+        kryo.register(LobbyJoinRequest.class);
+        kryo.register(LobbyJoinRequest.Result.class);
+        kryo.register(LobbyDataRequest.class);
+        kryo.register(LobbyDataRequest.Result.class);
+        kryo.register(LobbyListRequest.class);
+        kryo.register(LobbyListRequest.Result.class);
+        kryo.register(LobbyLeaveRequest.class);
+        kryo.register(LobbyLeaveRequest.Result.class);
+
+        kryo.register(UserMessage.class);
+
+        kryo.register(String[].class);
+
+        kryo.register(StartMatchRequest.class);
+        kryo.register(GameSetupRequest.Player.class);
+        kryo.register(GameSetupRequest.Player[].class);
     }
 }

@@ -2,19 +2,24 @@ package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ContactFilter;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
 import de.paluno.game.gameobjects.ground.Ground;
+import de.paluno.game.worldhandlers.WorldHandler;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class GameWorld implements Disposable {
+
+    public static class SnapshotData {
+        private Ground.SnapshotData ground;
+    }
 
     private WorldHandler worldHandler;
 
@@ -23,6 +28,8 @@ public class GameWorld implements Disposable {
     private ArrayList<WorldObject> objects;
 
     private com.badlogic.gdx.physics.box2d.World world;
+
+    private Rectangle worldBounds;
 
     private Ground ground;
     private ExplosionMaskRenderer explosionMaskRenderer;
@@ -47,6 +54,16 @@ public class GameWorld implements Disposable {
             }else {
             	
             }
+        }
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Headshot && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+            Projectile projectile = UserData.getObject(fixtureB);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA))
+                return false;
+        }
+        else if (UserData.getType(fixtureB) == UserData.ObjectType.Headshot && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            Projectile projectile = UserData.getObject(fixtureA);
+            if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
+                return false;
         }
 
        if (UserData.getType(fixtureA) == UserData.ObjectType.turret && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
@@ -79,15 +96,20 @@ public class GameWorld implements Disposable {
         world.setContactFilter(contactFilter);
         debugRenderer = new Box2DDebugRenderer();
 
+        worldBounds = new Rectangle(0, 0, map.getWorldWidth(), map.getWorldHeight());
+
         camera = new GameCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.setWorldBounds(worldBounds);
         explosionMaskRenderer = new ExplosionMaskRenderer(camera.getOrthoCamera());
 
         ground = new Ground(map, explosionMaskRenderer);
         explosionMaskRenderer.setGround(ground);
 
         registerAfterUpdate(ground);
-        //windHandler = new WindHandler();
-        //camera.setBottomLimit(worldBounds.y);
+    }
+
+    public void setFromSnapshot(SnapshotData data) {
+        ground.setFromSnapshot(data.ground);
     }
 
     @Override
@@ -101,6 +123,12 @@ public class GameWorld implements Disposable {
     	return worldHandler;
     }
 
+    public SnapshotData makeSnapshot() {
+        SnapshotData data = new SnapshotData();
+        data.ground = ground.makeSnapshot();
+        return data;
+    }
+
     public com.badlogic.gdx.physics.box2d.World getWorld() {
         return world;
     }
@@ -111,12 +139,12 @@ public class GameWorld implements Disposable {
     }
 
     public void step() {
-        world.step(1.0f / 60.0f, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
+        world.step(Constants.REFRESH_RATE, Constants.VELOCITY_ITERATIONS, Constants.POSITION_ITERATIONS);
     }
 
     public void render(SpriteBatch batch, float delta) {
-        forgetObjects();
         registerObjects();
+        forgetObjects();
 
         camera.update(delta);
 
@@ -130,7 +158,7 @@ public class GameWorld implements Disposable {
 
         batch.end();
 
-        //if (isRenderDebug)
+        if (isRenderDebug)
             debugRenderer.render(world, camera.getDebugProjection());
     }
 
@@ -140,6 +168,10 @@ public class GameWorld implements Disposable {
 
     public boolean isInWorldBounds(Body body) {
         return body.getWorldCenter().y > 0;
+    }
+
+    public Rectangle getWorldBounds() {
+        return worldBounds;
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {

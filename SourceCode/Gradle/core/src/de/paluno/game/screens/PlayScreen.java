@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.GameWorld;
 import de.paluno.game.interfaces.*;
+import de.paluno.game.worldhandlers.*;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
 
@@ -20,6 +21,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 	private boolean disposeReplayAfterUpdate;
     //private World.SnapshotData worldSnapshot;
     private WorldHandler worldHandler;
+    private ReplayWorldHandler replayWorldHandler;
     private UserWorldController worldController;
 
     private WinningPlayer winningPlayer = WinningPlayer.NONE;
@@ -45,8 +47,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         spriteBatch = new SpriteBatch();
     }
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms, NetworkClient client, GameSetupRequest request) {
-        this(game, mapNumber, numWorms);
+    public PlayScreen(SEPGame game, NetworkClient client, GameSetupRequest request) {
+        this(game, request.getMapNumber(), request.getNumWorms());
 
         this.client = client;
 
@@ -61,6 +63,26 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         this.gameSetupData = data;
     }
 
+    private EventManager.Listener eventListener = new EventManager.Listener() {
+        @Override
+        public void handleEvent(EventManager.Type eventType, Object data) {
+            switch (eventType) {
+                case Replay:
+                    replayWorldHandler = new ReplayWorldHandler(PlayScreen.this, (Replay)data);
+                    replayWorldHandler.initialize();
+
+                    worldHandler.hide();
+                    replayWorldHandler.show();
+                    break;
+                case ReplayEnded:
+                    replayWorldHandler.dispose();
+                    replayWorldHandler = null;
+                    worldHandler.show();
+                    break;
+            }
+        }
+    };
+
     @Override
     public void show() {
         float screenWidth = Gdx.graphics.getWidth();
@@ -69,7 +91,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         if (gameSetupRequest != null) {
-            worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest, mapNumber, numWorms);
+            worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest);
             chatWindow = new ChatWindow(client);
             chatWindow.initialize();
         }
@@ -96,8 +118,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 			mapSound = getAssetManager().get(Assets.map4Sound);
 			break;
 		}
+		mapSound.loop(0.2f);
 
         worldHandler.initialize();
+        worldHandler.show();
 
         worldController = new UserWorldController();
         worldController.initialize(worldHandler);
@@ -151,6 +175,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         inputMultiplexer.addProcessor(weaponUI.getInputProcessor());
         inputMultiplexer.addProcessor(worldController.getInputProcessor());
         Gdx.input.setInputProcessor(inputMultiplexer);
+
+        EventManager.getInstance().addListener(eventListener, EventManager.Type.Replay, EventManager.Type.ReplayEnded);
     }
 
     @Override
@@ -161,7 +187,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         // game loop
         Gdx.graphics.setTitle("SEPGame FPS: " + Gdx.graphics.getFramesPerSecond());
 
-        worldHandler.updateAndRender(spriteBatch, delta);
+        if (replayWorldHandler != null)
+            replayWorldHandler.updateAndRender(spriteBatch, delta);
+        else
+            worldHandler.updateAndRender(spriteBatch, delta);
 
         /*if (replayWorld != null)
         	replayWorld.doGameLoop(spriteBatch, delta);

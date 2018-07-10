@@ -38,10 +38,16 @@ class ShapeFactory {
     }
 
     static float[] createVertices(PolygonMapObject object) {
-        Polygon polygon = object.getPolygon();
+        float[] transformedVerts = object.getPolygon().getTransformedVertices();
+        float[] vertices = new float[transformedVerts.length];
+        for (int i = 0; i < vertices.length; i++) {
+            vertices[i] = transformedVerts[i] * Constants.WORLD_SCALE;
+        }
+        return vertices;
+        /*Polygon polygon = object.getPolygon();
         polygon.setPosition(polygon.getX() * Constants.WORLD_SCALE, polygon.getY() * Constants.WORLD_SCALE);
         polygon.setScale(Constants.WORLD_SCALE, Constants.WORLD_SCALE);
-        return polygon.getTransformedVertices();
+        return polygon.getTransformedVertices();*/
     }
 
     static ChainShape createChainShape(float[] v) {

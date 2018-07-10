@@ -1,12 +1,11 @@
 package de.paluno.game;
 
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import de.paluno.game.gameobjects.ShotDirectionIndicator;
 import de.paluno.game.gameobjects.WeaponIndicator;
 import de.paluno.game.gameobjects.WeaponType;
-import de.paluno.game.interfaces.ShotDirectionData;
+import de.paluno.game.worldhandlers.WorldHandler;
 
 public class UserWorldController {
 
@@ -87,7 +86,9 @@ public class UserWorldController {
                 case Constants.KEY_SELECT_WEAPON_7:
                 	worldHandler.applyEquipWeapon(WeaponType.WEAPON_TURRET);
                 	break;
-
+                case Constants.KEY_TOGGLE_DEBUG_RENDER:
+                    worldHandler.toggleDebugRender();
+                    break;
             }
 
             return super.keyDown(keycode);

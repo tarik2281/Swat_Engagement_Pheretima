@@ -1,7 +1,9 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import de.paluno.game.gameobjects.WorldObject;
 
@@ -24,6 +26,7 @@ public class GameCamera {
     private int horizontalMovement;
     private int verticalMovement;
 
+    private Rectangle worldBounds;
     // in world space (in meters)
     private float bottomLimit;
 
@@ -68,6 +71,10 @@ public class GameCamera {
         bottomLimit = bottom + viewportHeight / 2.0f * Constants.WORLD_SCALE;
     }
 
+    public void setWorldBounds(Rectangle worldBounds) {
+        this.worldBounds = worldBounds;
+    }
+
     public void setHorizontalMovement(int movement) {
         horizontalMovement = movement;
     }
@@ -101,8 +108,10 @@ public class GameCamera {
         debugPosition.add(horizontalMovement * Constants.CAMERA_MOVE_VELOCITY * delta,
                 verticalMovement * Constants.CAMERA_MOVE_VELOCITY * delta);
 
+        debugPosition.x = MathUtils.clamp(debugPosition.x, worldBounds.x + debugCamera.viewportWidth / 2.0f, worldBounds.x + worldBounds.width - debugCamera.viewportWidth / 2.0f);
+        debugPosition.y = MathUtils.clamp(debugPosition.y, worldBounds.y + debugCamera.viewportHeight / 2.0f, worldBounds.y + worldBounds.height - debugCamera.viewportHeight / 2.0f);
         // limit the vertical camera position so it does not go under the bottom limit
-        debugPosition.y = Math.max(debugPosition.y, bottomLimit);
+        //debugPosition.y = Math.max(debugPosition.y, bottomLimit);
 
         // since we calculated the camera position in meters for debug drawing, convert that to pixels for normal drawing
         position.set(Constants.getScreenSpaceVector(debugPosition));
@@ -114,6 +123,11 @@ public class GameCamera {
         // let the Camera class calculate its new projection matrices
         debugCamera.update();
         camera.update();
+    }
+
+    public void setPositionToFocus() {
+        if (cameraFocus != null)
+        debugPosition.set(cameraFocus.getPosition());
     }
     
     public void setCameraPosition(Vector2 position) {
@@ -127,6 +141,10 @@ public class GameCamera {
     public Matrix4 getScreenProjection() {
         // return the camera matrix to be used with a SpriteBatch
         return camera.combined;
+    }
+
+    public Vector2 getWorldPosition() {
+        return debugPosition;
     }
 
     public OrthographicCamera getOrthoCamera() {

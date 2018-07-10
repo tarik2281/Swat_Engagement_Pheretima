@@ -9,6 +9,8 @@ public class Constants {
 	public static final float PHYSICSSTEPLENGTH = 0.00800000037997961f;
 	public static final Vector2 GRAVITY = new Vector2(0.0f, -9.81f);
 
+	public static final float UPDATE_FREQUENCY = 1.0f / 30.0f;
+
 	// game play constants
 	public static final int NUM_PLAYERS = 2;
 	public static final int MAX_CHAR_NUM = 5;
@@ -17,9 +19,13 @@ public class Constants {
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
 
-	public static final Color PLAYER_1_COLOR = Color.TEAL;
+	public static final Color PLAYER_1_COLOR = Color.ROYAL;
 	public static final Color PLAYER_2_COLOR = Color.FIREBRICK;
+	public static final Color PLAYER_3_COLOR = Color.GOLDENROD;
+	public static final Color PLAYER_4_COLOR = Color.VIOLET;
+	public static final Color PLAYER_5_COLOR = Color.LIME;
 
+	public static final String BACKGROUND_LAYER = "BackgroundLayer";
 	public static final String TILE_LAYER = "TileLayer";
 	public static final String COLLISION_LAYER = "CollisionLayer";
 	public static final String SPAWN_LAYER = "SpawnPositions";
@@ -62,18 +68,25 @@ public class Constants {
 	public static final float CAMERA_FOCUS_TIME = 0.5f;
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
-	public static final float WORM_RADIUS = WORM_HEIGHT / 2.0f;
-
+	public static final float WORM_RADIUS = 7.5f * WORLD_SCALE;
+	
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
 	
 	public static final Vector2 AIRSTRIKE_SPAWNPOS = new Vector2(1340.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS2 = new Vector2(1320.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS3 = new Vector2(1300.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
+	
+	public static final float HEAD_AREA_RADIUS = 6.0f * WORLD_SCALE;
+	public static final int HEADSHOT_DAMAGE = 100;
 
 	public static final int DAMAGE_TYPE_VIRUS = 1;
 	public static final int DAMAGE_TYPE_PROJECTILE = 2;
+	public static final int DEATH_TYPE_FALL_DOWN = 1;
+	public static final int DEATH_TYPE_NO_HEALTH = 2;
+	public static final int DEATH_TYPE_DISCONNECTED = 3;
 
+	public static float REFRESH_RATE;
 
 	// key bindings
     public static final int KEY_MOVE_LEFT = Input.Keys.LEFT;

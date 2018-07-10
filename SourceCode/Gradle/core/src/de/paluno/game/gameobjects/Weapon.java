@@ -1,11 +1,8 @@
 package de.paluno.game.gameobjects;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 import de.paluno.game.*;
 
@@ -22,13 +19,8 @@ public class Weapon {
 	}
 
 	private Player player;
-	
-	private Sound gunShotSound;
-	private Sound bazookaShotSound;
-	private Sound airstrikeSound;
+
 	private Sound noAmmoSound;
-	private Sound throwSound;
-	private Sound targetSound;
 	
 	private WeaponType type;
 	private int currentAmmo;
@@ -42,7 +34,6 @@ public class Weapon {
 	 * @param type - WeaponType of the weapon, to determine it's behavior
 	 */
 	public Weapon(WeaponType type) {
-
 		this.type = type;
 
 		this.currentAmmo = type.getMaxAmmo();
@@ -50,13 +41,9 @@ public class Weapon {
 
 	public void setupAssets(AssetManager manager) {
 		animationSet = manager.get(type.getWeaponAsset());
-		gunShotSound = manager.get(Assets.gunShotSound);
-		bazookaShotSound = manager.get(Assets.bazookaShotSound);
-		airstrikeSound = manager.get(Assets.airstrikeSound);
 		noAmmoSound = manager.get(Assets.noAmmo);
-		throwSound = manager.get(Assets.throwSound);
-		targetSound = manager.get(Assets.targetSound);
 	}
+
 	/**
 	 * Constructor to create a new Weapon from given data
 	 * @param player - Reference to the (copied) Player we belong to
@@ -73,10 +60,8 @@ public class Weapon {
 
 	public void shoot(Worm worm, WeaponIndicator indicator, List<Projectile> output) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
+			EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, this);
 			if (getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
-				targetSound.play(0.3f);
-				airstrikeSound.play(0.4f);
-				
 				Vector2 position = indicator.getPosition();
 				
 				Projectile projectile = new Projectile(worm, 
@@ -111,16 +96,12 @@ public class Weapon {
 				
 				switch(projectile.getWeaponType()){
 					case WEAPON_GUN:
-						gunShotSound.play(0.7f);
 						break;
 					case WEAPON_BAZOOKA:
-						bazookaShotSound.play(0.2f);
 						break;
 					case WEAPON_SPECIAL:
-						throwSound.play(0.4f);
 						break;
 					case WEAPON_GRENADE:
-						throwSound.play(0.4f);
 						break;
 				}
 			}

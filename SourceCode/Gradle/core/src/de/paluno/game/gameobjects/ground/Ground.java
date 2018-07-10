@@ -2,13 +2,14 @@ package de.paluno.game.gameobjects.ground;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
 import com.badlogic.gdx.physics.box2d.*;
+import de.paluno.game.Constants;
 import de.paluno.game.Map;
 import de.paluno.game.UserData;
 import de.paluno.game.gameobjects.*;
-import de.paluno.game.gameobjects.GameWorld;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,7 +17,6 @@ import java.util.LinkedList;
 public class Ground extends WorldObject {
 	
 	public class SnapshotData {
-		private Map map;
 		private ArrayList<CollisionObject.SnapshotData> collisionObjects;
 	    private ArrayList<Explosion> explosions;
 	}
@@ -26,6 +26,8 @@ public class Ground extends WorldObject {
     private ExplosionMaskRenderer maskRenderer;
     private OrthogonalTiledMapRenderer mapRenderer;
     private Map map;
+    private TiledMapTileLayer tileLayer;
+    private TiledMapTileLayer backgroundLayer;
 
     private ArrayList<CollisionObject> collisionObjects;
     private ArrayList<CollisionObject> queriedObjects;
@@ -49,30 +51,24 @@ public class Ground extends WorldObject {
 
     public Ground(Map map, ExplosionMaskRenderer renderer) {
         this.map = map;
+        this.tileLayer = (TiledMapTileLayer)map.getTiledMap().getLayers().get(Constants.TILE_LAYER);
+        this.backgroundLayer = (TiledMapTileLayer)map.getTiledMap().getLayers().get(Constants.BACKGROUND_LAYER);
 
         this.maskRenderer = renderer;
 
         clipper = new ClipperWrapper();
-        collisionObjects = new ArrayList<CollisionObject>();
-        queriedObjects = new ArrayList<CollisionObject>();
+        collisionObjects = new ArrayList<>();
+        queriedObjects = new ArrayList<>();
 
-        explosions = new ArrayList<Explosion>();
-        explosionQueue = new LinkedList<Explosion>();
+        explosions = new ArrayList<>();
+        explosionQueue = new LinkedList<>();
     }
-    
-    public Ground(GameWorld world, ExplosionMaskRenderer renderer, SnapshotData data) {
-        this.map = data.map;
-    	this.maskRenderer = renderer;
-    	
-    	clipper = new ClipperWrapper();
-    	
-    	collisionObjects = new ArrayList<CollisionObject>(data.collisionObjects.size());
-    	for (CollisionObject.SnapshotData objectData : data.collisionObjects)
-    	    collisionObjects.add(new CollisionObject(objectData));
 
-    	queriedObjects = new ArrayList<CollisionObject>();
-    	explosions = new ArrayList<Explosion>(data.explosions);
-    	explosionQueue = new LinkedList<Explosion>();
+    public void setFromSnapshot(SnapshotData data) {
+        for (CollisionObject.SnapshotData objectData : data.collisionObjects)
+            collisionObjects.add(new CollisionObject(objectData));
+
+        explosions.addAll(data.explosions);
     }
 
     public void addExplosion(Explosion explosion) {
@@ -115,10 +111,6 @@ public class Ground extends WorldObject {
     }
 
     @Override
-    public void update(float delta) {
-    }
-
-    @Override
     public void render(SpriteBatch batch, float delta) {
         while (!explosionQueue.isEmpty())
             executeExplosion(explosionQueue.poll());
@@ -128,10 +120,20 @@ public class Ground extends WorldObject {
 
         batch.end();
 
+        mapRenderer.setView(getWorld().getCamera().getOrthoCamera());
+        if (backgroundLayer != null) {
+            batch.begin();
+            mapRenderer.renderTileLayer(backgroundLayer);
+            batch.end();
+        }
+
         maskRenderer.enableMask();
 
-        mapRenderer.setView(getWorld().getCamera().getOrthoCamera());
-        mapRenderer.render();
+        if (tileLayer != null) {
+            batch.begin();
+            mapRenderer.renderTileLayer(tileLayer);
+            batch.end();
+        }
 
         maskRenderer.disableMask();
 
@@ -173,7 +175,6 @@ public class Ground extends WorldObject {
 		    data.collisionObjects.add(object.makeSnapshot());
 
 		data.explosions = new ArrayList<>(this.explosions);
-		data.map = this.map;
 		
 		return data;
 	}

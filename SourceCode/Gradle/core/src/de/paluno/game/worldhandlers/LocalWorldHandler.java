@@ -1,14 +1,39 @@
-package de.paluno.game;
+package de.paluno.game.worldhandlers;
 
 import com.badlogic.gdx.utils.Timer;
+import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.gameobjects.Player;
 import de.paluno.game.gameobjects.Worm;
+import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
 import de.paluno.game.screens.WinningPlayer;
 
 public class LocalWorldHandler extends WorldHandler {
 
     private int numWorms;
+
+    private boolean wormDied;
+
+    private Timer.Task turnTimer = new Timer.Task() {
+        @Override
+        public void run() {
+            shiftTurn(true);
+
+            startTurn();
+        }
+    };
+
+    private EventManager.Listener eventListener = new EventManager.Listener() {
+        @Override
+        public void handleEvent(EventManager.Type eventType, Object data) {
+            switch (eventType) {
+                case ReplayEnded:
+                    Timer.schedule(turnTimer, 0.5f);
+                    break;
+            }
+        }
+    };
 
     public LocalWorldHandler(PlayScreen screen, int mapNumber, int numWorms) {
         super(screen, mapNumber);
@@ -43,7 +68,7 @@ public class LocalWorldHandler extends WorldHandler {
             Worm worm = currentPlayer.getCurrentWorm();
 
             if (worm.isInfected()) {
-                worm.takeDamage(Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
+                worm.takeDamage(de.paluno.game.Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
 
                 if (worm.isDead()) {
                     Timer.schedule(new Timer.Task() {
@@ -64,6 +89,8 @@ public class LocalWorldHandler extends WorldHandler {
             setCurrentPlayerTurn(currentPlayer.getPlayerNumber(),
                     currentPlayer.getCurrentWorm().getCharacterNumber());
             getWindHandler().nextWind();
+            getReplay().setWind(getWindHandler().getWind());
+            wormDied = false;
         }
     }
 
@@ -71,25 +98,32 @@ public class LocalWorldHandler extends WorldHandler {
         if (getNumPlayersAlive() <= 1)
             return;
 
-        if (shiftWorms && currentPlayer != -1) {
-            getCurrentPlayer().shiftTurn();
-        }
-
         do {
             currentPlayer = (currentPlayer + 1) % getPlayers().size();
         } while (getCurrentPlayer().isDefeated());
+
+        if (shiftWorms) {
+            getCurrentPlayer().shiftTurn();
+        }
     }
 
     @Override
     protected void requestNextTurn() {
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                shiftTurn(true);
+        if (wormDied && getReplay() != null) {
+            getReplay().setCameraPosition(getWorld().getCamera().getWorldPosition());
+            getReplay().addGameData(new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN));
+            EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
+        }
+        else {
+            Timer.schedule(turnTimer, 0.5f);
+        }
 
-                startTurn();
-            }
-        }, 0.5f);
+        wormDied = false;
+    }
+
+    @Override
+    protected void onWormDied(Worm.DeathEvent event) {
+        wormDied = true;
     }
 
     @Override
@@ -104,7 +138,16 @@ public class LocalWorldHandler extends WorldHandler {
 
     @Override
     public void onInitializePlayers() {
+        EventManager.getInstance().addListener(eventListener, EventManager.Type.ReplayEnded);
+
         initializePlayersDefault(numWorms);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+
+        EventManager.getInstance().removeListener(eventListener, EventManager.Type.ReplayEnded);
     }
 
     @Override
