@@ -5,6 +5,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.sun.deploy.jcp.controller.Network;
 import de.paluno.game.screens.*;
 
 public class SEPGame extends Game {
@@ -44,26 +45,28 @@ public class SEPGame extends Game {
     }
 
 
-    public void setLoginScreen(){
-        setNextScreen(new LoginScreen(this));
+    public void setLoginScreen(NetworkClient client){
+        setNextScreen(new LoginScreen(this, client));
     }
+
+
 
     public void setPlayScreen(int mapNumber, int numWorms) {
         setNextScreen(new PlayScreen(this, mapNumber, numWorms));
-//        setNextScreen(new PlayScreen(this, mapNumber, numWorms, playerNumber, modi, names));
-    }
-
-    public void setPlayerMenuScreen(int mapNumber, int numWorms) {
-        setNextScreen(new LoginScreen(this));
     }
 
 
-    public void setLobbyScreen(){
-        setNextScreen(new LobbyScreen(this));
+
+    public void setLobbyScreen(NetworkClient client){
+        setNextScreen(new LobbyScreen(this, client));
     }
 
-    public void setPlayerLobbyScreen(int mapNumber, int numWorms){
-        setNextScreen(new PlayerLobbyScreen(this,mapNumber, numWorms));
+    public void setPlayerLobbyScreen(NetworkClient client, int lobbyId){
+        setNextScreen(new PlayerLobbyScreen(this, client, lobbyId));
+    }
+
+    public void setModiScreen(){
+        setNextScreen(new ModiScreen(this));
     }
 
     public void setGameOver(WinningPlayer winningPlayer) {

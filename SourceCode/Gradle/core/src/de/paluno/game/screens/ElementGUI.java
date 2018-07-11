@@ -22,7 +22,7 @@ public class ElementGUI {
     private TextField.TextFieldStyle textFieldStyle;
     private TextField textField;
 
-    private ImageButton selectedImageButton;
+    private ImageButton selectedImageButton, selectedImageButton2;
     private TextButton selectedTextButton;
 
     public Skin getSkin() {
@@ -55,6 +55,13 @@ public class ElementGUI {
         imageButton = new ImageButton(textureRegionDrawable);
         imageButton.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         imageButton.pad(10);
+        return imageButton;
+    }
+
+    public ImageButton createWeaponButton(Texture texture) {
+        textureRegion = new TextureRegion(texture);
+        textureRegionDrawable = new TextureRegionDrawable(textureRegion);
+        imageButton = new ImageButton(textureRegionDrawable);
         return imageButton;
     }
 
@@ -99,4 +106,15 @@ public class ElementGUI {
         if (selectedImageButton != null)
             selectedImageButton.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     }
+
+    public void setSelectedImageButton2(ImageButton button) {
+        if (selectedImageButton2 != null)
+            selectedImageButton2.setColor(1.0f, 1.0f, 1.0f, 0.4f);
+
+        selectedImageButton2 = button;
+
+        if (selectedImageButton2 != null)
+            selectedImageButton2.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
 }

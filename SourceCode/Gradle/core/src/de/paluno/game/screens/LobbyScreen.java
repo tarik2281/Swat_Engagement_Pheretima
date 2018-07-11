@@ -9,12 +9,21 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Timer;
 import de.paluno.game.Assets;
+import de.paluno.game.DataHandler;
+import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
+import de.paluno.game.interfaces.LobbyCreateRequest;
+import de.paluno.game.interfaces.LobbyData;
+import de.paluno.game.interfaces.LobbyJoinRequest;
+import de.paluno.game.interfaces.LobbyListRequest;
+
+import javax.xml.crypto.Data;
 
 public class LobbyScreen extends ScreenAdapter implements Loadable {
     private ScrollPane scrollPane;
-    private List<String> list;
+    private List<LobbyData> list;
     private Skin skin;
     private Stage stage;
     private SEPGame game;
@@ -26,11 +35,38 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
     private Table tableBackground;
     private Image imageBackground;
 
-    public ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4, buttonPlay, buttonWorm1, buttonWorm2,
-            buttonWorm3, buttonWorm4, buttonWorm5;
+    private Timer.Task updateTimer = new Timer.Task() {
+        @Override
+        public void run() {
+            client.send(new LobbyListRequest());
+        }
+    };
+
+    public ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4,
+            buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
 
     private ImageButton selectedWormButton;
     private ImageButton selectedMapButton;
+
+    private NetworkClient client;
+    private DataHandler dataHandler = new DataHandler() {
+        @Override
+        public void handleData(NetworkClient client, Object data) {
+            if (data instanceof LobbyListRequest.Result) {
+                list.setItems(((LobbyListRequest.Result) data).lobbies);
+
+                Timer.schedule(updateTimer, 10.0f);
+            }
+            else if (data instanceof LobbyCreateRequest.Result){
+                game.setNextScreen(new PlayerLobbyScreen(game, client, ((LobbyCreateRequest.Result) data).lobbyId));
+            }
+            else if (data instanceof LobbyJoinRequest.Result) {
+                if (((LobbyJoinRequest.Result) data).success) {
+                    game.setNextScreen(new PlayerLobbyScreen(game, client, ((LobbyJoinRequest.Result) data).lobbyId));
+                }
+            }
+        }
+    };
 
 
     private int mapNumber;
@@ -63,14 +99,19 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         }
     }
 
-    public LobbyScreen(SEPGame game) {
+    public LobbyScreen(SEPGame game, NetworkClient client) {
         elementGUI = new ElementGUI();
+        this.client = client;
         stage = new Stage();
         this.game = game;
     }
 
     @Override
     public void show() {
+        client.send(new LobbyListRequest());
+        client.registerDataHandler(dataHandler);
+
+
         tableBackground = new Table();
         skin = elementGUI.getSkin();
         menuTable = new Table(skin);
@@ -82,8 +123,8 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedMapButton(buttonMap1);
-                mapNumber = 1;
+                elementGUI.setSelectedImageButton(buttonMap1);
+                mapNumber = 0;
                 System.out.println("Map1 Clicked");
             }
         });
@@ -94,8 +135,8 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedMapButton(buttonMap2);
-                mapNumber = 2;
+                elementGUI.setSelectedImageButton(buttonMap2);
+                mapNumber = 1;
                 System.out.println("Map2 Clicked");
             }
         });
@@ -106,8 +147,9 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedMapButton(buttonMap3);
-                mapNumber = 3;
+                elementGUI.setSelectedImageButton(buttonMap3);
+
+                mapNumber = 2;
                 System.out.println("Map3 Clicked");
             }
         });
@@ -119,8 +161,9 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedMapButton(buttonMap4);
-                mapNumber = 4;
+                elementGUI.setSelectedImageButton(buttonMap4);
+
+                mapNumber = 3;
                 System.out.println("Map4 Clicked");
             }
         });
@@ -133,7 +176,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedWormButton(buttonWorm1);
+                elementGUI.setSelectedImageButton(buttonWorm1);
                 numWorms = 1;
                 System.out.println("Worm 1 Clicked");
             }
@@ -145,7 +188,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedWormButton(buttonWorm2);
+                elementGUI.setSelectedImageButton(buttonWorm2);
                 numWorms = 2;
                 System.out.println("Worm 2 Clicked");
             }
@@ -156,7 +199,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedWormButton(buttonWorm3);
+                elementGUI.setSelectedImageButton(buttonWorm3);
                 numWorms = 3;
                 System.out.println("Worm 3 Clicked");
             }
@@ -167,7 +210,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedWormButton(buttonWorm4);
+                elementGUI.setSelectedImageButton(buttonWorm4);
                 numWorms = 4;
                 System.out.println("Worm 4 Clicked");
             }
@@ -178,7 +221,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                setSelectedWormButton(buttonWorm5);
+                elementGUI.setSelectedImageButton(buttonWorm5);
                 numWorms = 5;
                 System.out.println("Worm 5 Clicked");
             }
@@ -190,7 +233,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setPlayerMenuScreen(mapNumber, numWorms);
+                game.setModiScreen();
             }
         });
 
@@ -212,18 +255,24 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         textButtonJoinLobby.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setPlayerLobbyScreen(mapNumber, numWorms);
+                LobbyData data = list.getSelected();
+                if (data != null) {
+                    LobbyJoinRequest request = new LobbyJoinRequest();
+                    request.lobbyId = data.id;
+                    client.send(request);
+                }
+                //game.setPlayerLobbyScreen(mapNumber, numWorms);
             }
         });
 
 
-        list = new List<String>(skin);
+        list = new List<LobbyData>(skin);
         String[] strings = new String[5];
         for (int i = 1, k = 0; i <= strings.length; i++) {
             strings[k++] = "Lobby " + i + ": ";
 
         }
-        list.setItems(strings);
+
 
         scrollPane = new ScrollPane(list, skin);
         scrollPane.setBounds(550, 300, 500, 300);
@@ -261,7 +310,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 lobbyDialog.setVisible(false);
-                list.setItems("Lobby: " + textField.getText());
+                client.send(new LobbyCreateRequest(textField.getText(), mapNumber,numWorms));
             }
         });
         textField = elementGUI.createTextField("Lobbyname eingeben");
@@ -287,8 +336,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         mapNumber = 1;
         setSelectedWormButton(buttonWorm1);
         numWorms = 1;
-
-
     }
 
 
@@ -326,8 +373,16 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void dispose() {
+
         stage.dispose();
         skin.dispose();
+    }
+
+    @Override
+    public void hide() {
+        client.unregisterDataHandler(dataHandler);
+
+        updateTimer.cancel();
     }
 
     @Override

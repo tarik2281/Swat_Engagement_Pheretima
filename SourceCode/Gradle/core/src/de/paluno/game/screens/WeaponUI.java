@@ -11,9 +11,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
-import de.paluno.game.WorldHandler;
 import de.paluno.game.gameobjects.WeaponType;
 import de.paluno.game.gameobjects.Player;
+import de.paluno.game.worldhandlers.WorldHandler;
 
 import java.util.ArrayList;
 
@@ -43,44 +43,53 @@ public class WeaponUI {
         image2 = new Image(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI2))));
 
         //Gun ElementGUI
-        buttonGun = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconGun));
+        buttonGun = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconGun));
         buttonGun.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Gun ElementGUI Clicked");
                 worldHandler.applyEquipWeapon(WeaponType.WEAPON_GUN);
+                table.setVisible(false);
+                table2.setVisible(false);
 
             }
         }));
 
 
         // Grenade ElementGUI
-        buttonGrenade = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconGrenade));
+        buttonGrenade = elementGUI.createWeaponButton((playScreen.getAssetManager().get(Assets.iconGrenade)));
         buttonGrenade.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Grenade ElementGUI Clicked");
                 worldHandler.applyEquipWeapon(WeaponType.WEAPON_GRENADE);
+                table.setVisible(false);
+                table2.setVisible(false);
+
             }
         }));
 
         // Bazooka ElementGUI
-        buttonBazooka = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconBazooka));
+        buttonBazooka = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconBazooka));
         buttonBazooka.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Bazooka ElementGUI Clicked");
                 worldHandler.applyEquipWeapon(WeaponType.WEAPON_BAZOOKA);
+                table.setVisible(false);
+                table2.setVisible(false);
             }
         }));
 
         // SpecialWeapon ElementGUI
-        buttonWeaponSpecial = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconSpecial));
+        buttonWeaponSpecial = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconSpecial));
         buttonWeaponSpecial.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("SpecialWeapon ElementGUI Clicked");
                 worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
+                table.setVisible(false);
+                table2.setVisible(false);
             }
         }));
 
@@ -111,17 +120,19 @@ public class WeaponUI {
 
 
         // Airstrike ElementGUI
-        buttonAirStrike = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconAirStrike));
+        buttonAirStrike = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconAirStrike));
         buttonAirStrike.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Airstrike ElementGUI Clicked");
+                table.setVisible(false);
+                table2.setVisible(false);
                 //worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
         // Teleport ElementGUI
-        buttonTeleport = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconTeleport));
+        buttonTeleport = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconTeleport));
         buttonTeleport.addListener((new ClickListener() {
 
 //                        Vector3 selectedTeleportPosition = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(x, y, 0));
@@ -130,6 +141,8 @@ public class WeaponUI {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Teleport Clicked");
+                table.setVisible(false);
+                table2.setVisible(false);
                 worldHandler.applyEquipWeapon(WeaponType.WEAPON_TELEPORTER);
 
             }
@@ -138,27 +151,31 @@ public class WeaponUI {
 
 
         // Mine ElementGUI
-        buttonMine = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconMine));
+        buttonMine = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconMine));
         buttonMine.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Mine ElementGUI Clicked");
+                table.setVisible(false);
+                table2.setVisible(false);
                 //  worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
         // SpecialWeapon ElementGUI
-        buttonArtillery = elementGUI.createButton(playScreen.getAssetManager().get(Assets.iconArtillery));
+        buttonArtillery = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconArtillery));
         buttonArtillery.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Artillery ElementGUI Clicked");
+                table.setVisible(false);
+                table2.setVisible(false);
                 // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
         //Weapon Menu Button
-        weaponMenuButton = elementGUI.createButton(playScreen.getAssetManager().get(Assets.weaponMenuButton));
+        weaponMenuButton = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.weaponMenuButton));
         weaponMenuButton.addListener(new ClickListener() {
             int weaponClick = 0;
 

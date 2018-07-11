@@ -73,11 +73,11 @@ public class Assets {
     public static final AssetDescriptor<Map> map1 =
             new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
     public static final AssetDescriptor<Map> map2 =
-            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
+            new AssetDescriptor<Map>("Map2SEP.tmx", Map.class);
     public static final AssetDescriptor<Map> map3 =
-            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
+            new AssetDescriptor<Map>("Map3SEP.tmx", Map.class);
     public static final AssetDescriptor<Map> map4 =
-            new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
+            new AssetDescriptor<Map>("Map4SEP.tmx", Map.class);
 
     public static AssetDescriptor<Map> getMapByIndex(int index) {
         switch (index) {
@@ -257,7 +257,8 @@ public class Assets {
 
     public static final AssetDescriptor[] PlayerMenuScreenAssets = {
             playButton,playerMenuScreen2,playerMenuScreen3,playerMenuScreen4,playerMenuScreen5,teamMenuScreenBackground,random,
-            teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5,menuBackground
+            teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5,menuBackground,  menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
+            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground,menuBackground
     };
 
 

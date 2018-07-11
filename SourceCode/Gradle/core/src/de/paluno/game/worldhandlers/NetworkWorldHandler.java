@@ -165,7 +165,7 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
                 WormData[] wormData = new WormData[numWorms];
                 for (int j = 0; j < numWorms; j++) {
-                    Worm worm = addWorm(player, j);
+                    Worm worm = addWorm(player, j, "");
                     worm.setPosition(getRandomSpawnPosition());
 
                     wormData[j] = new WormData()
@@ -191,7 +191,7 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
                 player.setClientId(playerData.getClientId());
 
                 for (WormData wormData : playerData.getWorms()) {
-                    Worm worm = addWorm(player, wormData.getWormNumber());
+                    Worm worm = addWorm(player, wormData.getWormNumber(), "");
                     worm.setPosition(wormData.getPhysicsData().getPositionX(),
                             wormData.getPhysicsData().getPositionY());
                     // TODO: setup worms

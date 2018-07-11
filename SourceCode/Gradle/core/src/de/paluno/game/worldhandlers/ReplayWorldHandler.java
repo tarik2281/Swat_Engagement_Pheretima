@@ -33,7 +33,7 @@ public class ReplayWorldHandler extends InterpolationWorldHandler {
             Player player = addPlayer(playerData.getPlayerNumber());
 
             for (Worm.SnapshotData wormData : playerData.wormData) {
-                Worm worm = addWorm(player, wormData.characterNumber);
+                Worm worm = addWorm(player, wormData.characterNumber, "");
                 worm.setFromSnapshot(wormData);
                 if (worm.isDead())
                     getWorld().forgetAfterUpdate(worm);

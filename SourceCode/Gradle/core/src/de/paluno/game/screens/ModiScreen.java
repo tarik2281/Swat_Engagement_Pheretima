@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import de.paluno.game.Assets;
+import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
 import javax.xml.soap.Text;
@@ -18,10 +19,13 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     private Table table;
     private Skin skin;
     private SEPGame game;
-    private  ElementGUI elementGUI;
+    private ElementGUI elementGUI;
     private Image imageBackground;
-    private TextButton textButtonPlay,textButtonOnline, textButtonLocal;
+    private TextButton textButtonPlay, textButtonOnline, textButtonLocal;
     private TextButton selectedModiButton;
+    private Dialog connectingDialog;
+    private NetworkClient client;
+    private int modi = 1;
 
     public ModiScreen(SEPGame game) {
         super();
@@ -34,51 +38,76 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         stage = new Stage();
         table = new Table();
         skin = elementGUI.getSkin();
+        connectingDialog = new Dialog("Connecting", elementGUI.getSkin());
 
         table.setFillParent(true);
         imageBackground = elementGUI.createBackground(game.getAssetManager().get(Assets.menuBackground));
         table.setBackground(imageBackground.getDrawable());
 
         textButtonLocal = elementGUI.createTextButton("Local");
-        textButtonLocal.addListener(new ClickListener(){
+        textButtonLocal.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 elementGUI.setSelectedTextButton(textButtonLocal);
+                modi = 1;
             }
         });
-        textButtonLocal.setSize(300,100);
+        textButtonLocal.setSize(300, 100);
         textButtonOnline = elementGUI.createTextButton("Online");
-        textButtonOnline.addListener(new ClickListener(){
+        textButtonOnline.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-               elementGUI.setSelectedTextButton(textButtonOnline);
+                elementGUI.setSelectedTextButton(textButtonOnline);
+                modi = 2;
+
             }
         });
-        textButtonOnline.setSize(300,100);
+        textButtonOnline.setSize(300, 100);
         textButtonPlay = elementGUI.createTextButton("Start");
-        textButtonPlay.addListener(new ClickListener(){
+        textButtonPlay.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setLoginScreen();
+                if (modi == 1){
+                    game.setLoginScreen(null);
+                }else {
+
+                    connectingDialog.show(stage);
+                    client = new NetworkClient("localhost");
+                    client.setConnectionListener(new NetworkClient.ConnectionListener() {
+                        @Override
+                        public void onConnectionResult(NetworkClient client, int result) {
+                            switch (result) {
+                                case NetworkClient.RESULT_CONNECTION_SUCCESS:
+                                    game.setLoginScreen(client);
+                                    break;
+                                case NetworkClient.RESULT_CONNECTION_FAILED:
+                                    connectingDialog.setSize(300, 300);
+                                    connectingDialog.text("Connection Failed");
+                                    break;
+                            }
+                        }
+                    });
+                    client.connect();
+
+                }
             }
         });
+
         textButtonLocal.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         textButtonOnline.setColor(1.0f, 1.0f, 1.0f, 0.4f);
 
 
-        textButtonLocal.setPosition(330,300);
-        textButtonOnline.setPosition(730,300);
-        textButtonPlay.setPosition(570,200);
+        textButtonLocal.setPosition(330, 300);
+        textButtonOnline.setPosition(730, 300);
+        textButtonPlay.setPosition(570, 200);
 
-        setSelectedModiButton(textButtonLocal);
-
+        elementGUI.setSelectedTextButton(textButtonLocal);
 
         stage.addActor(table);
         stage.addActor(textButtonLocal);
         stage.addActor(textButtonOnline);
         stage.addActor(textButtonPlay);
-
 
 
         Gdx.input.setInputProcessor(stage);
