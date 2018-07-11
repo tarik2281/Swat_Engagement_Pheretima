@@ -116,14 +116,16 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (playerNum < 6) {
+                    playerNum++;
                     names.add(textFieldUsername.getText());
                     names.add(textFieldWorm1.getText());
                     names.add(textFieldWorm2.getText());
                     names.add(textFieldWorm3.getText());
                     names.add(textFieldWorm4.getText());
                     names.add(textFieldWorm5.getText());
-                    textButtonPlayerNum.setText("Spieler " + playerNum);
-                    playerNum++;
+                    if (playerNum <= 5) {
+                        textButtonPlayerNum.setText("Spieler " + playerNum);
+                    }
 
 
                     String res = String.join(" " , names);
