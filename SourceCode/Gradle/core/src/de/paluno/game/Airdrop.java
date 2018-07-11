@@ -6,12 +6,12 @@ import com.badlogic.gdx.math.Vector2;
 
 import de.paluno.game.gameobjects.AirdropChute;
 import de.paluno.game.gameobjects.AirdropCrate;
+import de.paluno.game.gameobjects.GameWorld;
 import de.paluno.game.gameobjects.WeaponType;
-import de.paluno.game.gameobjects.World;
 
 public class Airdrop implements GameEvent {
 
-	private World world;
+	//private World world;
 	
 	/**
 	 * Empty contructor
@@ -23,11 +23,11 @@ public class Airdrop implements GameEvent {
 	 * @param world - Reference to the world this happens in
 	 */
 	@Override
-	public Object trigger(World world) {
-		this.world = world;
+	public Object trigger(GameWorld world) {
+		//this.world = world;
 		
 		// Get a new random spawnpoint
-		Vector2 spawn = world.generateDropPosition();
+		Vector2 spawn = null;//world.generateDropPosition();
 		
 		// Select a new random drop content
 		WeaponType[] possibleDrops = WeaponType.values();
@@ -36,7 +36,7 @@ public class Airdrop implements GameEvent {
 		System.out.println("Crate spawned - i = "+i+" - Weapon is "+drop.getName());
 		
 		// Create the Airdrop
-		AirdropCrate crate = new AirdropCrate(world, spawn, drop);
+		AirdropCrate crate = new AirdropCrate( spawn, drop);
 		world.registerAfterUpdate(crate);
 		AirdropChute chute = new AirdropChute(crate);
 		crate.setChute(chute);
@@ -50,16 +50,16 @@ public class Airdrop implements GameEvent {
 	 * @param spawn - Given spawn coordinates
 	 * @param drop - Given loot content
 	 */
-	public void debugSpawn(World world, Vector2 spawn, WeaponType drop) {
+	/*public void debugSpawn(World world, Vector2 spawn, WeaponType drop) {
 		System.out.println("Debug crate spawn called!");
 		this.world = world;
 		
 		// Create the Airdrop
-		AirdropCrate crate = new AirdropCrate(world, spawn, drop);
+		AirdropCrate crate = new AirdropCrate(spawn, drop);
 		world.registerAfterUpdate(crate);
 		AirdropChute chute = new AirdropChute(crate);
 		crate.setChute(chute);
 		world.registerAfterUpdate(chute);
 		world.getCamera().setCameraFocus(crate);
-	}
+	}*/
 }

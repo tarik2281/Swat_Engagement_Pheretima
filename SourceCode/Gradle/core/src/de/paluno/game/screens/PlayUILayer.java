@@ -73,7 +73,7 @@ public class PlayUILayer {
                    message = "Spieler "+(currentPlayer+1)+" ist am Zug!";
                    color = Constants.PLAYER_COLORS[currentPlayer];
                 break;
-            case GAMEOVER:
+            /*case GAMEOVER:
                 if(currentPlayer != -1) {
                 	message = "Spieler "+(currentPlayer+1)+" hat gewonnen!";
                 	color = Constants.PLAYER_COLORS[currentPlayer];
@@ -82,7 +82,7 @@ public class PlayUILayer {
                 	color = Color.LIGHT_GRAY;
                 }
                 
-                break;
+                break;*/
         }
 
         showMessage(message, color);

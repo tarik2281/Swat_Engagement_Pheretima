@@ -89,6 +89,9 @@ public class UserWorldController {
                 case Constants.KEY_TOGGLE_DEBUG_RENDER:
                     worldHandler.toggleDebugRender();
                     break;
+                case Constants.KEY_DEBUG_DROP_TURRET:
+                    worldHandler.debugDrop();
+                    break;
             }
 
             return super.keyDown(keycode);

@@ -2,8 +2,10 @@ package de.paluno.game.worldhandlers;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Timer;
 import de.paluno.game.Assets;
@@ -194,9 +196,11 @@ public abstract class WorldHandler implements Disposable {
 
                 break;
             case WormTookDamage: {
-                if (shouldWorldStep()) {
-                    Worm.DamageEvent event = (Worm.DamageEvent) data;
+                Worm.DamageEvent event = (Worm.DamageEvent) data;
+                HoverText hoverText = new HoverText(event.getWorm(), "-" + event.getDamage(), Color.RED);
+                world.registerAfterUpdate(hoverText);
 
+                if (shouldWorldStep()) {
                     if (event.getDamageType() != de.paluno.game.Constants.DAMAGE_TYPE_VIRUS) {
                         WormDamageEvent gameEvent = new WormDamageEvent(currentGameTick, event.getWorm().getPlayerNumber(),
                                 event.getWorm().getCharacterNumber(), event.getDamage(), event.getDamageType());
@@ -248,6 +252,34 @@ public abstract class WorldHandler implements Disposable {
             case IdleRequest:
                 setIdle();
                 break;
+            case DestroyJoint: {
+                Joint joint = (Joint)data;
+                world.getWorld().destroyJoint(joint);
+                break;
+            }
+            case RemoveCrate: {
+                AirdropCrate crate = (AirdropCrate)data;
+                world.forgetAfterUpdate(crate);
+                break;
+            }
+            case CrateLanded: {
+                setWaiting();
+                break;
+            }
+            case CratePickup: {
+                AirdropCrate.PickupEvent event = (AirdropCrate.PickupEvent)data;
+
+                HoverText hoverText = new HoverText(event.getWorm(),
+                        "+1 " + event.getCrate().getDrop().getName(),
+                        Constants.PLAYER_COLORS[event.getWorm().getPlayerNumber()]);
+                world.registerAfterUpdate(hoverText);
+
+                if (shouldWorldStep()) {
+
+                }
+
+                break;
+            }
         }
     };
 
@@ -330,7 +362,11 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WeaponShoot,
                 EventManager.Type.AirBall,
                 EventManager.Type.Headshot,
-                EventManager.Type.IdleRequest);
+                EventManager.Type.IdleRequest,
+                EventManager.Type.DestroyJoint,
+                EventManager.Type.CrateLanded,
+                EventManager.Type.RemoveCrate,
+                EventManager.Type.CratePickup);
 
         for (Player player : players)
             player.show();
@@ -353,7 +389,11 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WeaponShoot,
                 EventManager.Type.AirBall,
                 EventManager.Type.Headshot,
-                EventManager.Type.IdleRequest);
+                EventManager.Type.IdleRequest,
+                EventManager.Type.DestroyJoint,
+                EventManager.Type.CrateLanded,
+                EventManager.Type.RemoveCrate,
+                EventManager.Type.CratePickup);
     }
 
     @Override
@@ -589,6 +629,12 @@ public abstract class WorldHandler implements Disposable {
         return spawnPositions.remove(new Random().nextInt(spawnPositions.size()));
     }
 
+    protected Vector2 getRandomAirdropPosition() {
+        Random random = new Random();
+        float x = random.nextFloat() * map.getWorldWidth();
+        return new Vector2(x, map.getWorldHeight());
+    }
+
     public int getNumPlayersAlive() {
         return numPlayersAlive;
     }
@@ -821,6 +867,22 @@ public abstract class WorldHandler implements Disposable {
         }
 
         return true;
+    }
+
+    public void createAirdrop(Vector2 position, WeaponType drop) {
+        AirdropCrate crate = new AirdropCrate(position, drop);
+        world.registerAfterUpdate(crate);
+        AirdropChute chute = new AirdropChute(crate);
+        crate.setChute(chute);
+        world.registerAfterUpdate(chute);
+        world.getCamera().setCameraFocus(crate);
+
+        endPlayerTurn();
+        currentGameState = GameState.DROPPING;
+    }
+
+    public void debugDrop() {
+        createAirdrop(getRandomAirdropPosition(), WeaponType.WEAPON_SPECIAL);
     }
 
     public void raiseLimit() {

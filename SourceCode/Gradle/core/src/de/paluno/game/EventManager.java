@@ -74,7 +74,23 @@ public class EventManager {
         /**
          * data: null
          */
-        IdleRequest
+        IdleRequest,
+        /**
+         * data: null
+         */
+        CrateLanded,
+        /**
+         * data: {@link com.badlogic.gdx.physics.box2d.Joint}
+         */
+        DestroyJoint,
+        /**
+         * data: {@link de.paluno.game.gameobjects.AirdropCrate}
+         */
+        RemoveCrate,
+        /**
+         * data: {@link de.paluno.game.gameobjects.AirdropCrate.PickupEvent}
+         */
+        CratePickup
     }
 
     public interface Listener {

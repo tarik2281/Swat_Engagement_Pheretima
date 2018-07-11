@@ -206,10 +206,14 @@ public class CollisionHandler implements ContactListener {
 
         // Worm <-> Crate
         if(UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Worm) {
-            ((Worm) o2).pickupWeapon(((AirdropCrate) o1).pickup());
+            AirdropCrate crate = UserData.getObject(fixA);
+            crate.pickup();
+            ((Worm) o2).pickupWeapon(crate);
             System.out.println("Crate picked up!");
         } else if(UserData.getType(fixB) == UserData.ObjectType.Crate && UserData.getType(fixA) == UserData.ObjectType.Worm) {
-            ((Worm) o1).pickupWeapon(((AirdropCrate) o2).pickup());
+            AirdropCrate crate = UserData.getObject(fixB);
+            crate.pickup();
+            ((Worm) o1).pickupWeapon(crate);
             System.out.println("Crate picked up!");
         }
 

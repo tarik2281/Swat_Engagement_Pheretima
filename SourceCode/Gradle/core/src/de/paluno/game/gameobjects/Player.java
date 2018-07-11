@@ -254,13 +254,13 @@ public class Player implements Disposable {
 	 * Method to generate a given debug test Airdrop
 	 * @param keycode - The key registered for a certain weapon type
 	 */
-	public void spawnDebugDrop(int keycode) {
+	/*public void spawnDebugDrop(int keycode) {
 		WeaponType dropWeapon;
 		switch(keycode) {
 			default: case Constants.KEY_DEBUG_DROP_TURRET: dropWeapon = WeaponType.WEAPON_SPECIAL;
 		}
 		world.spawnDebugDrop(dropWeapon, this.getCurrentWorm().getBody().getPosition().x);
-	}
+	}*/
 
 	/**
 	 * Method to add one shot to a given picked up weapon

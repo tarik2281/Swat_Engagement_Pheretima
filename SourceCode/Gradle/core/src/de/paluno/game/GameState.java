@@ -5,6 +5,7 @@ public enum GameState {
 	PLAYERTURN,
 	SHOOTING,
 	WAITING,
+	DROPPING,
 	RAISE_LIMIT,
 	REPLAY_ENDED,
 	IDLE,

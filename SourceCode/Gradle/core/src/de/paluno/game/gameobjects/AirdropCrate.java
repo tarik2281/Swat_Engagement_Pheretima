@@ -1,45 +1,46 @@
 package de.paluno.game.gameobjects;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJoint;
-import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
-import de.paluno.game.GameState;
+import de.paluno.game.EventManager;
 import de.paluno.game.UserData;
 
-public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
+public class AirdropCrate extends WorldObject {
 
-	private World world;
-	private GameState currentState;
-	
+	public static class PickupEvent {
+		private Worm worm;
+		private AirdropCrate crate;
+
+		public PickupEvent(Worm worm, AirdropCrate crate) {
+			this.worm = worm;
+			this.crate = crate;
+		}
+
+		public Worm getWorm() {
+			return worm;
+		}
+
+		public AirdropCrate getCrate() {
+			return crate;
+		}
+	}
+
 	private Sprite design;
-	private Sprite designChute;
 	private WeaponType drop;
-	private Vector2 spawn;
 	
 	// C = Chute, D = Drop, contact = Shall things collide with crate?
 	private boolean dropping = true;
 	private boolean fading = false;
 	private float opacity = 1.0f;
 	private boolean contact = true;
-	
-	private Body body;
-	private Fixture fix;
 	
 	private AirdropChute chute = null;
 	
@@ -48,28 +49,22 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 	
 	/**
 	 * Constructor
-	 * @param world - Reference to the world we are in
 	 * @param spawn - Spawn coordinate
 	 * @param drop - Drop content
 	 */
-	public AirdropCrate(World world, Vector2 spawn, WeaponType drop) {
-		this.world = world;
-		this.spawn = spawn;
-		
+	public AirdropCrate(Vector2 spawn, WeaponType drop) {
+		setPosition(spawn);
 		this.drop = drop;
-		
-		Texture texture = getAssets().get(Assets.crate);
-		this.design = new Sprite(texture);
-		design.setOriginCenter();
 		
 		System.out.println("New drop initialized!");
 		//world.getCamera().setCameraFocus(this);
 	}
-	
+
 	@Override
-	public Body getBody() {return this.body;}
-	@Override
-	public void setBodyToNullReference() {this.body = null;}
+	public void setupAssets(AssetManager manager) {
+		design = new Sprite(manager.get(Assets.crate));
+		design.setOriginCenter();
+	}
 
 	/**
 	 * Handler method for Game Loop's render phase
@@ -78,34 +73,30 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 	 */
 	@Override
 	public void render(SpriteBatch batch, float delta) {
-		if(body != null) {
-			// The crate itself still exists (if not, we got a problem), so render it
-			Vector2 cratePosition = Constants.getScreenSpaceVector(this.body.getPosition());
-			if(fading) {
-				// The crate has been picked up and is slowly fading - calculate
-				if(opacity != 0) {
-					// Still fading, calculate how much we lose this round (duration: 1s)
-					opacity -= 2*delta;
-					if(opacity < 0) opacity = 0;
-					design.setAlpha(opacity);
-				}
-			} else design.setRotation(body.getAngle() * TODEG);
-			//batch.draw(design, cratePosition.x, cratePosition.y);
-			design.setOriginBasedPosition(cratePosition.x, cratePosition.y);
-			design.draw(batch);
-		}
-		
+		// The crate itself still exists (if not, we got a problem), so render it
+		Vector2 cratePosition = Constants.getScreenSpaceVector(getPosition());
+		if (fading) {
+			// The crate has been picked up and is slowly fading - calculate
+			if (opacity != 0) {
+				// Still fading, calculate how much we lose this round (duration: 1s)
+				opacity -= 2 * delta;
+				if (opacity < 0) opacity = 0;
+				design.setAlpha(opacity);
+			}
+		} else design.setRotation(getAngle() * TODEG);
+		//batch.draw(design, cratePosition.x, cratePosition.y);
+		design.setOriginBasedPosition(cratePosition.x, cratePosition.y);
+		design.draw(batch);
 	}
+
 	/**
 	 * Handler method for Game Loop's update phase
 	 * @param delta - Time since last update in seconds
-	 * @param gamestate - The current GameState we're in
 	 */
 	@Override
-	public void update(float delta, GameState gamestate) {
+	public void update(float delta) {
 		// No body anymore? Shouldn't happen, catch
-		if(body == null) return;
-		this.currentState = gamestate;
+
 		// Determine done fading outs
 		if(opacity == 0) removeCrate();
 		
@@ -114,7 +105,7 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 			body.setType(BodyType.StaticBody);
 		}*/
 		
-		if (!world.isInWorldBounds(body)) {
+		if (!getWorld().isInWorldBounds(this)) {
 			if(chute != null) removeChute();
 			removeCrate();
 		};
@@ -124,15 +115,15 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 	 * Method to create the body for our pickup crate
 	 */
 	@Override
-	public void setupBody() {
+	protected Body onSetupBody(World world) {
 		BodyDef def = new BodyDef();
 		def.type = BodyType.DynamicBody;
 		def.gravityScale = 0.0f;
 		def.fixedRotation = false;
-		def.position.set(spawn);
+		def.position.set(getPosition());
 		def.linearVelocity.set(0, -1.5f);
 		
-		this.body = world.createBody(def);
+		Body body = world.createBody(def);
 		
 		PolygonShape bodyRect = new PolygonShape();
 		bodyRect.setAsBox(Constants.CRATE_RADIUS, Constants.CRATE_RADIUS);
@@ -143,12 +134,18 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		fDef.friction = 1.0f;
 		fDef.restitution = 0.1f;
 		
-		this.fix = body.createFixture(fDef);
+		Fixture fix = body.createFixture(fDef);
 		fix.setUserData(new UserData(UserData.ObjectType.Crate, this));
 		
 		bodyRect.dispose();
+
+		return body;
 	}
-	
+
+	public WeaponType getDrop() {
+		return drop;
+	}
+
 	/**
 	 * Method to start fading out the crate
 	 */
@@ -166,9 +163,9 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		this.chute.destroy();
 		System.out.println("Chute destruction triggered, chaging crate specs.");
 		// Update the crate body, to make it affected by gravity
-		body.setGravityScale(1.0f);
-		body.resetMassData();
-		body.setLinearVelocity(0.0f, 0.0f);
+		getBody().setGravityScale(1.0f);
+		getBody().resetMassData();
+		getBody().setLinearVelocity(0.0f, 0.0f);
 		System.out.println("Done!");
 	}
 	
@@ -178,7 +175,9 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 	private void removeCrate() {
 		if(this.chute == null) {
 			System.out.println("World should have forgotten this crate");
-			world.forgetAfterUpdate(this);
+			EventManager.getInstance().queueEvent(EventManager.Type.RemoveCrate, this);
+			//removeFromWorld();
+			//world.forgetAfterUpdate(this);
 		} else System.out.println("Waiting for chute to despawn...");
 	}
 	/**
@@ -188,13 +187,7 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		chute.remove();
 		chute = null;
 	}
-	
-	/**
-	 * Getter method for our AssetManager, directly from world
-	 * @return AssetManager
-	 */
-	protected AssetManager getAssets() {return this.world.getAssetManager();}
-	
+
 	/**
 	 * Method to trigger the "Crate pickup" event
 	 * @return The weapon contained in this drop
@@ -213,7 +206,8 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 		System.out.println("Throwing off chute");
 		destroyChute();
 		System.out.println("Chute thrown off!");
-		this.world.setCrateLanded();
+		EventManager.getInstance().queueEvent(EventManager.Type.CrateLanded, null);
+		//this.world.setCrateLanded();
 	}
 	
 	public void setChute(AirdropChute chute) {this.chute = chute;}
@@ -223,6 +217,4 @@ public class AirdropCrate implements Renderable, Updatable, PhysicsObject {
 	 * @return Handle contact?
 	 */
 	public boolean getContact() {return this.contact;}
-	
-	public World getWorld() {return this.world;}
 }

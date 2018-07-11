@@ -1,7 +1,8 @@
 package de.paluno.game;
 
-import de.paluno.game.gameobjects.World;
+
+import de.paluno.game.gameobjects.GameWorld;
 
 public interface GameEvent {
-	Object trigger(World world);
+	Object trigger(GameWorld world);
 }
