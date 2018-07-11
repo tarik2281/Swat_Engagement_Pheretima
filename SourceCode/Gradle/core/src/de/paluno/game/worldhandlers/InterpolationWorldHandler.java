@@ -63,6 +63,8 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                     case EXPLOSION: {
                         ExplosionEvent ex = (ExplosionEvent) currentEvent;
                         Projectile projectile = getProjectileById(ex.projectileId);
+                        if (projectile == null)
+                            System.out.println("Could not find projectile for id: " + ex.projectileId + " (" + toString() + ")");
                         getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
                                 ex.getRadius(), ex.getBlastPower()));
                         EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, projectile);
@@ -70,16 +72,28 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                     }
                     case SHOOT: {
                         for (ProjectileData data : ((ShootEvent) currentEvent).projectiles) {
-                            Projectile projectile = new Projectile(null, WeaponType.values()[data.getType()],
+                            Projectile projectile;
+                            Worm shootingWorm = getPlayers().get(data.getPlayerNumber()).getWormByNumber(data.getWormNumber());
+                            if (shootingWorm == null) {
+                                System.out.println("Could not find worm for id: " + data.getPlayerNumber() + ", " + data.getWormNumber() + " (" + toString() + ")");
+                            }
+                            else {
+                                System.out.println("Could find worm for id: " + data.getPlayerNumber() + ", " + data.getWormNumber() + " (" + toString() + ")");
+                            }
+                            if (data.getType() == WeaponType.WEAPON_TURRET.ordinal())
+                                projectile = new Turret(shootingWorm, WeaponType.values()[data.getType()],
+                                        new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
+                            else
+                                projectile = new Projectile(shootingWorm, WeaponType.values()[data.getType()],
                                     new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
                             addProjectile(projectile);
                             projectile.setId(data.getId());
                         }
-                        EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, getCurrentPlayer().getCurrentWeapon());
+                        EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, WeaponType.values()[((ShootEvent) currentEvent).weaponType]);
                         break;
                     }
                     case END_TURN: {
-                        setIdle();
+                        EventManager.getInstance().queueEvent(EventManager.Type.IdleRequest, null);
                         break;
                     }
                     case WORM_DIED: {

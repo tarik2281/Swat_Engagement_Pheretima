@@ -18,6 +18,7 @@ public class Projectile extends WorldObject {
 
 	public static class SnapshotData {
 
+	    private int id;
 		private Vector2 position;
 		private Vector2 direction;
 		private WeaponType weaponType;
@@ -28,6 +29,10 @@ public class Projectile extends WorldObject {
 		public Vector2 getPosition() {
 			return position;
 		}
+
+		public WeaponType getWeaponType() {
+		    return weaponType;
+        }
 	}
 
     // in meters
@@ -36,7 +41,7 @@ public class Projectile extends WorldObject {
     private static final float BAZOOKA_DENSITY = 0.07f;
     private static final float GRENADE_DENSITY = 0.2f;
     private static final float AIRSTRIKE_DENSITY = 1f;
-
+    private static final float MINE_DENSITY = 1000.0f;
 
     private int id;
     private Vector2 direction;
@@ -44,12 +49,13 @@ public class Projectile extends WorldObject {
 
     private Texture texture;
     private Sprite sprite;
+    private Turret turret;
 
     private boolean exploded = false;
 
-    private Worm shootingWorm;
+    protected Worm shootingWorm;
     private boolean wormContactEnded = false;
-
+    private boolean turretContactEnded= false;
     private float explosionTimer = 0.0f;
     private Explosion explosion;
 
@@ -70,6 +76,13 @@ public class Projectile extends WorldObject {
         return id;
     }
 
+    public Projectile(SnapshotData data) {
+        this.id = data.id;
+        setPosition(data.position);
+        this.direction = new Vector2(data.direction);
+        this.weaponType = data.weaponType;
+    }
+
     @Override
     public void setupAssets(AssetManager manager) {
         texture = manager.get(weaponType.getProjectileAsset());
@@ -87,7 +100,7 @@ public class Projectile extends WorldObject {
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null, true, false);
             
-        if(!getWorld().isInWorldBounds(getBody())) {
+        if(!getWorld().isInWorldBounds(this)) {
         	explode(null, false, false);
         }
         if (!wormContactEnded && shootingWorm != null) {
@@ -95,6 +108,13 @@ public class Projectile extends WorldObject {
             if (distance > Constants.WORM_RADIUS + PROJECTILE_RADIUS)
                 wormContactEnded = true;
         }
+        if (!turretContactEnded) {
+			if (turret != null) {
+				float distance = turret.getPosition().dst(getPosition());
+	            if (distance > Constants.TURRET_RADIUS + PROJECTILE_RADIUS)
+	                turretContactEnded = true;
+			}
+		}
     }
 
     @Override
@@ -104,6 +124,7 @@ public class Projectile extends WorldObject {
         sprite.setOriginBasedPosition(position.x, position.y);
 
         switch (weaponType) {
+        	case WEAPON_TURRET_PROJECTILE:
             case WEAPON_BAZOOKA:
             case WEAPON_AIRSTRIKE:
                 Vector2 direction = new Vector2(-getVelocity().x, getVelocity().y);
@@ -127,6 +148,8 @@ public class Projectile extends WorldObject {
 
         CircleShape shape = new CircleShape();
         shape.setRadius(PROJECTILE_RADIUS);
+        CircleShape poly = new CircleShape();
+        poly.setRadius(Constants.TURRET_RADIUS);
 
         //Vector2 impulse = new Vector2(direction).scl(body.getMass() * weaponType.getShootingImpulse());
 
@@ -144,7 +167,7 @@ public class Projectile extends WorldObject {
             body.setGravityScale(0.0f);
 
             // apply an impulse to the body so it flies in the direction we chose
-            Vector2 impulse = new Vector2(direction).scl(0.0015f);
+            Vector2 impulse = new Vector2(direction).scl(0.00015f);
             body.applyLinearImpulse(impulse, body.getPosition(), true);
 
             // CollisionHandler Identifier
@@ -187,7 +210,33 @@ public class Projectile extends WorldObject {
         	body.applyAngularImpulse(-0.01f * body.getMass(),  true);
         	fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
         }
-        
+        else if (weaponType == WeaponType.WEAPON_MINE) {
+   		 	FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = MINE_DENSITY;
+            fixtureDef.friction = 1.0f;
+            fixtureDef.restitution = 0.6f;
+            body = world.createBody(bodyDef);
+            Fixture fix = body.createFixture(fixtureDef);
+            body.setGravityScale(1.0f);
+            // Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
+            //body.applyLinearImpulse(impulse, body.getPosition(), true);
+            //body.applyAngularImpulse(-0.01f * body.getMass(), true);
+   	     	fix.setUserData(new UserData(UserData.ObjectType.Projectile,this));
+
+
+        } else if (weaponType == WeaponType.WEAPON_TURRET_PROJECTILE) {
+            FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = shape;
+            fixtureDef.density = BAZOOKA_DENSITY;
+            body = world.createBody(bodyDef);
+            Fixture fix = body.createFixture(fixtureDef);
+            body.setGravityScale(0.0f);
+            Vector2 impulse = new Vector2(direction).scl(body.getMass() * 7.0f);
+            body.applyLinearImpulse(impulse, body.getPosition(), true);
+            fix.setUserData(new UserData(UserData.ObjectType.Projectile, this));
+        }
+
         shape.dispose();
 
         return body;
@@ -214,32 +263,33 @@ public class Projectile extends WorldObject {
     }
 
     public void explode(Worm directHitWorm, boolean collidedObject, boolean collidedHead) {
-        if (!exploded) {
+        if (weaponType == WeaponType.WEAPON_TURRET) {
+            return;
+        } else if (!exploded) {
             exploded = true;
             explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());
             EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, this);
 
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null) {
-                    if (collidedHead)
+                    if (collidedHead && weaponType == WeaponType.WEAPON_GUN)
                         directHitWorm.takeDamage(Constants.HEADSHOT_DAMAGE, Constants.DAMAGE_TYPE_PROJECTILE);
                     else
                         directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
                 }
                 else
-                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
-                
-            }
-            else if (collidedObject) {
+                    EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
+
+            } else if (collidedObject) {
                 ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
-                
-                if(affectedWorms.isEmpty()) {
-                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
+
+                if (affectedWorms.isEmpty()) {
+                    EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
                 }
-                
+
                 for (Worm worm : affectedWorms) {
-                    worm.takeDamage((int)weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
-                
+                    worm.takeDamage((int) weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
+
                     if (weaponType == WeaponType.WEAPON_SPECIAL)
                         worm.setIsInfected(true);
                 }
@@ -250,12 +300,14 @@ public class Projectile extends WorldObject {
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
-		data.position= new Vector2(getPosition());
-		data.direction= new Vector2(direction);
+		data.id = id;
+		data.position = new Vector2(getPosition());
+		data.direction = new Vector2(direction);
 		data.weaponType = weaponType;
-		data.playerNumber = shootingWorm.getPlayerNumber();
-		data.wormNumber = shootingWorm.getCharacterNumber();
-
+		if (shootingWorm != null) {
+            data.playerNumber = shootingWorm.getPlayerNumber();
+            data.wormNumber = shootingWorm.getCharacterNumber();
+        }
 		return data;
 	}
 }

@@ -3,7 +3,7 @@ package de.paluno.game.gameobjects;
 public abstract class WeaponIndicator<T> extends WorldObject {
 
     public enum Type {
-        ShotDirection, Pointer;
+        ShotDirection, Pointer, None;
 
         public WeaponIndicator newInstance() {
             switch (this) {

@@ -11,7 +11,11 @@ import java.util.List;
 
 public class Replay {
 
+    public static final int TYPE_PLAYER_TURN = 0;
+    public static final int TYPE_TURRETS = 1;
+
     private WorldStateSnapshot setupSnapshot;
+    private int type;
     private int mapNumber;
     private int playerNumber;
     private int wormNumber;
@@ -22,11 +26,17 @@ public class Replay {
     private ArrayList<GameEvent> events;
     private ArrayList<WorldData> snapshots;
 
-    public Replay() {
+    public Replay(int type) {
+        this.type = type;
+
         events = new ArrayList<>();
         snapshots = new ArrayList<>();
 
         startingTick = -1;
+    }
+
+    public int getType() {
+        return type;
     }
 
     public void addGameData(GameData data) {

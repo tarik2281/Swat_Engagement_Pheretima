@@ -1,6 +1,5 @@
-package de.paluno.game;
+ package de.paluno.game;
 
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Projectile;
@@ -88,15 +87,28 @@ public class CollisionHandler implements ContactListener {
 
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
 
-            if (((Projectile) o1).explodeOnCollision()) {
-                ((Projectile) o1).explode((Worm) o2, true, false);
+        	Projectile projectile = UserData.getObject(fixA);
+        	Worm worm = UserData.getObject(fixB);
+
+        	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
+        		projectile.explode(worm, true, false);
+        	}
+        	else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+                projectile.explode(worm, true, false);
             }
+
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o2).getHealth());
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
 
-            if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode((Worm) o1, true, false);
+        	Projectile projectile = UserData.getObject(fixB);
+        	Worm worm = UserData.getObject(fixA);
+
+        	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
+        		projectile.explode(worm, true, false);
+        	}
+        	else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+                projectile.explode(worm, true, false);
             }
             System.out.println("Projectile -> Worm");
             System.out.println("Worms life = " + ((Worm) o1).getHealth());
@@ -106,8 +118,10 @@ public class CollisionHandler implements ContactListener {
 
         // Projectile -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Ground) {
-        	if (((Projectile) o1).explodeOnCollision()) {
-        		((Projectile) o1).explode(null, true, false);
+        	Projectile projectile = UserData.getObject(fixA);
+
+            if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+        		projectile.explode(null, true, false);
             }
         	else {
         		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
@@ -116,17 +130,19 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Projectile collided with Ground");
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Ground) {
-            if (((Projectile) o2).explodeOnCollision()) {
-                ((Projectile) o2).explode(null, true, false);
+            Projectile projectile = UserData.getObject(fixB);
+
+            if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+                projectile.explode(null, true, false);
             }
             else {
-        		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
-        	}
+                EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
+            }
             System.out.println("Projectile collided with Ground");
         }
-        
 
-        
+
+
         // Worm Headshot
         if (UserData.getType(fixA) == UserData.ObjectType.Headshot && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
         	 if (((Projectile) o2).explodeOnCollision()) {
@@ -141,6 +157,54 @@ public class CollisionHandler implements ContactListener {
                  	EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
              }
         }
+
+
+        // Turret ->ground
+        if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Ground) {
+
+        	Projectile projectile = UserData.getObject(fixA);
+
+        	if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
+        		projectile.explode(null, false, false);
+
+            System.out.println("Turret collided with Ground");
+
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.Ground) {
+        	Projectile projectile = UserData.getObject(fixB);
+
+        	if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
+        		projectile.explode(null, false, false);
+
+            System.out.println("Turret collided with Ground");
+        }
+
+        //Turret -> worm
+        if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.WormFoot) {
+        	Worm worm = UserData.getObject(fixB);
+        	worm.beginContact();
+
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.WormFoot) {
+        	Worm worm = UserData.getObject(fixA);
+        	worm.beginContact();
+        }
+
+        // projectile->Turret
+
+        if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
+
+        	Projectile projectile = UserData.getObject(fixA);
+
+        		projectile.explode(null, true, false);
+
+            System.out.println("Projectile collided with Turret");
+
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
+        	Projectile projectile = UserData.getObject(fixB);
+        		projectile.explode(null, true, false);
+
+            System.out.println("Projectile collided with Turret");
+        }
+
     }
 
     /**
@@ -184,6 +248,14 @@ public class CollisionHandler implements ContactListener {
             ((Worm) o1).endContact();
             System.out.println("Worm isn't in contact with the worm");
         } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Worm) {
+            ((Worm) o2).endContact();
+            System.out.println("Worm isn't in contact with the worm");
+        }
+
+        if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Turret) {
+            ((Worm) o1).endContact();
+            System.out.println("Worm isn't in contact with the worm");
+        } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Turret) {
             ((Worm) o2).endContact();
             System.out.println("Worm isn't in contact with the worm");
         }

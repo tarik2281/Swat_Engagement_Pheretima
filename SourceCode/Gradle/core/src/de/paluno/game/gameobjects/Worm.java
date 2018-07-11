@@ -91,7 +91,7 @@ public class Worm extends WorldObject {
 	private boolean gunUnequipping = false;
 
 	private int health;
-	
+
 	private boolean animationInvalidated;
 
 	/**
@@ -104,6 +104,7 @@ public class Worm extends WorldObject {
 
 		this.player = player;
 
+		this.orientation = Constants.WORM_DIRECTION_LEFT;
 		this.health = Constants.WORM_MAX_HEALTH;
 		this.animationInvalidated = true;
 
@@ -181,7 +182,7 @@ public class Worm extends WorldObject {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!getWorld().isInWorldBounds(getBody())) {
+		if (!getWorld().isInWorldBounds(this)) {
 			die(Constants.DEATH_TYPE_FALL_DOWN);
 		}
 	}
@@ -249,7 +250,7 @@ public class Worm extends WorldObject {
 		CircleShape headshot = new CircleShape();
 		headshot.setRadius(Constants.HEAD_AREA_RADIUS);
 		headshot.setPosition(new Vector2(1 * Constants.WORLD_SCALE, 5 * Constants.WORLD_SCALE));
-		
+
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
@@ -279,7 +280,7 @@ public class Worm extends WorldObject {
 		fixtureDef.restitution = 0.0f;
 		fix = body.createFixture(fixtureDef);
 		fix.setUserData(new UserData(UserData.ObjectType.Headshot, this));
-		
+
 		// Infected this round - breed the devastating virus!
 		if (isInfected)
 			createVirusFixture(body);

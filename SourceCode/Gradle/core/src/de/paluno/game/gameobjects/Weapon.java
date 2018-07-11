@@ -60,7 +60,7 @@ public class Weapon {
 
 	public void shoot(Worm worm, WeaponIndicator indicator, List<Projectile> output) {
 		if (type.getMaxAmmo() == Constants.WEAPON_AMMO_INF || currentAmmo > 0) {
-			EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, this);
+			EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, type);
 			if (getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
 				Vector2 position = indicator.getPosition();
 				
@@ -83,21 +83,21 @@ public class Weapon {
 				output.add(projectile2);
 				output.add(projectile3);
 			}
+			else if(getWeaponType() == WeaponType.WEAPON_TURRET) {
+				Vector2 position = new Vector2(worm.getPosition().x + worm.getOrientation() * 0.5f, worm.getPosition().y);
+				Turret turret = new Turret(worm, type, position, new Vector2());
+				
+				output.add(turret);
+			}
 			else {
-				Vector2 direction = new Vector2(1, 0).rotate(indicator.getAngle());
+				Vector2 direction;
+				if (indicator != null)
+					direction = new Vector2(1, 0).rotate(indicator.getAngle());
+				else
+					direction = new Vector2();
+
 				Projectile projectile = new Projectile(worm, type, worm.getPosition(), direction);
 				output.add(projectile);
-				
-				switch(projectile.getWeaponType()){
-					case WEAPON_GUN:
-						break;
-					case WEAPON_BAZOOKA:
-						break;
-					case WEAPON_SPECIAL:
-						break;
-					case WEAPON_GRENADE:
-						break;
-				}
 			}
 
 			currentAmmo--;

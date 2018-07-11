@@ -109,6 +109,7 @@ public class ChatWindow implements Disposable {
 
         chatTable = new Table(skin);
         chatScrollPane = new ScrollPane(chatTable, skin);
+        chatScrollPane.setColor(1.0f, 1.0f, 1.0f, 0.3f);
 
         table.add(chatScrollPane).size(500, 200);
         table.row();

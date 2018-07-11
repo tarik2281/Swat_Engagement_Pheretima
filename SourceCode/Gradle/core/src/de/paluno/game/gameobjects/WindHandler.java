@@ -20,8 +20,8 @@ public class WindHandler extends WorldObject {
     private Vector2 wind = new Vector2();
 
     private List<Projectile> projectiles;
-
-    public WindHandler() {
+   private WeaponType type;
+   public WindHandler() {
 
     }
 
@@ -40,9 +40,15 @@ public class WindHandler extends WorldObject {
 
         // apply wind (force) to the center of the projectile
         for (Projectile projectile : projectiles) {
-            if (projectile.getBody() != null)
+            if (projectile.getBody() != null && type!= WeaponType.WEAPON_TURRET )
                 projectile.getBody().applyForceToCenter(wind, true);
+        else {
+        	return;
         }
+        }  
+        
+        
+        
     }
 
     /**
