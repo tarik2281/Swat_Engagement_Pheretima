@@ -196,7 +196,7 @@ public class Player implements Disposable {
 	public Weapon getCurrentWeapon() {
     	return currentWeapon;
 	}
-	
+
     /**
      * Passthrough method to make our current Worm equip a given Weapon
      * @param weaponType - The WeaponType of the Weapon to select
@@ -248,5 +248,30 @@ public class Player implements Disposable {
 			data.weaponData[i] = weapons.get(i).makeSnapshot();
 
 		return data;
+	}
+
+	/**
+	 * Method to generate a given debug test Airdrop
+	 * @param keycode - The key registered for a certain weapon type
+	 */
+	public void spawnDebugDrop(int keycode) {
+		WeaponType dropWeapon;
+		switch(keycode) {
+			default: case Constants.KEY_DEBUG_DROP_TURRET: dropWeapon = WeaponType.WEAPON_SPECIAL;
+		}
+		world.spawnDebugDrop(dropWeapon, this.getCurrentWorm().getBody().getPosition().x);
+	}
+
+	/**
+	 * Method to add one shot to a given picked up weapon
+	 * @param weapon - The WeaponType of the weapon
+	 */
+	public void addAmmo(WeaponType weapon) {
+		for(Weapon check : this.weapons) {
+			if(check.getWeaponType() == weapon) {
+				check.addAmmo(1);
+				break;
+			}
+		}
 	}
 }

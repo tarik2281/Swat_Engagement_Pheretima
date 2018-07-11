@@ -53,7 +53,7 @@ public class HealthBar extends WorldObject {
     private Color getColor() {
         Color color = Color.WHITE;
 
-        switch (worm.getPlayerNumber()) {
+        /*switch (worm.getPlayerNumber()) {
             case Constants.PLAYER_NUMBER_1:
                 color = Constants.PLAYER_1_COLOR;
                 break;
@@ -69,7 +69,8 @@ public class HealthBar extends WorldObject {
             case 4:
                 color = Constants.PLAYER_5_COLOR;
                 break;
-        }
+        }*/
+        color = Constants.PLAYER_COLORS[worm.getPlayerNumber()];
 
         return color;
     }

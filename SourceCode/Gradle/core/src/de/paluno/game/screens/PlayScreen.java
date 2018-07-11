@@ -24,31 +24,33 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private ReplayWorldHandler replayWorldHandler;
     private UserWorldController worldController;
 
-    private WinningPlayer winningPlayer = WinningPlayer.NONE;
+    private int winningPlayer = -2;
 
     private int mapNumber;
     private int numWorms;
+    private int numPlayers;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
 
     private Sound mapSound;
-    
+
     private GameSetupData gameSetupData;
     private GameSetupRequest gameSetupRequest;
     private NetworkClient client;
     private ChatWindow chatWindow;
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms, int numPlayers) {
         this.game = game;
 
         this.mapNumber = mapNumber;
         this.numWorms = numWorms;
+        this.numPlayers = numPlayers;
 
         spriteBatch = new SpriteBatch();
     }
 
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupRequest request) {
-        this(game, request.getMapNumber(), request.getNumWorms());
+        this(game, request.getMapNumber(), request.getNumWorms(), request.getPlayers().length);
 
         this.client = client;
 
@@ -56,7 +58,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     }
 
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupData data) {
-        this(game, data.mapNumber, 1);
+        this(game, data.mapNumber, 1, data.getPlayerData().length);
 
         this.client = client;
 
@@ -87,7 +89,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     public void show() {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
-        
+
         uiLayer = new PlayUILayer(screenWidth, screenHeight);
 
         if (gameSetupRequest != null) {
@@ -210,7 +212,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
             disposeReplayAfterUpdate = false;
         }
 
-        if (winningPlayer != WinningPlayer.NONE && replayWorld == null) {
+        if (winningPlayer != -2 && replayWorld == null) {
             game.setGameOver(winningPlayer);
         }*/
     }
@@ -270,7 +272,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         }*/
     }
 
-    public void setGameOver(WinningPlayer winningPlayer) {
+    public void setGameOver(int winningPlayer) {
         this.winningPlayer = winningPlayer;
     }
 }

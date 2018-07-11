@@ -12,22 +12,22 @@ public enum WeaponType {
 	 * MaxAmmo, Icon, Animation, Projectile Icon, shoot strength, explosion radius, explosion impulse, explosion time, damage
 	 */
 	WEAPON_BAZOOKA(Constants.WEAPON_AMMO_INF, Assets.iconBazooka, Assets.weaponBazooka, Assets.projectileBazooka,
-			WeaponIndicator.Type.ShotDirection, 7.0f, 0.35f, 0.003f, 0.0f, 30),
+			WeaponIndicator.Type.ShotDirection, 7.0f, 0.35f, 0.003f, 0.0f, 30, "Bazooka"),
 	WEAPON_GUN(Constants.WEAPON_AMMO_INF, Assets.iconGun, Assets.weaponGun, Assets.projectileGun,
-			WeaponIndicator.Type.ShotDirection, 7.0f, 0.0f, 0.0f, 0.0f, 40),
+			WeaponIndicator.Type.ShotDirection, 7.0f, 0.0f, 0.0f, 0.0f, 40, "Pistole"),
 	WEAPON_GRENADE(Constants.WEAPON_AMMO_INF, Assets.iconGrenade, Assets.weaponGrenade, Assets.projectileGrenade,
-			WeaponIndicator.Type.ShotDirection, 7.0f, 0.5f, 0.003f, 3.0f, 50),
+			WeaponIndicator.Type.ShotDirection, 7.0f, 0.5f, 0.003f, 3.0f, 50, "Granate"),
 	WEAPON_SPECIAL(3, Assets.iconSpecial, Assets.weaponSpecial, Assets.projectileSpecial,
-			WeaponIndicator.Type.ShotDirection, 7.0f, 0.35f, 0.0f, 0.0f, 0),
+			WeaponIndicator.Type.ShotDirection, 7.0f, 0.35f, 0.0f, 0.0f, 0, "Virus"),
 	WEAPON_AIRSTRIKE(Constants.WEAPON_AMMO_SPECIAL, Assets.iconAirstrike, Assets.weaponAirstrike, Assets.projectileAirstrike,
-			WeaponIndicator.Type.Pointer, 1f, 0.75f, 0.009f, 0.0f, 25),
+			WeaponIndicator.Type.Pointer, 1f, 0.75f, 0.009f, 0.0f, 25, "Luftschlag"),
 	WEAPON_MINE(3, Assets.iconSpecial, Assets.weaponMine, Assets.projectileMine,
-			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 10),
+			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 10, "Mine"),
 	WEAPON_TURRET(1, Assets.iconSpecial, Assets.wormBreath , Assets.weaponTurret,
-			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 30),
+			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 30, "Geschütz"),
 	WEAPON_TURRET_PROJECTILE(Constants.WEAPON_AMMO_INF, Assets.iconGun, Assets.weaponGun, Assets.projectileGun,
-			WeaponIndicator.Type.ShotDirection, 7.0f, 0.0f, 0.0f, 0.0f, 40);
-	
+			WeaponIndicator.Type.ShotDirection, 7.0f, 0.0f, 0.0f, 0.0f, 40, null);
+
 	public static final int NUM_WEAPONS = 7;
 
 	private final int maxAmmo;
@@ -40,6 +40,7 @@ public enum WeaponType {
 	private final float explosionBlastPower;
 	private final float explosionTime;
 	private final float damage;
+	private final String name;
 
 	/**
 	 * Set Weapon parameters if created with this
@@ -52,10 +53,11 @@ public enum WeaponType {
 	 * @param explosionBlastPower
 	 * @param explosionTime
 	 * @param damage
+	 * @param name
 	 */
 	WeaponType(int maxAmmo, AssetDescriptor<Texture> icon, AssetDescriptor<AnimationData> weapon, AssetDescriptor<Texture> projectile,
 			   WeaponIndicator.Type indicatorType, float shootingImpulse, float explosionRadius, float explosionBlastPower,
-			   float explosionTime, float damage) {
+			   float explosionTime, float damage, String name) {
 		this.maxAmmo = maxAmmo;
 		this.icon = icon;
 		this.weapon = weapon;
@@ -66,6 +68,7 @@ public enum WeaponType {
 		this.explosionBlastPower = explosionBlastPower;
 		this.explosionTime = explosionTime;
 		this.damage = damage;
+		this.name = name;
 	}
 
 	/**
@@ -111,4 +114,6 @@ public enum WeaponType {
 	public float getDamage() {
 		 return damage;
 	}
+
+	public String getName() {return name;}
 }

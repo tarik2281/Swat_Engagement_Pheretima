@@ -46,9 +46,10 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
 
     private int mapNumber;
     private int numWorms;
-    
+
     private Music music;
     private Music tickSound;
+    private int numPlayers = 2;
 
     public MenuScreen(SEPGame game) {
         super();
@@ -68,7 +69,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         // Menu Background
         textureBackground = game.getAssetManager().get(Assets.menuBackground);
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
-        
+
         tickSound = game.getAssetManager().get(Assets.tickSound);
         tickSound.setLooping(false);
         tickSound.setVolume(0.6f);
@@ -153,7 +154,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	tickSound.play();
-                game.setPlayScreen(mapNumber, numWorms);
+                game.setPlayScreen(mapNumber, numWorms, numPlayers);
                 System.out.println("Play Clicked");
             }
         });

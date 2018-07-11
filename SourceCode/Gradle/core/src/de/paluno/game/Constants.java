@@ -20,12 +20,20 @@ public class Constants {
 
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
+	public static final int WINNING_PLAYER_NONE = -1;
 
 	public static final Color PLAYER_1_COLOR = Color.ROYAL;
 	public static final Color PLAYER_2_COLOR = Color.FIREBRICK;
 	public static final Color PLAYER_3_COLOR = Color.GOLDENROD;
 	public static final Color PLAYER_4_COLOR = Color.VIOLET;
 	public static final Color PLAYER_5_COLOR = Color.LIME;
+	public static final Color[] PLAYER_COLORS = new Color[] {
+			Color.TEAL,
+			Color.FIREBRICK,
+			Color.CYAN,
+			Color.LIME,
+			Color.GOLDENROD
+	};
 
 	public static final String BACKGROUND_LAYER = "BackgroundLayer";
 	public static final String TILE_LAYER = "TileLayer";
@@ -59,7 +67,7 @@ public class Constants {
 	public static final float CAMERA_MOVE_VELOCITY = 3.0f; // m/s
 
 	public static final float MESSAGE_DURATION = 2.0f; // in seconds
-	
+
 	//Turret
 	public static final float TURRET_DENSITY = 13234.0f;
 	public static final float TURRET_RADIUS = 25.0f * WORLD_SCALE;
@@ -71,14 +79,14 @@ public class Constants {
 	public static final float WORM_WIDTH = 18.0f * WORLD_SCALE;
 	public static final float WORM_HEIGHT = 25.0f * WORLD_SCALE;
 	public static final float WORM_RADIUS = 7.5f * WORLD_SCALE;
-	
+public static final float CRATE_RADIUS = 10.0f * WORLD_SCALE;
 	public static final float VIRUS_RADIUS = 30.0f * WORLD_SCALE;
 	public static final int VIRUS_DAMAGE = 5;
-	
+
 	public static final Vector2 AIRSTRIKE_SPAWNPOS = new Vector2(1340.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS2 = new Vector2(1320.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
 	public static final Vector2 AIRSTRIKE_SPAWNPOS3 = new Vector2(1300.0f * WORLD_SCALE, 950.0f * WORLD_SCALE);
-	
+
 	public static final float HEAD_AREA_RADIUS = 6.0f * WORLD_SCALE;
 	public static final int HEADSHOT_DAMAGE = 100;
 
@@ -104,7 +112,7 @@ public class Constants {
     public static final int KEY_SELECT_WEAPON_5 = Input.Keys.F5;
     public static final int KEY_SELECT_WEAPON_6 = Input.Keys.F6;
     public static final int KEY_SELECT_WEAPON_7 = Input.Keys.F7;
-    
+
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;
     public static final int KEY_MOVE_CAMERA_RIGHT = Input.Keys.D;
@@ -113,6 +121,8 @@ public class Constants {
     public static final int KEY_TOGGLE_CAMERA_FOCUS = Input.Keys.F;
     public static final int KEY_TOGGLE_DEBUG_RENDER = Input.Keys.Y;
     
+    public static final int KEY_DEBUG_DROP_TURRET = Input.Keys.T;
+
     // Weapon constants
     public static final int WEAPON_AMMO_INF = -1;
     public static final int WEAPON_AMMO_RIFLE = 10;

@@ -21,11 +21,11 @@ public class Weapon {
 	private Player player;
 
 	private Sound noAmmoSound;
-	
+
 	private WeaponType type;
 	private int currentAmmo;
 	//private Vector2 curserPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-	
+
 	private AnimationData animationSet;
 
 	/**
@@ -63,22 +63,22 @@ public class Weapon {
 			EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, type);
 			if (getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
 				Vector2 position = indicator.getPosition();
-				
-				Projectile projectile = new Projectile(worm, 
-						this.type, Constants.AIRSTRIKE_SPAWNPOS, 
-						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
+
+				Projectile projectile = new Projectile(worm,
+						this.type, Constants.AIRSTRIKE_SPAWNPOS,
+						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
 								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-				
-				Projectile projectile2 = new Projectile(worm, 
-						this.type, Constants.AIRSTRIKE_SPAWNPOS2 , 
-						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
+
+				Projectile projectile2 = new Projectile(worm,
+						this.type, Constants.AIRSTRIKE_SPAWNPOS2 ,
+						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
 								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-				
-				Projectile projectile3 = new Projectile(worm, 
-						this.type, Constants.AIRSTRIKE_SPAWNPOS3, 
-						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x, 
+
+				Projectile projectile3 = new Projectile(worm,
+						this.type, Constants.AIRSTRIKE_SPAWNPOS3,
+						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
 								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
-				
+
 				output.add(projectile);
 				output.add(projectile2);
 				output.add(projectile3);
@@ -86,7 +86,7 @@ public class Weapon {
 			else if(getWeaponType() == WeaponType.WEAPON_TURRET) {
 				Vector2 position = new Vector2(worm.getPosition().x + worm.getOrientation() * 0.5f, worm.getPosition().y);
 				Turret turret = new Turret(worm, type, position, new Vector2());
-				
+
 				output.add(turret);
 			}
 			else {
@@ -105,8 +105,8 @@ public class Weapon {
 			noAmmoSound.play(0.2f);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Getter method to get our current ammo
 	 * @return currentAmmo
@@ -151,4 +151,10 @@ public class Weapon {
 
 		return data;
 	}
+
+	/**
+	 * Method to increase the amount of available ammo
+	 * @param amount - The amount to increase
+	 */
+	public void addAmmo(int amount) {this.currentAmmo += amount;}
 }

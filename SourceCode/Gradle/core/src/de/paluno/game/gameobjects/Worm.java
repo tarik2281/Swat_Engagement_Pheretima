@@ -1,6 +1,7 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -432,6 +433,9 @@ public class Worm extends WorldObject {
      */
 	public void takeDamage(int damage, int damageType) {
 		health -= damage;
+		
+		HoverText info = new HoverText(this.world, this, "-"+damage, Color.RED);
+		world.registerAfterUpdate(info);
 
 		EventManager.getInstance().queueEvent(EventManager.Type.WormTookDamage, new DamageEvent(this, damage, damageType));
 
@@ -595,5 +599,16 @@ public class Worm extends WorldObject {
 		data.isDead = isDead;
 
 		return data;
+	}
+	
+	/**
+	 * Passthrough method to give the "weapon picked up, add ammo" order to the player we belong to, who manages the arsenal
+	 * @param weapon - The WeaponType of the weapon picked up
+	 */
+	public void pickupWeapon(WeaponType weapon) {
+		if(weapon == null) return;
+		this.player.addAmmo(weapon);
+		HoverText info = new HoverText(this.world, this, "+1 "+weapon.getName(), Constants.PLAYER_COLORS[this.getPlayerNumber()]);
+		world.registerAfterUpdate(info);
 	}
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.Map;
@@ -13,6 +14,7 @@ import de.paluno.game.gameobjects.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class Ground extends WorldObject {
 	
@@ -150,6 +152,12 @@ public class Ground extends WorldObject {
         loadCollisions(body);
 
         return body;
+    }
+
+    public Vector2 getRandomDropPoint() {
+        Random random = new Random();
+        int x = random.nextInt(Math.round(this.getWorldWidth())+1);
+        return new Vector2(x, (int) this.getWorldHeight());
     }
 
     private void loadCollisions(Body body) {
