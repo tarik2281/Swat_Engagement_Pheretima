@@ -104,6 +104,7 @@ public class Worm extends WorldObject {
 
 		this.player = player;
 
+		this.orientation = Constants.WORM_DIRECTION_LEFT;
 		this.health = Constants.WORM_MAX_HEALTH;
 		this.animationInvalidated = true;
 
@@ -181,7 +182,7 @@ public class Worm extends WorldObject {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!getWorld().isInWorldBounds(getBody())) {
+		if (!getWorld().isInWorldBounds(this)) {
 			die(Constants.DEATH_TYPE_FALL_DOWN);
 		}
 	}

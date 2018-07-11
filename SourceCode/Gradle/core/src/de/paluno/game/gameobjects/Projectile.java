@@ -18,6 +18,7 @@ public class Projectile extends WorldObject {
 
 	public static class SnapshotData {
 
+	    private int id;
 		private Vector2 position;
 		private Vector2 direction;
 		private WeaponType weaponType;
@@ -28,6 +29,10 @@ public class Projectile extends WorldObject {
 		public Vector2 getPosition() {
 			return position;
 		}
+
+		public WeaponType getWeaponType() {
+		    return weaponType;
+        }
 	}
 
     // in meters
@@ -71,6 +76,13 @@ public class Projectile extends WorldObject {
         return id;
     }
 
+    public Projectile(SnapshotData data) {
+        this.id = data.id;
+        setPosition(data.position);
+        this.direction = new Vector2(data.direction);
+        this.weaponType = data.weaponType;
+    }
+
     @Override
     public void setupAssets(AssetManager manager) {
         texture = manager.get(weaponType.getProjectileAsset());
@@ -88,7 +100,7 @@ public class Projectile extends WorldObject {
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null, true, false);
             
-        if(!getWorld().isInWorldBounds(getBody())) {
+        if(!getWorld().isInWorldBounds(this)) {
         	explode(null, false, false);
         }
         if (!wormContactEnded && shootingWorm != null) {
@@ -251,34 +263,32 @@ public class Projectile extends WorldObject {
     }
 
     public void explode(Worm directHitWorm, boolean collidedObject, boolean collidedHead) {
-    	if (weaponType == WeaponType.WEAPON_TURRET) {
-			return;
-		}else
-    if(!exploded) {
+        if (weaponType == WeaponType.WEAPON_TURRET) {
+            return;
+        } else if (!exploded) {
             exploded = true;
             explosion = new Explosion(getPosition(), weaponType.getExplosionRadius(), weaponType.getExplosionBlastPower());
             EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, this);
 
             if (weaponType.getExplosionRadius() == 0.0f) {
                 if (directHitWorm != null) {
-                    if (collidedHead)
+                    if (collidedHead && weaponType == WeaponType.WEAPON_GUN)
                         directHitWorm.takeDamage(Constants.HEADSHOT_DAMAGE, Constants.DAMAGE_TYPE_PROJECTILE);
                     else
                         directHitWorm.takeDamage(Math.round(weaponType.getDamage()), Constants.DAMAGE_TYPE_PROJECTILE);
                 }
                 else
-                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
+                    EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
 
-            }
-            else if (collidedObject) {
+            } else if (collidedObject) {
                 ArrayList<Worm> affectedWorms = getWorld().addExplosion(explosion);
-                
-                if(affectedWorms.isEmpty()) {
-                	EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
+
+                if (affectedWorms.isEmpty()) {
+                    EventManager.getInstance().queueEvent(EventManager.Type.AirBall, this);
                 }
 
                 for (Worm worm : affectedWorms) {
-                    worm.takeDamage((int)weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
+                    worm.takeDamage((int) weaponType.getDamage(), Constants.DAMAGE_TYPE_PROJECTILE);
 
                     if (weaponType == WeaponType.WEAPON_SPECIAL)
                         worm.setIsInfected(true);
@@ -290,12 +300,14 @@ public class Projectile extends WorldObject {
     public SnapshotData makeSnapshot() {
 		SnapshotData data = new SnapshotData();
 
-		data.position= new Vector2(getPosition());
-		data.direction= new Vector2(direction);
+		data.id = id;
+		data.position = new Vector2(getPosition());
+		data.direction = new Vector2(direction);
 		data.weaponType = weaponType;
-		data.playerNumber = shootingWorm.getPlayerNumber();
-		data.wormNumber = shootingWorm.getCharacterNumber();
-
+		if (shootingWorm != null) {
+            data.playerNumber = shootingWorm.getPlayerNumber();
+            data.wormNumber = shootingWorm.getCharacterNumber();
+        }
 		return data;
 	}
 }

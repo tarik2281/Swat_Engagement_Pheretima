@@ -31,7 +31,7 @@ public class EventManager {
          */
         WormDied,
         /**
-         * data: {@link de.paluno.game.gameobjects.Weapon}
+         * data: {@link de.paluno.game.gameobjects.WeaponType}
          */
         WeaponShoot,
         /**
@@ -70,7 +70,11 @@ public class EventManager {
         /**
          * data: null
          */
-        ReplayEnded
+        ReplayEnded,
+        /**
+         * data: null
+         */
+        IdleRequest
     }
 
     public interface Listener {

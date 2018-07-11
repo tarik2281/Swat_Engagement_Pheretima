@@ -1,6 +1,5 @@
  package de.paluno.game;
 
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.physics.box2d.*;
 
 import de.paluno.game.gameobjects.Projectile;
@@ -160,48 +159,48 @@ public class CollisionHandler implements ContactListener {
         }
 
 
-        // turret ->ground
-        if (UserData.getType(fixA) == UserData.ObjectType.turret && UserData.getType(fixB) == UserData.ObjectType.Ground) {
+        // Turret ->ground
+        if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Ground) {
 
         	Projectile projectile = UserData.getObject(fixA);
 
         	if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
-        		projectile.explode(null, false);
+        		projectile.explode(null, false, false);
 
-            System.out.println("turret collided with Ground");
+            System.out.println("Turret collided with Ground");
 
-        } else if (UserData.getType(fixB) == UserData.ObjectType.turret && UserData.getType(fixA) == UserData.ObjectType.Ground) {
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.Ground) {
         	Projectile projectile = UserData.getObject(fixB);
 
         	if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
-        		projectile.explode(null, false);
+        		projectile.explode(null, false, false);
 
-            System.out.println("turret collided with Ground");
+            System.out.println("Turret collided with Ground");
         }
 
-        //turret -> worm
-        if (UserData.getType(fixA) == UserData.ObjectType.turret && UserData.getType(fixB) == UserData.ObjectType.WormFoot) {
+        //Turret -> worm
+        if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.WormFoot) {
         	Worm worm = UserData.getObject(fixB);
         	worm.beginContact();
 
-        } else if (UserData.getType(fixB) == UserData.ObjectType.turret && UserData.getType(fixA) == UserData.ObjectType.WormFoot) {
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.WormFoot) {
         	Worm worm = UserData.getObject(fixA);
         	worm.beginContact();
         }
 
-        // projectile->turret
+        // projectile->Turret
 
-        if (UserData.getType(fixA) == UserData.ObjectType.turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
+        if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
 
         	Projectile projectile = UserData.getObject(fixA);
 
-        		projectile.explode(null, true);
+        		projectile.explode(null, true, false);
 
             System.out.println("Projectile collided with Turret");
 
-        } else if (UserData.getType(fixB) == UserData.ObjectType.turret && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
         	Projectile projectile = UserData.getObject(fixB);
-        		projectile.explode(null, true);
+        		projectile.explode(null, true, false);
 
             System.out.println("Projectile collided with Turret");
         }
@@ -253,10 +252,10 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Worm isn't in contact with the worm");
         }
 
-        if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.turret) {
+        if (UserData.getType(fixA) == UserData.ObjectType.WormFoot && UserData.getType(fixB) == UserData.ObjectType.Turret) {
             ((Worm) o1).endContact();
             System.out.println("Worm isn't in contact with the worm");
-        } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.turret) {
+        } else if (UserData.getType(fixB) == UserData.ObjectType.WormFoot && UserData.getType(fixA) == UserData.ObjectType.Turret) {
             ((Worm) o2).endContact();
             System.out.println("Worm isn't in contact with the worm");
         }

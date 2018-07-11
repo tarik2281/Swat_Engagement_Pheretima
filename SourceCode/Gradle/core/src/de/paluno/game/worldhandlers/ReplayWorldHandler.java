@@ -39,6 +39,14 @@ public class ReplayWorldHandler extends InterpolationWorldHandler {
                     getWorld().forgetAfterUpdate(worm);
             }
         }
+
+        for (Projectile.SnapshotData projectileData : replay.getSetupSnapshot().getProjectileSnapshots()) {
+            addProjectile(projectileData);
+        }
+
+        for (Projectile.SnapshotData projectileData : replay.getSetupSnapshot().getTurretSnapshots()) {
+            addProjectile(projectileData);
+        }
     }
 
     @Override
@@ -70,7 +78,14 @@ public class ReplayWorldHandler extends InterpolationWorldHandler {
 
         setCurrentTime(replay.getStartingTime());
         replayPlaying = true;
-        setCurrentPlayerTurn(replay.getPlayerNumber(), replay.getWormNumber());
+        switch (replay.getType()) {
+            case Replay.TYPE_PLAYER_TURN:
+                setCurrentPlayerTurn(replay.getPlayerNumber(), replay.getWormNumber());
+                break;
+            case Replay.TYPE_TURRETS:
+                shootTurrets();
+                break;
+        }
         getWindHandler().setWind(replay.getWind());
     }
 }

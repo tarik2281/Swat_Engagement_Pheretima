@@ -27,6 +27,8 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     private GameSetupData gameSetupData;
 
     private boolean wormDied;
+    private boolean simulatingTurrets = false;
+    private boolean simulateTurrets = false;
 
     private DataHandler dataHandler = new DataHandler() {
         @Override
@@ -36,6 +38,15 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
                 setCurrentPlayerTurn(event.playerNumber, event.wormNumber);
                 getWindHandler().setWind(event.wind);
                 getReplay().setWind(event.wind);
+                setCurrentTime(getCurrentGameTick() * de.paluno.game.Constants.UPDATE_FREQUENCY);
+            }
+            else if (data instanceof TurretsShootRequest) {
+                TurretsShootRequest request = (TurretsShootRequest)data;
+                simulateTurrets = request.getSimulatingUserId() == client.getClientId();
+                System.out.println("Is simulating: " + simulateTurrets);
+                simulatingTurrets = true;
+                if (!shootTurrets())
+                    client.send(Message.clientReady());
                 setCurrentTime(getCurrentGameTick() * de.paluno.game.Constants.UPDATE_FREQUENCY);
             }
             else if (data instanceof GameOverEvent) {
@@ -123,11 +134,15 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
     @Override
     protected void requestNextTurn() {
+        System.out.println("Requested next turn wormDied: " + wormDied);
+
         if (isControllingCurrentPlayer()) {
             GameEvent event = new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN);
             getReplay().addGameData(event);
             client.send(event);
         }
+
+        simulatingTurrets = false;
 
         if (wormDied && getReplay() != null) {
             EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
@@ -203,6 +218,9 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     }
 
     public boolean isControllingCurrentPlayer() {
+        if (simulatingTurrets)
+            return simulateTurrets;
+
         Player currentPlayer = getCurrentPlayer();
         return currentPlayer != null && currentPlayer.getClientId() == getClientId();
     }
@@ -237,11 +255,9 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
     @Override
     protected void onWormDied(Worm.DeathEvent event) {
-        if (event.getDeathType() != de.paluno.game.Constants.DEATH_TYPE_DISCONNECTED)
+        if (event.getDeathType() != de.paluno.game.Constants.DEATH_TYPE_DISCONNECTED) {
+            System.out.println("Registering worm died in NetworkWorldHandler");
             wormDied = true;
-
-        if (event.getDeathType() == Constants.DEATH_TYPE_FALL_DOWN && getReplay() != null) {
-            getReplay().setStartingTick(getCurrentGameTick(), 5.0f);
         }
     }
 

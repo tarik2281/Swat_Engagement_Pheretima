@@ -43,42 +43,39 @@ public class GameWorld implements Disposable {
             Projectile projectile = UserData.getObject(fixtureB);
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA)) {
                 return false;
-            }else {
-            	
+            } else {
+
             }
-        }
-        else if (UserData.getType(fixtureB) == UserData.ObjectType.Worm && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+        } else if (UserData.getType(fixtureB) == UserData.ObjectType.Worm && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
             Projectile projectile = UserData.getObject(fixtureA);
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB)) {
                 return false;
-            }else {
-            	
+            } else {
+
             }
         }
         if (UserData.getType(fixtureA) == UserData.ObjectType.Headshot && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
             Projectile projectile = UserData.getObject(fixtureB);
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureA))
                 return false;
-        }
-        else if (UserData.getType(fixtureB) == UserData.ObjectType.Headshot && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+        } else if (UserData.getType(fixtureB) == UserData.ObjectType.Headshot && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
             Projectile projectile = UserData.getObject(fixtureA);
             if (!projectile.isWormContactEnded() && projectile.getShootingWorm() == UserData.getObject(fixtureB))
                 return false;
         }
 
-       if (UserData.getType(fixtureA) == UserData.ObjectType.turret && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
-          return true;
-      }        else if (UserData.getType(fixtureB) == UserData.ObjectType.turret && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
-            return true;
-       }
-       
-        if (UserData.getType(fixtureA) == UserData.ObjectType.Projectile && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
-           return false;
-       }
-        else if (UserData.getType(fixtureB) == UserData.ObjectType.Projectile && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Turret && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+            return false;
+        } else if (UserData.getType(fixtureB) == UserData.ObjectType.Turret && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
             return false;
         }
-        
+
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Projectile && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+            return false;
+        } else if (UserData.getType(fixtureB) == UserData.ObjectType.Projectile && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            return false;
+        }
+
         return true;
     };
 
@@ -166,8 +163,8 @@ public class GameWorld implements Disposable {
         return camera;
     }
 
-    public boolean isInWorldBounds(Body body) {
-        return body.getWorldCenter().y > 0;
+    public boolean isInWorldBounds(WorldObject object) {
+        return object.getPosition().y > 0;
     }
 
     public Rectangle getWorldBounds() {

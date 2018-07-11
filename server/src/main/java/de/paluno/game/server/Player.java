@@ -82,8 +82,6 @@ public class Player {
                 currentWormIndex = 0;
                 roundEnded = true;
             }
-
-            currentWormIndex = (currentWormIndex + 1) % worms.size();
         } while (worms.get(currentWormIndex).isDead());
     }
 

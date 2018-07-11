@@ -5,6 +5,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Timer;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 import de.paluno.game.EventManager;
@@ -39,7 +40,9 @@ public abstract class WorldHandler implements Disposable {
 
     private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
+    private ArrayList<Turret> turrets;
     private int projectileId = 0;
+    private boolean canShoot = false;
 
     private int currentGameTick;
     private float updateTimer;
@@ -63,11 +66,19 @@ public abstract class WorldHandler implements Disposable {
     private Sound targetSound;
     private Sound airstrikeSound;
 
+    private Timer.Task endTurnTimer = new Timer.Task() {
+
+        @Override
+        public void run() {
+            setWaiting();
+        }
+    };
+
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
             case WeaponShoot: {
-                Weapon weapon = (Weapon) data;
-                switch (weapon.getWeaponType()) {
+                WeaponType weapon = (WeaponType) data;
+                switch (weapon) {
                     case WEAPON_GUN:
                         gunShotSound.play();
                         break;
@@ -146,6 +157,9 @@ public abstract class WorldHandler implements Disposable {
                     setWaiting();
                 }
 
+                if (replay != null)
+                    replay.setStartingTick(currentGameTick, 5.0f);
+
                 GameEvent.Type type = null;
                 switch (event.getDeathType()) {
                     case de.paluno.game.Constants.DEATH_TYPE_NO_HEALTH:
@@ -153,8 +167,6 @@ public abstract class WorldHandler implements Disposable {
                         break;
                     case de.paluno.game.Constants.DEATH_TYPE_FALL_DOWN:
                         type = GameEvent.Type.WORM_FELL_DOWN;
-                        if (replay != null)
-                            replay.setStartingTick(currentGameTick, 5.0f);
                         break;
                 }
 
@@ -233,6 +245,9 @@ public abstract class WorldHandler implements Disposable {
                 if (shouldWorldStep())
                     emitGameEvent(GameEvent.Type.HEADSHOT);
                 break;
+            case IdleRequest:
+                setIdle();
+                break;
         }
     };
 
@@ -254,6 +269,7 @@ public abstract class WorldHandler implements Disposable {
         this.players = new ArrayList<>();
 
         this.projectiles = new ArrayList<>();
+        this.turrets = new ArrayList<>();
         this.weaponProjectileCache = new ArrayList<>();
         weaponIndicators = new HashMap<>();
 
@@ -313,7 +329,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormMovement,
                 EventManager.Type.WeaponShoot,
                 EventManager.Type.AirBall,
-                EventManager.Type.Headshot);
+                EventManager.Type.Headshot,
+                EventManager.Type.IdleRequest);
 
         for (Player player : players)
             player.show();
@@ -335,7 +352,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.WormMovement,
                 EventManager.Type.WeaponShoot,
                 EventManager.Type.AirBall,
-                EventManager.Type.Headshot);
+                EventManager.Type.Headshot,
+                EventManager.Type.IdleRequest);
     }
 
     @Override
@@ -378,27 +396,80 @@ public abstract class WorldHandler implements Disposable {
         return projectiles;
     }
 
+    protected void addProjectile(Projectile.SnapshotData projectileData) {
+
+        switch (projectileData.getWeaponType()) {
+            case WEAPON_TURRET:
+                Turret turret = new Turret(projectileData);
+                projectiles.add(turret);
+                world.registerAfterUpdate(turret);
+                break;
+            default:
+                Projectile projectile = new Projectile(projectileData);
+                projectiles.add(projectile);
+                world.registerAfterUpdate(projectile);
+                break;
+        }
+    }
+
     protected void addProjectile(Projectile projectile) {
-        projectiles.add(projectile);
-        projectile.setId(projectileId++);
+        if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET) {
+            projectiles.add(projectile);
+            projectile.setId(projectileId++);
+        }
         world.registerAfterUpdate(projectile);
-        world.getCamera().setCameraFocus(projectile);
 
-        endPlayerTurn();
+        if (projectile.getWeaponType() == WeaponType.WEAPON_TURRET_PROJECTILE)
+            System.out.println("spawning turret projectile with id: " + projectile.getId() + " (" + toString() + ")");
 
-        currentGameState = GameState.SHOOTING;
+        switch (projectile.getWeaponType()) {
+            case WEAPON_MINE:
+                unequipWeapon();
+                canShoot = false;
+                if (shouldWorldStep())
+                Timer.schedule(endTurnTimer, Constants.END_TURN_TIMER_SECONDS);
+                break;
+            case WEAPON_TURRET:
+                unequipWeapon();
+                turrets.add((Turret)projectile);
+                canShoot = false;
+                if (shouldWorldStep())
+                Timer.schedule(endTurnTimer, Constants.END_TURN_TIMER_SECONDS);
+                break;
+            default:
+                world.getCamera().setCameraFocus(projectile);
+
+                endPlayerTurn();
+
+                currentGameState = GameState.SHOOTING;
+                break;
+        }
     }
 
     protected void removeProjectile(Projectile projectile) {
-        projectiles.remove(projectile);
+        System.out.println("Called from " + toString());
+        if (projectile.getWeaponType() == WeaponType.WEAPON_TURRET)
+            turrets.remove(projectile);
+        else
+            projectiles.remove(projectile);
+
         world.forgetAfterUpdate(projectile);
 
         if (world.getCamera().getCameraFocus() == projectile) {
+            // TODO: prevent focusing mines
             if (!projectiles.isEmpty())
                 world.getCamera().setCameraFocus(projectiles.get(0));
         }
 
-        if (projectiles.isEmpty()) {
+        boolean advance = true;
+        for (Projectile projectile1 : projectiles) {
+            if (projectile1.getWeaponType() != WeaponType.WEAPON_MINE) {
+                advance = false;
+                break;
+            }
+        }
+
+        if (advance) {
             setWaiting();
         }
     }
@@ -428,7 +499,9 @@ public abstract class WorldHandler implements Disposable {
             currentWorm.removeChild(currentWeaponIndicator);
 
         currentWeaponIndicator = weaponIndicators.computeIfAbsent(weaponType.getIndicatorType(), WeaponIndicator.Type::newInstance);
-        currentWorm.addChild(currentWeaponIndicator);
+
+        if (currentWeaponIndicator != null)
+            currentWorm.addChild(currentWeaponIndicator);
     }
 
     protected Projectile getProjectileById(int id) {
@@ -457,15 +530,29 @@ public abstract class WorldHandler implements Disposable {
                 world.getCamera().setCameraFocus(worm);
                 equipWeapon(WeaponType.WEAPON_BAZOOKA);
 
-                if (shouldCreateReplay()) {
-                    replay = new Replay();
-                    replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers()));
-                    replay.setPlayerTurn(playerNumber, wormNumber);
-                    replay.setSetupTick(currentGameTick);
-                    replay.setMapNumber(getMapNumber());
-                    replay.setCameraPosition(new Vector2(getWorld().getCamera().getWorldPosition()));
-                }
+                createReplayPlayerTurn(playerNumber, wormNumber);
             }
+        }
+    }
+
+    private void createReplayPlayerTurn(int playerNumber, int wormNumber) {
+        if (shouldCreateReplay()) {
+            replay = new Replay(Replay.TYPE_PLAYER_TURN);
+            replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers(), getProjectiles(), turrets));
+            replay.setPlayerTurn(playerNumber, wormNumber);
+            replay.setSetupTick(currentGameTick);
+            replay.setMapNumber(getMapNumber());
+            replay.setCameraPosition(new Vector2(getWorld().getCamera().getWorldPosition()));
+        }
+    }
+
+    private void createReplayTurrets() {
+        if (shouldCreateReplay()) {
+            replay = new Replay(Replay.TYPE_TURRETS);
+            replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers(), getProjectiles(), turrets));
+            replay.setSetupTick(currentGameTick);
+            replay.setMapNumber(getMapNumber());
+            replay.setCameraPosition(new Vector2(getWorld().getCamera().getWorldPosition()));
         }
     }
 
@@ -594,26 +681,32 @@ public abstract class WorldHandler implements Disposable {
         if (shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
             Player player = getCurrentPlayer();
             Worm worm = player.getCurrentWorm();
-            weaponProjectileCache.clear();
             player.getCurrentWeapon().shoot(worm, currentWeaponIndicator, weaponProjectileCache);
-            weaponProjectileCache.forEach(this::addProjectile);
-
-            ProjectileData[] projectilesArray = new ProjectileData[weaponProjectileCache.size()];
-
-            int index = 0;
-            for (Projectile projectile : weaponProjectileCache) {
-                ProjectileData data = new ProjectileData()
-                        .setId(projectile.getId())
-                        .setType(projectile.getWeaponType().ordinal())
-                        .setPhysicsData(new PhysicsData()
-                                .setPositionX(projectile.getPosition().x)
-                                .setPositionY(projectile.getPosition().y));
-                projectilesArray[index++] = data;
-            }
-
-            ShootEvent event = new ShootEvent(currentGameTick, projectilesArray);
-            emitGameData(event);
+            shootProjectiles(player.getPlayerNumber(), worm.getCharacterNumber(), player.getCurrentWeapon().getWeaponType());
         }
+    }
+
+    private void shootProjectiles(int playerNumber, int wormNumber, WeaponType type) {
+        weaponProjectileCache.forEach(this::addProjectile);
+
+        ProjectileData[] projectilesArray = new ProjectileData[weaponProjectileCache.size()];
+
+        int index = 0;
+        for (Projectile projectile : weaponProjectileCache) {
+            ProjectileData data = new ProjectileData()
+                    .setId(projectile.getId())
+                    .setPlayerNumber(playerNumber)
+                    .setWormNumber(wormNumber)
+                    .setType(projectile.getWeaponType().ordinal())
+                    .setPhysicsData(new PhysicsData()
+                            .setPositionX(projectile.getPosition().x)
+                            .setPositionY(projectile.getPosition().y));
+            projectilesArray[index++] = data;
+        }
+
+        ShootEvent event = new ShootEvent(currentGameTick, type.ordinal(), projectilesArray);
+        emitGameData(event);
+        weaponProjectileCache.clear();
     }
 
     private Worm getNextActiveWorm() {
@@ -650,6 +743,8 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void setWaiting() {
+        endTurnTimer.cancel();
+
         endPlayerTurn();
 
         Worm nextActiveWorm = getNextActiveWorm();
@@ -703,12 +798,33 @@ public abstract class WorldHandler implements Disposable {
     }
 
     protected void setIdle() {
+        endPlayerTurn();
         currentGameState = GameState.IDLE;
         requestNextTurn();
     }
 
     public GameWorld getWorld() {
         return world;
+    }
+
+    public boolean shootTurrets() {
+        if (turrets.isEmpty())
+            return false;
+
+        createReplayTurrets();
+
+        if (shouldWorldStep()) {
+            for (Turret turret : turrets) {
+                turret.shoot(weaponProjectileCache);
+                shootProjectiles(turret.getShootingWorm().getPlayerNumber(), turret.getShootingWorm().getCharacterNumber(), WeaponType.WEAPON_TURRET_PROJECTILE);
+            }
+        }
+
+        return true;
+    }
+
+    public void raiseLimit() {
+        // TODO: raise limit
     }
 
     private WorldData makeWorldSnapshot() {

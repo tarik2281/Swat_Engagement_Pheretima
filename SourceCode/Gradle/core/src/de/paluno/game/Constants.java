@@ -16,6 +16,8 @@ public class Constants {
 	public static final int MAX_CHAR_NUM = 5;
 	public static final int WORM_MAX_HEALTH = 100;
 
+	public static final float END_TURN_TIMER_SECONDS = 3.0f;
+
 	public static final int PLAYER_NUMBER_1 = 0;
 	public static final int PLAYER_NUMBER_2 = 1;
 

@@ -18,9 +18,11 @@ public class LocalWorldHandler extends WorldHandler {
     private Timer.Task turnTimer = new Timer.Task() {
         @Override
         public void run() {
-            shiftTurn(true);
+            if (!isRoundEnded() || !shootTurrets()) {
+                shiftTurn(true);
 
-            startTurn();
+                startTurn();
+            }
         }
     };
 
@@ -153,5 +155,21 @@ public class LocalWorldHandler extends WorldHandler {
     @Override
     protected boolean shouldCreateReplay() {
         return true;
+    }
+
+    private boolean isRoundEnded() {
+        boolean roundEnded = true;
+
+        for (Player player : getPlayers()) {
+            if (!player.isRoundEnded()) {
+                roundEnded = false;
+                break;
+            }
+        }
+
+        if (roundEnded)
+            getPlayers().forEach(player -> player.setIsRoundEnded(false));
+
+        return roundEnded;
     }
 }

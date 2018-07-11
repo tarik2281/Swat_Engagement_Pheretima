@@ -7,6 +7,9 @@ import java.util.Random;
 
 public class Match {
 
+    private static final int STATE_PLAYER_TURN = 1;
+    private static final int STATE_TURRETS_SHOOT = 2;
+
     private int currentTick;
 
     private int currentPlayerIndex;
@@ -16,6 +19,8 @@ public class Match {
     private Random windRandomizer;
     private Lobby2 lobby;
 
+    private int state;
+
     public Match(Lobby2 lobby) {
         currentTick = 0;
         currentPlayerIndex = -1;
@@ -24,6 +29,8 @@ public class Match {
 
         players = new ArrayList<>();
         windRandomizer = new Random();
+
+        state = 0;
     }
 
     public Player addPlayer(User user, int number) {
@@ -63,7 +70,20 @@ public class Match {
             }
 
         if (allClientsReady()) {
-            startTurn();
+            if (isRoundEnded()) {
+                Player simulatingPlayer = null;
+                for (Player player : players) {
+                    if (player.getControllingUser().getConnection().isConnected()) {
+                        simulatingPlayer = player;
+                        break;
+                    }
+                }
+
+                lobby.broadcastData(null, new TurretsShootRequest(simulatingPlayer.getControllingUser().getId()));
+            }
+            else {
+                startTurn();
+            }
         }
     }
 
@@ -108,6 +128,9 @@ public class Match {
                 break;
             }
         }
+
+        if (ready)
+            players.forEach(player -> player.setReady(false));
 
         return ready;
     }
@@ -178,7 +201,6 @@ public class Match {
 
             for (Player player : players) {
                 player.getControllingUser().getConnection().sendTCP(startTurnEvent);
-                player.setReady(false);
             }
 
             System.out.println("Starting turn for player: " + startTurnEvent.playerNumber + ", worm: " + startTurnEvent.wormNumber + ", wormDead: " + currentPlayer.getCurrentWorm().isDead());
@@ -195,5 +217,21 @@ public class Match {
 
         if (shiftWorms)
             players.get(currentPlayerIndex).shiftTurn();
+    }
+
+    private boolean isRoundEnded() {
+        boolean roundEnded = true;
+
+        for (Player player : players) {
+            if (!player.isRoundEnded()) {
+                roundEnded = false;
+                break;
+            }
+        }
+
+        if (roundEnded)
+            players.forEach(player -> player.setRoundEnded(false));
+
+        return roundEnded;
     }
 }
