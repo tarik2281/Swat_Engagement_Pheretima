@@ -84,11 +84,11 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         tableBackground.setBackground(imageBackground.getDrawable());
         tableBackground.setFillParent(true);
 
-        textFieldWorm1 = elementGUI.createTextField("Worm 1");
-        textFieldWorm2 = elementGUI.createTextField("Worm 2");
-        textFieldWorm3 = elementGUI.createTextField("Worm 3");
-        textFieldWorm4 = elementGUI.createTextField("Worm 4");
-        textFieldWorm5 = elementGUI.createTextField("Worm 5");
+        textFieldWorm1 = elementGUI.createTextField("Wurm 1");
+        textFieldWorm2 = elementGUI.createTextField("Wurm 2");
+        textFieldWorm3 = elementGUI.createTextField("Wurm 3");
+        textFieldWorm4 = elementGUI.createTextField("Wurm 4");
+        textFieldWorm5 = elementGUI.createTextField("Wurm 5");
         textFieldUsername = elementGUI.createTextField("Username");
         textButtonAutoFill = elementGUI.createTextButton("Auto-Fill");
         textButtonAutoFill.addListener(new ClickListener() {

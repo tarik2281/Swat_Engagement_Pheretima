@@ -12,11 +12,9 @@ import de.paluno.game.Assets;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
-import javax.xml.soap.Text;
-
 public class ModiScreen extends ScreenAdapter implements Loadable {
     private Stage stage;
-    private Table table;
+    private Table tableBackground, tableTextButton;
     private Skin skin;
     private SEPGame game;
     private ElementGUI elementGUI;
@@ -25,6 +23,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     private TextButton selectedModiButton;
     private NetworkClient client;
     private int modi = 1;
+    private TextButton textButtonClose;
 
     public ModiScreen(SEPGame game) {
         super();
@@ -35,12 +34,13 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     @Override
     public void show() {
         stage = new Stage();
-        table = new Table();
+        tableBackground = new Table();
+        tableTextButton = new Table();
         skin = elementGUI.getSkin();
 
-        table.setFillParent(true);
+        tableBackground.setFillParent(true);
         imageBackground = elementGUI.createBackground(game.getAssetManager().get(Assets.menuBackground));
-        table.setBackground(imageBackground.getDrawable());
+        tableBackground.setBackground(imageBackground.getDrawable());
 
         textButtonLocal = elementGUI.createTextButton("Local");
         textButtonLocal.addListener(new ClickListener() {
@@ -60,6 +60,15 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
 
             }
         });
+
+        textButtonClose = elementGUI.createTextButton("Beenden");
+        textButtonClose.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.exit(0);
+            }
+        });
+
         textButtonOnline.setSize(300, 100);
         textButtonPlay = elementGUI.createTextButton("Start");
         textButtonPlay.addListener(new ClickListener() {
@@ -67,7 +76,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (modi == 1){
-                    game.setLoginScreen(null);
+                    game.setLocalScreen();
                 }else if (modi == 2) {
                     client = new NetworkClient("localhost");
                     client.setConnectionListener(new NetworkClient.ConnectionListener() {
@@ -82,7 +91,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                                         protected void result (Object object) {
                                             System.out.println("Chosen: " + object);
                                         }
-                                    }.text("Connection failed").button("Reconnect", true).show(stage);
+                                    }.text("Connection failed").button("Close", true).show(stage);
                                     break;
                             }
                         }
@@ -96,18 +105,18 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         textButtonLocal.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         textButtonOnline.setColor(1.0f, 1.0f, 1.0f, 0.4f);
 
+        tableTextButton.setFillParent(true);
+        tableTextButton.add(textButtonLocal).size(350,80).pad(20);
+        tableTextButton.add(textButtonOnline).size(350,80).pad(20).row();
+        tableTextButton.add(textButtonPlay).size(200,60).padLeft(30);
+        tableTextButton.add(textButtonClose).size(200,60).padRight(30);
 
-        textButtonLocal.setPosition(330, 300);
-        textButtonOnline.setPosition(730, 300);
-        textButtonPlay.setPosition(570, 200);
+//        stage.setDebugAll(true);
 
         elementGUI.setSelectedTextButton(textButtonLocal);
 
-        stage.addActor(table);
-        stage.addActor(textButtonLocal);
-        stage.addActor(textButtonOnline);
-        stage.addActor(textButtonPlay);
-
+        stage.addActor(tableBackground);
+        stage.addActor(tableTextButton);
 
         Gdx.input.setInputProcessor(stage);
     }

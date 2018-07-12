@@ -15,7 +15,6 @@ import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
-import de.paluno.game.interfaces.LobbyData;
 import de.paluno.game.interfaces.UserLoginRequest;
 import de.paluno.game.interfaces.UserName;
 
@@ -27,7 +26,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
     private Stage stage;
     private ElementGUI elementGUI;
     private TextField textFieldWorm1, textFieldWorm2, textFieldWorm3, textFieldWorm4, textFieldWorm5, textFieldUsername;
-    private TextButton textButtonPlayerNum, textButtonSpielen, textButtonAutoFill,textButtonAdd,textButtonDelete;;
+    private TextButton textButtonMenu, textButtonSpielen, textButtonAutoFill,textButtonAdd,textButtonDelete;;
     private Table tableBackground, tableTextField, tableMap, table4Worm, tableTextButton, tableTextButtonPlayer;
     private Image imageBackground;
     private NetworkClient client;
@@ -169,20 +168,20 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
                         i = 0;
             }
         });
-        textButtonPlayerNum = elementGUI.createTextButton("Menu");
-        textButtonPlayerNum.setVisible(false);
+        textButtonMenu = elementGUI.createTextButton("Menu");
+        textButtonMenu.setVisible(false);
 
 
-        textButtonPlayerNum.addListener(new ClickListener() {
+        textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
+                game.setModiScreen();
             }
         });
 
         textButtonSpielen = elementGUI.createTextButton("Spielen");
 
-        textButtonPlayerNum.addListener(new ClickListener() {
+        textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 super.clicked(event, x, y);
@@ -257,9 +256,14 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
         buttonWorm1 = elementGUI.createButton(game.getAssetManager().get(Assets.worms1Button));
         buttonWorm1.addListener(new ClickListener() {
-
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                textFieldWorm1.setVisible(true);
+                textFieldWorm2.setVisible(false);
+                textFieldWorm3.setVisible(false);
+                textFieldWorm4.setVisible(false);
+                textFieldWorm5.setVisible(false);
+
                 elementGUI.setSelectedImageButton2(buttonWorm1);
                 numWorms = 1;
                 System.out.println("Worm 1 Clicked");
@@ -272,6 +276,13 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                textFieldWorm1.setVisible(true);
+                textFieldWorm2.setVisible(true);
+                textFieldWorm3.setVisible(false);
+                textFieldWorm4.setVisible(false);
+                textFieldWorm5.setVisible(false);
+
+
                 elementGUI.setSelectedImageButton2(buttonWorm2);
                 numWorms = 2;
                 System.out.println("Worm 2 Clicked");
@@ -283,6 +294,12 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                textFieldWorm1.setVisible(true);
+                textFieldWorm2.setVisible(true);
+                textFieldWorm3.setVisible(true);
+                textFieldWorm4.setVisible(false);
+                textFieldWorm5.setVisible(false);
+
                 elementGUI.setSelectedImageButton2(buttonWorm3);
                 numWorms = 3;
                 System.out.println("Worm 3 Clicked");
@@ -294,6 +311,12 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                textFieldWorm1.setVisible(true);
+                textFieldWorm2.setVisible(true);
+                textFieldWorm3.setVisible(true);
+                textFieldWorm4.setVisible(true);
+                textFieldWorm5.setVisible(false);
+
                 elementGUI.setSelectedImageButton2(buttonWorm4);
                 numWorms = 4;
                 System.out.println("Worm 4 Clicked");
@@ -305,12 +328,21 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                textFieldWorm1.setVisible(true);
+                textFieldWorm2.setVisible(true);
+                textFieldWorm3.setVisible(true);
+                textFieldWorm4.setVisible(true);
+                textFieldWorm5.setVisible(true);
                 elementGUI.setSelectedImageButton2(buttonWorm5);
                 numWorms = 5;
                 System.out.println("Worm 5 Clicked");
             }
         });
 
+        textFieldWorm2.setVisible(false);
+        textFieldWorm3.setVisible(false);
+        textFieldWorm4.setVisible(false);
+        textFieldWorm5.setVisible(false);
 
         tableTextField.setFillParent(true);
         tableTextField.add(textFieldUsername).size(200, 50).colspan(5).row();
@@ -339,8 +371,9 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         table4Worm.setPosition(tableMap.getPadX(), tableMap.getPadY()+80);
 
         tableTextButton.setFillParent(true);
-        tableTextButton.add(textButtonPlayerNum).size(200, 60);
-        tableTextButton.add(textButtonSpielen).size(200, 60);
+        tableTextButton.setX(180);
+        tableTextButton.add(textButtonMenu).size(200, 60).pad(20);
+        tableTextButton.add(textButtonSpielen).size(200, 60).pad(20);
         tableTextButton.bottom().setY(20);
 
 
@@ -397,7 +430,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 //        textFieldWorm4.setPosition(750,370);
 //        textFieldWorm5.setPosition(950,370);
 //        textFieldUsername.setPosition(550,450);
-//        textButtonPlayerNum.setPosition(550200);
+//        textButtonMenu.setPosition(550200);
 //        textButtonSpielen.setPosition(550,120);
 
 //        tableBackground.center();
@@ -406,7 +439,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         if (client == null) {
             stage.addActor(tableMap);
             stage.addActor(table4Worm);
-            textButtonPlayerNum.setVisible(true);
+            textButtonMenu.setVisible(true);
         }
 
         stage.addActor(tableTextButton);
@@ -420,7 +453,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 //        stage.addActor(textFieldWorm4);
 //        stage.addActor(textFieldWorm5);
 //        stage.addActor(textFieldUsername);
-//        stage.addActor(textButtonPlayerNum);
+//        stage.addActor(textButtonMenu);
 //        stage.addActor(textButtonSpielen);
 
         elementGUI.setSelectedImageButton(buttonMap1);

@@ -56,11 +56,9 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
                 list.setItems(((LobbyListRequest.Result) data).lobbies);
 
                 Timer.schedule(updateTimer, 10.0f);
-            }
-            else if (data instanceof LobbyCreateRequest.Result){
+            } else if (data instanceof LobbyCreateRequest.Result) {
                 game.setNextScreen(new PlayerLobbyScreen(game, client, ((LobbyCreateRequest.Result) data).lobbyId));
-            }
-            else if (data instanceof LobbyJoinRequest.Result) {
+            } else if (data instanceof LobbyJoinRequest.Result) {
                 if (((LobbyJoinRequest.Result) data).success) {
                     game.setNextScreen(new PlayerLobbyScreen(game, client, ((LobbyJoinRequest.Result) data).lobbyId));
                 }
@@ -123,7 +121,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonMap1);
+                setSelectedMapButton(buttonMap1);
                 mapNumber = 0;
                 System.out.println("Map1 Clicked");
             }
@@ -135,7 +133,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonMap2);
+                setSelectedMapButton(buttonMap2);
                 mapNumber = 1;
                 System.out.println("Map2 Clicked");
             }
@@ -147,7 +145,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonMap3);
+                setSelectedMapButton(buttonMap3);
 
                 mapNumber = 2;
                 System.out.println("Map3 Clicked");
@@ -161,7 +159,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonMap4);
+                setSelectedMapButton(buttonMap4);
 
                 mapNumber = 3;
                 System.out.println("Map4 Clicked");
@@ -169,59 +167,57 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         });
 
 
-
-
-        buttonWorm1 = elementGUI.createButton(game.getAssetManager().get(Assets.worms1Button),menuTable2);
+        buttonWorm1 = elementGUI.createButton(game.getAssetManager().get(Assets.worms1Button), menuTable2);
         buttonWorm1.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonWorm1);
+                setSelectedWormButton(buttonWorm1);
                 numWorms = 1;
                 System.out.println("Worm 1 Clicked");
             }
         });
 
 
-        buttonWorm2 = elementGUI.createButton(game.getAssetManager().get(Assets.worms2Button),menuTable2);
+        buttonWorm2 = elementGUI.createButton(game.getAssetManager().get(Assets.worms2Button), menuTable2);
         buttonWorm2.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonWorm2);
+                setSelectedWormButton(buttonWorm2);
                 numWorms = 2;
                 System.out.println("Worm 2 Clicked");
             }
         });
 
-        buttonWorm3 = elementGUI.createButton(game.getAssetManager().get(Assets.worms3Button),menuTable2);
+        buttonWorm3 = elementGUI.createButton(game.getAssetManager().get(Assets.worms3Button), menuTable2);
         buttonWorm3.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonWorm3);
+                setSelectedWormButton(buttonWorm3);
                 numWorms = 3;
                 System.out.println("Worm 3 Clicked");
             }
         });
 
-        buttonWorm4 = elementGUI.createButton(game.getAssetManager().get(Assets.worms4Button),menuTable2);
+        buttonWorm4 = elementGUI.createButton(game.getAssetManager().get(Assets.worms4Button), menuTable2);
         buttonWorm4.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonWorm4);
+                setSelectedWormButton(buttonWorm4);
                 numWorms = 4;
                 System.out.println("Worm 4 Clicked");
             }
         });
 
-        buttonWorm5 = elementGUI.createButton(game.getAssetManager().get(Assets.worms5Button),menuTable2);
+        buttonWorm5 = elementGUI.createButton(game.getAssetManager().get(Assets.worms5Button), menuTable2);
         buttonWorm5.addListener(new ClickListener() {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                elementGUI.setSelectedImageButton(buttonWorm5);
+                setSelectedWormButton(buttonWorm5);
                 numWorms = 5;
                 System.out.println("Worm 5 Clicked");
             }
@@ -310,7 +306,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 lobbyDialog.setVisible(false);
-                client.send(new LobbyCreateRequest(textField.getText(), mapNumber,numWorms));
+                client.send(new LobbyCreateRequest(textField.getText(), mapNumber, numWorms));
             }
         });
         textField = elementGUI.createTextField("Lobbyname eingeben");

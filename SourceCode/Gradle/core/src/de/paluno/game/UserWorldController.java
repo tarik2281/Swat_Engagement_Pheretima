@@ -83,6 +83,8 @@ public class UserWorldController {
                 case Constants.KEY_TOGGLE_DEBUG_RENDER:
                     worldHandler.toggleDebugRender();
                     break;
+                case Constants.KEY_SELECT_WEAPON_MENU:
+                    break;
             }
 
             return super.keyDown(keycode);

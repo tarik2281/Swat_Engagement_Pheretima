@@ -43,7 +43,7 @@ public class SEPGame extends Game {
     }
 
     public void setStartScreen() {
-        setNextScreen(new LocalScreen(this));
+        setNextScreen(new ModiScreen(this));
     }
 
 
@@ -55,6 +55,9 @@ public class SEPGame extends Game {
 
     public void setPlayScreen(int mapNumber, int numWorms, Array<UserName> names) {
         setNextScreen(new PlayScreen(this, mapNumber, numWorms, names));
+    }
+    public void setLocalScreen() {
+        setNextScreen(new LocalScreen(this));
     }
 
 

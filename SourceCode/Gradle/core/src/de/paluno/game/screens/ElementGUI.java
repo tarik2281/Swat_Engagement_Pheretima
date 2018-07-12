@@ -69,6 +69,7 @@ public class ElementGUI {
     public TextButton createTextButton(String name) {
         textButton = new TextButton(name, skin);
         textButton.setSize(200, 60);
+        textButton.pad(10);
         return textButton;
     }
 
