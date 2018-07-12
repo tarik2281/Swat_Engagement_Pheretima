@@ -24,6 +24,7 @@ public class Weapon {
 
 	private WeaponType type;
 	private int currentAmmo;
+	private float airstrikeHeight;
 	//private Vector2 curserPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 
 	private AnimationData animationSet;
@@ -42,6 +43,10 @@ public class Weapon {
 	public void setupAssets(AssetManager manager) {
 		animationSet = manager.get(type.getWeaponAsset());
 		noAmmoSound = manager.get(Assets.noAmmo);
+	}
+
+	public void setAirstrikeHeight(float airstrikeHeight) {
+		this.airstrikeHeight = airstrikeHeight;
 	}
 
 	/**
@@ -67,17 +72,17 @@ public class Weapon {
 				Projectile projectile = new Projectile(worm,
 						this.type, Constants.AIRSTRIKE_SPAWNPOS,
 						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
-								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
+								 		-airstrikeHeight + position.y).nor());
 
 				Projectile projectile2 = new Projectile(worm,
 						this.type, Constants.AIRSTRIKE_SPAWNPOS2 ,
 						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
-								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
+								 		-airstrikeHeight + position.y).nor());
 
 				Projectile projectile3 = new Projectile(worm,
 						this.type, Constants.AIRSTRIKE_SPAWNPOS3,
 						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
-								 		-Constants.AIRSTRIKE_SPAWNPOS.y + position.y).nor());
+								 		-airstrikeHeight + position.y).nor());
 
 				output.add(projectile);
 				output.add(projectile2);

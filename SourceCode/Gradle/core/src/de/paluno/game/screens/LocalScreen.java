@@ -34,7 +34,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
     //libgdx Array
     private Array<UserName> names = new Array<>();
-    private int mapNumber, numWorms;
+    private int mapNumber, numWorms = 1;
     int playerNum = 1;
     private ScrollPane scrollPane;
     private List<UserName> list;

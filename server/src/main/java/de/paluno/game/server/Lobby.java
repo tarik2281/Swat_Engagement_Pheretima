@@ -97,8 +97,12 @@ public class Lobby {
 
     public void broadcastData(User exception, Object data) {
         for (User user : users) {
-            if (user != exception)
-                user.getConnection().sendTCP(data);
+            if (user != exception) {
+                if (data instanceof WorldData)
+                    user.getConnection().sendUDP(data);
+                else
+                    user.getConnection().sendTCP(data);
+            }
         }
     }
 
@@ -117,7 +121,7 @@ public class Lobby {
         GameSetupRequest.Player[] players = new GameSetupRequest.Player[users.size()];
         int index = 0;
         for (User user : users)
-            players[index++] = new GameSetupRequest.Player(user.getId(), user.getWormNames());
+            players[index++] = new GameSetupRequest.Player(user.getId(), user.getUserName());
 
         GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
         creatingUser.getConnection().sendTCP(request);

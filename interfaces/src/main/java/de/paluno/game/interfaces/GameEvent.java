@@ -18,6 +18,7 @@ public class GameEvent extends GameData {
         REMOVE_CRATE,
         DESTROY_CHUTE,
         REMOVE_CHUTE,
+        CRATE_LANDED,
         GAME_STATE_CHANGED
     }
 

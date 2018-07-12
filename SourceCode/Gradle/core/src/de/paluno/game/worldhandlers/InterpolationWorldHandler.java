@@ -136,6 +136,9 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                     case FEET_COLLISION:
                         EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
                         break;
+                    case CRATE_LANDED:
+                        EventManager.getInstance().queueEvent(EventManager.Type.CrateLanded, null);
+                        break;
                     case CRATE_PICKUP: {
                         CratePickupEvent event = (CratePickupEvent)currentEvent;
 

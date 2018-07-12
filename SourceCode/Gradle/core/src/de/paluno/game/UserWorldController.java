@@ -1,7 +1,9 @@
 package de.paluno.game;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
+import de.paluno.game.gameobjects.AirstrikeIndicator;
 import de.paluno.game.gameobjects.ShotDirectionIndicator;
 import de.paluno.game.gameobjects.WeaponIndicator;
 import de.paluno.game.gameobjects.WeaponType;
@@ -86,11 +88,11 @@ public class UserWorldController {
                 case Constants.KEY_SELECT_WEAPON_7:
                 	worldHandler.applyEquipWeapon(WeaponType.WEAPON_TURRET);
                 	break;
+                case Constants.KEY_SELECT_WEAPON_8:
+                    worldHandler.applyEquipWeapon(WeaponType.WEAPON_TELEPORTER);
+                    break;
                 case Constants.KEY_TOGGLE_DEBUG_RENDER:
                     worldHandler.toggleDebugRender();
-                    break;
-                case Constants.KEY_DEBUG_DROP_TURRET:
-                    worldHandler.randomAirdrop();
                     break;
             }
 
@@ -148,6 +150,14 @@ public class UserWorldController {
                     break;
             }
             return super.keyUp(keycode);
+        }
+
+        @Override
+        public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+            if (button == Input.Buttons.LEFT && worldHandler.getCurrentWeaponIndicator() instanceof AirstrikeIndicator)
+                worldHandler.shoot();
+
+            return true;
         }
     };
 

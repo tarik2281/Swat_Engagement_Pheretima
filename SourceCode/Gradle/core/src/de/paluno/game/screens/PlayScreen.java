@@ -238,6 +238,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void hide() {
+        EventManager.getInstance().removeListener(eventListener, EventManager.Type.Replay, EventManager.Type.ReplayEnded);
+
         worldHandler.dispose();
 
         if (chatWindow != null)

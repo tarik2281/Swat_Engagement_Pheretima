@@ -71,22 +71,12 @@ public class LocalWorldHandler extends WorldHandler {
 
     private void startTurn() {
         if (getNumPlayersAlive() <= 1) {
-            int winningPlayerNumber = -1;
+            String winningPlayer = null;
             for (Player player : getPlayers()) {
                 if (!player.isDefeated()) {
-                    winningPlayerNumber = player.getPlayerNumber();
+                    winningPlayer = player.getName();
                     break;
                 }
-            }
-
-            WinningPlayer winningPlayer = WinningPlayer.NONE;
-            switch (winningPlayerNumber) {
-                case 0:
-                    winningPlayer = WinningPlayer.PLAYERONE;
-                    break;
-                case 1:
-                    winningPlayer = WinningPlayer.PLAYERTWO;
-                    break;
             }
 
             EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);

@@ -6,7 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.utils.Array;
-import com.sun.deploy.jcp.controller.Network;
 import de.paluno.game.interfaces.UserName;
 import de.paluno.game.screens.*;
 

@@ -4,23 +4,23 @@ public class GameSetupRequest {
 
     public static class Player {
         private int clientId;
-        private String[] wormNames;
+        private UserName userName;
 
         public Player() {
 
         }
 
-        public Player(int clientId, String[] wormNames) {
+        public Player(int clientId, UserName userName) {
             this.clientId = clientId;
-            this.wormNames = wormNames;
+            this.userName = userName;
         }
 
         public int getClientId() {
             return clientId;
         }
 
-        public String[] getWormNames() {
-            return wormNames;
+        public UserName getUserName() {
+            return userName;
         }
     }
 

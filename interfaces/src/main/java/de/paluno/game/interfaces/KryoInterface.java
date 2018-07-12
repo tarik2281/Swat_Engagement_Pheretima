@@ -37,6 +37,8 @@ public class KryoInterface {
         kryo.register(RemoveCrateEvent.class);
         kryo.register(SpawnAirdropEvent.class);
         kryo.register(RaiseWaterEvent.class);
+        kryo.register(UserName.class);
+        kryo.register(UserName[].class);
 
         kryo.register(UserLoginRequest.class);
         kryo.register(UserLoginRequest.Result.class);

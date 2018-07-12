@@ -305,6 +305,11 @@ public abstract class WorldHandler implements Disposable {
                     setWaiting();
                 
                 landSound.play(1.5f);
+
+                if (shouldWorldStep()) {
+                    GameEvent event = new GameEvent(getCurrentGameTick(), GameEvent.Type.CRATE_LANDED);
+                    emitGameData(event);
+                }
                 break;
             }
             case CratePickup: {
@@ -766,6 +771,7 @@ public abstract class WorldHandler implements Disposable {
     private void addWeapons(Player player) {
         for (WeaponType type : WeaponType.values()) {
             Weapon weapon = new Weapon(type);
+            weapon.setAirstrikeHeight(map.getWorldHeight());
             weapon.setupAssets(getAssetManager());
             player.addWeapon(weapon);
         }
@@ -1099,7 +1105,7 @@ public abstract class WorldHandler implements Disposable {
                         .setPhysicsData(worm.generatePhysicsData());
             }
 
-            playerDataArray[i++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormDataArray);
+            playerDataArray[i++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormDataArray, null);
         }
 
         data.setPlayers(playerDataArray);

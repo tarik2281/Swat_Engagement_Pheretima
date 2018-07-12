@@ -85,7 +85,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setMenuScreen();
+                game.setModiScreen();
             }
         });
         

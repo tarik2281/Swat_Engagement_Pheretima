@@ -18,6 +18,7 @@ public class GameWorld implements Disposable {
 
     public static class SnapshotData {
         private Ground.SnapshotData ground;
+        private float waterLevel;
     }
 
     private WorldHandler worldHandler;
@@ -112,6 +113,8 @@ public class GameWorld implements Disposable {
 
     public void setFromSnapshot(SnapshotData data) {
         ground.setFromSnapshot(data.ground);
+        this.waterLevel = data.waterLevel;
+        water.setLevel(waterLevel);
     }
 
     @Override
@@ -128,6 +131,7 @@ public class GameWorld implements Disposable {
     public SnapshotData makeSnapshot() {
         SnapshotData data = new SnapshotData();
         data.ground = ground.makeSnapshot();
+        data.waterLevel = waterLevel;
         return data;
     }
 

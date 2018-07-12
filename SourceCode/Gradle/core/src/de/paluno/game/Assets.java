@@ -215,13 +215,13 @@ public class Assets {
     public static final AssetDescriptor<Sound> gunRelease =
     		new AssetDescriptor<Sound>("GunRelease.mp3", Sound.class);
     public static final AssetDescriptor<Sound> airstrikeSound =
-    		new AssetDescriptor<Sound>("Airstrike.WAV", Sound.class);
+    		new AssetDescriptor<Sound>("Airstrike.wav", Sound.class);
     public static final AssetDescriptor<Sound> airstrikeExplosion =
-    		new AssetDescriptor<Sound>("AirstrikeExplosion.WAV", Sound.class);
+    		new AssetDescriptor<Sound>("AirstrikeExplosion.wav", Sound.class);
     public static final AssetDescriptor<Sound> airballSound =
-    		new AssetDescriptor<Sound>("NoHitNoExplosion.WAV", Sound.class);
+    		new AssetDescriptor<Sound>("NoHitNoExplosion.wav", Sound.class);
     public static final AssetDescriptor<Sound> raiseLimitSound =
-    		new AssetDescriptor<Sound>("UnderWaterLoop.WAV", Sound.class);
+    		new AssetDescriptor<Sound>("UnderWaterLoop.wav", Sound.class);
     public static final AssetDescriptor<Sound> map1Sound =
     		new AssetDescriptor<Sound>("Map1_ArabianNight.mp3", Sound.class);
     public static final AssetDescriptor<Sound> map2Sound =
@@ -233,7 +233,7 @@ public class Assets {
     public static final AssetDescriptor<Sound> walkLoop =
     		new AssetDescriptor<Sound>("WalkLoop.wav", Sound.class);
     public static final AssetDescriptor<Sound> noAmmo =
-    		new AssetDescriptor<Sound>("NoAmmoWarning.wav", Sound.class);
+    		new AssetDescriptor<Sound>("NoAmmoWarning.WAV", Sound.class);
     public static final AssetDescriptor<Sound> fallDown =
     		new AssetDescriptor<Sound>("FallDown.wav", Sound.class);
     public static final AssetDescriptor<Sound> roundStart =

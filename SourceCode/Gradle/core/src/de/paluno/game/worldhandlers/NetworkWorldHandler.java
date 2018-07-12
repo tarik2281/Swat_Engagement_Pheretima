@@ -8,7 +8,6 @@ import de.paluno.game.NetworkClient;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
-import de.paluno.game.screens.WinningPlayer;
 
 import java.util.ArrayList;
 
@@ -65,15 +64,10 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
             }
             else if (data instanceof GameOverEvent) {
                 GameOverEvent event = (GameOverEvent)data;
-                WinningPlayer winningPlayer = WinningPlayer.NONE;
-                switch (event.winningPlayer) {
-                    case 0:
-                        winningPlayer = WinningPlayer.PLAYERONE;
-                        break;
-                    case 1:
-                        winningPlayer = WinningPlayer.PLAYERTWO;
-                        break;
-                }
+                String winningPlayer = null;
+                Player player = getPlayers().get(event.winningPlayer);
+                if (player != null)
+                    winningPlayer = player.getName();
                 EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
             }
             else if (data instanceof WorldData) {
@@ -192,11 +186,12 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
             int playerIndex = 0;
             for (GameSetupRequest.Player setupPlayer : gameSetupRequest.getPlayers()) {
                 Player player = addPlayer(playerIndex);
+                player.setName(setupPlayer.getUserName().getUserName());
                 player.setClientId(setupPlayer.getClientId());
 
                 WormData[] wormData = new WormData[numWorms];
                 for (int j = 0; j < numWorms; j++) {
-                    Worm worm = addWorm(player, j, "");
+                    Worm worm = addWorm(player, j, setupPlayer.getUserName().getWormNames()[j]);
                     worm.setPosition(getRandomSpawnPosition());
 
                     wormData[j] = new WormData()
@@ -207,7 +202,7 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
                                     .setPositionY(worm.getPosition().y));
                 }
 
-                playerData[playerIndex++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormData);
+                playerData[playerIndex++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormData, setupPlayer.getUserName());
             }
 
             GameSetupData data = new GameSetupData(playerData);
@@ -219,10 +214,11 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
                 PlayerData playerData = gameSetupData.getPlayerData()[i];
 
                 Player player = addPlayer(playerData.getPlayerNumber());
+                player.setName(playerData.getUserName().getUserName());
                 player.setClientId(playerData.getClientId());
 
                 for (WormData wormData : playerData.getWorms()) {
-                    Worm worm = addWorm(player, wormData.getWormNumber(), "");
+                    Worm worm = addWorm(player, wormData.getWormNumber(), playerData.getUserName().getWormNames()[wormData.getWormNumber()]);
                     worm.setPosition(wormData.getPhysicsData().getPositionX(),
                             wormData.getPhysicsData().getPositionY());
                     // TODO: setup worms
