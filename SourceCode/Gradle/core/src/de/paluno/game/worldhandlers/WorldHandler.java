@@ -15,7 +15,6 @@ import de.paluno.game.GameState;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
-import sun.security.krb5.internal.crypto.Des;
 
 import java.util.*;
 
