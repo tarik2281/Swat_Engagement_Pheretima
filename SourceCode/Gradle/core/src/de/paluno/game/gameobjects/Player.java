@@ -23,6 +23,7 @@ public class Player implements Disposable {
 
 	private int playerNum;
 
+    private String name;
 	private ArrayList<Worm> worms;
 	private int numWormsAlive;
 	private ArrayList<Weapon> weapons;
@@ -64,12 +65,20 @@ public class Player implements Disposable {
 
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public void addWeapon(Weapon weapon) {
 		weapons.add(weapon);
 	}
 
-	public Worm addWorm(int wormNumber) {
-		Worm worm = new Worm(this, wormNumber);
+	public Worm addWorm(int wormNumber, String name) {
+		Worm worm = new Worm(this, wormNumber, name);
 		worms.add(wormNumber, worm);
 		numWormsAlive++;
 		return worm;

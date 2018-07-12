@@ -5,68 +5,93 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.utils.Array;
+import com.sun.deploy.jcp.controller.Network;
+import de.paluno.game.interfaces.UserName;
 import de.paluno.game.screens.*;
 
 public class SEPGame extends Game {
 
-	private AssetManager assetManager;
+    private AssetManager assetManager;
 
-	private EventManager.Listener listener = (type, data) -> {
-		switch (type) {
-			case GameOver:
-				setGameOver((String)data);
-				break;
-		}
-	};
+    private EventManager.Listener listener = (type, data) -> {
+        switch (type) {
+            case GameOver:
+                setGameOver((String) data);
+                break;
+        }
+    };
 
-	public SEPGame() {
-		assetManager = new AssetManager();
+    public SEPGame() {
+        assetManager = new AssetManager();
         assetManager.setLoader(AnimationData.class, new AnimationData.Loader(new InternalFileHandleResolver()));
         assetManager.setLoader(Map.class, new Map.Loader(new InternalFileHandleResolver()));
-	}
+    }
 
-	@Override
-	public void create() {
-		EventManager.getInstance().addListener(listener, EventManager.Type.GameOver);
+    @Override
+    public void create() {
+        EventManager.getInstance().addListener(listener, EventManager.Type.GameOver);
 
-		setMenuScreen();
-	}
+        setStartScreen();
+    }
 
     @Override
     public void render() {
-		EventManager.getInstance().processEvents();
+        EventManager.getInstance().processEvents();
 
         super.render();
     }
 
-    public void setMenuScreen() {
-		setNextScreen(new MenuScreen(this));
-	}
-
-    public void setPlayScreen(int mapNumber, int numWorms, int numPlayers) {
-		setNextScreen(new PlayScreen(this, mapNumber, numWorms, numPlayers));
-	}
-
-    public void setGameOver(String name) {
-	    setNextScreen(new GameOverScreen(this, name));
+    public void setStartScreen() {
+        setNextScreen(new ModiScreen(this));
     }
 
-	public AssetManager getAssetManager() {
-		return assetManager;
-	}
 
-	public void setNextScreen(Screen screen) {
-		// TODO: maybe loading screen
-		assetManager.clear();
+    public void setLoginScreen(NetworkClient client){
+        setNextScreen(new LoginScreen(this, client));
+    }
 
-		if (screen instanceof Loadable) {
-			((Loadable) screen).load(assetManager);
-			assetManager.finishLoading();
-		}
 
-		setScreen(screen);
-	}
+
+    public void setPlayScreen(int mapNumber, int numWorms, Array<UserName> names) {
+        setNextScreen(new PlayScreen(this, mapNumber, numWorms, names));
+    }
+    public void setLocalScreen() {
+        setNextScreen(new LocalScreen(this));
+    }
+
+
+
+    public void setLobbyScreen(NetworkClient client){
+        setNextScreen(new LobbyScreen(this, client));
+    }
+
+    public void setPlayerLobbyScreen(NetworkClient client, int lobbyId){
+        setNextScreen(new PlayerLobbyScreen(this, client, lobbyId));
+    }
+
+    public void setModiScreen(){
+        setNextScreen(new ModiScreen(this));
+    }
+
+    public void setGameOver(String name) {
+        setNextScreen(new GameOverScreen(this, name));
+    }
+
+
+    public AssetManager getAssetManager() {
+        return assetManager;
+    }
+
+    public void setNextScreen(Screen screen) {
+        // TODO: maybe loading screen
+        assetManager.clear();
+
+        if (screen instanceof Loadable) {
+            ((Loadable) screen).load(assetManager);
+            assetManager.finishLoading();
+        }
+
+        setScreen(screen);
+    }
 }

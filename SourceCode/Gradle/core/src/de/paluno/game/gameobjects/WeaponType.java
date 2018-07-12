@@ -27,10 +27,12 @@ public enum WeaponType {
 			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 10, "Mine"),
 	WEAPON_TURRET(1, Assets.iconSpecial, Assets.wormBreath , Assets.weaponTurret,
 			WeaponIndicator.Type.None, 7.0f, 0.35f, 0.003f, 0.0f, 30, "Geschütz"),
+    WEAPON_TELEPORTER(3, Assets.iconTeleport, Assets.teleporter, Assets.projectileSpecial,
+            WeaponIndicator.Type.Pointer, 0.0f, 0.0f, 0.0f, 0.0f, 0, "Teleporter"),
 	WEAPON_TURRET_PROJECTILE(Constants.WEAPON_AMMO_INF, Assets.iconGun, Assets.weaponGun, Assets.projectileGun,
 			WeaponIndicator.Type.ShotDirection, 7.0f, 0.0f, 0.0f, 0.0f, 40, null);
 
-	public static final int NUM_WEAPONS = 7;
+	public static final int NUM_WEAPONS = 8;
 
 	private final int maxAmmo;
 	private final AssetDescriptor<Texture> icon;

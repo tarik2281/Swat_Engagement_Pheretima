@@ -1,5 +1,6 @@
 package de.paluno.game.worldhandlers;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import de.paluno.game.Constants;
 import de.paluno.game.EventManager;
@@ -17,6 +18,7 @@ public class LocalWorldHandler extends WorldHandler {
     private static final int STATE_AIRDROP = 4;
 
     private int numWorms;
+    private Array<UserName> names;
 
     private boolean wormDied;
     private int state;
@@ -60,10 +62,11 @@ public class LocalWorldHandler extends WorldHandler {
         }
     };
 
-    public LocalWorldHandler(PlayScreen screen, int mapNumber, int numWorms) {
+    public LocalWorldHandler(PlayScreen screen, int mapNumber, int numWorms, Array<UserName> names) {
         super(screen, mapNumber);
 
         this.numWorms = numWorms;
+        this.names = names;
     }
 
     private void startTurn() {
@@ -165,7 +168,16 @@ public class LocalWorldHandler extends WorldHandler {
     public void onInitializePlayers() {
         EventManager.getInstance().addListener(eventListener, EventManager.Type.ReplayEnded);
 
-        initializePlayersDefault(numWorms);
+        for (int i = 0; i < names.size; i++) {
+            UserName userName = names.get(i);
+            Player player = addPlayer(i);
+            player.setName(userName.getUserName());
+
+            for (int j = 0; j < numWorms; j++) {
+                Worm worm = addWorm(player, j, userName.getWormNames()[j]);
+                worm.setPosition(getRandomSpawnPosition());
+            }
+        }
     }
 
     @Override

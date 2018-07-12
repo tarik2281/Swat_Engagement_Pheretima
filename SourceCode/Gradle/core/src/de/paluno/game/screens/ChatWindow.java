@@ -25,6 +25,7 @@ public class ChatWindow implements Disposable {
 
     private Table chatTable;
     private ScrollPane chatScrollPane;
+    private ElementGUI elementGUI;
 
     private DataHandler messageHandler = (client, data) -> {
         if (data instanceof ChatMessage) {
@@ -46,6 +47,10 @@ public class ChatWindow implements Disposable {
 
     public ChatWindow(NetworkClient client) {
         this.client = client;
+    }
+
+    public Table getTable() {
+        return table;
     }
 
     private void addMessage(String userName, String message) {
@@ -77,10 +82,14 @@ public class ChatWindow implements Disposable {
         });
     }
 
+
+
+
     public void initialize() {
         client.registerDataHandler(messageHandler);
+        elementGUI = new ElementGUI();
 
-        skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
+        skin = elementGUI.getSkin();
 
         stage = new Stage();
         table = new Table(skin);

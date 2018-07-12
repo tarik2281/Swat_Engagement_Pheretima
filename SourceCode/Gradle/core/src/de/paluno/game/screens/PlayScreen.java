@@ -7,10 +7,15 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.GameWorld;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.worldhandlers.*;
+
+import java.util.List;
 
 public class PlayScreen extends ScreenAdapter implements Loadable {
 
@@ -28,9 +33,9 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     private int mapNumber;
     private int numWorms;
-    private int numPlayers;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
+    private Array<UserName> names;
 
     private Sound mapSound;
 
@@ -39,18 +44,27 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private NetworkClient client;
     private ChatWindow chatWindow;
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms, int numPlayers) {
+    private PlayScreen(SEPGame game, int mapNumber) {
         this.game = game;
-
         this.mapNumber = mapNumber;
-        this.numWorms = numWorms;
-        this.numPlayers = numPlayers;
-
         spriteBatch = new SpriteBatch();
     }
 
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms, Array<UserName> userNames) {
+//    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
+        this(game, mapNumber);
+
+        this.numWorms = numWorms;
+        this.names = userNames;
+//        this.modi = modi;
+//        this.names = names;
+//        this.playerNumber = playerNumber;
+
+
+    }
+
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupRequest request) {
-        this(game, request.getMapNumber(), request.getNumWorms(), request.getPlayers().length);
+        this(game, request.getMapNumber());
 
         this.client = client;
 
@@ -58,7 +72,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     }
 
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupData data) {
-        this(game, data.mapNumber, 1, data.getPlayerData().length);
+        this(game, data.mapNumber);
 
         this.client = client;
 
@@ -103,7 +117,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
             chatWindow.initialize();
         }
         else {
-            worldHandler = new LocalWorldHandler(this, mapNumber, numWorms);
+            worldHandler = new LocalWorldHandler(this, mapNumber, numWorms, names);
         }
 
 		switch (mapNumber) {
@@ -165,10 +179,11 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
             world.initializeData(mapNumber, gameSetupData);
         }
         else {
-            world.initializeNew(mapNumber, numWorms);
+            world.initializeNew(mapNumber, numWorms, names);
         }
 */
         weaponUI = new WeaponUI(this);
+        weaponUI.setWorldHandler(worldHandler);
         //weaponUI.setPlayer(world.getCurrentPlayer());
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();

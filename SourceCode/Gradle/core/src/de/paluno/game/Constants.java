@@ -1,6 +1,7 @@
 package de.paluno.game;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
@@ -112,6 +113,9 @@ public static final float CRATE_RADIUS = 10.0f * WORLD_SCALE;
     public static final int KEY_SELECT_WEAPON_5 = Input.Keys.F5;
     public static final int KEY_SELECT_WEAPON_6 = Input.Keys.F6;
     public static final int KEY_SELECT_WEAPON_7 = Input.Keys.F7;
+    public static final int KEY_SELECT_WEAPON_8 = Input.Keys.F8;
+    public static final int KEY_SELECT_WEAPON_MENU = Input.Keys.I;
+
 
     // debug key bindings
     public static final int KEY_MOVE_CAMERA_LEFT = Input.Keys.A;

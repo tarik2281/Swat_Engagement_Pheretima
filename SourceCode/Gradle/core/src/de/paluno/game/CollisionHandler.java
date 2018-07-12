@@ -72,6 +72,7 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Worm -> Ground");
         }
 
+
         /**
          * Infected Worm -> Worm
          */

@@ -89,6 +89,10 @@ public class Weapon {
 
 				output.add(turret);
 			}
+			// setTransform Method spawns the current Worm to the selected position
+			else if (type == WeaponType.WEAPON_TELEPORTER){
+                worm.getBody().setTransform(indicator.getPosition().x, indicator.getPosition().y, 0);
+            }
 			else {
 				Vector2 direction;
 				if (indicator != null)

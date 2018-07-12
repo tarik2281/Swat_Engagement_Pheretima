@@ -22,6 +22,7 @@ public class Worm extends WorldObject {
         private int orientation;
         private boolean isInfected;
         private boolean isDead;
+        private String name;
     }
 
     public static class DamageEvent {
@@ -90,6 +91,7 @@ public class Worm extends WorldObject {
 	private Weapon currentWeapon = null;
 	private boolean gunUnequipping = false;
 
+	private String name;
 	private int health;
 
 	private boolean animationInvalidated;
@@ -99,8 +101,14 @@ public class Worm extends WorldObject {
 	 */
 	public Worm() {}
 
-	public Worm(Player player, int characterNumber) {
-		this.characterNumber = characterNumber;
+	/**
+	 * Constructor
+	 * @param player - reference to the player we belong to
+	 * @param charNum - Our character number
+	 */
+	public Worm(Player player, int charNum, String name) {
+	    characterNumber = charNum;
+	    this.name = name;
 
 		this.player = player;
 
@@ -118,6 +126,7 @@ public class Worm extends WorldObject {
 		this.orientation = data.orientation;
 		this.isInfected = data.isInfected;
 		this.isDead = data.isDead;
+		this.name = data.name;
 	}
 
 
@@ -126,6 +135,10 @@ public class Worm extends WorldObject {
 		this.walkAnimation = new AnimatedSprite(manager.get(Assets.wormWalk));
 		this.idleAnimation = new AnimatedSprite(manager.get(Assets.wormBreath));
 		this.flyAnimation = new AnimatedSprite(manager.get(Assets.wormFly));
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	/**
@@ -432,7 +445,7 @@ public class Worm extends WorldObject {
      */
 	public void takeDamage(int damage, int damageType) {
 		health -= damage;
-		
+
 		//HoverText info = new HoverText(this.world, this, "-"+damage, Color.RED);
 		//world.registerAfterUpdate(info);
 
@@ -596,6 +609,7 @@ public class Worm extends WorldObject {
 		data.orientation = orientation;
 		data.isInfected = isInfected;
 		data.isDead = isDead;
+		data.name = name;
 
 		return data;
 	}
