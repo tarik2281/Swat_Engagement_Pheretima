@@ -78,10 +78,9 @@ public class Player {
             return;
 
         do {
-            if (++currentWormIndex >= worms.size()) {
-                currentWormIndex = 0;
+            currentWormIndex = (currentWormIndex + 1) % worms.size();
+            if (currentWormIndex == worms.size() - 1)
                 roundEnded = true;
-            }
         } while (worms.get(currentWormIndex).isDead());
     }
 

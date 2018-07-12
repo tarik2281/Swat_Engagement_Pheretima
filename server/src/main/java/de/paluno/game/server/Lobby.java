@@ -1,254 +1,189 @@
-/*package de.paluno.game.server;
+package de.paluno.game.server;
 
-import com.esotericsoftware.kryonet.Connection;
 import de.paluno.game.interfaces.*;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
 public class Lobby {
 
-    private String name;
-    private int currentPlayerIndex;
-    private ArrayList<Player> players;
-    private int numPlayersAlive;
+    public static final int ID_NONE = -1;
 
-    private Random windRandomizer = new Random();
+    private final int id;
+    private final String name;
+    private List<User> users;
+    private final byte mapNumber;
+    private final byte numWorms;
+    private Match match;
+    private Runnable destroyListener;
 
-    private boolean closed;
+    private final User creatingUser;
 
-    public Lobby() {
-        currentPlayerIndex = -1;
-        players = new ArrayList<>();
+    public Lobby(int id, String name, int mapNumber, int numWorms, User creatingUser) {
+        this.id = id;
+        this.name = name;
+        this.mapNumber = (byte)mapNumber;
+        this.numWorms = (byte)numWorms;
+        this.creatingUser = creatingUser;
+
+        users = new ArrayList<>();
+
+        joinUser(creatingUser);
     }
 
-    public boolean isClosed() {
-        return closed;
+    public int getId() {
+        return id;
     }
 
-    public boolean isInLobby(Connection connection) {
-        for (Player player : players) {
-            if (player.getConnection().getID() == connection.getID())
-                return true;
+    public boolean isOpen() {
+        return match == null && users.size() < Constants.NUM_MAX_PLAYERS;
+    }
+
+    public boolean joinUser(User joiningUser) {
+        if (joiningUser.getCurrentLobbyId() != ID_NONE)
+            return joiningUser.getCurrentLobbyId() == id;
+
+        if (users.size() < Constants.NUM_MAX_PLAYERS) {
+            UserMessage message = UserMessage.joined(joiningUser.getId(), joiningUser.getName());
+
+            for (User user : users)
+                user.getConnection().sendTCP(message);
+
+            users.add(joiningUser);
+            joiningUser.setCurrentLobbyId(getId());
+
+            System.out.println("User(name: " + joiningUser.getName()  + ") joined lobby(id: " + id + ")");
+
+            return true;
         }
 
         return false;
     }
 
-    public void addPlayerConnection(Connection connection) {
-        if (isClosed())
-            return;
+    public boolean leaveUser(User leavingUser) {
+        if (match != null)
+            match.userDisconnected(leavingUser);
 
-        Player player = new Player(null, players.size());
-        player.setDefeatedListener(() -> numPlayersAlive--);
-        players.add(player);
+        if (leavingUser.getCurrentLobbyId() == id) {
+            users.remove(leavingUser);
 
-        if (players.size() == 2) {
-            startGame();
-            closed = true;
-        }
-    }
+            Message message;
 
-    public void startGame() {
-        int[] clientIds = new int[players.size()];
-        int[] playerNumbers = new int[players.size()];
+            if (users.isEmpty() || (match == null && leavingUser.getId() == creatingUser.getId())) {
+                message = Message.lobbyDestroyed();
 
-        numPlayersAlive = 0;
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            clientIds[i] = player.getConnection().getID();
-            playerNumbers[i] = player.getNumber();
-            numPlayersAlive++;
-        }
+                for (User user : users)
+                    user.setCurrentLobbyId(ID_NONE);
 
-        GameSetupRequest setupRequest = new GameSetupRequest();
-        players.get(0).getConnection().sendTCP(setupRequest);
-    }
-
-    public void setClientReady(Connection connection) {
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            if (player.getConnection().getID() == connection.getID()) {
-                player.setReady(true);
-
-                if (i == currentPlayerIndex)
-                    broadcast(connection, new GameEvent(0, GameEvent.Type.END_TURN));
-
-                break;
-            }
-        }
-
-        if (allClientsReady()) {
-            startTurn();
-        }
-    }
-
-    private void applyWormInfectionDamage() {
-        Player currentPlayer = getCurrentPlayer();
-        Worm worm = currentPlayer.getCurrentWorm();
-
-        if (worm.isInfected()) {
-            WormDamageEvent damageEvent = worm.takeDamage(Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
-
-            if (worm.isDead()) {
-                broadcast(null, new WormEvent(0, GameEvent.Type.WORM_DIED, worm.getPlayerNumber(), worm.getWormNumber()));
-
-                if (numPlayersAlive >= Constants.NUM_MIN_PLAYERS) {
-                    if (currentPlayer.isDefeated()) {
-                        shiftTurn(false);
-                        applyWormInfectionDamage();
-                    }
-                    else {
-                        currentPlayer.shiftTurn();
-                    }
-                }
+                if (destroyListener != null)
+                    destroyListener.run();
             }
             else {
-                broadcast(null, damageEvent);
+                message = UserMessage.left(leavingUser.getId(), leavingUser.getName());
             }
+
+            leavingUser.setCurrentLobbyId(ID_NONE);
+
+            for (User user : users)
+                user.getConnection().sendTCP(message);
+
+            System.out.println("User(name: " + leavingUser.getName()  + ") left lobby(id: " + id + ")");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public void broadcastData(User exception, Object data) {
+        for (User user : users) {
+            if (user != exception)
+                user.getConnection().sendTCP(data);
         }
     }
 
-    private void startTurn() {
-        shiftTurn(true);
-
-        if (numPlayersAlive < Constants.NUM_MIN_PLAYERS) {
-            int winningPlayer = -1;
-            for (Player player : players) {
-                if (!player.isDefeated()) {
-                    winningPlayer = player.getNumber();
-                    break;
-                }
-            }
-
-            GameOverEvent gameOverEvent = new GameOverEvent();
-            gameOverEvent.winningPlayer = winningPlayer;
-            broadcast(null, gameOverEvent);
-        }
-        else {
-            applyWormInfectionDamage();
-
-            StartTurnEvent startTurnEvent = new StartTurnEvent();
-
-            Player currentPlayer = getCurrentPlayer();
-            startTurnEvent.playerNumber = currentPlayer.getNumber();
-            startTurnEvent.wormNumber = currentPlayer.getCurrentWorm().getWormNumber();
-            startTurnEvent.wind = windRandomizer.nextInt(Constants.WIND_RANGE + 1) + Constants.WIND_START;
-
-            for (Player player : players) {
-                player.getConnection().sendTCP(startTurnEvent);
-                player.setReady(false);
-            }
+    public void broadcastChatMessage(ChatMessage message) {
+        for (User user : users) {
+            user.getConnection().sendTCP(message);
         }
     }
 
-    private boolean allClientsReady() {
-        boolean ready = true;
-
-        for (Player player : players) {
-            if (!player.isReady()) {
-                ready = false;
-                break;
-            }
-        }
-
-        return ready;
+    public void handleGameData(User sender, GameData gameData) {
+        if (match != null)
+            match.handleGameData(sender, gameData);
     }
 
-    public void onReceiveGameEvent(Connection source, GameEvent event) {
-        switch (event.getType()) {
-            case WORM_DIED: {
-                WormEvent wormEvent = (WormEvent)event;
-                getWorm(wormEvent).setDead(true);
-                break;
-            }
-            case WORM_TOOK_DAMAGE: {
-                WormDamageEvent wormEvent = (WormDamageEvent)event;
-                getWorm(wormEvent).applyDamage(wormEvent.getDamage());
-                break;
-            }
-            case WORM_INFECTED: {
-                WormEvent wormEvent = (WormEvent)event;
-                getWorm(wormEvent).setInfected(true);
-                break;
-            }
-        }
+    public void startMatch() {
+        GameSetupRequest.Player[] players = new GameSetupRequest.Player[users.size()];
+        int index = 0;
+        for (User user : users)
+            players[index++] = new GameSetupRequest.Player(user.getId(), user.getWormNames());
 
-        broadcast(source, event);
+        GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
+        creatingUser.getConnection().sendTCP(request);
+
+        System.out.printf("Starting match for lobby(id:%d, name:%s)\n", id, name);
     }
 
-    public Player getCurrentPlayer() {
-        return players.get(currentPlayerIndex);
-    }
+    public void setupMatch(GameSetupData data) {
+        match = new Match(this);
 
-    public Player getPlayerByNumber(int number) {
-        return players.get(number);
-    }
+        for (User user : users)
+            if (user.getId() != creatingUser.getId())
+                user.getConnection().sendTCP(data);
 
-    public Worm getWorm(WormEvent event) {
-        return getPlayerByNumber(event.getPlayerNumber()).getWormByNumber(event.getWormNumber());
-    }
-
-    public void onReceiveWorldData(Connection source, WorldData data) {
-        if (data.isUsingTCP())
-            broadcast(source, data);
-        else
-            broadcastUDP(source, data);
-    }
-
-    public void onReceiveGameSetupData(Connection source, GameSetupData data) {
         for (PlayerData playerData : data.getPlayerData()) {
-            Player player = players.get(playerData.getPlayerNumber());
-            player.setupFromData(playerData);
-        }
+            Player player = match.addPlayer(getUserById(playerData.getClientId()), playerData.getPlayerNumber());
 
-        broadcast(source, data);
-    }
+            for (WormData wormData : playerData.getWorms()) {
+                Worm worm = player.addWorm(wormData.getWormNumber());
 
-    private void broadcast(Connection source, Object data) {
-        for (Player player : players) {
-            if (source == null || player.getConnection().getID() != source.getID())
-                player.getConnection().sendTCP(data);
-        }
-    }
-
-    private void broadcastUDP(Connection source, Object data) {
-        for (Player player : players) {
-            if (source == null || player.getConnection().getID() != source.getID())
-                player.getConnection().sendUDP(data);
-        }
-    }
-
-    public void shiftTurn(boolean shiftWorms) {
-        if (numPlayersAlive <= 0)
-            return;
-
-        if (shiftWorms && currentPlayerIndex != -1) {
-            players.get(currentPlayerIndex).shiftTurn();
-        }
-
-        do {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        } while (getPlayerByNumber(currentPlayerIndex).isDefeated());
-    }
-
-    public void broadcastMessage(Connection source, Message data) {
-        switch (data.getType()) {
-            case ChatMessage: {
-                ChatMessage message = (ChatMessage)data;
-
-                for (Player player : players) {
-                    if (player.getConnection().getID() == source.getID()) {
-                        message.setPlayer(player.getNumber());
-                        break;
-                    }
-                }
-
-                broadcast(null, data);
-
-                break;
             }
         }
+    }
+
+    public void userReady(User user) {
+        if (match != null) {
+            match.userReady(user);
+        }
+    }
+
+    private User getUserById(int clientId) {
+        for (User user : users)
+            if (user.getId() == clientId)
+                return user;
+
+        return null;
+    }
+
+    public String[] getUsers() {
+        String[] array = new String[users.size()];
+
+        for (int i = 0; i < users.size(); i++) {
+            User user = users.get(i);
+            array[i] = user.getName();
+        }
+
+        return array;
+    }
+
+    public void setDestroyListener(Runnable listener) {
+        this.destroyListener = listener;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getMapNumber() {
+        return mapNumber;
+    }
+
+    public int getNumWorms() {
+        return numWorms;
+    }
+
+    public User getCreatingUser() {
+        return creatingUser;
     }
 }
-*/

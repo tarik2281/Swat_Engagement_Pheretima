@@ -18,11 +18,11 @@ public class Match {
     private int numPlayersAlive;
 
     private Random windRandomizer;
-    private Lobby2 lobby;
+    private Lobby lobby;
 
     private int state;
 
-    public Match(Lobby2 lobby) {
+    public Match(Lobby lobby) {
         currentTick = 0;
         currentPlayerIndex = -1;
         numPlayersAlive = 0;

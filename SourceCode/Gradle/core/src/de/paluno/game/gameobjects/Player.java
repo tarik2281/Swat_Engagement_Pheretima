@@ -149,10 +149,9 @@ public class Player implements Disposable {
 	        return;
 
 		do {
-			if (++turn >= worms.size()) {
-				turn = 0;
+			turn = (turn + 1) % worms.size();
+			if (turn == worms.size() - 1)
 				isRoundEnded = true;
-			}
 		} while (worms.get(turn).isDead());
 	}
 	

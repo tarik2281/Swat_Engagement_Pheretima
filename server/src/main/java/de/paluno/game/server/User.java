@@ -15,7 +15,7 @@ public class User {
         this.name = name;
         this.wormNames = wormNames;
 
-        currentLobbyId = Lobby2.ID_NONE;
+        currentLobbyId = Lobby.ID_NONE;
     }
 
     public int getId() {

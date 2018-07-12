@@ -15,7 +15,7 @@ public class GameServer {
     private Server server;
     private int nextLobbyId;
 
-    private HashMap<Integer, Lobby2> lobbyMap;
+    private HashMap<Integer, Lobby> lobbyMap;
     private HashMap<Integer, User> loggedInUsers;
 
     private Listener serverListener = new Listener() {
@@ -44,7 +44,7 @@ public class GameServer {
 
                 User user = getUserById(connection.getID());
                 if (user != null) {
-                    Lobby2 lobby = createLobby(request.getName(), request.getMapNumber(), request.getNumWorms(), user);
+                    Lobby lobby = createLobby(request.getName(), request.getMapNumber(), request.getNumWorms(), user);
 
                     LobbyCreateRequest.Result result = new LobbyCreateRequest.Result();
                     result.lobbyId = lobby.getId();
@@ -55,7 +55,7 @@ public class GameServer {
                 LobbyJoinRequest request = (LobbyJoinRequest)object;
 
                 boolean joined = false;
-                Lobby2 lobby = lobbyMap.get(request.lobbyId);
+                Lobby lobby = lobbyMap.get(request.lobbyId);
                 if (lobby != null) {
                     User user = getUserById(connection.getID());
                     if (user != null)
@@ -67,13 +67,13 @@ public class GameServer {
                 if (joined)
                     result.lobbyId = lobby.getId();
                 else
-                    result.lobbyId = Lobby2.ID_NONE;
+                    result.lobbyId = Lobby.ID_NONE;
                 connection.sendTCP(result);
             }
             else if (object instanceof LobbyLeaveRequest) {
                 User user = getUserById(connection.getID());
                 if (user != null) {
-                    Lobby2 lobby = lobbyMap.get(user.getCurrentLobbyId());
+                    Lobby lobby = lobbyMap.get(user.getCurrentLobbyId());
                     if (lobby != null)
                         lobby.leaveUser(user);
 
@@ -85,7 +85,7 @@ public class GameServer {
             else if (object instanceof LobbyListRequest) {
                 ArrayList<LobbyData> lobbies = new ArrayList<>();
 
-                for (Lobby2 lobby : lobbyMap.values()) {
+                for (Lobby lobby : lobbyMap.values()) {
                     if (lobby.isOpen()) {
                         LobbyData data = new LobbyData();
                         data.id = lobby.getId();
@@ -102,7 +102,7 @@ public class GameServer {
                 LobbyDataRequest request = (LobbyDataRequest)object;
 
                 LobbyData lobbyData = null;
-                Lobby2 lobby = getLobbyById(request.lobbyId);
+                Lobby lobby = getLobbyById(request.lobbyId);
                 if (lobby != null) {
                     lobbyData = new LobbyData();
                     lobbyData.id = lobby.getId();
@@ -122,7 +122,7 @@ public class GameServer {
                 StartMatchRequest request = (StartMatchRequest)object;
                 User user = getUserById(connection.getID());
                 if (user != null) {
-                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    Lobby lobby = getLobbyById(user.getCurrentLobbyId());
                     if (lobby != null && lobby.getCreatingUser().getId() == user.getId()) {
                         lobby.startMatch();
                     }
@@ -132,7 +132,7 @@ public class GameServer {
                 ChatMessage message = (ChatMessage)object;
                 User user = getUserById(connection.getID());
                 if (user != null) {
-                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    Lobby lobby = getLobbyById(user.getCurrentLobbyId());
 
                     if (lobby != null) {
                         message.setUserName(user.getName());
@@ -144,7 +144,7 @@ public class GameServer {
             else if (object instanceof GameSetupData) {
                 User user = getUserById(connection.getID());
                 if (user != null) {
-                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    Lobby lobby = getLobbyById(user.getCurrentLobbyId());
                     if (lobby != null) {
                         lobby.setupMatch((GameSetupData)object);
                     }
@@ -153,7 +153,7 @@ public class GameServer {
             else if (object instanceof GameData) {
                 User user = getUserById(connection.getID());
                 if (user != null) {
-                    Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+                    Lobby lobby = getLobbyById(user.getCurrentLobbyId());
                     if (lobby != null) {
                         lobby.handleGameData(user, (GameData)object);
                     }
@@ -162,7 +162,7 @@ public class GameServer {
             else if (object instanceof Message) {
                 User user = getUserById(connection.getID());
 
-                Lobby2 lobby = null;
+                Lobby lobby = null;
                 if (user != null)
                     lobby = getLobbyById(user.getCurrentLobbyId());
 
@@ -190,7 +190,7 @@ public class GameServer {
         return loggedInUsers.get(id);
     }
 
-    private Lobby2 getLobbyById(int id) {
+    private Lobby getLobbyById(int id) {
         return lobbyMap.get(id);
     }
 
@@ -206,7 +206,7 @@ public class GameServer {
         User user = loggedInUsers.remove(id);
 
         if (user != null) {
-            Lobby2 lobby = getLobbyById(user.getCurrentLobbyId());
+            Lobby lobby = getLobbyById(user.getCurrentLobbyId());
             if (lobby != null)
                 lobby.leaveUser(user);
 
@@ -214,8 +214,8 @@ public class GameServer {
         }
     }
 
-    private Lobby2 createLobby(String name, int mapNumber, int numWorms, User creatingUser) {
-        Lobby2 lobby = new Lobby2(getNextLobbyId(), name, mapNumber, numWorms, creatingUser);
+    private Lobby createLobby(String name, int mapNumber, int numWorms, User creatingUser) {
+        Lobby lobby = new Lobby(getNextLobbyId(), name, mapNumber, numWorms, creatingUser);
         lobby.setDestroyListener(() -> {
             lobbyMap.remove(lobby.getId());
             System.out.printf("Destroyed lobby (id: %d, name: %s)\n", lobby.getId(), lobby.getName());

@@ -990,7 +990,6 @@ public abstract class WorldHandler implements Disposable {
 
         if (shouldWorldStep()) {
             SpawnAirdropEvent event = new SpawnAirdropEvent(getCurrentGameTick(), crate.getId(), chute.getId(), position.x, position.y, drop.ordinal());
-            System.out.println("Emmitting event crateId: " + crate.getId() + ", chuteId: " + chute.getId());
             emitGameData(event);
         }
     }
@@ -1000,7 +999,7 @@ public abstract class WorldHandler implements Disposable {
         currentGameState = GameState.DROPPING;
     }
 
-    public void debugDrop() {
+    public void randomAirdrop() {
         createAirdrop(getRandomAirdropPosition(), WeaponType.getRandomDrop());
     }
 

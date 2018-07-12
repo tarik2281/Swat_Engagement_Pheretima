@@ -90,7 +90,7 @@ public class UserWorldController {
                     worldHandler.toggleDebugRender();
                     break;
                 case Constants.KEY_DEBUG_DROP_TURRET:
-                    worldHandler.debugDrop();
+                    worldHandler.randomAirdrop();
                     break;
             }
 

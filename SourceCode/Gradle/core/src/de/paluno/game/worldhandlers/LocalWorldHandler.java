@@ -11,14 +11,32 @@ import de.paluno.game.screens.WinningPlayer;
 
 public class LocalWorldHandler extends WorldHandler {
 
+    private static final int STATE_PLAYER_TURN = 1;
+    private static final int STATE_TURRETS_SHOOTING = 2;
+    private static final int STATE_AIRDROP = 3;
+
     private int numWorms;
 
     private boolean wormDied;
+    private int state;
 
     private Timer.Task turnTimer = new Timer.Task() {
         @Override
         public void run() {
-            if (!isRoundEnded() || !shootTurrets()) {
+            if (isRoundEnded()) {
+                if (shootTurrets())
+                    state = STATE_TURRETS_SHOOTING;
+                else {
+                    randomAirdrop();
+                    state = STATE_AIRDROP;
+                }
+            }
+            else if (state == STATE_TURRETS_SHOOTING) {
+                randomAirdrop();
+                state = STATE_AIRDROP;
+            }
+            else {
+                state = STATE_PLAYER_TURN;
                 shiftTurn(true);
 
                 startTurn();
@@ -111,7 +129,7 @@ public class LocalWorldHandler extends WorldHandler {
 
     @Override
     protected void requestNextTurn() {
-        if (getReplay() != null) {
+        if (wormDied && getReplay() != null) {
             getReplay().setCameraPosition(getWorld().getCamera().getWorldPosition());
             getReplay().addGameData(new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN));
             EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
