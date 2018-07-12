@@ -13,7 +13,8 @@ public class LocalWorldHandler extends WorldHandler {
 
     private static final int STATE_PLAYER_TURN = 1;
     private static final int STATE_TURRETS_SHOOTING = 2;
-    private static final int STATE_AIRDROP = 3;
+    private static final int STATE_RAISE_WATER = 3;
+    private static final int STATE_AIRDROP = 4;
 
     private int numWorms;
 
@@ -27,11 +28,15 @@ public class LocalWorldHandler extends WorldHandler {
                 if (shootTurrets())
                     state = STATE_TURRETS_SHOOTING;
                 else {
-                    randomAirdrop();
-                    state = STATE_AIRDROP;
+                    raiseWaterLevel();
+                    state = STATE_RAISE_WATER;
                 }
             }
             else if (state == STATE_TURRETS_SHOOTING) {
+                raiseWaterLevel();
+                state = STATE_RAISE_WATER;
+            }
+            else if (state == STATE_RAISE_WATER) {
                 randomAirdrop();
                 state = STATE_AIRDROP;
             }

@@ -36,6 +36,7 @@ public class KryoInterface {
         kryo.register(DestroyChuteEvent.class);
         kryo.register(RemoveCrateEvent.class);
         kryo.register(SpawnAirdropEvent.class);
+        kryo.register(RaiseWaterEvent.class);
 
         kryo.register(UserLoginRequest.class);
         kryo.register(UserLoginRequest.Result.class);

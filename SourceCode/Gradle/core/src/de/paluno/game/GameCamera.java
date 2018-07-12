@@ -27,6 +27,7 @@ public class GameCamera {
     private int verticalMovement;
 
     private Rectangle worldBounds;
+    private Vector2 goToPoint;
     // in world space (in meters)
     private float bottomLimit;
 
@@ -56,6 +57,7 @@ public class GameCamera {
     // set the object the camera will follow, or null to follow nothing
     public void setCameraFocus(WorldObject object) {
         cameraFocus = object;
+        goToPoint = null;
     }
 
     public WorldObject getCameraFocus() {
@@ -92,6 +94,19 @@ public class GameCamera {
     }
 
     public void update(float delta) {
+        Vector2 focusPoint = goToPoint;
+        if (cameraFocus != null)
+            focusPoint = cameraFocus.getPosition();
+
+        if (focusPoint != null) {
+            // smooth following the object
+            focusDirectionVector.set(focusPoint).add(-debugPosition.x, -debugPosition.y);
+            focusDirectionVector.nor();
+            float distance = focusPoint.dst(debugPosition);
+            focusDirectionVector.scl(distance / Constants.CAMERA_FOCUS_TIME * delta);
+            debugPosition.add(focusDirectionVector);
+        }
+
         if (cameraFocus != null && cameraFocus.getBody() != null) {
             // smooth following the object
             focusDirectionVector.set(cameraFocus.getBody().getPosition()).add(-debugPosition.x, -debugPosition.y);
@@ -127,11 +142,16 @@ public class GameCamera {
 
     public void setPositionToFocus() {
         if (cameraFocus != null)
-        debugPosition.set(cameraFocus.getPosition());
+            setCameraPosition(cameraFocus.getPosition());
     }
     
     public void setCameraPosition(Vector2 position) {
     	debugPosition.set(position);
+    	goToPoint = null;
+    }
+
+    public void goToPoint(float x, float y) {
+        goToPoint = new Vector2(x, y);
     }
 
     public Matrix4 getDebugProjection() {

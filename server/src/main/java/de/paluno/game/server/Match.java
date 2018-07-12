@@ -9,7 +9,8 @@ public class Match {
 
     private static final int STATE_PLAYER_TURN = 1;
     private static final int STATE_TURRETS_SHOOT = 2;
-    private static final int STATE_AIRDROP = 3;
+    private static final int STATE_RAISE_WATER = 3;
+    private static final int STATE_AIRDROP = 4;
 
     private int currentTick;
 
@@ -84,6 +85,10 @@ public class Match {
                 lobby.broadcastData(null, new TurretsShootRequest(simulatingPlayer.getControllingUser().getId()));
             }
             else if (state == STATE_TURRETS_SHOOT) {
+                state = STATE_RAISE_WATER;
+                lobby.broadcastData(null, new RaiseWaterEvent());
+            }
+            else if (state == STATE_RAISE_WATER) {
                 Player simulatingPlayer = null;
                 for (Player player : players) {
                     if (player.getControllingUser().getConnection().isConnected()) {
@@ -128,7 +133,8 @@ public class Match {
                 }
             }
 
-            lobby.broadcastData(sender, gameData);
+            if (state != STATE_RAISE_WATER)
+                lobby.broadcastData(sender, gameData);
         }
     }
 

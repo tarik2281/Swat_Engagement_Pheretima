@@ -11,7 +11,6 @@ public class Message {
          * UserLeft messages resolve to an instance of {@link UserMessage}.
          */
         UserLeft,
-        GameStarting,
         ClientReady,
         LobbyDestroyed,
         /**

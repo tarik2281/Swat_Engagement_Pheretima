@@ -139,8 +139,8 @@ public static final float CRATE_RADIUS = 10.0f * WORLD_SCALE;
     public static final int WEAPON_ARSENAL_PROJECTILE = 1;
     public static final int WEAPON_ARSENAL_THROWABLE = 1;
 
-    public static final float RAISE_LIMIT_SPEED = 0.07f;
-    public static final float RAISE_LIMIT_LENGTH = 0.3f;
+    public static final float RAISE_LEVEL_SPEED = 0.07f;
+    public static final float RAISE_LEVEL_LENGTH = 0.3f;
 
 	private Constants() {
 		// An instance should not be created of this class

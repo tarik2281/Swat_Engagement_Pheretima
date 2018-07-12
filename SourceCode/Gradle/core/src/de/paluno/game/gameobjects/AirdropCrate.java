@@ -1,7 +1,6 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -128,7 +127,7 @@ public class AirdropCrate extends WorldObject {
 			body.setType(BodyType.StaticBody);
 		}*/
 		
-		if (!getWorld().isInWorldBounds(this)) {
+		if (getWorld().isUnderWater(this)) {
 			if(chute != null) removeChute();
 			removeCrate();
 		}

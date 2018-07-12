@@ -2,12 +2,24 @@ package de.paluno.game;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 
 public class Assets {
+    private static final TextureLoader.TextureParameter waterParameters;
+
+    static {
+        waterParameters = new TextureLoader.TextureParameter();
+        waterParameters.wrapU = Texture.TextureWrap.Repeat;
+        waterParameters.wrapV = Texture.TextureWrap.ClampToEdge;
+    }
+
+    public static final AssetDescriptor<Texture> waterTexture =
+            new AssetDescriptor<Texture>("WaterTexture.png", Texture.class, waterParameters);
+
     public static final AssetDescriptor<Texture> menuBackground =
             new AssetDescriptor<Texture>("MENU.png", Texture.class);
     public static final AssetDescriptor<Texture> map1Thumbnail =
@@ -31,7 +43,7 @@ public class Assets {
     public static final AssetDescriptor<Texture> worms4Button =
             new AssetDescriptor<Texture>("Worms4.png", Texture.class);
     public static final AssetDescriptor<Texture> worms5Button =
-            new AssetDescriptor<Texture>("Worms5.png", Texture.class);
+            new AssetDescriptor<Texture>("Worms5.png", Texture.class, new TextureLoader.TextureParameter());
 
     public static final AssetDescriptor<Map> map1 =
             new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
@@ -209,7 +221,7 @@ public class Assets {
     public static final AssetDescriptor[] PlayScreenAssets = {
             airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
             weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, windGreen, windOrange, windRed,
-            weaponMine, projectileMine,weaponTurret ,projectileTurret, crate, chute
+            weaponMine, projectileMine,weaponTurret ,projectileTurret, crate, chute, waterTexture
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {

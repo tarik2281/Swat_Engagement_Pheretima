@@ -3,7 +3,6 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ContactFilter;
 import com.badlogic.gdx.utils.Disposable;
@@ -32,6 +31,8 @@ public class GameWorld implements Disposable {
     private Rectangle worldBounds;
 
     private Ground ground;
+    private Water water;
+    private float waterLevel;
     private ExplosionMaskRenderer explosionMaskRenderer;
 
     private GameCamera camera;
@@ -103,6 +104,10 @@ public class GameWorld implements Disposable {
         explosionMaskRenderer.setGround(ground);
 
         registerAfterUpdate(ground);
+
+        water = new Water();
+        water.setWorld(this);
+        water.setupAssets(worldHandler.getAssetManager());
     }
 
     public void setFromSnapshot(SnapshotData data) {
@@ -153,6 +158,8 @@ public class GameWorld implements Disposable {
         for (WorldObject object : objects)
             object.render(batch, delta);
 
+        water.render(batch, delta);
+
         batch.end();
 
         if (isRenderDebug)
@@ -163,8 +170,17 @@ public class GameWorld implements Disposable {
         return camera;
     }
 
-    public boolean isInWorldBounds(WorldObject object) {
-        return object.getPosition().y > 0;
+    public float getWaterLevel() {
+        return waterLevel;
+    }
+
+    public void setWaterLevel(float level) {
+        waterLevel = level;
+        water.setLevel(level * Constants.SCREEN_SCALE);
+    }
+
+    public boolean isUnderWater(WorldObject object) {
+        return !(object.getPosition().y > waterLevel);
     }
 
     public Rectangle getWorldBounds() {

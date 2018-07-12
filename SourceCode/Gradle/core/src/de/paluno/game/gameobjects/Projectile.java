@@ -100,7 +100,7 @@ public class Projectile extends WorldObject {
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null, true, false);
             
-        if(!getWorld().isInWorldBounds(this)) {
+        if(getWorld().isUnderWater(this)) {
         	explode(null, false, false);
         }
         if (!wormContactEnded && shootingWorm != null) {

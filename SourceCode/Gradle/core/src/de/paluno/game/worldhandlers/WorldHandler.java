@@ -51,6 +51,8 @@ public abstract class WorldHandler implements Disposable {
     private int chuteId = 0;
     private boolean canShoot = false;
 
+    private float targetLevel = 0.0f;
+
     private int currentGameTick;
     private float updateTimer;
     private Replay replay;
@@ -933,6 +935,12 @@ public abstract class WorldHandler implements Disposable {
             }
         }
 
+        if (currentGameState == GameState.RAISE_WATER_LEVEL) {
+            world.setWaterLevel(world.getWaterLevel() + delta * Constants.RAISE_LEVEL_SPEED);
+            if (world.getWaterLevel() >= targetLevel)
+                setIdle();
+        }
+
         onUpdate(delta);
 
         world.render(batch, delta);
@@ -1003,8 +1011,11 @@ public abstract class WorldHandler implements Disposable {
         createAirdrop(getRandomAirdropPosition(), WeaponType.getRandomDrop());
     }
 
-    public void raiseLimit() {
-        // TODO: raise limit
+    public void raiseWaterLevel() {
+        replay = null;
+        currentGameState = GameState.RAISE_WATER_LEVEL;
+        targetLevel = world.getWaterLevel() + Constants.RAISE_LEVEL_LENGTH;
+        world.getCamera().goToPoint(world.getCamera().getWorldPosition().x, 0.0f);
     }
 
     private WorldData makeWorldSnapshot() {

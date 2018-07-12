@@ -1,7 +1,6 @@
 package de.paluno.game.gameobjects;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -183,7 +182,7 @@ public class Worm extends WorldObject {
         }
 		
 		// Worm fell off the world rim? Is ded.
-		if (!getWorld().isInWorldBounds(this)) {
+		if (getWorld().isUnderWater(this)) {
 			die(Constants.DEATH_TYPE_FALL_DOWN);
 		}
 	}

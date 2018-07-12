@@ -28,6 +28,7 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     private boolean wormDied;
     private boolean simulatingAirdrop = false;
     private boolean simulatingTurrets = false;
+    private boolean raisingLimit = false;
     private boolean simulatingPlayer = false;
 
     private DataHandler dataHandler = new DataHandler() {
@@ -57,6 +58,10 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
                 else
                     beginAirdrop();
                 setCurrentTime(getCurrentGameTick() * Constants.UPDATE_FREQUENCY);
+            }
+            else if (data instanceof RaiseWaterEvent) {
+                raisingLimit = true;
+                raiseWaterLevel();
             }
             else if (data instanceof GameOverEvent) {
                 GameOverEvent event = (GameOverEvent)data;
@@ -145,12 +150,14 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     protected void requestNextTurn() {
         System.out.println("Requested next turn wormDied: " + wormDied);
 
-        if (isControllingCurrentPlayer()) {
+        if (!raisingLimit && isControllingCurrentPlayer()) {
             GameEvent event = new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN);
-            getReplay().addGameData(event);
+            if (getReplay() != null)
+                getReplay().addGameData(event);
             client.send(event);
         }
 
+        raisingLimit = false;
         simulatingTurrets = false;
         simulatingAirdrop = false;
 
@@ -228,6 +235,9 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     }
 
     public boolean isControllingCurrentPlayer() {
+        if (getCurrentGameState() == GameState.RAISE_WATER_LEVEL)
+            return true;
+
         if (simulatingTurrets || simulatingAirdrop)
             return simulatingPlayer;
 
@@ -245,7 +255,8 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
     @Override
     protected void onGameDataProcessed(GameData gameData) {
-        getReplay().addGameData(gameData);
+        if (getReplay() != null)
+            getReplay().addGameData(gameData);
         if (getCurrentGameTick() < gameData.getTick())
             setCurrentGameTick(gameData.getTick());
     }
