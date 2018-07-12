@@ -17,9 +17,6 @@ public class WindDirectionIndicator extends WorldObject {
     private Sprite sprite;  // Graphical object which implements a texture to draw the object
     private WindHandler windHandler;
 
-    private Sound windMediumSound;
-    private Sound windHeavySound;
-
     public WindDirectionIndicator(WindHandler windHandler) {
         this.windHandler = windHandler;
     }
@@ -31,10 +28,6 @@ public class WindDirectionIndicator extends WorldObject {
         redTexture = manager.get(Assets.windRed);
 
         sprite = new Sprite(greenTexture);
-
-        //sounds
-        windMediumSound = manager.get(Assets.windMedium);
-        windHeavySound = manager.get(Assets.windHeavy);
     }
 
     @Override
