@@ -23,7 +23,6 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     private Image imageBackground;
     private TextButton textButtonPlay, textButtonOnline, textButtonLocal;
     private TextButton selectedModiButton;
-    private Dialog connectingDialog;
     private NetworkClient client;
     private int modi = 1;
 
@@ -38,7 +37,6 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         stage = new Stage();
         table = new Table();
         skin = elementGUI.getSkin();
-        connectingDialog = new Dialog("Connecting", elementGUI.getSkin());
 
         table.setFillParent(true);
         imageBackground = elementGUI.createBackground(game.getAssetManager().get(Assets.menuBackground));
@@ -70,9 +68,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
             public void clicked(InputEvent event, float x, float y) {
                 if (modi == 1){
                     game.setLoginScreen(null);
-                }else {
-
-                    connectingDialog.show(stage);
+                }else if (modi == 2) {
                     client = new NetworkClient("localhost");
                     client.setConnectionListener(new NetworkClient.ConnectionListener() {
                         @Override
@@ -82,8 +78,11 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                                     game.setLoginScreen(client);
                                     break;
                                 case NetworkClient.RESULT_CONNECTION_FAILED:
-                                    connectingDialog.setSize(300, 300);
-                                    connectingDialog.text("Connection Failed");
+                                    new Dialog("Server Connection", elementGUI.getSkin()) {
+                                        protected void result (Object object) {
+                                            System.out.println("Chosen: " + object);
+                                        }
+                                    }.text("Connection failed").button("Reconnect", true).show(stage);
                                     break;
                             }
                         }
