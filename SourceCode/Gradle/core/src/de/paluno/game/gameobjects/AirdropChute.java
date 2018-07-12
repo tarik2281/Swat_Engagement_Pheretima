@@ -13,6 +13,7 @@ import de.paluno.game.*;
 
 public class AirdropChute extends WorldObject {
 
+	private int id = -1;
 	private AirdropCrate crate;
 	private RevoluteJoint joint;
 	
@@ -20,6 +21,7 @@ public class AirdropChute extends WorldObject {
 	
 	private boolean fading = false;
 	private float opacity = 1.0f;
+	private boolean removed = false;
 	
 	final float TORAD = (float)(Math.PI / 180.0f);
 	final float TODEG = (float)(180.0f / Math.PI);
@@ -89,7 +91,7 @@ public class AirdropChute extends WorldObject {
 	@Override
 	public void update(float delta) {
 		if(opacity == 0) crate.removeChute();
-		else if(joint != null) {
+		if(joint != null) {
 			if(this.crate.getBody().getAngle() >= 22 * TORAD) {
 				this.joint.setMotorSpeed(-22 * TORAD);
 			} else if(this.crate.getBody().getAngle() <= -22 * TORAD) {
@@ -117,18 +119,38 @@ public class AirdropChute extends WorldObject {
 			design.setOriginBasedPosition(chutePosition.x, chutePosition.y);
 			design.draw(batch);
 	}
-	
-	protected void destroy() {
+
+	public Joint getJoint() {
+		return joint;
+	}
+
+	public void setJointToNull() {
+		joint = null;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public void destroy() {
 		//crate.getWorld().destroyJoint((Joint) joint);
-		EventManager.getInstance().queueEvent(EventManager.Type.DestroyJoint, joint);
+		EventManager.getInstance().queueEvent(EventManager.Type.DestroyChute, this);
 		//crate.getWorld().registerDestroyJoint(joint);
 		System.out.println("Joint destroyed");
-		this.joint = null;
+		//this.joint = null;
 		this.fading = true;
 	}
 	
-	protected void remove() {
-		removeFromWorld();
+	public void remove() {
+		if (!removed) {
+			removed = true;
+			EventManager.getInstance().queueEvent(EventManager.Type.RemoveChute, this);
+		}
+		//removeFromWorld();
 		//crate.getWorld().forgetAfterUpdate(this);
 	}
 	

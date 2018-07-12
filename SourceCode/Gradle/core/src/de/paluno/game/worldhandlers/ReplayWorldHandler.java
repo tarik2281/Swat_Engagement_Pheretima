@@ -47,6 +47,10 @@ public class ReplayWorldHandler extends InterpolationWorldHandler {
         for (Projectile.SnapshotData projectileData : replay.getSetupSnapshot().getTurretSnapshots()) {
             addProjectile(projectileData);
         }
+
+        for (AirdropCrate.SnapshotData crateData : replay.getSetupSnapshot().getCrateSnapshots()) {
+            addCrate(new AirdropCrate(crateData));
+        }
     }
 
     @Override

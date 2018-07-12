@@ -111,7 +111,7 @@ public class LocalWorldHandler extends WorldHandler {
 
     @Override
     protected void requestNextTurn() {
-        if (wormDied && getReplay() != null) {
+        if (getReplay() != null) {
             getReplay().setCameraPosition(getWorld().getCamera().getWorldPosition());
             getReplay().addGameData(new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN));
             EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());

@@ -136,6 +136,59 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                     case FEET_COLLISION:
                         EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
                         break;
+                    case CRATE_PICKUP: {
+                        CratePickupEvent event = (CratePickupEvent)currentEvent;
+
+                        AirdropCrate crate = getCrateById(event.getCrateId());
+                        Worm worm = getPlayers().get(event.getPlayerNumber()).getWormByNumber(event.getWormNumber());
+
+                        if (crate != null) {
+                            crate.pickup(worm);
+                        }
+
+                        break;
+                    }
+                    case SPAWN_AIRDROP: {
+                        SpawnAirdropEvent event = (SpawnAirdropEvent)currentEvent;
+
+                        System.out.println("Received event crateId: " + event.getCrateId() + ", chuteId: " + event.getChuteId());
+                        AirdropCrate crate = new AirdropCrate(new Vector2(event.getPositionX(), event.getPositionY()), WeaponType.values()[event.getDropType()]);
+                        crate.setId(event.getCrateId());
+                        addCrate(crate);
+
+                        AirdropChute chute = new AirdropChute(crate);
+                        chute.setId(event.getChuteId());
+                        crate.setChute(chute);
+                        addChute(chute);
+
+                        getWorld().getCamera().setCameraFocus(crate);
+
+                        break;
+                    }
+                    case REMOVE_CRATE: {
+                        RemoveCrateEvent event = (RemoveCrateEvent)currentEvent;
+
+                        AirdropCrate crate = getCrateById(event.getCrateId());
+                        if (crate != null)
+                        crate.removeCrate();
+                        break;
+                    }
+                    case REMOVE_CHUTE: {
+                        DestroyChuteEvent event = (DestroyChuteEvent)currentEvent;
+
+                        AirdropChute chute = getChuteById(event.getChuteId());
+                        if (chute != null)
+                        chute.remove();
+                        break;
+                    }
+                    case DESTROY_CHUTE: {
+                        DestroyChuteEvent event = (DestroyChuteEvent)currentEvent;
+
+                        AirdropChute chute = getChuteById(event.getChuteId());
+                        if (chute != null)
+                        chute.destroy();
+                        break;
+                    }
                 }
                 onGameDataProcessed(currentEvent);
             }
@@ -194,6 +247,38 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
 
                     physics = physicsCache.interpolate(currentData.getPhysicsData(), physics, to);
                     projectile.setPhysics(physics);
+                }
+            }
+
+            for (AirdropCrate crate : getCrates()) {
+                CrateData currentData = currentSnapshot.getCrateById(crate.getId());
+                if (currentData != null) {
+                    PhysicsData physics = null;
+
+                    if (nextSnapshot != null) {
+                        CrateData nextData = nextSnapshot.getCrateById(crate.getId());
+                        if (nextData != null)
+                            physics = nextData.getPhysicsData();
+                    }
+
+                    physics = physicsCache.interpolate(currentData.getPhysicsData(), physics, to);
+                    crate.setPhysics(physics);
+                }
+            }
+
+            for (AirdropChute chute : getChutes()) {
+                CrateData currentData = currentSnapshot.getChuteById(chute.getId());
+                if (currentData != null) {
+                    PhysicsData physics = null;
+
+                    if (nextSnapshot != null) {
+                        CrateData nextData = nextSnapshot.getChuteById(chute.getId());
+                        if (nextData != null)
+                            physics = nextData.getPhysicsData();
+                    }
+
+                    physics = physicsCache.interpolate(currentData.getPhysicsData(), physics, to);
+                    chute.setPhysics(physics);
                 }
             }
 

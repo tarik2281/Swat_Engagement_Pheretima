@@ -9,6 +9,7 @@ public class Match {
 
     private static final int STATE_PLAYER_TURN = 1;
     private static final int STATE_TURRETS_SHOOT = 2;
+    private static final int STATE_AIRDROP = 3;
 
     private int currentTick;
 
@@ -79,7 +80,20 @@ public class Match {
                     }
                 }
 
+                state = STATE_TURRETS_SHOOT;
                 lobby.broadcastData(null, new TurretsShootRequest(simulatingPlayer.getControllingUser().getId()));
+            }
+            else if (state == STATE_TURRETS_SHOOT) {
+                Player simulatingPlayer = null;
+                for (Player player : players) {
+                    if (player.getControllingUser().getConnection().isConnected()) {
+                        simulatingPlayer = player;
+                        break;
+                    }
+                }
+
+                state = STATE_AIRDROP;
+                lobby.broadcastData(null, new SpawnAirdropRequest(simulatingPlayer.getControllingUser().getId()));
             }
             else {
                 startTurn();
@@ -187,6 +201,7 @@ public class Match {
     }
 
     private void startTurn() {
+        state = STATE_PLAYER_TURN;
         shiftTurn(true);
 
         if (!sendGameOver()) {

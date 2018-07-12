@@ -40,7 +40,7 @@ public class Replay {
     }
 
     public void addGameData(GameData data) {
-        data.setReceivingTimeStamp(data.getTick() * NetworkWorldHandler.UPDATE_FREQUENCY);
+        data.setReceivingTimeStamp(data.getTick() * Constants.UPDATE_FREQUENCY);
 
         if (data instanceof GameEvent)
             events.add((GameEvent)data);
@@ -70,7 +70,7 @@ public class Replay {
         if (tick == -1)
             tick = setupTick;
 
-        return tick * NetworkWorldHandler.UPDATE_FREQUENCY;
+        return tick * Constants.UPDATE_FREQUENCY;
     }
 
     public void setWind(int wind) {

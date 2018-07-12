@@ -6,6 +6,8 @@ import de.paluno.game.AnimationData;
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
 
+import java.util.Random;
+
 public enum WeaponType {
 	/**
 	 * Long story short: Aaaaaaall the fixed Weapon stats
@@ -116,4 +118,13 @@ public enum WeaponType {
 	}
 
 	public String getName() {return name;}
+
+	public static WeaponType getRandomDrop() {
+		Random random = new Random();
+		WeaponType type = null;
+		do {
+			type = values()[random.nextInt(NUM_WEAPONS)];
+		} while (type.maxAmmo == Constants.WEAPON_AMMO_INF);
+		return type;
+	}
 }

@@ -600,16 +600,4 @@ public class Worm extends WorldObject {
 
 		return data;
 	}
-	
-	/**
-	 * Passthrough method to give the "weapon picked up, add ammo" order to the player we belong to, who manages the arsenal
-	 * @param weapon - The WeaponType of the weapon picked up
-	 */
-	public void pickupWeapon(AirdropCrate crate) {
-		if(crate == null) return;
-		this.player.addAmmo(crate.getDrop());
-		EventManager.getInstance().queueEvent(Type.CratePickup, new AirdropCrate.PickupEvent(this, crate));
-		//HoverText info = new HoverText(this.world, this, "+1 "+weapon.getName(), Constants.PLAYER_COLORS[this.getPlayerNumber()]);
-		//world.registerAfterUpdate(info);
-	}
 }

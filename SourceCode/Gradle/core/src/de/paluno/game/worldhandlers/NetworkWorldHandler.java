@@ -14,7 +14,6 @@ import java.util.ArrayList;
 
 public class NetworkWorldHandler extends InterpolationWorldHandler {
 
-    public static final float UPDATE_FREQUENCY = 1.0f / 30.0f; // 30Hz
     public static final float TIME_SHIFT = 0.3f; // 300 ms delay
 
     private NetworkClient client;
@@ -27,8 +26,9 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     private GameSetupData gameSetupData;
 
     private boolean wormDied;
+    private boolean simulatingAirdrop = false;
     private boolean simulatingTurrets = false;
-    private boolean simulateTurrets = false;
+    private boolean simulatingPlayer = false;
 
     private DataHandler dataHandler = new DataHandler() {
         @Override
@@ -38,16 +38,25 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
                 setCurrentPlayerTurn(event.playerNumber, event.wormNumber);
                 getWindHandler().setWind(event.wind);
                 getReplay().setWind(event.wind);
-                setCurrentTime(getCurrentGameTick() * de.paluno.game.Constants.UPDATE_FREQUENCY);
+                setCurrentTime(getCurrentGameTick() * Constants.UPDATE_FREQUENCY);
             }
             else if (data instanceof TurretsShootRequest) {
                 TurretsShootRequest request = (TurretsShootRequest)data;
-                simulateTurrets = request.getSimulatingUserId() == client.getClientId();
-                System.out.println("Is simulating: " + simulateTurrets);
+                simulatingPlayer = request.getSimulatingUserId() == client.getClientId();
                 simulatingTurrets = true;
                 if (!shootTurrets())
                     client.send(Message.clientReady());
-                setCurrentTime(getCurrentGameTick() * de.paluno.game.Constants.UPDATE_FREQUENCY);
+                setCurrentTime(getCurrentGameTick() * Constants.UPDATE_FREQUENCY);
+            }
+            else if (data instanceof SpawnAirdropRequest) {
+                SpawnAirdropRequest request = (SpawnAirdropRequest)data;
+                simulatingPlayer = request.getSimulatingUserId() == client.getClientId();
+                simulatingAirdrop = true;
+                if (simulatingPlayer)
+                    createAirdrop(getRandomAirdropPosition(), WeaponType.getRandomDrop());
+                else
+                    beginAirdrop();
+                setCurrentTime(getCurrentGameTick() * Constants.UPDATE_FREQUENCY);
             }
             else if (data instanceof GameOverEvent) {
                 GameOverEvent event = (GameOverEvent)data;
@@ -64,14 +73,14 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
             }
             else if (data instanceof WorldData) {
                 WorldData worldData = (WorldData)data;
-                worldData.setReceivingTimeStamp(worldData.getTick() * UPDATE_FREQUENCY);// + getIdleTime());
+                worldData.setReceivingTimeStamp(worldData.getTick() * Constants.UPDATE_FREQUENCY);// + getIdleTime());
                 receivedGameData.add(worldData);
             }
             else if (data instanceof GameEvent) {
                 GameEvent event = (GameEvent)data;
                 if (event.getType() == GameEvent.Type.END_TURN)
                     System.out.println("End turn received");
-                event.setReceivingTimeStamp(event.getTick() * UPDATE_FREQUENCY);// + getIdleTime());
+                event.setReceivingTimeStamp(event.getTick() * Constants.UPDATE_FREQUENCY);// + getIdleTime());
                 receivedGameEvents.add(event);
             }
             else if (data instanceof UserMessage) {
@@ -143,6 +152,7 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
         }
 
         simulatingTurrets = false;
+        simulatingAirdrop = false;
 
         if (wormDied && getReplay() != null) {
             EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
@@ -218,8 +228,8 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
     }
 
     public boolean isControllingCurrentPlayer() {
-        if (simulatingTurrets)
-            return simulateTurrets;
+        if (simulatingTurrets || simulatingAirdrop)
+            return simulatingPlayer;
 
         Player currentPlayer = getCurrentPlayer();
         return currentPlayer != null && currentPlayer.getClientId() == getClientId();
@@ -235,10 +245,6 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
     @Override
     protected void onGameDataProcessed(GameData gameData) {
-        if (gameData instanceof GameEvent) {
-            if (((GameEvent) gameData).getType() == GameEvent.Type.END_TURN)
-                System.out.println("Adding end turn to replay");
-        }
         getReplay().addGameData(gameData);
         if (getCurrentGameTick() < gameData.getTick())
             setCurrentGameTick(gameData.getTick());

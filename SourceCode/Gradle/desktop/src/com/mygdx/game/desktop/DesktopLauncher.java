@@ -13,6 +13,7 @@ public class DesktopLauncher {
 		config.width = 1350;
 		config.height = 900;
 		config.foregroundFPS = refreshRate;
+		config.backgroundFPS = refreshRate;
 		Constants.REFRESH_RATE = 1.0f / (float)refreshRate;
 		new LwjglApplication(new SEPGame(), config);
 	}

@@ -167,7 +167,7 @@ public class Projectile extends WorldObject {
             body.setGravityScale(0.0f);
 
             // apply an impulse to the body so it flies in the direction we chose
-            Vector2 impulse = new Vector2(direction).scl(0.00015f);
+            Vector2 impulse = new Vector2(direction).scl(7.0f * body.getMass());
             body.applyLinearImpulse(impulse, body.getPosition(), true);
 
             // CollisionHandler Identifier

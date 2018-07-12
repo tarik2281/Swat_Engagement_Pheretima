@@ -88,13 +88,12 @@ public class CollisionHandler implements ContactListener {
 
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Worm) {
 
-        	Projectile projectile = UserData.getObject(fixA);
-        	Worm worm = UserData.getObject(fixB);
+            Projectile projectile = UserData.getObject(fixA);
+            Worm worm = UserData.getObject(fixB);
 
-        	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
-        		projectile.explode(worm, true, false);
-        	}
-        	else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+            if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
+                projectile.explode(worm, true, false);
+            } else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
                 projectile.explode(worm, true, false);
             }
 
@@ -102,13 +101,12 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Worms life = " + ((Worm) o2).getHealth());
         } else if (UserData.getType(fixB) == UserData.ObjectType.Projectile && UserData.getType(fixA) == UserData.ObjectType.Worm) {
 
-        	Projectile projectile = UserData.getObject(fixB);
-        	Worm worm = UserData.getObject(fixA);
+            Projectile projectile = UserData.getObject(fixB);
+            Worm worm = UserData.getObject(fixA);
 
-        	if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
-        		projectile.explode(worm, true, false);
-        	}
-        	else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
+            if (projectile.getWeaponType() == WeaponType.WEAPON_MINE && projectile.getShootingWorm() != worm) {
+                projectile.explode(worm, true, false);
+            } else if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
                 projectile.explode(worm, true, false);
             }
             System.out.println("Projectile -> Worm");
@@ -116,17 +114,15 @@ public class CollisionHandler implements ContactListener {
         }
 
 
-
         // Projectile -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Projectile && UserData.getType(fixB) == UserData.ObjectType.Ground) {
-        	Projectile projectile = UserData.getObject(fixA);
+            Projectile projectile = UserData.getObject(fixA);
 
             if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
-        		projectile.explode(null, true, false);
+                projectile.explode(null, true, false);
+            } else {
+                EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
             }
-        	else {
-        		EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
-        	}
 
             System.out.println("Projectile collided with Ground");
 
@@ -135,8 +131,7 @@ public class CollisionHandler implements ContactListener {
 
             if (projectile.getWeaponType() != WeaponType.WEAPON_MINE && projectile.explodeOnCollision()) {
                 projectile.explode(null, true, false);
-            }
-            else {
+            } else {
                 EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
             }
             System.out.println("Projectile collided with Ground");
@@ -144,90 +139,88 @@ public class CollisionHandler implements ContactListener {
 
         // Worm Headshot
         if (UserData.getType(fixA) == UserData.ObjectType.Headshot && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
-        	 if (((Projectile) o2).explodeOnCollision()) {
-                 ((Projectile) o2).explode((Worm) o1, true, true);
-                 if(((Projectile) o2).getWeaponType() == WeaponType.WEAPON_GUN)
-                	 EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
-             }
+            if (((Projectile) o2).explodeOnCollision()) {
+                ((Projectile) o2).explode((Worm) o1, true, true);
+                if (((Projectile) o2).getWeaponType() == WeaponType.WEAPON_GUN)
+                    EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
+            }
         } else if (UserData.getType(fixB) == UserData.ObjectType.Headshot && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
-        	 if (((Projectile) o1).explodeOnCollision()) {
-                 ((Projectile) o1).explode((Worm) o2, true, true);
-                 if(((Projectile) o1).getWeaponType() == WeaponType.WEAPON_GUN)
-                 	EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
-             }
+            if (((Projectile) o1).explodeOnCollision()) {
+                ((Projectile) o1).explode((Worm) o2, true, true);
+                if (((Projectile) o1).getWeaponType() == WeaponType.WEAPON_GUN)
+                    EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
+            }
         }
 
 
         // Turret ->ground
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Ground) {
 
-        	Projectile projectile = UserData.getObject(fixA);
+            Projectile projectile = UserData.getObject(fixA);
 
-        	if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
-        		projectile.explode(null, false, false);
+            if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
+                projectile.explode(null, false, false);
 
             System.out.println("Turret collided with Ground");
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.Ground) {
-        	Projectile projectile = UserData.getObject(fixB);
+            Projectile projectile = UserData.getObject(fixB);
 
-        	if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
-        		projectile.explode(null, false, false);
+            if (projectile.getWeaponType() != WeaponType.WEAPON_TURRET && projectile.explodeOnCollision())
+                projectile.explode(null, false, false);
 
             System.out.println("Turret collided with Ground");
         }
 
         //Turret -> worm
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.WormFoot) {
-        	Worm worm = UserData.getObject(fixB);
-        	worm.beginContact();
+            Worm worm = UserData.getObject(fixB);
+            worm.beginContact();
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.WormFoot) {
-        	Worm worm = UserData.getObject(fixA);
-        	worm.beginContact();
+            Worm worm = UserData.getObject(fixA);
+            worm.beginContact();
         }
 
         // projectile->Turret
 
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
 
-        	Projectile projectile = UserData.getObject(fixA);
+            Projectile projectile = UserData.getObject(fixA);
 
-        		projectile.explode(null, true, false);
+            projectile.explode(null, true, false);
 
             System.out.println("Projectile collided with Turret");
 
         } else if (UserData.getType(fixB) == UserData.ObjectType.Turret && UserData.getType(fixA) == UserData.ObjectType.Projectile) {
-        	Projectile projectile = UserData.getObject(fixB);
-        		projectile.explode(null, true, false);
+            Projectile projectile = UserData.getObject(fixB);
+            projectile.explode(null, true, false);
 
             System.out.println("Projectile collided with Turret");
         }
 
         // Worm <-> Crate
-        if(UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Worm) {
+        if (UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Worm) {
             AirdropCrate crate = UserData.getObject(fixA);
-            crate.pickup();
-            ((Worm) o2).pickupWeapon(crate);
+            crate.pickup(UserData.getObject(fixB));
             System.out.println("Crate picked up!");
-        } else if(UserData.getType(fixB) == UserData.ObjectType.Crate && UserData.getType(fixA) == UserData.ObjectType.Worm) {
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Crate && UserData.getType(fixA) == UserData.ObjectType.Worm) {
             AirdropCrate crate = UserData.getObject(fixB);
-            crate.pickup();
-            ((Worm) o1).pickupWeapon(crate);
+            crate.pickup(UserData.getObject(fixA));
             System.out.println("Crate picked up!");
         }
 
         // Crate <-> Ground
-        if(UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Ground) {
+        if (UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Ground) {
             System.out.println("Crate landed!");
             ((AirdropCrate) o1).land();
-        } else if(UserData.getType(fixB) == UserData.ObjectType.Crate && UserData.getType(fixA) == UserData.ObjectType.Ground) {
+        } else if (UserData.getType(fixB) == UserData.ObjectType.Crate && UserData.getType(fixA) == UserData.ObjectType.Ground) {
             System.out.println("Crate landed!");
             ((AirdropCrate) o2).land();
         }
 
         //Crate <-> Crate
-        if(UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Crate) {
+        if (UserData.getType(fixA) == UserData.ObjectType.Crate && UserData.getType(fixB) == UserData.ObjectType.Crate) {
             System.out.println("Crate landed!");
             ((AirdropCrate) o1).land();
             ((AirdropCrate) o2).land();
@@ -290,37 +283,37 @@ public class CollisionHandler implements ContactListener {
 
     @Override
     public void preSolve(Contact contact, Manifold oldManifold) {
-    	Fixture f1 = contact.getFixtureA(), f2 = contact.getFixtureB();
-    	Object o1 = f1.getBody().getUserData(), o2 = f2.getBody().getUserData();
+        Fixture f1 = contact.getFixtureA(), f2 = contact.getFixtureB();
+        Object o1 = f1.getBody().getUserData(), o2 = f2.getBody().getUserData();
 
-    	if(o1 == null || o2 == null) return;
+        if (o1 == null || o2 == null) return;
 
-    	/*
-    	 * When a crate has been picked up, it will slowly fade. During this time, no contacts with Worms are allowed
-    	 */
-    	if(UserData.getType(f1) == UserData.ObjectType.Crate && UserData.getType(f2) == UserData.ObjectType.Worm) {
-    		AirdropCrate crate = (AirdropCrate) o1;
-    		if(!crate.getContact()) contact.setEnabled(false);
-    		System.out.println("Crate ignored!");
-    	} else if(UserData.getType(f2) == UserData.ObjectType.Crate && UserData.getType(f1) == UserData.ObjectType.Worm) {
-    		AirdropCrate crate = (AirdropCrate) o2;
-    		if(!crate.getContact()) contact.setEnabled(false);
-    		System.out.println("Crate ignored!");
-    	}
+        /*
+         * When a crate has been picked up, it will slowly fade. During this time, no contacts with Worms are allowed
+         */
+        if (UserData.getType(f1) == UserData.ObjectType.Crate && UserData.getType(f2) == UserData.ObjectType.Worm) {
+            AirdropCrate crate = (AirdropCrate) o1;
+            if (!crate.getContact()) contact.setEnabled(false);
+            System.out.println("Crate ignored!");
+        } else if (UserData.getType(f2) == UserData.ObjectType.Crate && UserData.getType(f1) == UserData.ObjectType.Worm) {
+            AirdropCrate crate = (AirdropCrate) o2;
+            if (!crate.getContact()) contact.setEnabled(false);
+            System.out.println("Crate ignored!");
+        }
 
-    	// Crate <-> Chute
-    	if(UserData.getType(f1) == UserData.ObjectType.Chute && UserData.getType(f2) == UserData.ObjectType.Crate) {
-    		contact.setEnabled(false);
-    	} else if(UserData.getType(f1) == UserData.ObjectType.Crate && UserData.getType(f2) == UserData.ObjectType.Chute) {
-    		contact.setEnabled(false);
-    	}
+        // Crate <-> Chute
+        if (UserData.getType(f1) == UserData.ObjectType.Chute && UserData.getType(f2) == UserData.ObjectType.Crate) {
+            contact.setEnabled(false);
+        } else if (UserData.getType(f1) == UserData.ObjectType.Crate && UserData.getType(f2) == UserData.ObjectType.Chute) {
+            contact.setEnabled(false);
+        }
 
-    	// Chute <-> Worm
-    	if(UserData.getType(f1) == UserData.ObjectType.Chute && UserData.getType(f2) == UserData.ObjectType.Worm) {
-    		contact.setEnabled(false);
-    	} else if(UserData.getType(f1) == UserData.ObjectType.Worm && UserData.getType(f2) == UserData.ObjectType.Chute) {
-    		contact.setEnabled(false);
-    	}
+        // Chute <-> Worm
+        if (UserData.getType(f1) == UserData.ObjectType.Chute && UserData.getType(f2) == UserData.ObjectType.Worm) {
+            contact.setEnabled(false);
+        } else if (UserData.getType(f1) == UserData.ObjectType.Worm && UserData.getType(f2) == UserData.ObjectType.Chute) {
+            contact.setEnabled(false);
+        }
     }
 
     @Override

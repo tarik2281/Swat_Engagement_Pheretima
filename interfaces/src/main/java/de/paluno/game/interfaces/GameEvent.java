@@ -13,6 +13,11 @@ public class GameEvent extends GameData {
         GRENADE_COLLISION,
         FEET_COLLISION,
         END_TURN,
+        SPAWN_AIRDROP,
+        CRATE_PICKUP,
+        REMOVE_CRATE,
+        DESTROY_CHUTE,
+        REMOVE_CHUTE,
         GAME_STATE_CHANGED
     }
 

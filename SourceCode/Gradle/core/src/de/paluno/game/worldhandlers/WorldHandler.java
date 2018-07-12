@@ -15,6 +15,7 @@ import de.paluno.game.GameState;
 import de.paluno.game.gameobjects.*;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.screens.PlayScreen;
+import sun.security.krb5.internal.crypto.Des;
 
 import java.util.*;
 
@@ -43,7 +44,11 @@ public abstract class WorldHandler implements Disposable {
     private ArrayList<Projectile> weaponProjectileCache;
     private ArrayList<Projectile> projectiles;
     private ArrayList<Turret> turrets;
+    private ArrayList<AirdropCrate> crates;
+    private ArrayList<AirdropChute> chutes;
     private int projectileId = 0;
+    private int crateId = 0;
+    private int chuteId = 0;
     private boolean canShoot = false;
 
     private int currentGameTick;
@@ -115,8 +120,8 @@ public abstract class WorldHandler implements Disposable {
                         airstrikeUse.play();
                         break;
                 }
+                break;
             }
-            break;
             case GrenadeCollision:
                 grenadeContact.play();
 
@@ -252,18 +257,47 @@ public abstract class WorldHandler implements Disposable {
             case IdleRequest:
                 setIdle();
                 break;
-            case DestroyJoint: {
-                Joint joint = (Joint)data;
-                world.getWorld().destroyJoint(joint);
+            case DestroyChute: {
+                AirdropChute chute = (AirdropChute) data;
+
+                world.getWorld().destroyJoint(chute.getJoint());
+                chute.setJointToNull();
+
+                if (shouldWorldStep()) {
+                    DestroyChuteEvent event = new DestroyChuteEvent(getCurrentGameTick(), GameEvent.Type.DESTROY_CHUTE, chute.getId());
+                    emitGameData(event);
+                }
                 break;
             }
             case RemoveCrate: {
                 AirdropCrate crate = (AirdropCrate)data;
-                world.forgetAfterUpdate(crate);
+
+                removeCrate(crate);
+
+                if (shouldWorldStep()) {
+                    RemoveCrateEvent event = new RemoveCrateEvent(getCurrentGameTick(), GameEvent.Type.REMOVE_CRATE, crate.getId());
+                    emitGameData(event);
+                }
+
+                if (currentGameState == GameState.DROPPING)
+                    setWaiting();
+                break;
+            }
+            case RemoveChute: {
+                AirdropChute chute = (AirdropChute)data;
+
+                removeChute(chute);
+
+                if (shouldWorldStep()) {
+                    DestroyChuteEvent event = new DestroyChuteEvent(getCurrentGameTick(), GameEvent.Type.REMOVE_CHUTE, chute.getId());
+                    emitGameData(event);
+                }
+
                 break;
             }
             case CrateLanded: {
-                setWaiting();
+                if (currentGameState == GameState.DROPPING)
+                    setWaiting();
                 break;
             }
             case CratePickup: {
@@ -274,8 +308,13 @@ public abstract class WorldHandler implements Disposable {
                         Constants.PLAYER_COLORS[event.getWorm().getPlayerNumber()]);
                 world.registerAfterUpdate(hoverText);
 
-                if (shouldWorldStep()) {
+                Player player = getPlayers().get(event.getWorm().getPlayerNumber());
+                player.addAmmo(event.getCrate().getDrop());
 
+                if (shouldWorldStep()) {
+                    CratePickupEvent pickupEvent = new CratePickupEvent(getCurrentGameTick(), event.getCrate().getId(),
+                            event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber());
+                    emitGameData(pickupEvent);
                 }
 
                 break;
@@ -302,6 +341,8 @@ public abstract class WorldHandler implements Disposable {
 
         this.projectiles = new ArrayList<>();
         this.turrets = new ArrayList<>();
+        this.crates = new ArrayList<>();
+        this.chutes = new ArrayList<>();
         this.weaponProjectileCache = new ArrayList<>();
         weaponIndicators = new HashMap<>();
 
@@ -363,9 +404,10 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.AirBall,
                 EventManager.Type.Headshot,
                 EventManager.Type.IdleRequest,
-                EventManager.Type.DestroyJoint,
+                EventManager.Type.DestroyChute,
                 EventManager.Type.CrateLanded,
                 EventManager.Type.RemoveCrate,
+                EventManager.Type.RemoveChute,
                 EventManager.Type.CratePickup);
 
         for (Player player : players)
@@ -390,9 +432,10 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.AirBall,
                 EventManager.Type.Headshot,
                 EventManager.Type.IdleRequest,
-                EventManager.Type.DestroyJoint,
+                EventManager.Type.DestroyChute,
                 EventManager.Type.CrateLanded,
                 EventManager.Type.RemoveCrate,
+                EventManager.Type.RemoveChute,
                 EventManager.Type.CratePickup);
     }
 
@@ -434,6 +477,14 @@ public abstract class WorldHandler implements Disposable {
 
     protected ArrayList<Projectile> getProjectiles() {
         return projectiles;
+    }
+
+    protected ArrayList<AirdropCrate> getCrates() {
+        return crates;
+    }
+
+    protected ArrayList<AirdropChute> getChutes() {
+        return chutes;
     }
 
     protected void addProjectile(Projectile.SnapshotData projectileData) {
@@ -484,6 +535,34 @@ public abstract class WorldHandler implements Disposable {
                 currentGameState = GameState.SHOOTING;
                 break;
         }
+    }
+
+    protected void addCrate(AirdropCrate crate) {
+        if (crate.getId() == -1)
+            crate.setId(crateId++);
+        else if (crate.getId() >= crateId)
+            crateId = crate.getId() + 1;
+        crates.add(crate);
+        world.registerAfterUpdate(crate);
+    }
+
+    protected void addChute(AirdropChute chute) {
+        if (chute.getId() == -1)
+            chute.setId(chuteId++);
+        else if (chute.getId() >= chuteId)
+            chuteId = chute.getId() + 1;
+        chutes.add(chute);
+        world.registerAfterUpdate(chute);
+    }
+
+    protected void removeChute(AirdropChute chute) {
+        chutes.remove(chute);
+        world.forgetAfterUpdate(chute);
+    }
+
+    protected void removeCrate(AirdropCrate crate) {
+        crates.remove(crate);
+        world.forgetAfterUpdate(crate);
     }
 
     protected void removeProjectile(Projectile projectile) {
@@ -553,6 +632,24 @@ public abstract class WorldHandler implements Disposable {
         return null;
     }
 
+    protected AirdropCrate getCrateById(int id) {
+        for (AirdropCrate crate : crates) {
+            if (crate.getId() == id)
+                return crate;
+        }
+
+        return null;
+    }
+
+    protected AirdropChute getChuteById(int id) {
+        for (AirdropChute chute : chutes) {
+            if (chute.getId() == id)
+                return chute;
+        }
+
+        return null;
+    }
+
     protected void setCurrentPlayerTurn(int playerNumber, int wormNumber) {
         currentGameState = GameState.PLAYERTURN;
 
@@ -568,6 +665,7 @@ public abstract class WorldHandler implements Disposable {
                 worm.setIsPlaying(true);
                 worm.addChild(windDirectionIndicator);
                 world.getCamera().setCameraFocus(worm);
+                canShoot = true;
                 equipWeapon(WeaponType.WEAPON_BAZOOKA);
 
                 createReplayPlayerTurn(playerNumber, wormNumber);
@@ -578,7 +676,7 @@ public abstract class WorldHandler implements Disposable {
     private void createReplayPlayerTurn(int playerNumber, int wormNumber) {
         if (shouldCreateReplay()) {
             replay = new Replay(Replay.TYPE_PLAYER_TURN);
-            replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers(), getProjectiles(), turrets));
+            replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers(), getProjectiles(), turrets, crates));
             replay.setPlayerTurn(playerNumber, wormNumber);
             replay.setSetupTick(currentGameTick);
             replay.setMapNumber(getMapNumber());
@@ -589,7 +687,7 @@ public abstract class WorldHandler implements Disposable {
     private void createReplayTurrets() {
         if (shouldCreateReplay()) {
             replay = new Replay(Replay.TYPE_TURRETS);
-            replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers(), getProjectiles(), turrets));
+            replay.setSetupSnapshot(new WorldStateSnapshot(getWorld(), getPlayers(), getProjectiles(), turrets, crates));
             replay.setSetupTick(currentGameTick);
             replay.setMapNumber(getMapNumber());
             replay.setCameraPosition(new Vector2(getWorld().getCamera().getWorldPosition()));
@@ -724,7 +822,7 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void shoot() {
-        if (shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
+        if (canShoot && shouldAcceptInput() && currentGameState == GameState.PLAYERTURN) {
             Player player = getCurrentPlayer();
             Worm worm = player.getCurrentWorm();
             player.getCurrentWeapon().shoot(worm, currentWeaponIndicator, weaponProjectileCache);
@@ -781,6 +879,15 @@ public abstract class WorldHandler implements Disposable {
                 if (worm != null && worm.getBody() != null && worm.getBody().isAwake()) {
                     allIdle = false;
                     break players;
+                }
+            }
+        }
+
+        if (allIdle) {
+            for (AirdropCrate crate : crates) {
+                if (crate != null && crate.getBody() != null && crate.getBody().isAwake()) {
+                    allIdle = false;
+                    break;
                 }
             }
         }
@@ -857,6 +964,8 @@ public abstract class WorldHandler implements Disposable {
         if (turrets.isEmpty())
             return false;
 
+        currentGameState = GameState.SHOOTING;
+
         createReplayTurrets();
 
         if (shouldWorldStep()) {
@@ -871,18 +980,28 @@ public abstract class WorldHandler implements Disposable {
 
     public void createAirdrop(Vector2 position, WeaponType drop) {
         AirdropCrate crate = new AirdropCrate(position, drop);
-        world.registerAfterUpdate(crate);
+        addCrate(crate);
         AirdropChute chute = new AirdropChute(crate);
         crate.setChute(chute);
-        world.registerAfterUpdate(chute);
+        addChute(chute);
         world.getCamera().setCameraFocus(crate);
 
+        beginAirdrop();
+
+        if (shouldWorldStep()) {
+            SpawnAirdropEvent event = new SpawnAirdropEvent(getCurrentGameTick(), crate.getId(), chute.getId(), position.x, position.y, drop.ordinal());
+            System.out.println("Emmitting event crateId: " + crate.getId() + ", chuteId: " + chute.getId());
+            emitGameData(event);
+        }
+    }
+
+    public void beginAirdrop() {
         endPlayerTurn();
         currentGameState = GameState.DROPPING;
     }
 
     public void debugDrop() {
-        createAirdrop(getRandomAirdropPosition(), WeaponType.WEAPON_SPECIAL);
+        createAirdrop(getRandomAirdropPosition(), WeaponType.getRandomDrop());
     }
 
     public void raiseLimit() {
@@ -902,15 +1021,36 @@ public abstract class WorldHandler implements Disposable {
                 projectiles[index++] = new ProjectileData()
                         .setId(projectile.getId())
                         .setType(projectile.getWeaponType().ordinal())
-                        .setPhysicsData(new PhysicsData()
-                                .setPositionX(projectile.getPosition().x)
-                                .setPositionY(projectile.getPosition().y)
-                                .setVelocityX(projectile.getVelocity().x)
-                                .setVelocityY(projectile.getVelocity().y)
-                                .setAngle(projectile.getAngle()));
+                        .setPhysicsData(projectile.generatePhysicsData());
             }
 
             data.setProjectiles(projectiles);
+        }
+
+        if (!crates.isEmpty()) {
+            CrateData[] cratesArray = new CrateData[crates.size()];
+
+            int index = 0;
+            for (AirdropCrate crate : crates) {
+                cratesArray[index++] = new CrateData()
+                        .setId(crate.getId())
+                        .setPhysicsData(crate.generatePhysicsData());
+            }
+
+            data.setCrates(cratesArray);
+        }
+
+        if (!chutes.isEmpty()) {
+            CrateData[] cratesArray = new CrateData[chutes.size()];
+
+            int index = 0;
+            for (AirdropChute chute : chutes) {
+                cratesArray[index++] = new CrateData()
+                        .setId(chute.getId())
+                        .setPhysicsData(chute.generatePhysicsData());
+            }
+
+            data.setChutes(cratesArray);
         }
 
         int i = 0;
@@ -927,11 +1067,7 @@ public abstract class WorldHandler implements Disposable {
                         .setNumGroundContacts(worm.getNumContacts())
                         .setMovement(worm.getMovement())
                         .setOrientation(worm.getOrientation())
-                        .setPhysicsData(new PhysicsData()
-                                .setPositionX(worm.getPosition().x)
-                                .setPositionY(worm.getPosition().y)
-                                .setVelocityX(worm.getVelocity().x)
-                                .setVelocityY(worm.getVelocity().y));
+                        .setPhysicsData(worm.generatePhysicsData());
             }
 
             playerDataArray[i++] = new PlayerData(player.getClientId(), player.getPlayerNumber(), wormDataArray);

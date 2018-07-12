@@ -21,6 +21,8 @@ public class KryoInterface {
         kryo.register(GameEvent.Type.class);
         kryo.register(ExplosionEvent.class);
         kryo.register(ProjectileData[].class);
+        kryo.register(CrateData.class);
+        kryo.register(CrateData[].class);
         kryo.register(EndTurnEvent.class);
         kryo.register(ShootEvent.class);
         kryo.register(GameEvent.class);
@@ -29,7 +31,11 @@ public class KryoInterface {
         kryo.register(GameOverEvent.class);
         kryo.register(ShotDirectionData.class);
         kryo.register(PointerData.class);
+        kryo.register(CratePickupEvent.class);
         kryo.register(ChatMessage.class);
+        kryo.register(DestroyChuteEvent.class);
+        kryo.register(RemoveCrateEvent.class);
+        kryo.register(SpawnAirdropEvent.class);
 
         kryo.register(UserLoginRequest.class);
         kryo.register(UserLoginRequest.Result.class);
@@ -55,5 +61,6 @@ public class KryoInterface {
         kryo.register(GameSetupRequest.Player.class);
         kryo.register(GameSetupRequest.Player[].class);
         kryo.register(TurretsShootRequest.class);
+        kryo.register(SpawnAirdropRequest.class);
     }
 }

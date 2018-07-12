@@ -33,6 +33,16 @@ public class AirdropCrate extends WorldObject {
 		}
 	}
 
+	public static class SnapshotData {
+		private Vector2 position;
+		private float angle;
+		private WeaponType drop;
+		private int id;
+	}
+
+	private int id = -1;
+	private boolean fromSnapshot = false;
+
 	private Sprite design;
 	private WeaponType drop;
 	
@@ -41,6 +51,7 @@ public class AirdropCrate extends WorldObject {
 	private boolean fading = false;
 	private float opacity = 1.0f;
 	private boolean contact = true;
+	private boolean removed = false;
 	
 	private AirdropChute chute = null;
 	
@@ -60,6 +71,17 @@ public class AirdropCrate extends WorldObject {
 		//world.getCamera().setCameraFocus(this);
 	}
 
+	public AirdropCrate(SnapshotData data) {
+		setPosition(data.position);
+		setAngle(data.angle);
+		setId(data.id);
+
+		this.drop = data.drop;
+
+		fromSnapshot = true;
+		dropping = false;
+	}
+
 	@Override
 	public void setupAssets(AssetManager manager) {
 		design = new Sprite(manager.get(Assets.crate));
@@ -73,6 +95,7 @@ public class AirdropCrate extends WorldObject {
 	 */
 	@Override
 	public void render(SpriteBatch batch, float delta) {
+
 		// The crate itself still exists (if not, we got a problem), so render it
 		Vector2 cratePosition = Constants.getScreenSpaceVector(getPosition());
 		if (fading) {
@@ -108,7 +131,7 @@ public class AirdropCrate extends WorldObject {
 		if (!getWorld().isInWorldBounds(this)) {
 			if(chute != null) removeChute();
 			removeCrate();
-		};
+		}
 	}
 	
 	/**
@@ -122,6 +145,12 @@ public class AirdropCrate extends WorldObject {
 		def.fixedRotation = false;
 		def.position.set(getPosition());
 		def.linearVelocity.set(0, -1.5f);
+
+		if (fromSnapshot) {
+			def.gravityScale = 1.0f;
+			def.angle = getAngle();
+			def.linearVelocity.set(0, 0);
+		}
 		
 		Body body = world.createBody(def);
 		
@@ -142,6 +171,14 @@ public class AirdropCrate extends WorldObject {
 		return body;
 	}
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public WeaponType getDrop() {
 		return drop;
 	}
@@ -159,7 +196,7 @@ public class AirdropCrate extends WorldObject {
 	 */
 	private void destroyChute() {
 		// Destroy the joint, the chute is going and the crate probably not
-		if(this.chute.isFading() || this.chute == null) return;
+		if(chute == null || this.chute.isFading()) return;
 		this.chute.destroy();
 		System.out.println("Chute destruction triggered, chaging crate specs.");
 		// Update the crate body, to make it affected by gravity
@@ -172,8 +209,9 @@ public class AirdropCrate extends WorldObject {
 	/**
 	 * Method to finally completely remove the crate's body
 	 */
-	private void removeCrate() {
-		if(this.chute == null) {
+	public void removeCrate() {
+		if(!removed) {
+			removed = true;
 			System.out.println("World should have forgotten this crate");
 			EventManager.getInstance().queueEvent(EventManager.Type.RemoveCrate, this);
 			//removeFromWorld();
@@ -184,18 +222,20 @@ public class AirdropCrate extends WorldObject {
 	 * Method to finally completely remove the chute's body
 	 */
 	protected void removeChute() {
-		chute.remove();
-		chute = null;
+		if (chute != null) {
+			chute.remove();
+			chute = null;
+		}
 	}
 
 	/**
 	 * Method to trigger the "Crate pickup" event
 	 * @return The weapon contained in this drop
 	 */
-	public WeaponType pickup() {
-		if(fading) return null;
+	public void pickup(Worm worm) {
+		if(fading) return;
+		EventManager.getInstance().queueEvent(EventManager.Type.CratePickup, new PickupEvent(worm, this));
 		destroy();
-		return this.drop;
 	}
 	/**
 	 * Method to trigger the "Crate landed" event
@@ -217,4 +257,13 @@ public class AirdropCrate extends WorldObject {
 	 * @return Handle contact?
 	 */
 	public boolean getContact() {return this.contact;}
+
+	public SnapshotData makeSnapshot() {
+		SnapshotData data = new SnapshotData();
+		data.position = new Vector2(getPosition());
+		data.angle = getAngle();
+		data.drop = drop;
+		data.id = id;
+		return data;
+	}
 }

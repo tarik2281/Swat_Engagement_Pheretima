@@ -118,6 +118,15 @@ public class WorldObject {
         return angularVelocity;
     }
 
+    public PhysicsData generatePhysicsData() {
+        return new PhysicsData()
+                .setPositionX(getPosition().x)
+                .setPositionY(getPosition().y)
+                .setVelocityX(getVelocity().x)
+                .setVelocityY(getVelocity().y)
+                .setAngle(getAngle());
+    }
+
     public void setPhysics(PhysicsData data) {
         setPosition(data.getPositionX(), data.getPositionY());
         setVelocity(data.getVelocityX(), data.getVelocityY());

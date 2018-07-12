@@ -1,9 +1,6 @@
 package de.paluno.game.worldhandlers;
 
-import de.paluno.game.gameobjects.GameWorld;
-import de.paluno.game.gameobjects.Player;
-import de.paluno.game.gameobjects.Projectile;
-import de.paluno.game.gameobjects.Turret;
+import de.paluno.game.gameobjects.*;
 
 import java.util.Collection;
 
@@ -12,8 +9,10 @@ public class WorldStateSnapshot {
     private Player.SnapshotData[] playerSnapshots;
     private Projectile.SnapshotData[] projectileSnapshots;
     private Projectile.SnapshotData[] turretSnapshots;
+    private AirdropCrate.SnapshotData[] crateSnapshots;
 
-    public WorldStateSnapshot(GameWorld world, Collection<Player> players, Collection<Projectile> projectiles, Collection<Turret> turrets) {
+    public WorldStateSnapshot(GameWorld world, Collection<Player> players, Collection<Projectile> projectiles,
+                              Collection<Turret> turrets, Collection<AirdropCrate> crates) {
         worldSnapshot = world.makeSnapshot();
 
         playerSnapshots = new Player.SnapshotData[players.size()];
@@ -30,6 +29,11 @@ public class WorldStateSnapshot {
         index = 0;
         for (Turret turret : turrets)
             turretSnapshots[index++] = turret.makeSnapshot();
+
+        crateSnapshots = new AirdropCrate.SnapshotData[crates.size()];
+        index = 0;
+        for (AirdropCrate crate : crates)
+            crateSnapshots[index++] = crate.makeSnapshot();
     }
 
     public GameWorld.SnapshotData getWorldSnapshot() {
@@ -46,5 +50,9 @@ public class WorldStateSnapshot {
 
     public Projectile.SnapshotData[] getTurretSnapshots() {
         return turretSnapshots;
+    }
+
+    public AirdropCrate.SnapshotData[] getCrateSnapshots() {
+        return crateSnapshots;
     }
 }

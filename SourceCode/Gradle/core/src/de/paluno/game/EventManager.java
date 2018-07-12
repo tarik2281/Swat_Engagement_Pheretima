@@ -80,9 +80,9 @@ public class EventManager {
          */
         CrateLanded,
         /**
-         * data: {@link com.badlogic.gdx.physics.box2d.Joint}
+         * data: {@link de.paluno.game.gameobjects.AirdropChute}
          */
-        DestroyJoint,
+        DestroyChute,
         /**
          * data: {@link de.paluno.game.gameobjects.AirdropCrate}
          */
@@ -90,7 +90,11 @@ public class EventManager {
         /**
          * data: {@link de.paluno.game.gameobjects.AirdropCrate.PickupEvent}
          */
-        CratePickup
+        CratePickup,
+        /**
+         * data: {@link de.paluno.game.gameobjects.AirdropChute}
+         */
+        RemoveChute
     }
 
     public interface Listener {

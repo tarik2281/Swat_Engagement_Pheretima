@@ -6,6 +6,8 @@ public class WorldData extends GameData {
     private PlayerData[] players;
     private Object indicatorData;
     private ProjectileData[] projectiles;
+    private CrateData[] crates;
+    private CrateData[] chutes;
     private int currentWeapon = -1;
 
     public WorldData() {
@@ -50,6 +52,42 @@ public class WorldData extends GameData {
 
     public WorldData setProjectiles(ProjectileData[] projectiles) {
         this.projectiles = projectiles;
+        return this;
+    }
+
+    public CrateData[] getCrates() {
+        return crates;
+    }
+
+    public CrateData getCrateById(int id) {
+        if (crates != null)
+            for (CrateData crateData : crates)
+                if (crateData.getId() == id)
+                    return crateData;
+
+        return null;
+    }
+
+    public WorldData setChutes(CrateData[] chutes) {
+        this.chutes = chutes;
+        return this;
+    }
+
+    public CrateData[] getChutes() {
+        return chutes;
+    }
+
+    public CrateData getChuteById(int id) {
+        if (chutes != null)
+            for (CrateData crateData : chutes)
+                if (crateData.getId() == id)
+                    return crateData;
+
+        return null;
+    }
+
+    public WorldData setCrates(CrateData[] crates) {
+        this.crates = crates;
         return this;
     }
 
