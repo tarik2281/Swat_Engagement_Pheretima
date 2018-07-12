@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.GameWorld;
 import de.paluno.game.interfaces.*;
@@ -36,7 +37,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private int modi;
     private PlayUILayer uiLayer;
     private WeaponUI weaponUI;
-    private List<String> names;
+    private Array<UserName> names;
 
     private Sound mapSound;
 
@@ -45,21 +46,27 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private NetworkClient client;
     private ChatWindow chatWindow;
 
-    public PlayScreen(SEPGame game, int mapNumber, int numWorms) {
-//    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
+    private PlayScreen(SEPGame game, int mapNumber) {
         this.game = game;
         this.mapNumber = mapNumber;
+        spriteBatch = new SpriteBatch();
+    }
+
+    public PlayScreen(SEPGame game, int mapNumber, int numWorms, Array<UserName> userNames) {
+//    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
+        this(game, mapNumber);
+
         this.numWorms = numWorms;
+        this.names = userNames;
 //        this.modi = modi;
 //        this.names = names;
 //        this.playerNumber = playerNumber;
 
 
-        spriteBatch = new SpriteBatch();
     }
 
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupRequest request) {
-        this(game, request.getMapNumber(), request.getNumWorms());
+        this(game, request.getMapNumber());
 
         this.client = client;
 
@@ -67,7 +74,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     }
 
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupData data) {
-        this(game, data.mapNumber, 1);
+        this(game, data.mapNumber);
 
         this.client = client;
 
@@ -112,7 +119,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
             chatWindow.initialize();
         }
         else {
-            worldHandler = new LocalWorldHandler(this, mapNumber, numWorms);
+            worldHandler = new LocalWorldHandler(this, mapNumber, numWorms, names);
         }
 
 		switch (mapNumber) {

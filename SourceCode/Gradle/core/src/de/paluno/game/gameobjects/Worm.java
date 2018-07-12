@@ -22,6 +22,7 @@ public class Worm extends WorldObject {
         private int orientation;
         private boolean isInfected;
         private boolean isDead;
+        private String name;
     }
 
     public static class DamageEvent {
@@ -131,6 +132,7 @@ public class Worm extends WorldObject {
 		this.orientation = data.orientation;
 		this.isInfected = data.isInfected;
 		this.isDead = data.isDead;
+		this.name = data.name;
 	}
 
 
@@ -630,6 +632,7 @@ public class Worm extends WorldObject {
 		data.orientation = orientation;
 		data.isInfected = isInfected;
 		data.isDead = isDead;
+		data.name = name;
 
 		return data;
 	}

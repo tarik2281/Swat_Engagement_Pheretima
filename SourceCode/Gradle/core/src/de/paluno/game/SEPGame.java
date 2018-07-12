@@ -5,7 +5,9 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.utils.Array;
 import com.sun.deploy.jcp.controller.Network;
+import de.paluno.game.interfaces.UserName;
 import de.paluno.game.screens.*;
 
 public class SEPGame extends Game {
@@ -41,7 +43,7 @@ public class SEPGame extends Game {
     }
 
     public void setStartScreen() {
-        setNextScreen(new ModiScreen(this));
+        setNextScreen(new LocalScreen(this));
     }
 
 
@@ -51,8 +53,8 @@ public class SEPGame extends Game {
 
 
 
-    public void setPlayScreen(int mapNumber, int numWorms) {
-        setNextScreen(new PlayScreen(this, mapNumber, numWorms));
+    public void setPlayScreen(int mapNumber, int numWorms, Array<UserName> names) {
+        setNextScreen(new PlayScreen(this, mapNumber, numWorms, names));
     }
 
 

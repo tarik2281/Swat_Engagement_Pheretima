@@ -30,15 +30,13 @@ public class Player implements Disposable {
 
 	private int numCharacters;
 
+	private String name;
 	private ArrayList<Worm> worms;
 	private int numWormsAlive;
 	private ArrayList<Weapon> weapons;
 	private Weapon currentWeapon;
 	private int turn = 0;
 	private boolean isRoundEnded = false;
-	boolean indicatorAvailable = false;
-
-	private Sound gunRelease;
 
 	private int clientId;
 
@@ -53,78 +51,6 @@ public class Player implements Disposable {
 			}
 		}
 	};
-
-	/**
-	 * Inner KeyListener object to dynamically register reactions to certain input keys pressed
-	 */
-	private InputHandler.KeyListener keyListener = (keyCode, keyDown) -> {
-		if (keyDown) {
-			switch (keyCode) {
-				case Constants.KEY_MOVE_LEFT:
-					getCurrentWorm().setMovement(Constants.MOVEMENT_LEFT);
-					break;
-				case Constants.KEY_MOVE_RIGHT:
-					getCurrentWorm().setMovement(Constants.MOVEMENT_RIGHT);
-					break;
-				case Constants.KEY_JUMP:
-					getCurrentWorm().setJump(true);
-					break;
-                case Constants.KEY_DO_ACTION:
-                	shoot();
-                    break;
-				case Constants.KEY_ROTATE_INDICATOR_DOWN:
-					//getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_DOWN);
-					break;
-				case Constants.KEY_ROTATE_INDICATOR_UP:
-					//getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_UP);
-					break;
-                case Constants.KEY_SELECT_WEAPON_1:
-                	gunRelease.play(0.1f);
-                	equipWeapon(WeaponType.WEAPON_GUN);
-                    break;
-                case Constants.KEY_SELECT_WEAPON_2:
-					equipWeapon(WeaponType.WEAPON_GRENADE);
-                    break;
-                case Constants.KEY_SELECT_WEAPON_3:
-                	gunRelease.play(0.1f);
-					equipWeapon(WeaponType.WEAPON_BAZOOKA);
-                    break;
-				case Constants.KEY_SELECT_WEAPON_4:
-					equipWeapon(WeaponType.WEAPON_SPECIAL);
-					break;
-				case Constants.KEY_SELECT_WEAPON_5:
-					equipWeapon(WeaponType.WEAPON_AIRSTRIKE);
-					break;
-                case Constants.KEY_SELECT_WEAPON_6:
-                    equipWeapon(WeaponType.WEAPON_TELEPORTER);
-                    break;
-			}
-		}
-		else {
-			// And the same when the key is released
-			switch (keyCode) {
-				case Constants.KEY_MOVE_LEFT:
-					if (getCurrentWorm().getMovement() == Constants.MOVEMENT_LEFT)
-						getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-					break;
-				case Constants.KEY_MOVE_RIGHT:
-					if (getCurrentWorm().getMovement() == Constants.MOVEMENT_RIGHT)
-						getCurrentWorm().setMovement(Constants.MOVEMENT_NO_MOVEMENT);
-					break;
-				case Constants.KEY_ROTATE_INDICATOR_DOWN:
-					//if (getWeaponIndicator().getRotationMovement() == Constants.MOVEMENT_DOWN)
-					//	getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
-					break;
-				case Constants.KEY_ROTATE_INDICATOR_UP:
-					//if (getWeaponIndicator().getRotationMovement() == Constants.MOVEMENT_UP)
-					//	getWeaponIndicator().setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
-					break;
-			}
-		}
-
-		return true;
-	};
-
 
 	public Player(int playerNumber) {
 		this.playerNum = playerNumber;
@@ -143,6 +69,14 @@ public class Player implements Disposable {
 
 	@Override
 	public void dispose() {
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void addWeapon(Weapon weapon) {
