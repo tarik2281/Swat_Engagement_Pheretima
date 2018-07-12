@@ -94,7 +94,11 @@ public class EventManager {
         /**
          * data: {@link de.paluno.game.gameobjects.AirdropChute}
          */
-        RemoveChute
+        RemoveChute,
+        /**
+         * data: null
+         */
+        CrateFall
     }
 
     public interface Listener {

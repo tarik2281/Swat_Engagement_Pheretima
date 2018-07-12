@@ -205,6 +205,10 @@ public class Assets {
     		new AssetDescriptor<Sound>("PickUpUtility.mp3", Sound.class);
     public static final AssetDescriptor<Sound> headshotSound =
     		new AssetDescriptor<Sound>("HeadshotSound.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> airDropFall = 
+    		new AssetDescriptor<Sound>("AirDropFall.wav", Sound.class);
+    public static final AssetDescriptor<Sound> lootEquip = 
+    		new AssetDescriptor<Sound>("LootEquip.mp3", Sound.class);
 
 
 
@@ -232,6 +236,6 @@ public class Assets {
     		menuSound, tickSound, gameOverSound, grenadeExplosionSound, gunShotSound, gunRelease, airstrikeSound, airstrikeExplosion,
     		airballSound, bazookaShotSound, raiseLimitSound, map1Sound, map2Sound, map3Sound, map4Sound, walkLoop, noAmmo, fallDown,
     		roundStart, landSound, virusSound, throwSound, windMedium, windHeavy, targetSound, grenadeContact, onGroundSound, destroySound,
-    		airstrikeUse, headshotSound
+    		airstrikeUse, headshotSound, airDropFall, lootEquip
     };
 }

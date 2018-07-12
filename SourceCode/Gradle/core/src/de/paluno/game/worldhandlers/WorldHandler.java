@@ -73,6 +73,10 @@ public abstract class WorldHandler implements Disposable {
     private Sound throwSound;
     private Sound targetSound;
     private Sound airstrikeSound;
+    private Sound airDropFall;
+    private Sound lootEquipSound;
+    private Sound raiseLimitSound;
+    private Sound landSound;
 
     private Timer.Task endTurnTimer = new Timer.Task() {
 
@@ -115,7 +119,7 @@ public abstract class WorldHandler implements Disposable {
                 switch (weapon.getWeaponType()) {
                     case WEAPON_GUN:
                     case WEAPON_BAZOOKA:
-                        gunRelease.play();
+                        gunRelease.play(0.5f);
                         break;
                     case WEAPON_AIRSTRIKE:
                         airstrikeUse.play();
@@ -299,6 +303,8 @@ public abstract class WorldHandler implements Disposable {
             case CrateLanded: {
                 if (currentGameState == GameState.DROPPING)
                     setWaiting();
+                
+                landSound.play(1.5f);
                 break;
             }
             case CratePickup: {
@@ -317,9 +323,13 @@ public abstract class WorldHandler implements Disposable {
                             event.getWorm().getPlayerNumber(), event.getWorm().getCharacterNumber());
                     emitGameData(pickupEvent);
                 }
-
+                
+                lootEquipSound.play();
                 break;
             }
+            case CrateFall:
+            	airDropFall.play();
+            	break;
         }
     };
 
@@ -371,6 +381,10 @@ public abstract class WorldHandler implements Disposable {
         throwSound = screen.getAssetManager().get(Assets.throwSound);
         targetSound = screen.getAssetManager().get(Assets.targetSound);
         airstrikeSound = screen.getAssetManager().get(Assets.airstrikeSound);
+        airDropFall = screen.getAssetManager().get(Assets.airDropFall);
+        lootEquipSound = screen.getAssetManager().get(Assets.lootEquip);
+        raiseLimitSound = screen.getAssetManager().get(Assets.raiseLimitSound);
+        landSound = screen.getAssetManager().get(Assets.landSound);
 
         windHandler = new WindHandler();
         windHandler.setProjectiles(projectiles);
@@ -409,7 +423,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.CrateLanded,
                 EventManager.Type.RemoveCrate,
                 EventManager.Type.RemoveChute,
-                EventManager.Type.CratePickup);
+                EventManager.Type.CratePickup,
+                EventManager.Type.CrateFall);
 
         for (Player player : players)
             player.show();
@@ -437,7 +452,8 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.CrateLanded,
                 EventManager.Type.RemoveCrate,
                 EventManager.Type.RemoveChute,
-                EventManager.Type.CratePickup);
+                EventManager.Type.CratePickup,
+                EventManager.Type.CrateFall);
     }
 
     @Override
@@ -731,7 +747,7 @@ public abstract class WorldHandler implements Disposable {
     protected Vector2 getRandomAirdropPosition() {
         Random random = new Random();
         float x = random.nextFloat() * map.getWorldWidth();
-        return new Vector2(x, map.getWorldHeight());
+        return new Vector2(x, map.getWorldHeight()- (700 * Constants.WORLD_SCALE));
     }
 
     public int getNumPlayersAlive() {
@@ -936,8 +952,10 @@ public abstract class WorldHandler implements Disposable {
 
         if (currentGameState == GameState.RAISE_WATER_LEVEL) {
             world.setWaterLevel(world.getWaterLevel() + delta * Constants.RAISE_LEVEL_SPEED);
-            if (world.getWaterLevel() >= targetLevel)
+            if (world.getWaterLevel() >= targetLevel) {
                 setIdle();
+            	raiseLimitSound.stop();
+            }
         }
 
         onUpdate(delta);
@@ -1002,6 +1020,7 @@ public abstract class WorldHandler implements Disposable {
     }
 
     public void beginAirdrop() {
+    	EventManager.getInstance().queueEvent(EventManager.Type.CrateFall, null);
         endPlayerTurn();
         currentGameState = GameState.DROPPING;
     }
@@ -1015,6 +1034,7 @@ public abstract class WorldHandler implements Disposable {
         currentGameState = GameState.RAISE_WATER_LEVEL;
         targetLevel = world.getWaterLevel() + Constants.RAISE_LEVEL_LENGTH;
         world.getCamera().goToPoint(world.getCamera().getWorldPosition().x, 0.0f);
+        raiseLimitSound.loop();
     }
 
     private WorldData makeWorldSnapshot() {

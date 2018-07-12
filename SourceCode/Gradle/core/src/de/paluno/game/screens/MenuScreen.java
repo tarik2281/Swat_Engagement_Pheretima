@@ -66,6 +66,12 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
     }
 
     public void show() {
+    	//Menu sound
+        music = game.getAssetManager().get(Assets.menuSound);
+        music.setLooping(true);
+        music.setVolume(1f);
+        music.play();
+        
         // Menu Background
         textureBackground = game.getAssetManager().get(Assets.menuBackground);
         image = new Image((new TextureRegionDrawable(new TextureRegion(textureBackground))));
@@ -329,11 +335,7 @@ public class MenuScreen extends ScreenAdapter implements Loadable {
         // clears screen
         Gdx.gl.glClearColor(0f, 0f, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        //Menu sound
-        music = game.getAssetManager().get(Assets.menuSound);
-        music.setLooping(true);
-        music.setVolume(0.1f);
-        //music.play();
+       
 
         menuStage.act(Gdx.graphics.getDeltaTime());
         menuStage.draw();

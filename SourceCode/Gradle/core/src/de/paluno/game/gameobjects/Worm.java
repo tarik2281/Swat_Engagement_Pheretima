@@ -254,7 +254,7 @@ public class Worm extends WorldObject {
 		// And some physics settings
 		FixtureDef fixtureDef = new FixtureDef();
 		fixtureDef.shape = bodyRect;
-		fixtureDef.density = 0.5f;
+		fixtureDef.density = 4.5f;
 		fixtureDef.friction = 1.0f;
 		fixtureDef.restitution = 0.0f;
 		
