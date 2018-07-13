@@ -21,6 +21,9 @@ public class SEPGame extends Game {
 
     private EventManager.Listener listener = (type, data) -> {
         switch (type) {
+            case LeaveMatch:
+                setModiScreen();
+                break;
             case GameOver:
                 setGameOver((String) data);
                 break;
@@ -38,7 +41,7 @@ public class SEPGame extends Game {
 
     @Override
     public void create() {
-    	EventManager.getInstance().addListener(listener, EventManager.Type.GameOver, EventManager.Type.ClickSound);
+    	EventManager.getInstance().addListener(listener, EventManager.Type.GameOver, EventManager.Type.ClickSound, EventManager.Type.LeaveMatch);
     	
         FileHandle configFileHandle = Gdx.files.local("config.xml");
         if (!configFileHandle.exists())
@@ -98,15 +101,13 @@ public class SEPGame extends Game {
     }
 
     public void setNextScreen(Screen screen) {
-        // TODO: maybe loading screen
         assetManager.clear();
         
         if(screen instanceof PlayScreen)
         	menuMusic.stop();
         else if (!(screen instanceof GameOverScreen))
         	menuMusic.play();
-        	
-        
+
         if (screen instanceof Loadable) {
             ((Loadable) screen).load(assetManager);
             assetManager.finishLoading();

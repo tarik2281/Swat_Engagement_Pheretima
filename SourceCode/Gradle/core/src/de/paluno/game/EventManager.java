@@ -114,7 +114,9 @@ public class EventManager {
         /**
          * data: {@link de.paluno.game.gameobjects.Player}
          */
-        StartPlayerTurn
+        StartPlayerTurn,
+        PauseMatch,
+        LeaveMatch
     }
 
     public interface Listener {

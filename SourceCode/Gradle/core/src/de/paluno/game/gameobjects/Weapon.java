@@ -31,7 +31,6 @@ public class Weapon {
 
 	/**
 	 * Constructor
-	 * @param player - Reference to the player we belong to
 	 * @param type - WeaponType of the weapon, to determine it's behavior
 	 */
 	public Weapon(WeaponType type) {
@@ -97,7 +96,7 @@ public class Weapon {
 			// setTransform Method spawns the current Worm to the selected position
 			else if (type == WeaponType.WEAPON_TELEPORTER){
 				EventManager.getInstance().queueEvent(EventManager.Type.TeleporterUse, type);
-                worm.getBody().setTransform(indicator.getPosition().x, indicator.getPosition().y, 0);
+                worm.setPosition(indicator.getPosition());
             }
 			else {
 				Vector2 direction;

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
 import com.badlogic.gdx.scenes.scene2d.actions.RemoveActorAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
@@ -36,6 +37,9 @@ public class PlayUILayer implements Disposable {
                 case ReplayEnded:
                     hideReplay();
                     break;
+                case PauseMatch:
+                    showPauseMenu();
+                    break;
                 case StartPlayerTurn:
                     if (!showingReplay) {
                         Player player = (Player) data;
@@ -45,7 +49,6 @@ public class PlayUILayer implements Disposable {
             }
         }
     };
-
 
     public PlayUILayer(AssetManager manager) {
         stage = new Stage(new ScreenViewport());
@@ -67,7 +70,10 @@ public class PlayUILayer implements Disposable {
         weaponUI = new WeaponUI(manager, elementGUI);
         stage.addActor(weaponUI.getTable());
 
-        EventManager.getInstance().addListener(eventListener, EventManager.Type.StartPlayerTurn, EventManager.Type.Replay, EventManager.Type.ReplayEnded);
+        EventManager.getInstance().addListener(eventListener, EventManager.Type.StartPlayerTurn,
+                EventManager.Type.Replay,
+                EventManager.Type.ReplayEnded,
+                EventManager.Type.PauseMatch);
     }
 
     public void addChatWindow(NetworkClient client) {
@@ -78,13 +84,33 @@ public class PlayUILayer implements Disposable {
         }
     }
 
+    public void showPauseMenu() {
+        Dialog dialog = new Dialog("Pause", elementGUI.getSkin()) {
+            @Override
+            protected void result(Object object) {
+                if ("yes".equals(object)) {
+                    EventManager.getInstance().queueEvent(EventManager.Type.LeaveMatch, null);
+                }
+            }
+        };
+        dialog.text("Spiel verlassen?");
+        dialog.getContentTable().pad(10);
+        dialog.button("Nein", "no");
+        dialog.button("Ja", "yes");
+        dialog.getButtonTable().pad(10);
+        dialog.show(stage);
+    }
+
     public WeaponUI getWeaponUI() {
         return weaponUI;
     }
 
     @Override
     public void dispose() {
-        EventManager.getInstance().removeListener(eventListener, EventManager.Type.StartPlayerTurn, EventManager.Type.Replay, EventManager.Type.ReplayEnded);
+        EventManager.getInstance().removeListener(eventListener, EventManager.Type.StartPlayerTurn,
+                EventManager.Type.Replay,
+                EventManager.Type.ReplayEnded,
+                EventManager.Type.PauseMatch);
 
         if (chatWindow != null)
             chatWindow.dispose();

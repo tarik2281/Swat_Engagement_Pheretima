@@ -686,8 +686,12 @@ public abstract class WorldHandler implements Disposable {
 
         currentWeaponIndicator = weaponIndicators.computeIfAbsent(weaponType.getIndicatorType(), WeaponIndicator.Type::newInstance);
 
-        if (currentWeaponIndicator != null)
+        if (currentWeaponIndicator != null) {
+            if (currentWeaponIndicator instanceof ShotDirectionIndicator)
+                ((ShotDirectionIndicator) currentWeaponIndicator).setRotationMovement(Constants.MOVEMENT_NO_MOVEMENT);
+
             currentWorm.addChild(currentWeaponIndicator);
+        }
     }
 
     protected Projectile getProjectileById(int id) {
@@ -728,7 +732,6 @@ public abstract class WorldHandler implements Disposable {
             if (player.getPlayerNumber() == playerNumber) {
                 player.setTurn(wormNumber);
                 Worm worm = player.getWormByNumber(wormNumber);
-                System.out.println("Starting player turn for playerNumber: " + playerNumber + ", wormNumber: " + wormNumber + ", wormDead: " + worm.isDead());
                 worm.setIsPlaying(true);
                 worm.addChild(windDirectionIndicator);
                 world.getCamera().setCameraFocus(worm);

@@ -94,6 +94,9 @@ public class UserWorldController {
                 case Constants.KEY_TOGGLE_DEBUG_RENDER:
                     worldHandler.toggleDebugRender();
                     break;
+                case Constants.KEY_PAUSE:
+                    EventManager.getInstance().queueEvent(EventManager.Type.PauseMatch, null);
+                    break;
             }
 
             return super.keyDown(keycode);
