@@ -29,7 +29,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
     private ElementGUI elementGUI;
     private TextField textFieldWorm1, textFieldWorm2, textFieldWorm3, textFieldWorm4, textFieldWorm5, textFieldUsername;
     private TextButton textButtonMenu, textButtonSpielen, textButtonAutoFill,textButtonAdd,textButtonDelete;;
-    private Table tableBackground, tableTextField, tableMap, table4Worm, tableTextButton, tableTextButtonPlayer;
+    private Table tableBackground, tableTextField, tableTextButtonPlayer;
     private Image imageBackground;
     private NetworkClient client;
     public ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4,
@@ -56,8 +56,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             "Spongebob", "Patrick", "Sandy", "Plankton", "Mr. Krabs",
             "The Undertaker", "Rey Mysterio", "Jeff Hardy", "Hornswoggle", "The Rock",
             "Charlie Sheen", "Dexter", "Michael Scofield", "Barney Stinson", "Walter White",
-            "Chris Brown", "Drake", "Frank Ocean", "Trey Songz", "Eminem",
-            "Rihanna", "Beyonce", "Amy Winehouse", "Britney Spears", "J-Lo"));
+            "Chris Brown", "Drake", "Michael Jackson", "Trey Songz", "Eminem"));
 
     public LocalScreen(SEPGame game) {
         super();
@@ -77,6 +76,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
         Assets.loadAssets(manager, Assets.Music);
+        Assets.loadAssets(manager, Assets.MenuScreenAssets);
 
         return false;
     }
@@ -97,9 +97,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
         tableBackground = new Table();
         tableTextField = new Table();
-        tableMap = new Table();
-        table4Worm = new Table();
-        tableTextButton = new Table();
         if (client != null) {
             client.registerDataHandler(dataHandler);
         }
@@ -177,7 +174,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             }
         });
         textButtonMenu = elementGUI.createTextButton("Menu");
-        //textButtonMenu.setVisible(false);
 
 
         textButtonMenu.addListener(new ClickListener() {
@@ -372,7 +368,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
 
 
-        //tableTextField.setFillParent(true);
         tableTextField.add(textFieldUsername).size(150, 50).colspan(5).row();
         tableTextField.add(textFieldWorm1).size(150, 50);
         tableTextField.add(textFieldWorm2).size(150, 50);
@@ -380,33 +375,9 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         tableTextField.add(textFieldWorm4).size(150, 50);
         tableTextField.add(textFieldWorm5).size(150, 50).row();
         tableTextField.add(textButtonAutoFill).colspan(5);
-        //tableTextField.right().bottom().setY(250);
 
 
-        /*tableMap.setFillParent(true);
-        tableMap.add(buttonMap1);
-        tableMap.add(buttonMap2);
-        tableMap.add(buttonMap3);
-        tableMap.add(buttonMap4);
-        tableMap.setPosition(tableBackground.getPadX(), tableBackground.getPadY()+185);
-
-
-        table4Worm.setFillParent(true);
-        table4Worm.add(buttonWorm1);
-        table4Worm.add(buttonWorm2);
-        table4Worm.add(buttonWorm3);
-        table4Worm.add(buttonWorm4);
-        table4Worm.add(buttonWorm5).row();
-        table4Worm.setPosition(tableMap.getPadX(), tableMap.getPadY()+80);
-
-        tableTextButton.setFillParent(true);
-        tableTextButton.setX(180);
-        tableTextButton.add(textButtonMenu).size(200, 60).pad(20);
-        tableTextButton.add(textButtonSpielen).size(200, 60).pad(20);
-        tableTextButton.bottom().setY(20);*/
-
-
-        textButtonAdd = elementGUI.createTextButton("Hinzufügen");
+        textButtonAdd = elementGUI.createTextButton("Hinzufuegen");
         textButtonAdd.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -431,7 +402,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             }
         });
         tableTextButtonPlayer = new Table();
-        //tableTextButtonPlayer.setPosition(160,420);
         tableTextButtonPlayer.add(textButtonAdd);
         tableTextButtonPlayer.add(textButtonDelete);
 
@@ -465,43 +435,13 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         tableBackground.padTop(50);
         stage.addActor(tableBackground);
 
-//        textFieldWorm1.setPosition(150,370);
-//        textFieldWorm2.setPosition(350,370);
-//        textFieldWorm3.setPosition(550,370);
-//        textFieldWorm4.setPosition(750,370);
-//        textFieldWorm5.setPosition(950,370);
-//        textFieldUsername.setPosition(550,450);
-//        textButtonMenu.setPosition(550200);
-//        textButtonSpielen.setPosition(550,120);
-
-//        tableBackground.center();
-        /*stage.addActor(tableTextField);
-        if (client == null) {
-            stage.addActor(tableMap);
-            stage.addActor(table4Worm);
-            textButtonMenu.setVisible(true);
-        }
-
-        stage.addActor(tableTextButton);
-        stage.addActor(scrollPane);
-        stage.addActor(tableTextButtonPlayer);*/
-//        stage.setDebugAll(true);
-
-//        stage.addActor(textFieldWorm1);
-//        stage.addActor(textFieldWorm2);
-//        stage.addActor(textFieldWorm3);
-//        stage.addActor(textFieldWorm4);
-//        stage.addActor(textFieldWorm5);
-//        stage.addActor(textFieldUsername);
-//        stage.addActor(textButtonMenu);
-//        stage.addActor(textButtonSpielen);
 
         elementGUI.setSelectedImageButton(buttonMap1);
         elementGUI.setSelectedImageButton2(buttonWorm1);
 
         updateTextFields();
 
-        //stage.setDebugAll(true);
+//        stage.setDebugAll(true);
     }
 
 

@@ -1,4 +1,4 @@
- package de.paluno.game;
+package de.paluno.game;
 
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -10,16 +10,13 @@ import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
 
-    // TODO: 11.06.2018 explodeOnCollision Bazooka ? , preSolve, postSolve?
-    // Weapon Special on hit
-    // Weapon Special close by
+    private PlayScreen playScreen;
 
     private boolean listenForCollisions; // TODO: CollisionHandler listenForCollisions
 
     public CollisionHandler() {
     }
 
-    private PlayScreen playScreen;
 
     public CollisionHandler(PlayScreen playScreen) {
         this.playScreen = playScreen;
@@ -154,7 +151,7 @@ public class CollisionHandler implements ContactListener {
         }
 
 
-        // Turret ->ground
+        // Turret -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Ground) {
 
             Projectile projectile = UserData.getObject(fixA);
@@ -173,7 +170,7 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Turret collided with Ground");
         }
 
-        //Turret -> worm
+        //Turret -> Worm
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.WormFoot) {
             Worm worm = UserData.getObject(fixB);
             worm.beginContact();
@@ -183,7 +180,7 @@ public class CollisionHandler implements ContactListener {
             worm.beginContact();
         }
 
-        // projectile->Turret
+        // Projectile->Turret
 
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
 

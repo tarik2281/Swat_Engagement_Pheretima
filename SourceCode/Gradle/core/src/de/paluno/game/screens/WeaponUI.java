@@ -27,7 +27,7 @@ public class WeaponUI {
     private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonWeaponSpecial,
             buttonAirStrike, buttonTeleport, buttonMine, buttonArtillery, weaponMenuButton;
     // Is implemented into the stage
-    private Table table, table2;
+    private Table table, table2, tableMain;
 
     // Background of the table
     private Image image, image2;
@@ -37,12 +37,15 @@ public class WeaponUI {
     public WeaponUI(PlayScreen playScreen) {
         this.playScreen = playScreen;
         this.elementGUI = new ElementGUI();
+        stage = new Stage();
+        tableMain = new Table();
+        tableMain.setFillParent(true);
 
-        // Table Background
+        // Tables Background
         image = new Image((new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI)))));
         image2 = new Image(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI2))));
 
-        //Gun ElementGUI
+        //Gun
         buttonGun = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconGun));
         buttonGun.addListener((new ClickListener() {
             @Override
@@ -56,7 +59,7 @@ public class WeaponUI {
         }));
 
 
-        // Grenade ElementGUI
+        // Grenade
         buttonGrenade = elementGUI.createWeaponButton((playScreen.getAssetManager().get(Assets.iconGrenade)));
         buttonGrenade.addListener((new ClickListener() {
             @Override
@@ -69,7 +72,7 @@ public class WeaponUI {
             }
         }));
 
-        // Bazooka ElementGUI
+        // Bazooka
         buttonBazooka = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconBazooka));
         buttonBazooka.addListener((new ClickListener() {
             @Override
@@ -81,7 +84,7 @@ public class WeaponUI {
             }
         }));
 
-        // SpecialWeapon ElementGUI
+        // SpecialWeapon
         buttonWeaponSpecial = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconSpecial));
         buttonWeaponSpecial.addListener((new ClickListener() {
             @Override
@@ -93,33 +96,8 @@ public class WeaponUI {
             }
         }));
 
-        stage = new Stage();
-        table = new Table();
 
-
-        table.setBackground(image.getDrawable());
-        table.setPosition(1255, 120);
-
-        // Positioning of Buttons
-        table.top().right();
-        table.row();
-        table.add(buttonGun);
-        table.row();
-        table.add(buttonGrenade);
-        table.row();
-        table.add(buttonBazooka);
-        table.row();
-        table.add(buttonWeaponSpecial);
-        stage.setDebugAll(false);
-
-        //sets space to the edge of table
-        table.padRight(7);
-        table.padTop(12);
-        table.setSize(92, 150);
-        stage.addActor(table);
-
-
-        // Airstrike ElementGUI
+        // Airstrike
         buttonAirStrike = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconAirStrike));
         buttonAirStrike.addListener((new ClickListener() {
             @Override
@@ -127,17 +105,12 @@ public class WeaponUI {
                 System.out.println("Airstrike ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
-                //worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
-        // Teleport ElementGUI
+        // Teleport
         buttonTeleport = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconTeleport));
         buttonTeleport.addListener((new ClickListener() {
-
-//                        Vector3 selectedTeleportPosition = player.getWorld().getCamera().getWorldCamera().unproject(new Vector3(x, y, 0));
-//                        player.getCurrentWorm().getBody().setTransform(selectedTeleportPosition.x, selectedTeleportPosition.y, 0);
-
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Teleport Clicked");
@@ -147,10 +120,9 @@ public class WeaponUI {
 
             }
         }));
-        // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
 
 
-        // Mine ElementGUI
+        // Mine
         buttonMine = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconMine));
         buttonMine.addListener((new ClickListener() {
             @Override
@@ -158,11 +130,10 @@ public class WeaponUI {
                 System.out.println("Mine ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
-                //  worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
-        // SpecialWeapon ElementGUI
+        // SpecialWeapon
         buttonArtillery = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconArtillery));
         buttonArtillery.addListener((new ClickListener() {
             @Override
@@ -170,11 +141,10 @@ public class WeaponUI {
                 System.out.println("Artillery ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
-                // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
-        //Weapon Menu Button
+        //WeaponMenu
         weaponMenuButton = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.weaponMenuButton));
         weaponMenuButton.addListener(new ClickListener() {
             int weaponClick = 0;
@@ -190,37 +160,41 @@ public class WeaponUI {
                     table2.setVisible(false);
                     weaponClick = 0;
                 }
-
-
                 System.out.println("Weapon Menu Clicked");
             }
         });
-        weaponMenuButton.setPosition(1275, 320);
 
-        table2 = new Table();
+        table = new Table().padRight(7).padTop(2);
+        table.setBackground(image.getDrawable());
 
+        // Positioning of Buttons
+        table.add(buttonGun);
+        table.row();
+        table.add(buttonGrenade);
+        table.row();
+        table.add(buttonBazooka);
+        table.row();
+        table.add(buttonWeaponSpecial);
+
+        table2 = new Table().padTop(35);
         table2.setBackground(image2.getDrawable());
-        table2.setPosition(1180, 25);
+        table2.add(buttonAirStrike.pad(5));
+        table2.add(buttonTeleport.pad(5));
+        table2.add(buttonArtillery.pad(5));
+        table2.add(buttonMine.pad(5));
 
-        table2.add(buttonAirStrike);
-        table2.add(buttonTeleport);
-        table2.add(buttonArtillery);
-        table2.add(buttonMine);
-        table2.setSize(166, 75);
-        table2.padTop(35);
-        stage.setDebugAll(false);
-        buttonMine.pad(5);
 
-        buttonArtillery.pad(5);
-        buttonAirStrike.pad(5);
-        buttonTeleport.pad(5);
+        tableMain.right();
+        tableMain.add(weaponMenuButton).right().row();
+        tableMain.add(table.right()).size(92, 150).right().padTop(10).row();
+        tableMain.add(table2).padTop(10).size(166,75);
 
-        stage.addActor(weaponMenuButton);
-        stage.addActor(table2);
-        // stage.setDebugAll(true);
 
-        table.setVisible(false);
+        stage.addActor(tableMain);
         table2.setVisible(false);
+        table.setVisible(false);
+
+
     }
 
 

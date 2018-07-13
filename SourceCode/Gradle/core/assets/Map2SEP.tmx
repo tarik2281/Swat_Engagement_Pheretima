@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="200" height="100" tilewidth="16" tileheight="16" infinite="0" nextobjectid="236">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-up" width="200" height="100" tilewidth="16" tileheight="16" infinite="0" nextobjectid="237">
  <tileset firstgid="1" source="OverWorldTiles.tsx"/>
  <layer name="TileLayer" width="200" height="100">
   <data encoding="csv">
@@ -166,9 +166,6 @@
   <object id="170" x="64" y="704">
    <polygon points="0,0 192,0 192,-32 304,-32 304,0 496,0 496,32 0,32"/>
   </object>
-  <object id="171" x="640" y="672">
-   <polygon points="0,0 624,0 624,208 432,208 432,160 592,160 592,48 32,48 32,160 192,176 192,208 0,208"/>
-  </object>
   <object id="172" x="928" y="800">
    <polygon points="0,0 48,0 48,48 0,48"/>
   </object>
@@ -219,6 +216,9 @@
   </object>
   <object id="191" x="2912" y="1360" width="64" height="64">
    <ellipse/>
+  </object>
+  <object id="236" x="832" y="832">
+   <polygon points="0,0 0,48 -192,48 -192,-160 432,-160 432,48 240,48 240,0 400,0 400,-112 -160,-112 -160,0"/>
   </object>
  </objectgroup>
  <objectgroup name="SpawnPositions">

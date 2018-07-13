@@ -10,8 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
+<<<<<<< HEAD
 import de.paluno.game.Config;
 import de.paluno.game.EventManager;
+=======
+>>>>>>> branch 'work' of https://git.uni-due.de/sep/Sommersemester_2018/Gruppen_K_und_L/Repo_Gruppe_L.git
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
@@ -94,7 +97,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                     game.setLocalScreen();
                 }else if (modi == 2) {
                     Dialog connectionDialog = showConnectionDialog();
-                    client = new NetworkClient(Config.serverAddress);
+                    client = new NetworkClient("localhost");
                     client.setConnectionListener(new NetworkClient.ConnectionListener() {
                         @Override
                         public void onConnectionResult(NetworkClient client, int result) {
@@ -105,11 +108,6 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                                 case NetworkClient.RESULT_CONNECTION_FAILED:
                                     connectionDialog.hide();
                                     showErrorDialog("Verbindung zum Server konnte\nnicht aufgebaut werden.");
-                                    /*new Dialog("Server Connection", elementGUI.getSkin()) {
-                                        protected void result (Object object) {
-                                            System.out.println("Chosen: " + object);
-                                        }
-                                    }.text("Connection failed").button("Close", true).show(stage);*/
                                     break;
                             }
                         }
@@ -198,6 +196,8 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.LobbyScreenAssets);
         Assets.loadAssets(manager, Assets.Music);
+        Assets.loadAssets(manager, Assets.MenuScreenAssets);
+
         return false;
     }
 }

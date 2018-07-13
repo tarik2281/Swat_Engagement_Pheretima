@@ -26,7 +26,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
     private Skin skin;
     private Stage stage;
     private SEPGame game;
-    private TextButton textButtonJoinLobby, textButtonMenu, textButtonCreateLobby, textButtonStart;
+    private TextButton textButtonJoinLobby, textButtonMenu, textButtonCreateLobby;
 
     private ElementGUI elementGUI;
     private LobbyDialog lobbyDialog;
@@ -179,9 +179,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             public void clicked(InputEvent event, float x, float y) {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedMapButton(buttonMap4);
-
                 mapNumber = 3;
-                //System.out.println("Map4 Clicked");
             }
         });
 
@@ -194,7 +192,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm1);
                 numWorms = 1;
-                //System.out.println("Worm 1 Clicked");
             }
         });
 
@@ -207,7 +204,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm2);
                 numWorms = 2;
-                //System.out.println("Worm 2 Clicked");
             }
         });
 
@@ -219,7 +215,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm3);
                 numWorms = 3;
-                //System.out.println("Worm 3 Clicked");
             }
         });
 
@@ -231,7 +226,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm4);
                 numWorms = 4;
-                //System.out.println("Worm 4 Clicked");
             }
         });
 
@@ -243,7 +237,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm5);
                 numWorms = 5;
-                //System.out.println("Worm 5 Clicked");
             }
         });
 
@@ -294,7 +287,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
                     request.lobbyId = data.id;
                     client.send(request);
                 }
-                //game.setPlayerLobbyScreen(mapNumber, numWorms);
             }
         });
 
@@ -317,49 +309,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         tableBackground.add(textButtonMenu, textButtonCreateLobby, textButtonJoinLobby);
 
         stage.addActor(tableBackground);
-        //stage.addActor(textButtonCreateLobby);
-        //stage.addActor(textButtonJoinLobby);
-        //stage.addActor(textButtonMenu);
-        //stage.addActor(scrollPane);
-
-        /*menuTable.padLeft(30);
-        menuTable.padTop(50);
-        menuTable.add(buttonMap1);
-        menuTable.add(buttonMap2);
-        menuTable.row();
-        menuTable.add(buttonMap3);
-        menuTable.add(buttonMap4);
-        menuTable.left().top();*/
-
-        //menuTable.setFillParent(true);
-        //menuTable2.setPosition(330, 170);
-
-
-        /*textButtonStart = elementGUI.createTextButton("Erstellen");
-        textButtonStart.addListener(new ClickListener() {
-            int i = 0;
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                lobbyDialog.setVisible(false);
-                client.send(new LobbyCreateRequest(textField.getText(), mapNumber, numWorms));
-            }
-        });*/
-        //lobbyDialog.addActor(menuTable);
-        //lobbyDialog.addActor(menuTable2);
-        //lobbyDialog.addActor(textButtonStart);
-        //lobbyDialog.addActor(textField);
-        //textButtonStart.setPosition(230, 50);
-        //textField.setPosition(215, 235);
-
-
-        /*list.addListener(new ClickListener() {
-
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                System.out.println(list.getSelectedIndex());
-            }
-        });*/
 
         Gdx.input.setInputProcessor(stage);
 
@@ -420,6 +369,8 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.LobbyScreenAssets);
         Assets.loadAssets(manager, Assets.Music);
+        Assets.loadAssets(manager, Assets.MenuScreenAssets);
+        
         return false;
     }
 }
