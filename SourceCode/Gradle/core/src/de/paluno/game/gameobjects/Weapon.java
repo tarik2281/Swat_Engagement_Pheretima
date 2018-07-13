@@ -24,7 +24,9 @@ public class Weapon {
 
 	private WeaponType type;
 	private int currentAmmo;
-	private float airstrikeHeight;
+	private Vector2 airstrikeSpawnPosition;
+	private Vector2 airstrikeSpawnPosition2;
+	private Vector2 airstrikeSpawnPosition3;
 	//private Vector2 curserPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 
 	private AnimationData animationSet;
@@ -44,8 +46,10 @@ public class Weapon {
 		noAmmoSound = manager.get(Assets.noAmmo);
 	}
 
-	public void setAirstrikeHeight(float airstrikeHeight) {
-		this.airstrikeHeight = airstrikeHeight;
+	public void setAirstrikeSpawnPosition(float x, float y) {
+		airstrikeSpawnPosition = new Vector2(x, y);
+		airstrikeSpawnPosition2 = new Vector2(x - 0.2f, y);
+		airstrikeSpawnPosition3 = new Vector2(x - 0.4f, y);
 	}
 
 	/**
@@ -67,21 +71,17 @@ public class Weapon {
 			EventManager.getInstance().queueEvent(EventManager.Type.WeaponShoot, type);
 			if (getWeaponType() == WeaponType.WEAPON_AIRSTRIKE) {
 				Vector2 position = indicator.getPosition();
+				Vector2 direction = new Vector2(-airstrikeSpawnPosition.x + position.x,
+						-airstrikeSpawnPosition.y + position.y).nor();
 
 				Projectile projectile = new Projectile(worm,
-						this.type, Constants.AIRSTRIKE_SPAWNPOS,
-						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
-								 		-airstrikeHeight + position.y).nor());
+						this.type, airstrikeSpawnPosition, direction);
 
 				Projectile projectile2 = new Projectile(worm,
-						this.type, Constants.AIRSTRIKE_SPAWNPOS2 ,
-						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
-								 		-airstrikeHeight + position.y).nor());
+						this.type, airstrikeSpawnPosition2, direction);
 
 				Projectile projectile3 = new Projectile(worm,
-						this.type, Constants.AIRSTRIKE_SPAWNPOS3,
-						 new Vector2(-Constants.AIRSTRIKE_SPAWNPOS.x + position.x,
-								 		-airstrikeHeight + position.y).nor());
+						this.type, airstrikeSpawnPosition3, direction);
 
 				output.add(projectile);
 				output.add(projectile2);

@@ -175,6 +175,9 @@ public class LocalWorldHandler extends WorldHandler {
     public void dispose() {
         super.dispose();
 
+        if (turnTimer.isScheduled())
+            turnTimer.cancel();
+
         EventManager.getInstance().removeListener(eventListener, EventManager.Type.ReplayEnded);
     }
 

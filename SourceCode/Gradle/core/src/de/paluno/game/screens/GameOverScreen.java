@@ -14,14 +14,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.EventManager;
 import de.paluno.game.SEPGame;
@@ -36,7 +34,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private Stage stage;
 	private Table table;
 	private Table myFontTable;
-	private ImageButton restartButton;
+	private TextButton restartButton;
 	private Texture texture;
 	private Texture restartButtonTexture;
 	private TextureRegion restartButtonTextureRegion;
@@ -47,6 +45,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 	private CharSequence text;
 	private String playerName;
 	private Sound gameOver;
+	private Skin skin;
 	
 	
 	public GameOverScreen(SEPGame game, String playerName) {
@@ -63,26 +62,32 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
 
 	public void show() {
 		//GameOverScreen
-		batch = new SpriteBatch();
+		//batch = new SpriteBatch();
 		table = new Table();
 		myFontTable = new Table();
 		labelStyle = new Label.LabelStyle();
+
+		ElementGUI elementGUI = new ElementGUI();
+		skin = elementGUI.getSkin();
 		
 		//Sound
 		gameOver = game.getAssetManager().get(Assets.gameOverSound);
 		gameOver.play();
-		
-		texture = game.getAssetManager().get(Assets.gameOverScreen);
-		sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());	
+
+		Image gameOverImage = elementGUI.createBackground(game.getAssetManager().get(Assets.gameOverScreen));
+		//texture = game.getAssetManager().get(Assets.gameOverScreen);
+		//sprite = new Sprite(texture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		//Restart button
-		stage = new Stage();
+		stage = new Stage(new ScreenViewport());
 		Gdx.input.setInputProcessor(stage);
-		
-		restartButtonTexture = game.getAssetManager().get(Assets.menuButton);
-        restartButtonTextureRegion = new TextureRegion(restartButtonTexture);
-        restartButtonTextureDrawable = new TextureRegionDrawable(restartButtonTextureRegion);
-        restartButton = new ImageButton(restartButtonTextureDrawable);
+
+		restartButton = new TextButton("Menu", skin);
+
+		//restartButtonTexture = game.getAssetManager().get(Assets.menuButton);
+        //restartButtonTextureRegion = new TextureRegion(restartButtonTexture);
+        //restartButtonTextureDrawable = new TextureRegionDrawable(restartButtonTextureRegion);
+        //restartButton = new ImageButton(restartButtonTextureDrawable);
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -100,38 +105,53 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
         if (playerName != null)
         	labelText = playerName + " hat gewonnen.";
         else
-        	labelText = "Das ist Spiel ist unentschieden.";
+        	labelText = "Das Spiel ist unentschieden.";
         
 		label = new Label(labelText, labelStyle);
         
         stage.addActor(table);
-        stage.addActor(myFontTable);
-        
-        myFontTable.add(label);
-        myFontTable.setFillParent(true);
-        myFontTable.center();
-        myFontTable.padBottom(100);
-        
-        table.add(restartButton);
+        //stage.addActor(myFontTable);
+
         table.setFillParent(true);
-        table.bottom();
-        table.padBottom(200);
-        table.padRight(30);
+        table.center();
+        table.add(gameOverImage);
+        table.row();
+        table.add(label).pad(50);
+        table.row();
+        table.add(restartButton).size(200, 60).pad(50);
+
+        //myFontTable.add(label);
+        //myFontTable.setFillParent(true);
+        //myFontTable.center();
+        //myFontTable.padBottom(100);
+        
+        //table.add(restartButton);
+        //table.setFillParent(true);
+        //table.bottom();
+        //table.padBottom(200);
+        //table.padRight(30);
 	}
-	
+
+	@Override
+	public void resize(int width, int height) {
+		stage.getViewport().update(width, height, true);
+	}
+
 	public void render(float delta) {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
-		batch.begin();
-		sprite.draw(batch);
-		batch.end();
+		//batch.begin();
+		//sprite.draw(batch);
+		//batch.end();
 		
 		stage.act(delta);
 		stage.draw();
 	}
 	
 	public void hide(){
-		batch.dispose();
+		myFont.dispose();
+		skin.dispose();
+		//batch.dispose();
 		stage.dispose();
 	}
 }

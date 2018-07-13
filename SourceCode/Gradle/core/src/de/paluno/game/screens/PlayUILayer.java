@@ -154,6 +154,7 @@ public class PlayUILayer implements Disposable {
         removeActorAction.setActor(messageContainer);
         DelayAction delayAction = new DelayAction(Constants.MESSAGE_DURATION);
         delayAction.setAction(removeActorAction);
+        messageContainer.clearActions();
         messageContainer.addAction(delayAction);
 
         stage.addActor(messageContainer);

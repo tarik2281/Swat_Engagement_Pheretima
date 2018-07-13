@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -90,6 +91,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
         @Override
         protected void result(Object object) {
+            EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
             if ("create".equals(object)) {
                 if (!textField.getText().isEmpty())
                     client.send(new LobbyCreateRequest(textField.getText(), mapNumber, numWorms));

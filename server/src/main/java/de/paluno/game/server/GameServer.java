@@ -228,7 +228,7 @@ public class GameServer {
         return lobby;
     }
 
-    public void initialize() {
+    public void initialize(int tcpPort, int udpPort) {
         server = new Server();
         server.start();
 
@@ -237,7 +237,7 @@ public class GameServer {
         server.addListener(serverListener);
 
         try {
-            server.bind(Constants.TCP_PORT, Constants.UDP_PORT);
+            server.bind(tcpPort, udpPort);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -247,6 +247,51 @@ public class GameServer {
     public static void main(String[] args) {
         GameServer server = new GameServer();
 
-        server.initialize();
+        int tcpPort = Constants.TCP_PORT;
+        int udpPort = Constants.UDP_PORT;
+
+        System.out.println(Arrays.toString(args));
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-tcp_port")) {
+                if (++i >= args.length) {
+                    System.out.println(USAGE_MESSAGE);
+                    System.exit(-1);
+                }
+                else {
+                    try {
+                        tcpPort = Integer.parseInt(args[i]);
+                    }
+                    catch (NumberFormatException e) {
+                        System.out.println(USAGE_MESSAGE);
+                        System.exit(-1);
+                    }
+                }
+            }
+            else if (args[i].equals("-udp_port")) {
+                if (++i >= args.length) {
+                    System.out.println(USAGE_MESSAGE);
+                    System.exit(-1);
+                }
+                else {
+                    try {
+                        udpPort = Integer.parseInt(args[i]);
+                    }
+                    catch (NumberFormatException e) {
+                        System.out.println(USAGE_MESSAGE);
+                        System.exit(-1);
+                    }
+                }
+            }
+            else {
+                System.out.println(USAGE_MESSAGE);
+                System.exit(-1);
+            }
+        }
+
+        System.out.println("Starting server on TCP port: " + tcpPort + " and UDP port: " + udpPort);
+        server.initialize(tcpPort, udpPort);
     }
+
+    private static final String USAGE_MESSAGE = "Usage: server.jar [-tcp_port PORT_NUMBER] [-udp_port PORT_NUMBER]";
 }

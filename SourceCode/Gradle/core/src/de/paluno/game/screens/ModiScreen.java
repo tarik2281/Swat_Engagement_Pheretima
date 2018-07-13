@@ -53,7 +53,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         imageBackground = elementGUI.createBackground(game.getAssetManager().get(Assets.menuBackground));
         tableBackground.setBackground(imageBackground.getDrawable());
 
-        textButtonLocal = elementGUI.createTextButton("Local");
+        textButtonLocal = elementGUI.createTextButton("Lokal");
         textButtonLocal.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -117,14 +117,23 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
             }
         });
 
+        TextButton buttonCredits = new TextButton("Credits", skin);
+        buttonCredits.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setNextScreen(new CreditsScreen(game));
+            }
+        });
+
         textButtonLocal.setColor(1.0f, 1.0f, 1.0f, 0.4f);
         textButtonOnline.setColor(1.0f, 1.0f, 1.0f, 0.4f);
 
         tableTextButton.setFillParent(true);
         tableTextButton.add(textButtonLocal).size(350,80).pad(20);
         tableTextButton.add(textButtonOnline).size(350,80).pad(20).row();
-        tableTextButton.add(textButtonPlay).size(200,60).padLeft(30);
-        tableTextButton.add(textButtonClose).size(200,60).padRight(30);
+        tableTextButton.add(textButtonPlay).size(200,60).colspan(2).pad(20).row();
+        tableTextButton.add(buttonCredits).size(200, 60).colspan(2).pad(20).row();
+        tableTextButton.add(textButtonClose).size(200,60).colspan(2).pad(20);
 
 //        stage.setDebugAll(true);
 

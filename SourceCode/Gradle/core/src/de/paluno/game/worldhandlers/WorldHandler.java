@@ -88,6 +88,15 @@ public abstract class WorldHandler implements Disposable {
             setWaiting();
         }
     };
+    private Timer.Task turretsShootTimer = new Timer.Task() {
+        @Override
+        public void run() {
+            for (Turret turret : turrets) {
+                turret.shoot(weaponProjectileCache);
+                shootProjectiles(turret.getShootingWorm().getPlayerNumber(), turret.getShootingWorm().getCharacterNumber(), WeaponType.WEAPON_TURRET_PROJECTILE);
+            }
+        }
+    };
 
     private EventManager.Listener listener = (eventType, data) -> {
         switch (eventType) {
@@ -498,6 +507,11 @@ public abstract class WorldHandler implements Disposable {
 
     @Override
     public void dispose() {
+        if (endTurnTimer.isScheduled())
+            endTurnTimer.cancel();
+        if (turretsShootTimer.isScheduled())
+            turretsShootTimer.cancel();
+
         world.dispose();
 
         hide();
@@ -566,9 +580,6 @@ public abstract class WorldHandler implements Disposable {
             projectile.setId(projectileId++);
         }
         world.registerAfterUpdate(projectile);
-
-        if (projectile.getWeaponType() == WeaponType.WEAPON_TURRET_PROJECTILE)
-            System.out.println("spawning turret projectile with id: " + projectile.getId() + " (" + toString() + ")");
 
         switch (projectile.getWeaponType()) {
             case WEAPON_MINE:
@@ -821,7 +832,7 @@ public abstract class WorldHandler implements Disposable {
     private void addWeapons(Player player) {
         for (WeaponType type : WeaponType.values()) {
             Weapon weapon = new Weapon(type);
-            weapon.setAirstrikeHeight(map.getWorldHeight());
+            weapon.setAirstrikeSpawnPosition(map.getWorldWidth(), map.getWorldHeight());
             weapon.setupAssets(getAssetManager());
             player.addWeapon(weapon);
         }
@@ -1049,11 +1060,10 @@ public abstract class WorldHandler implements Disposable {
 
         createReplayTurrets();
 
+        getWorld().getCamera().setCameraFocus(turrets.get(0));
+
         if (shouldWorldStep()) {
-            for (Turret turret : turrets) {
-                turret.shoot(weaponProjectileCache);
-                shootProjectiles(turret.getShootingWorm().getPlayerNumber(), turret.getShootingWorm().getCharacterNumber(), WeaponType.WEAPON_TURRET_PROJECTILE);
-            }
+            Timer.schedule(turretsShootTimer, 2.0f);
         }
 
         return true;

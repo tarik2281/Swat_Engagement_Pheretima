@@ -185,7 +185,7 @@ public class EventManager {
     }
 
     public void queueEvent(Type type, Object data) {
-        System.out.println("Queueing event with type: " + type.name());
+        //System.out.println("Queueing event with type: " + type.name());
 
         Data eventData = new Data();
         eventData.type = type;

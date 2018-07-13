@@ -78,6 +78,12 @@ public class GameWorld implements Disposable {
             return false;
         }
 
+        if (UserData.getType(fixtureA) == UserData.ObjectType.Crate && UserData.getType(fixtureB) == UserData.ObjectType.Projectile) {
+            return false;
+        } else if (UserData.getType(fixtureB) == UserData.ObjectType.Crate && UserData.getType(fixtureA) == UserData.ObjectType.Projectile) {
+            return false;
+        }
+
         return true;
     };
 
