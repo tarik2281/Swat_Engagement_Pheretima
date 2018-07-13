@@ -22,8 +22,6 @@ public class Assets {
 
     public static final AssetDescriptor<Texture> menuBackground =
             new AssetDescriptor<Texture>("MENU.png", Texture.class);
-    public static final AssetDescriptor<Texture> teamMenuScreenBackground =
-            new AssetDescriptor<Texture>("TeamMenuScreen.png", Texture.class);
     public static final AssetDescriptor<Texture> map1Thumbnail =
             new AssetDescriptor<Texture>("Map1SEPThumb.png", Texture.class);
     public static final AssetDescriptor<Texture> map2Thumbnail =
@@ -50,37 +48,6 @@ public class Assets {
     public static final AssetDescriptor<Texture> weaponMenuButton =
             new AssetDescriptor<Texture>("target.png", Texture.class);
 
-    //TeamMenuScreen
-    public static final AssetDescriptor<Texture> teamMenuScreen2 =
-            new AssetDescriptor<Texture>("TeamMenuScreen2.png", Texture.class);
-    public static final AssetDescriptor<Texture> teamMenuScreen3 =
-            new AssetDescriptor<Texture>("TeamMenuScreen3.png", Texture.class);
-    public static final AssetDescriptor<Texture> teamMenuScreen4 =
-            new AssetDescriptor<Texture>("TeamMenuScreen4.png", Texture.class);
-    public static final AssetDescriptor<Texture> teamMenuScreen5 =
-            new AssetDescriptor<Texture>("TeamMenuScreen5.png", Texture.class);
-
-    //LoginScreen
-    public static final AssetDescriptor<Texture> playerMenuScreen2 =
-            new AssetDescriptor<Texture>("PlayerMenuScreen2.png", Texture.class);
-    public static final AssetDescriptor<Texture> playerMenuScreen3 =
-            new AssetDescriptor<Texture>("PlayerMenuScreen3.png", Texture.class);
-    public static final AssetDescriptor<Texture> playerMenuScreen4 =
-            new AssetDescriptor<Texture>("PlayerMenuScreen4.png", Texture.class);
-    public static final AssetDescriptor<Texture> playerMenuScreen5 =
-            new AssetDescriptor<Texture>("PlayerMenuScreen5.png", Texture.class);
-    public static final AssetDescriptor<Texture> random =
-            new AssetDescriptor<Texture>("random.png", Texture.class);
-
-    //Multiplayer Number
-    public static final AssetDescriptor<Texture> playerNumber2 =
-            new AssetDescriptor<Texture>("2Player.png", Texture.class);
-    public static final AssetDescriptor<Texture> playerNumber3 =
-            new AssetDescriptor<Texture>("3Player.png", Texture.class);
-    public static final AssetDescriptor<Texture> playerNumber4 =
-            new AssetDescriptor<Texture>("4Player.png", Texture.class);
-    public static final AssetDescriptor<Texture> playerNumber5 =
-            new AssetDescriptor<Texture>("5Player.png", Texture.class);
 
     public static final AssetDescriptor<Map> map1 =
             new AssetDescriptor<Map>("Map1SEP.tmx", Map.class);
@@ -272,16 +239,15 @@ public class Assets {
             assetManager.load(asset);
     }
 
-    public static final AssetDescriptor[] MenuScreenAssets = {
-            menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
-            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground,menuBackground
-    };
 
     public static final AssetDescriptor[] PlayScreenAssets = {
-            airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade, iconBazooka, projectileGun, projectileGrenade, projectileBazooka,
-            weaponGun, weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial, iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, weaponUI2, windGreen, windOrange, windRed,
-            weaponMine, projectileMine,weaponTurret ,projectileTurret, crate, chute, waterTexture,
-            iconAirStrike, iconMine,iconTeleport,iconArtillery,teleporter, weaponMenuButton
+            airstrikeCrosshair, arrow, wormBreath, wormWalk, wormFly, iconGun, iconGrenade,
+            iconBazooka, projectileGun, projectileGrenade, projectileBazooka, weaponGun,
+            weaponGrenade, weaponBazooka, iconSpecial, projectileSpecial, weaponSpecial,
+            iconAirstrike, projectileAirstrike, weaponAirstrike, weaponUI, weaponUI2, windGreen,
+            windOrange, windRed, weaponMine, projectileMine,weaponTurret ,projectileTurret,
+            crate, chute, waterTexture, iconAirStrike, iconMine,iconTeleport,iconArtillery,
+            teleporter, weaponMenuButton
     };
 
     public static final AssetDescriptor[] GameOverScreenAssets = {
@@ -289,17 +255,10 @@ public class Assets {
     };
 
 
-    public static final AssetDescriptor[] PlayerMenuScreenAssets = {
-            playButton,playerMenuScreen2,playerMenuScreen3,playerMenuScreen4,playerMenuScreen5,teamMenuScreenBackground,random,
-            teamMenuScreen2,teamMenuScreen3,teamMenuScreen4,teamMenuScreen5,menuBackground,  menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
-            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground,menuBackground
-    };
 
-
-    public static final AssetDescriptor[] LobbyScreenAssets = {
+    public static final AssetDescriptor[] MenuScreenAssets = {
             map1Thumbnail,map2Thumbnail,map3Thumbnail,map4Thumbnail,worms1Button,
-            worms2Button,worms3Button,worms4Button,worms5Button,menuBackground,  menuBackground, map1Thumbnail, map2Thumbnail, map3Thumbnail, map4Thumbnail, playButton, worms1Button,
-            worms2Button, worms3Button, worms4Button, worms5Button, multi, local, teamMenuScreenBackground
+            worms2Button,worms3Button,worms4Button,worms5Button,menuBackground,
     };
 
     public static final AssetDescriptor[] Music = {

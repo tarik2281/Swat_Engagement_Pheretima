@@ -168,7 +168,6 @@ public class WeaponUI {
         table.setBackground(image.getDrawable());
 
         // Positioning of Buttons
-        table.setVisible(false);
         table.add(buttonGun);
         table.row();
         table.add(buttonGrenade);
@@ -177,7 +176,6 @@ public class WeaponUI {
         table.row();
         table.add(buttonWeaponSpecial);
 
-        table2.setVisible(false);
         table2 = new Table().padTop(35);
         table2.setBackground(image2.getDrawable());
         table2.add(buttonAirStrike.pad(5));
@@ -193,6 +191,9 @@ public class WeaponUI {
 
 
         stage.addActor(tableMain);
+        table2.setVisible(false);
+        table.setVisible(false);
+
 
     }
 

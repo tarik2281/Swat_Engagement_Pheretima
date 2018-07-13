@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
-import de.paluno.game.Config;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
@@ -186,7 +185,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-        Assets.loadAssets(manager, Assets.LobbyScreenAssets);
+        Assets.loadAssets(manager, Assets.MenuScreenAssets);
         return false;
     }
 }

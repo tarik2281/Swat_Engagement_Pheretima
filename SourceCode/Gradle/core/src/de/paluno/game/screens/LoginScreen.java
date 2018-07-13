@@ -62,7 +62,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-        Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
+        Assets.loadAssets(manager, Assets.MenuScreenAssets);
         return false;
     }
 
