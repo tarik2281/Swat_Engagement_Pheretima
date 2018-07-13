@@ -89,7 +89,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                     game.setLocalScreen();
                 }else if (modi == 2) {
                     Dialog connectionDialog = showConnectionDialog();
-                    client = new NetworkClient(Config.serverAddress);
+                    client = new NetworkClient("localhost");
                     client.setConnectionListener(new NetworkClient.ConnectionListener() {
                         @Override
                         public void onConnectionResult(NetworkClient client, int result) {
@@ -100,11 +100,6 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                                 case NetworkClient.RESULT_CONNECTION_FAILED:
                                     connectionDialog.hide();
                                     showErrorDialog("Verbindung zum Server konnte\nnicht aufgebaut werden.");
-                                    /*new Dialog("Server Connection", elementGUI.getSkin()) {
-                                        protected void result (Object object) {
-                                            System.out.println("Chosen: " + object);
-                                        }
-                                    }.text("Connection failed").button("Close", true).show(stage);*/
                                     break;
                             }
                         }

@@ -127,7 +127,6 @@ public class WeaponUI {
                 System.out.println("Airstrike ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
-                //worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
@@ -147,7 +146,6 @@ public class WeaponUI {
 
             }
         }));
-        // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
 
 
         // Mine ElementGUI
@@ -158,7 +156,6 @@ public class WeaponUI {
                 System.out.println("Mine ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
-                //  worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 
@@ -170,7 +167,6 @@ public class WeaponUI {
                 System.out.println("Artillery ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
-                // worldHandler.applyEquipWeapon(WeaponType.WEAPON_SPECIAL);
             }
         }));
 

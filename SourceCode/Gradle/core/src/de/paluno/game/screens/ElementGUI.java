@@ -12,42 +12,28 @@ import javax.xml.soap.Text;
 
 public class ElementGUI {
 
-    private Texture texture;
     private Image image;
 
     private TextureRegion textureRegion;
     private TextureRegionDrawable textureRegionDrawable;
-    private ImageButton imageButton;
 
     private TextField.TextFieldStyle textFieldStyle;
     private TextField textField;
 
+    private ImageButton imageButton;
     private ImageButton selectedImageButton, selectedImageButton2;
+
+    private TextButton textButton;
     private TextButton selectedTextButton;
+
+    private Skin skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
+
 
     public Skin getSkin() {
         return skin;
     }
 
-    //    private Skin skin = new Skin(Gdx.files.internal("skin-masters/skin.json"));
-//    private Skin skin = new Skin(Gdx.files.internal("skin-grey/uiskin.json"));
-    private Skin skin = new Skin(Gdx.files.internal("sgx-ui/sgx-ui.json"));
-    //    private Skin skin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
-    private TextButton textButton;
 
-
-    public ImageButton createButton(Texture texture, Table table) {
-        textureRegion = new TextureRegion(texture);
-        textureRegionDrawable = new TextureRegionDrawable(textureRegion);
-        imageButton = new ImageButton(textureRegionDrawable);
-        imageButton.setColor(1.0f, 1.0f, 1.0f, 0.4f);
-        imageButton.pad(10);
-
-        if (table != null) {
-            table.add(imageButton);
-        }
-        return imageButton;
-    }
 
     public ImageButton createButton(Texture texture) {
         textureRegion = new TextureRegion(texture);

@@ -1,4 +1,4 @@
- package de.paluno.game;
+package de.paluno.game;
 
 import com.badlogic.gdx.physics.box2d.*;
 
@@ -154,7 +154,7 @@ public class CollisionHandler implements ContactListener {
         }
 
 
-        // Turret ->ground
+        // Turret -> Ground
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Ground) {
 
             Projectile projectile = UserData.getObject(fixA);
@@ -173,7 +173,7 @@ public class CollisionHandler implements ContactListener {
             System.out.println("Turret collided with Ground");
         }
 
-        //Turret -> worm
+        //Turret -> Worm
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.WormFoot) {
             Worm worm = UserData.getObject(fixB);
             worm.beginContact();
@@ -183,7 +183,7 @@ public class CollisionHandler implements ContactListener {
             worm.beginContact();
         }
 
-        // projectile->Turret
+        // Projectile->Turret
 
         if (UserData.getType(fixA) == UserData.ObjectType.Turret && UserData.getType(fixB) == UserData.ObjectType.Projectile) {
 

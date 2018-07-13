@@ -31,6 +31,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
             buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
     private ArrayList<String> names = new ArrayList<>();
     private int mapNumber, numWorms;
+
     int playerNum = 1;
 
     private DataHandler dataHandler = new DataHandler() {
@@ -48,8 +49,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
             "Spongebob", "Patrick", "Sandy", "Plankton", "Mr. Krabs",
             "The Undertaker", "Rey Mysterio", "Jeff Hardy", "Hornswoggle", "The Rock",
             "Charlie Sheen", "Dexter", "Michael Scofield", "Barney Stinson", "Walter White",
-            "Chris Brown", "Drake", "Frank Ocean", "Trey Songz", "Eminem",
-            "Rihanna", "Beyonce", "Amy Winehouse", "Britney Spears", "J-Lo"));
+            "Chris Brown", "Drake", "Michael Jackson", "Trey Songz", "Eminem"));
 
     public LoginScreen(SEPGame game, NetworkClient client) {
         super();
@@ -58,17 +58,13 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         stage = new Stage(new ScreenViewport());
         elementGUI = new ElementGUI();
         Gdx.input.setInputProcessor(stage);
-
     }
-
 
     @Override
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
-
         return false;
     }
-
 
     @Override
     public void show() {
@@ -128,7 +124,6 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
                         textButtonPlayerNum.setText("Spieler " + playerNum);
                     }
 
-
                     String res = String.join(" " , names);
                     System.out.println(res);
                 } else {
@@ -162,9 +157,6 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
                 if (client != null) {
                     client.send(new UserLoginRequest(textFieldUsername.getText(), new String[]{textFieldWorm1.getText(),
                             textFieldWorm2.getText(), textFieldWorm3.getText(), textFieldWorm4.getText(), textFieldWorm5.getText()}));
-                    //game.setLobbyScreen();
-                } else {
-                    //game.setPlayScreen(mapNumber, numWorms);
                 }
             }
         });
@@ -279,7 +271,6 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         });
 
 
-        //tableTextField.setFillParent(true);
         tableTextField.add(textFieldUsername).size(200, 50).colspan(5).row();
         tableTextField.add(textFieldWorm1).size(200, 50);
         tableTextField.add(textFieldWorm2).size(200, 50);
@@ -287,7 +278,6 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         tableTextField.add(textFieldWorm4).size(200, 50);
         tableTextField.add(textFieldWorm5).size(200, 50).row();
         tableTextField.add(textButtonAutoFill).colspan(5);
-        //tableTextField.setPosition(tableBackground.getPadX(), tableBackground.getPadY() + 230);
 
         tableBackground.center();
         tableBackground.add(tableTextField);
@@ -299,55 +289,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
         tableBackground.add(menuButtonsTable);
 
-        /*tableMap.setFillParent(true);
-        tableMap.add(buttonMap1);
-        tableMap.add(buttonMap2);
-        tableMap.add(buttonMap3);
-        tableMap.add(buttonMap4);
-
-        table4Worm.setFillParent(true);
-        table4Worm.add(buttonWorm1);
-        table4Worm.add(buttonWorm2);
-        table4Worm.add(buttonWorm3);
-        table4Worm.add(buttonWorm4);
-        table4Worm.add(buttonWorm5).row();
-        table4Worm.setPosition(tableMap.getPadX(), tableMap.getPadY() - 150);
-
-        tableTextButton.setFillParent(true);
-        tableTextButton.add(textButtonPlayerNum).size(200, 60).row();
-        tableTextButton.add(textButtonLogin).size(200, 60);
-        tableTextButton.setPosition(table4Worm.getPadX(), table4Worm.getPadY() - 300);*/
-
-
-//        textFieldWorm1.setPosition(150,370);
-//        textFieldWorm2.setPosition(350,370);
-//        textFieldWorm3.setPosition(550,370);
-//        textFieldWorm4.setPosition(750,370);
-//        textFieldWorm5.setPosition(950,370);
-//        textFieldUsername.setPosition(550,450);
-//        textButtonPlayerNum.setPosition(550200);
-//        textButtonLogin.setPosition(550,120);
-
-//        tableBackground.center();
         stage.addActor(tableBackground);
-        /*stage.addActor(tableTextField);
-        if (client == null) {
-            stage.addActor(tableMap);
-            stage.addActor(table4Worm);
-            textButtonPlayerNum.setVisible(true);
-        }
-
-        stage.addActor(tableTextButton);*/
-//        stage.setDebugAll(true);
-
-//        stage.addActor(textFieldWorm1);
-//        stage.addActor(textFieldWorm2);
-//        stage.addActor(textFieldWorm3);
-//        stage.addActor(textFieldWorm4);
-//        stage.addActor(textFieldWorm5);
-//        stage.addActor(textFieldUsername);
-//        stage.addActor(textButtonPlayerNum);
-//        stage.addActor(textButtonLogin);
 
         elementGUI.setSelectedImageButton(buttonMap1);
         elementGUI.setSelectedImageButton2(buttonWorm1);

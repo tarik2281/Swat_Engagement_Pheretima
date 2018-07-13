@@ -30,7 +30,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
     private SEPGame game;
     private TextButton textButtonMenu, textButtonPlay;
     private ElementGUI elementGUI;
-    private TextField textField, textFieldBackground;
+    private TextField textField;
     private Table table;
     private Image imageMap, imageNumWorms;
     private Container<Table> chatWindowContainer;
