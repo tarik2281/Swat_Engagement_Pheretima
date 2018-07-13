@@ -362,7 +362,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         tableTextField.add(textButtonAutoFill).colspan(5);
 
 
-        textButtonAdd = elementGUI.createTextButton("Hinzufügen");
+        textButtonAdd = elementGUI.createTextButton("Hinzufuegen");
         textButtonAdd.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
