@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
 import de.paluno.game.NetworkClient;
@@ -133,13 +134,18 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
     }
 
     @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
+    @Override
     public void show() {
         client.registerDataHandler(dataHandler);
         LobbyDataRequest lobbyDataRequest = new LobbyDataRequest();
         lobbyDataRequest.lobbyId = lobbyID;
         client.send(lobbyDataRequest);
 
-        stage = new Stage();
+        stage = new Stage(new ScreenViewport());
         table = new Table(skin);
         chatWindowContainer = new Container<>();
         chatWindow.initialize();

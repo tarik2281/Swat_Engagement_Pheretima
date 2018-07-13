@@ -1,13 +1,15 @@
 package de.paluno.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Timer;
@@ -26,6 +28,7 @@ public class ChatWindow implements Disposable {
     private Table chatTable;
     private ScrollPane chatScrollPane;
     private ElementGUI elementGUI;
+    private Drawable background;
 
     private DataHandler messageHandler = (client, data) -> {
         if (data instanceof ChatMessage) {
@@ -82,9 +85,6 @@ public class ChatWindow implements Disposable {
         });
     }
 
-
-
-
     public void initialize() {
         client.registerDataHandler(messageHandler);
         elementGUI = new ElementGUI();
@@ -99,6 +99,15 @@ public class ChatWindow implements Disposable {
         stage.addActor(table);
 
         TextField input = new TextField("", skin);
+        input.addListener(new FocusListener() {
+            @Override
+            public void keyboardFocusChanged(FocusEvent event, Actor actor, boolean focused) {
+                if (focused)
+                    enableBackground();
+                else
+                    disableBackground();
+            }
+        });
         input.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
@@ -118,13 +127,24 @@ public class ChatWindow implements Disposable {
 
         chatTable = new Table(skin);
         chatScrollPane = new ScrollPane(chatTable, skin);
-        chatScrollPane.setColor(1.0f, 1.0f, 1.0f, 0.3f);
+        background = chatScrollPane.getStyle().background;
+        chatScrollPane.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         table.add(chatScrollPane).size(500, 200);
         table.row();
         table.add(input).width(500);
 
         chatTable.align(Align.bottomLeft);
+        disableBackground();
+    }
+
+    public void disableBackground() {
+        chatScrollPane.getStyle().background = null;
+    }
+
+    public void enableBackground() {
+        stage.setScrollFocus(chatScrollPane);
+        chatScrollPane.getStyle().background = background;
     }
 
     public void render(float delta) {

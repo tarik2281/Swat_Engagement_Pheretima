@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
 import de.paluno.game.NetworkClient;
@@ -60,12 +61,16 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
     public LocalScreen(SEPGame game) {
         super();
         this.game = game;
-        stage = new Stage();
+        stage = new Stage(new ScreenViewport());
         elementGUI = new ElementGUI();
         Gdx.input.setInputProcessor(stage);
 
     }
 
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
 
     @Override
     public boolean load(AssetManager manager) {
@@ -169,7 +174,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             }
         });
         textButtonMenu = elementGUI.createTextButton("Menu");
-        textButtonMenu.setVisible(false);
+        //textButtonMenu.setVisible(false);
 
 
         textButtonMenu.addListener(new ClickListener() {
@@ -344,17 +349,26 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         textFieldWorm4.setVisible(false);
         textFieldWorm5.setVisible(false);
 
-        tableTextField.setFillParent(true);
-        tableTextField.add(textFieldUsername).size(200, 50).colspan(5).row();
-        tableTextField.add(textFieldWorm1).size(200, 50);
-        tableTextField.add(textFieldWorm2).size(200, 50);
-        tableTextField.add(textFieldWorm3).size(200, 50);
-        tableTextField.add(textFieldWorm4).size(200, 50);
-        tableTextField.add(textFieldWorm5).size(200, 50).row();
-        tableTextField.add(textButtonAutoFill).colspan(5);
-        tableTextField.right().bottom().setY(250);
+        tableBackground.setFillParent(true);
+        tableBackground.add(new Table()).colspan(2).getActor().add(buttonMap1, buttonMap2, buttonMap3, buttonMap4);
+        tableBackground.row();
+        tableBackground.add(new Table()).colspan(2).getActor().add(buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5);
+        tableBackground.row();
 
-        tableMap.setFillParent(true);
+
+
+        //tableTextField.setFillParent(true);
+        tableTextField.add(textFieldUsername).size(150, 50).colspan(5).row();
+        tableTextField.add(textFieldWorm1).size(150, 50);
+        tableTextField.add(textFieldWorm2).size(150, 50);
+        tableTextField.add(textFieldWorm3).size(150, 50);
+        tableTextField.add(textFieldWorm4).size(150, 50);
+        tableTextField.add(textFieldWorm5).size(150, 50).row();
+        tableTextField.add(textButtonAutoFill).colspan(5);
+        //tableTextField.right().bottom().setY(250);
+
+
+        /*tableMap.setFillParent(true);
         tableMap.add(buttonMap1);
         tableMap.add(buttonMap2);
         tableMap.add(buttonMap3);
@@ -374,7 +388,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         tableTextButton.setX(180);
         tableTextButton.add(textButtonMenu).size(200, 60).pad(20);
         tableTextButton.add(textButtonSpielen).size(200, 60).pad(20);
-        tableTextButton.bottom().setY(20);
+        tableTextButton.bottom().setY(20);*/
 
 
         textButtonAdd = elementGUI.createTextButton("Hinzufügen");
@@ -400,7 +414,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             }
         });
         tableTextButtonPlayer = new Table();
-        tableTextButtonPlayer.setPosition(160,420);
+        //tableTextButtonPlayer.setPosition(160,420);
         tableTextButtonPlayer.add(textButtonAdd);
         tableTextButtonPlayer.add(textButtonDelete);
 
@@ -411,11 +425,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
                 updateTextFields();
             }
         });
-        String[] strings = new String[5];
-        for (int i = 1, k = 0; i <= strings.length; i++) {
-            strings[k++] = "Player " + i + ": ";
 
-        }
         list.setItems(names);
 
         scrollPane = new ScrollPane(list, elementGUI.getSkin());
@@ -423,6 +433,19 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         scrollPane.setSmoothScrolling(false);
         scrollPane.setTransform(true);
         scrollPane.setScale(1f);
+
+        tableTextButtonPlayer.row();
+        tableTextButtonPlayer.add(scrollPane).colspan(2).size(300, 200).padTop(20);
+
+        tableBackground.add(tableTextButtonPlayer, tableTextField);
+        tableBackground.row();
+
+        Table menuButtonsTable = new Table();
+        menuButtonsTable.row().size(200, 60).pad(10);
+        menuButtonsTable.add(textButtonMenu, textButtonSpielen);
+        tableBackground.add(menuButtonsTable).colspan(2);
+        tableBackground.padTop(50);
+        stage.addActor(tableBackground);
 
 //        textFieldWorm1.setPosition(150,370);
 //        textFieldWorm2.setPosition(350,370);
@@ -434,8 +457,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 //        textButtonSpielen.setPosition(550,120);
 
 //        tableBackground.center();
-        stage.addActor(tableBackground);
-        stage.addActor(tableTextField);
+        /*stage.addActor(tableTextField);
         if (client == null) {
             stage.addActor(tableMap);
             stage.addActor(table4Worm);
@@ -444,7 +466,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
         stage.addActor(tableTextButton);
         stage.addActor(scrollPane);
-        stage.addActor(tableTextButtonPlayer);
+        stage.addActor(tableTextButtonPlayer);*/
 //        stage.setDebugAll(true);
 
 //        stage.addActor(textFieldWorm1);
@@ -460,6 +482,8 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         elementGUI.setSelectedImageButton2(buttonWorm1);
 
         updateTextFields();
+
+        //stage.setDebugAll(true);
     }
 
 

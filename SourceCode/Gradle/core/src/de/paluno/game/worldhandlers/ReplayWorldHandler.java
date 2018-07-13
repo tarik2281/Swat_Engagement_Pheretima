@@ -28,6 +28,7 @@ public class ReplayWorldHandler extends InterpolationWorldHandler {
 
         getWorld().setFromSnapshot(replay.getSetupSnapshot().getWorldSnapshot());
         getWorld().getCamera().setCameraPosition(replay.getCameraPosition());
+        getWorld().getCamera().setZoom(replay.getCameraZoom());
 
         for (Player.SnapshotData playerData : replay.getSetupSnapshot().getPlayerSnapshots()) {
             Player player = addPlayer(playerData.getPlayerNumber());

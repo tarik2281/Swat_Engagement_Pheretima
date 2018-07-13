@@ -28,6 +28,7 @@ public class NetworkClient {
     private Client client;
     private ConnectionListener connectionListener;
     private DisconnectionListener disconnectionListener;
+    private boolean userDisconnect = false;
 
     private ArrayList<DataHandler> addQueue;
     private ArrayList<DataHandler> removeQueue;
@@ -45,7 +46,7 @@ public class NetworkClient {
         @Override
         public void disconnected(Connection connection) {
             Gdx.app.postRunnable(() -> {
-                if (disconnectionListener != null)
+                if (!userDisconnect && disconnectionListener != null)
                     disconnectionListener.onDisconnected(NetworkClient.this);
             });
         }
@@ -117,6 +118,7 @@ public class NetworkClient {
     }
 
     public void disconnect() {
+        userDisconnect = true;
         client.stop();
     }
 
@@ -139,12 +141,4 @@ public class NetworkClient {
     public void unregisterDataHandler(DataHandler handler) {
         removeQueue.add(handler);
     }
-
-    /*public <T> void registerDataHandler(Class<T> tClass, DataHandler handler) {
-        dataHandlers.put(tClass, handler);
-    }
-
-    public <T> void unregisterDataHandler(Class<T> tClass, DataHandler handler) {
-        dataHandlers.remove(tClass);
-    }*/
 }

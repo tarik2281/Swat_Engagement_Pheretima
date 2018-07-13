@@ -8,7 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
+import de.paluno.game.Config;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
@@ -24,6 +26,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     private NetworkClient client;
     private int modi = 1;
     private TextButton textButtonClose;
+    private String errorText;
 
     public ModiScreen(SEPGame game) {
         super();
@@ -31,9 +34,16 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         elementGUI = new ElementGUI();
     }
 
+    public ModiScreen(SEPGame game, String errorText) {
+        super();
+        this.game = game;
+        elementGUI = new ElementGUI();
+        this.errorText = errorText;
+    }
+
     @Override
     public void show() {
-        stage = new Stage();
+        stage = new Stage(new ScreenViewport());
         tableBackground = new Table();
         tableTextButton = new Table();
         skin = elementGUI.getSkin();
@@ -78,7 +88,8 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                 if (modi == 1){
                     game.setLocalScreen();
                 }else if (modi == 2) {
-                    client = new NetworkClient("178.202.240.241");
+                    Dialog connectionDialog = showConnectionDialog();
+                    client = new NetworkClient(Config.serverAddress);
                     client.setConnectionListener(new NetworkClient.ConnectionListener() {
                         @Override
                         public void onConnectionResult(NetworkClient client, int result) {
@@ -87,17 +98,21 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                                     game.setLoginScreen(client);
                                     break;
                                 case NetworkClient.RESULT_CONNECTION_FAILED:
-                                    new Dialog("Server Connection", elementGUI.getSkin()) {
+                                    connectionDialog.hide();
+                                    showErrorDialog("Verbindung zum Server konnte\nnicht aufgebaut werden.");
+                                    /*new Dialog("Server Connection", elementGUI.getSkin()) {
                                         protected void result (Object object) {
                                             System.out.println("Chosen: " + object);
                                         }
-                                    }.text("Connection failed").button("Close", true).show(stage);
+                                    }.text("Connection failed").button("Close", true).show(stage);*/
                                     break;
                             }
                         }
                     });
+                    client.setDisconnectionListener(client -> {
+                        game.setNextScreen(new ModiScreen(game, "Verbindung zum Server abgebrochen"));
+                    });
                     client.connect();
-
                 }
             }
         });
@@ -118,7 +133,27 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         stage.addActor(tableBackground);
         stage.addActor(tableTextButton);
 
+        if (errorText != null)
+            showErrorDialog(errorText);
+
         Gdx.input.setInputProcessor(stage);
+    }
+
+    private Dialog showConnectionDialog() {
+        Dialog dialog = new Dialog("Online", skin);
+        dialog.text("Verbindung zum Server wird hergestellt...");
+        dialog.getContentTable().pad(10);
+        dialog.show(stage);
+        return dialog;
+    }
+
+    private void showErrorDialog(String text) {
+        Dialog dialog = new Dialog("Fehler", skin);
+        dialog.text(text);
+        dialog.getContentTable().pad(10);
+        dialog.button("OK");
+        dialog.getButtonTable().pad(10);
+        dialog.show(stage);
     }
 
     public void setSelectedModiButton(TextButton button) {
@@ -147,6 +182,11 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
 
     @Override

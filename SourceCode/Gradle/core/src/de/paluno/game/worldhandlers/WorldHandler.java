@@ -409,6 +409,10 @@ public abstract class WorldHandler implements Disposable {
             setIdle();
     }
 
+    public void updateViewport(float width, float height) {
+        world.getCamera().updateViewport(width, height);
+    }
+
     public void show() {
         EventManager.getInstance().addListener(listener,
                 EventManager.Type.WormDied,
@@ -703,6 +707,7 @@ public abstract class WorldHandler implements Disposable {
             replay.setSetupTick(currentGameTick);
             replay.setMapNumber(getMapNumber());
             replay.setCameraPosition(new Vector2(getWorld().getCamera().getWorldPosition()));
+            replay.setCameraZoom(world.getCamera().getZoom());
         }
     }
 
@@ -713,6 +718,7 @@ public abstract class WorldHandler implements Disposable {
             replay.setSetupTick(currentGameTick);
             replay.setMapNumber(getMapNumber());
             replay.setCameraPosition(new Vector2(getWorld().getCamera().getWorldPosition()));
+            replay.setCameraZoom(world.getCamera().getZoom());
         }
     }
 

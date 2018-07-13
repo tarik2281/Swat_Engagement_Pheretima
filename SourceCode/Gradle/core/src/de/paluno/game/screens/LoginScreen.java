@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
 import de.paluno.game.NetworkClient;
@@ -54,7 +55,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         super();
         this.game = game;
         this.client = client;
-        stage = new Stage();
+        stage = new Stage(new ScreenViewport());
         elementGUI = new ElementGUI();
         Gdx.input.setInputProcessor(stage);
 
@@ -138,6 +139,14 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
             }
         });
 
+        TextButton menuButton = elementGUI.createTextButton("Menu");
+        menuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                client.disconnect();
+                game.setModiScreen();
+            }
+        });
         textButtonLogin = elementGUI.createTextButton("Einloggen");
 
         textButtonPlayerNum.addListener(new ClickListener() {
@@ -270,7 +279,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         });
 
 
-        tableTextField.setFillParent(true);
+        //tableTextField.setFillParent(true);
         tableTextField.add(textFieldUsername).size(200, 50).colspan(5).row();
         tableTextField.add(textFieldWorm1).size(200, 50);
         tableTextField.add(textFieldWorm2).size(200, 50);
@@ -278,9 +287,19 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         tableTextField.add(textFieldWorm4).size(200, 50);
         tableTextField.add(textFieldWorm5).size(200, 50).row();
         tableTextField.add(textButtonAutoFill).colspan(5);
-        tableTextField.setPosition(tableBackground.getPadX(), tableBackground.getPadY() + 230);
+        //tableTextField.setPosition(tableBackground.getPadX(), tableBackground.getPadY() + 230);
 
-        tableMap.setFillParent(true);
+        tableBackground.center();
+        tableBackground.add(tableTextField);
+        tableBackground.row();
+
+        Table menuButtonsTable = new Table();
+        menuButtonsTable.row().size(200, 60).pad(10);
+        menuButtonsTable.add(menuButton, textButtonLogin);
+
+        tableBackground.add(menuButtonsTable);
+
+        /*tableMap.setFillParent(true);
         tableMap.add(buttonMap1);
         tableMap.add(buttonMap2);
         tableMap.add(buttonMap3);
@@ -297,7 +316,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         tableTextButton.setFillParent(true);
         tableTextButton.add(textButtonPlayerNum).size(200, 60).row();
         tableTextButton.add(textButtonLogin).size(200, 60);
-        tableTextButton.setPosition(table4Worm.getPadX(), table4Worm.getPadY() - 300);
+        tableTextButton.setPosition(table4Worm.getPadX(), table4Worm.getPadY() - 300);*/
 
 
 //        textFieldWorm1.setPosition(150,370);
@@ -311,14 +330,14 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
 //        tableBackground.center();
         stage.addActor(tableBackground);
-        stage.addActor(tableTextField);
+        /*stage.addActor(tableTextField);
         if (client == null) {
             stage.addActor(tableMap);
             stage.addActor(table4Worm);
             textButtonPlayerNum.setVisible(true);
         }
 
-        stage.addActor(tableTextButton);
+        stage.addActor(tableTextButton);*/
 //        stage.setDebugAll(true);
 
 //        stage.addActor(textFieldWorm1);
@@ -346,6 +365,11 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
 
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
 
     @Override

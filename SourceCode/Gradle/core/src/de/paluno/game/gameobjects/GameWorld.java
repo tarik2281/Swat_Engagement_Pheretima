@@ -114,7 +114,7 @@ public class GameWorld implements Disposable {
     public void setFromSnapshot(SnapshotData data) {
         ground.setFromSnapshot(data.ground);
         this.waterLevel = data.waterLevel;
-        water.setLevel(waterLevel);
+        water.setLevel(waterLevel * Constants.SCREEN_SCALE);
     }
 
     @Override

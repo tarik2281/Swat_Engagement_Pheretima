@@ -30,6 +30,7 @@ public class GameCamera {
     private Vector2 goToPoint;
     // in world space (in meters)
     private float bottomLimit;
+    private float zoom;
 
     private Vector2 focusDirectionVector = new Vector2();
 
@@ -52,6 +53,18 @@ public class GameCamera {
 
         debugPosition = new Vector2();
         position = new Vector2();
+
+        zoom = 1.0f;
+    }
+
+    public void updateViewport(float width, float height) {
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+
+        debugCamera.viewportWidth = width * Constants.WORLD_SCALE;
+        debugCamera.viewportHeight = height * Constants.WORLD_SCALE;
+
+        setZoom(zoom);
     }
 
     // set the object the camera will follow, or null to follow nothing
@@ -123,8 +136,8 @@ public class GameCamera {
         debugPosition.add(horizontalMovement * Constants.CAMERA_MOVE_VELOCITY * delta,
                 verticalMovement * Constants.CAMERA_MOVE_VELOCITY * delta);
 
-        debugPosition.x = MathUtils.clamp(debugPosition.x, worldBounds.x + debugCamera.viewportWidth / 2.0f, worldBounds.x + worldBounds.width - debugCamera.viewportWidth / 2.0f);
-        debugPosition.y = MathUtils.clamp(debugPosition.y, worldBounds.y + debugCamera.viewportHeight / 2.0f, worldBounds.y + worldBounds.height - debugCamera.viewportHeight / 2.0f);
+        debugPosition.x = MathUtils.clamp(debugPosition.x, worldBounds.x + debugCamera.viewportWidth * zoom / 2.0f, worldBounds.x + worldBounds.width - debugCamera.viewportWidth * zoom / 2.0f);
+        debugPosition.y = MathUtils.clamp(debugPosition.y, worldBounds.y + debugCamera.viewportHeight * zoom / 2.0f, worldBounds.y + worldBounds.height - debugCamera.viewportHeight * zoom / 2.0f);
         // limit the vertical camera position so it does not go under the bottom limit
         //debugPosition.y = Math.max(debugPosition.y, bottomLimit);
 
@@ -152,6 +165,27 @@ public class GameCamera {
 
     public void goToPoint(float x, float y) {
         goToPoint = new Vector2(x, y);
+        cameraFocus = null;
+    }
+
+    public float getZoom() {
+        return zoom;
+    }
+
+    public void setZoom(float zoom) {
+        this.zoom = zoom;
+
+        if (this.zoom <= 0.1f)
+            this.zoom = 0.1f;
+
+        float zoomWidth = worldBounds.width / debugCamera.viewportWidth;
+        float zoomHeight = worldBounds.height / debugCamera.viewportHeight;
+
+        this.zoom = Math.min(this.zoom, zoomWidth);
+        this.zoom = Math.min(this.zoom, zoomHeight);
+
+        camera.zoom = this.zoom;
+        debugCamera.zoom = this.zoom;
     }
 
     public Matrix4 getDebugProjection() {

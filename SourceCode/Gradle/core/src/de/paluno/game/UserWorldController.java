@@ -159,6 +159,12 @@ public class UserWorldController {
 
             return true;
         }
+
+        @Override
+        public boolean scrolled(int amount) {
+            worldHandler.getWorld().getCamera().setZoom(worldHandler.getWorld().getCamera().getZoom() + amount * 0.05f);
+            return super.scrolled(amount);
+        }
     };
 
     private void startCamVertMovement(int movement) {

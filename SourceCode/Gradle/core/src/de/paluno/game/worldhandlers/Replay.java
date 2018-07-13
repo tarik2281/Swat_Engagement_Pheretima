@@ -23,6 +23,7 @@ public class Replay {
     private int startingTick;
     private int wind;
     private Vector2 cameraPosition;
+    private float cameraZoom;
     private ArrayList<GameEvent> events;
     private ArrayList<WorldData> snapshots;
 
@@ -95,6 +96,14 @@ public class Replay {
 
     public void setCameraPosition(Vector2 cameraPosition) {
         this.cameraPosition = cameraPosition;
+    }
+
+    public float getCameraZoom() {
+        return cameraZoom;
+    }
+
+    public void setCameraZoom(float cameraZoom) {
+        this.cameraZoom = cameraZoom;
     }
 
     public int getPlayerNumber() {

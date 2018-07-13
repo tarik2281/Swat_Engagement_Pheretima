@@ -156,6 +156,8 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
         simulatingAirdrop = false;
 
         if (wormDied && getReplay() != null) {
+            getReplay().setCameraZoom(getWorld().getCamera().getZoom());
+            getReplay().setCameraPosition(getWorld().getCamera().getWorldPosition());
             EventManager.getInstance().queueEvent(EventManager.Type.Replay, getReplay());
         }
         else

@@ -100,6 +100,14 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     };
 
     @Override
+    public void resize(int width, int height) {
+        if (worldHandler != null)
+            worldHandler.updateViewport(width, height);
+        if (replayWorldHandler != null)
+            replayWorldHandler.updateViewport(width, height);
+    }
+
+    @Override
     public void show() {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
