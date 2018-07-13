@@ -23,7 +23,7 @@ public class WormTest {
 	
 	@Test
 	public void testTakeDamage(){
-		wormToTest = new Worm(player_Mock, 2);
+		wormToTest = new Worm(player_Mock, 2, "Spieler");
 		wormToTest.takeDamage(10, 1);
 		assertTrue("Damage falsch kalkuliert", 90 == wormToTest.getHealth());
 	}

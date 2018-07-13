@@ -26,7 +26,7 @@ public class WormTest2 {
 		when(weapon_Mock.getWeaponType()).thenReturn(WeaponType.WEAPON_GRENADE);
 		when(weapon_Mock.createAnimatedSprite()).thenReturn(mock(AnimatedSprite.class));
 
-		wormTest = new Worm(player_Mock, 2);
+		wormTest = new Worm(player_Mock, 2, "Spieler");
 		wormTest.equipWeapon(weapon_Mock);
 	}
 
