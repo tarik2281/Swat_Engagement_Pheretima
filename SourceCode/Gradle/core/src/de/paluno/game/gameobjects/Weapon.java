@@ -96,6 +96,7 @@ public class Weapon {
 			}
 			// setTransform Method spawns the current Worm to the selected position
 			else if (type == WeaponType.WEAPON_TELEPORTER){
+				EventManager.getInstance().queueEvent(EventManager.Type.TeleporterUse, type);
                 worm.getBody().setTransform(indicator.getPosition().x, indicator.getPosition().y, 0);
             }
 			else {
@@ -111,7 +112,7 @@ public class Weapon {
 
 			currentAmmo--;
 		}else {
-			noAmmoSound.play(0.2f);
+			noAmmoSound.play();
 		}
 	}
 

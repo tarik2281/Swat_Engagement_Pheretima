@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.Config;
+import de.paluno.game.EventManager;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
@@ -56,6 +57,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         textButtonLocal.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedTextButton(textButtonLocal);
                 modi = 1;
             }
@@ -65,6 +67,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         textButtonOnline.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedTextButton(textButtonOnline);
                 modi = 2;
 
@@ -75,6 +78,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
         textButtonClose.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 System.exit(0);
             }
         });
@@ -85,6 +89,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (modi == 1){
                     game.setLocalScreen();
                 }else if (modi == 2) {
@@ -192,6 +197,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     @Override
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.LobbyScreenAssets);
+        Assets.loadAssets(manager, Assets.Music);
         return false;
     }
 }

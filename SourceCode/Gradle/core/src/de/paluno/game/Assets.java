@@ -202,8 +202,6 @@ public class Assets {
             new AssetDescriptor<AnimationData>("WeaponMine.xml", AnimationData.class);
     public static final AssetDescriptor<Music> menuSound = 
     		new AssetDescriptor<Music>("MenuScreen_ThemeSong.mp3", Music.class);
-    public static final AssetDescriptor<Music> tickSound =
-    		new AssetDescriptor<Music>("MenuScreen_ClickSound.mp3", Music.class);
     public static final AssetDescriptor<Sound> gameOverSound =
     		new AssetDescriptor<Sound>("GameOverScreen_CrowdCheer.mp3", Sound.class);
     public static final AssetDescriptor<Sound> grenadeExplosionSound =
@@ -264,6 +262,16 @@ public class Assets {
     		new AssetDescriptor<Sound>("AirDropFall.wav", Sound.class);
     public static final AssetDescriptor<Sound> lootEquip =
     		new AssetDescriptor<Sound>("LootEquip.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> minePlaceSound =
+    		new AssetDescriptor<Sound>("MinePlace.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> mineEquip =
+    		new AssetDescriptor<Sound>("SniperEquip.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> turretUse =
+    		new AssetDescriptor<Sound>("TailNailImpact.mp3", Sound.class);
+    public static final AssetDescriptor<Sound> teleporterUse =
+    		new AssetDescriptor<Sound>("TELEPORT.wav", Sound.class);
+    public static final AssetDescriptor<Sound> clickSound =
+    		new AssetDescriptor<Sound>("TickSound.mp3", Sound.class);
 
 
 
@@ -303,9 +311,9 @@ public class Assets {
     };
 
     public static final AssetDescriptor[] Music = {
-    		menuSound, tickSound, gameOverSound, grenadeExplosionSound, gunShotSound, gunRelease, airstrikeSound, airstrikeExplosion,
+    		menuSound, gameOverSound, grenadeExplosionSound, gunShotSound, gunRelease, airstrikeSound, airstrikeExplosion,
     		airballSound, bazookaShotSound, raiseLimitSound, map1Sound, map2Sound, map3Sound, map4Sound, walkLoop, noAmmo, fallDown,
     		roundStart, landSound, virusSound, throwSound, windMedium, windHeavy, targetSound, grenadeContact, onGroundSound, destroySound,
-    		airstrikeUse, headshotSound, airDropFall, lootEquip
+    		airstrikeUse, headshotSound, airDropFall, lootEquip, minePlaceSound, mineEquip, turretUse, teleporterUse, clickSound
     };
 }

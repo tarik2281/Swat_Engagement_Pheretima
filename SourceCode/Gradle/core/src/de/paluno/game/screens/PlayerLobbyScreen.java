@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
+import de.paluno.game.EventManager;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 import de.paluno.game.interfaces.*;
@@ -160,6 +161,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
         textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 client.send(new LobbyLeaveRequest());
             }
         });
@@ -169,6 +171,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
         textButtonPlay.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 client.send(new StartMatchRequest());
             }
         });
@@ -248,6 +251,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
     @Override
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.LobbyScreenAssets);
+        Assets.loadAssets(manager, Assets.Music);
         return false;
     }
 }

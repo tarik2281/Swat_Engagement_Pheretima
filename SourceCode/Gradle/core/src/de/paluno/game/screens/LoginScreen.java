@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
+import de.paluno.game.EventManager;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 import de.paluno.game.interfaces.UserLoginRequest;
@@ -65,6 +66,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
     @Override
     public boolean load(AssetManager manager) {
         Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
+        Assets.loadAssets(manager, Assets.Music);
 
         return false;
     }
@@ -97,6 +99,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (i < randomPlayerNames.size()) {
                     textFieldWorm1.setText(randomPlayerNames.get(0 + i));
                     textFieldWorm2.setText(randomPlayerNames.get(1 + i));
@@ -116,6 +119,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         textButtonPlayerNum.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (playerNum < 6) {
                     playerNum++;
                     names.add(textFieldUsername.getText());
@@ -143,6 +147,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         menuButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 client.disconnect();
                 game.setModiScreen();
             }
@@ -152,6 +157,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         textButtonPlayerNum.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 super.clicked(event, x, y);
             }
         });
@@ -159,6 +165,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
         textButtonLogin.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (client != null) {
                     client.send(new UserLoginRequest(textFieldUsername.getText(), new String[]{textFieldWorm1.getText(),
                             textFieldWorm2.getText(), textFieldWorm3.getText(), textFieldWorm4.getText(), textFieldWorm5.getText()}));
@@ -174,6 +181,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap1);
                 mapNumber = 0;
                 System.out.println("Map1 Clicked");
@@ -186,6 +194,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap2);
                 mapNumber = 1;
                 System.out.println("Map2 Clicked");
@@ -198,6 +207,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap3);
 
                 mapNumber = 2;
@@ -214,6 +224,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap4);
 
                 mapNumber = 3;
@@ -227,6 +238,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton2(buttonWorm1);
                 numWorms = 1;
                 System.out.println("Worm 1 Clicked");
@@ -239,6 +251,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton2(buttonWorm2);
                 numWorms = 2;
                 System.out.println("Worm 2 Clicked");
@@ -250,6 +263,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton2(buttonWorm3);
                 numWorms = 3;
                 System.out.println("Worm 3 Clicked");
@@ -261,6 +275,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton2(buttonWorm4);
                 numWorms = 4;
                 System.out.println("Worm 4 Clicked");
@@ -272,6 +287,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton2(buttonWorm5);
                 numWorms = 5;
                 System.out.println("Worm 5 Clicked");

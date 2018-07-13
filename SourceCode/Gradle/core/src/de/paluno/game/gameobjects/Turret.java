@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.World;
 
 import de.paluno.game.Assets;
 import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.GameState;
 import de.paluno.game.UserData;
 import de.paluno.game.screens.PlayScreen;
@@ -129,6 +130,7 @@ public class Turret extends Projectile {
 	}
 	
 	public void shoot(List<Projectile> output) {
+		EventManager.getInstance().queueEvent(EventManager.Type.TurretShot, this);
 		Projectile projectile = new Projectile(null, WeaponType.WEAPON_TURRET_PROJECTILE, getPosition(), directions().nor());
 		output.add(projectile);
 	}
