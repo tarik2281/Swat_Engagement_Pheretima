@@ -10,11 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
-<<<<<<< HEAD
 import de.paluno.game.Config;
 import de.paluno.game.EventManager;
-=======
->>>>>>> branch 'work' of https://git.uni-due.de/sep/Sommersemester_2018/Gruppen_K_und_L/Repo_Gruppe_L.git
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 
@@ -194,7 +191,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-        Assets.loadAssets(manager, Assets.LobbyScreenAssets);
+    //  Assets.loadAssets(manager, Assets.LobbyScreenAssets);
         Assets.loadAssets(manager, Assets.Music);
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
 

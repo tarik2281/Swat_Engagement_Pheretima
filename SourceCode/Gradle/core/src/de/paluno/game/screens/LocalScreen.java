@@ -74,7 +74,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-        Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
+    //  Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
         Assets.loadAssets(manager, Assets.Music);
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
 
