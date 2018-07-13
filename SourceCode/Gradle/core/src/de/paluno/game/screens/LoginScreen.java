@@ -9,11 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import de.paluno.game.Assets;
-import de.paluno.game.DataHandler;
-import de.paluno.game.EventManager;
-import de.paluno.game.NetworkClient;
-import de.paluno.game.SEPGame;
+import de.paluno.game.*;
 import de.paluno.game.interfaces.UserLoginRequest;
 
 import java.util.*;
@@ -64,7 +60,7 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
     @Override
     public boolean load(AssetManager manager) {
   //    Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
-        Assets.loadAssets(manager, Assets.Music);
+        //Assets.loadAssets(manager, Assets.Music);
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
         return false;
     }
@@ -164,7 +160,8 @@ public class LoginScreen extends ScreenAdapter implements Loadable {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (client != null) {
                     client.send(new UserLoginRequest(textFieldUsername.getText(), new String[]{textFieldWorm1.getText(),
-                            textFieldWorm2.getText(), textFieldWorm3.getText(), textFieldWorm4.getText(), textFieldWorm5.getText()}));
+                            textFieldWorm2.getText(), textFieldWorm3.getText(), textFieldWorm4.getText(), textFieldWorm5.getText()},
+                            Config.udpEnabled));
                 }
             }
         });

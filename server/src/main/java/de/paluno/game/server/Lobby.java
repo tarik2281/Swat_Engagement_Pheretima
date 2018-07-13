@@ -115,16 +115,18 @@ public class Lobby {
     }
 
     public void startMatch() {
-        GameSetupRequest.Player[] players = new GameSetupRequest.Player[users.size()];
-        int index = 0;
-        for (User user : users)
-            players[index++] = new GameSetupRequest.Player(user.getId(), user.getUserName());
+        if (users.size() >= Constants.NUM_MIN_PLAYERS) {
+            GameSetupRequest.Player[] players = new GameSetupRequest.Player[users.size()];
+            int index = 0;
+            for (User user : users)
+                players[index++] = new GameSetupRequest.Player(user.getId(), user.getUserName());
 
-        GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
-        creatingUser.send(request, false);
-        creatingUser.getConnection().sendTCP(request);
+            GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
+            creatingUser.send(request, false);
+            creatingUser.getConnection().sendTCP(request);
 
-        System.out.printf("Starting match for lobby(id:%d, name:%s)\n", id, name);
+            System.out.printf("Starting match for lobby(id:%d, name:%s)\n", id, name);
+        }
     }
 
     public void setupMatch(GameSetupData data) {

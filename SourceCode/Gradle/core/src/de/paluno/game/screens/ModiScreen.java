@@ -192,7 +192,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
     @Override
     public boolean load(AssetManager manager) {
     //  Assets.loadAssets(manager, Assets.LobbyScreenAssets);
-        Assets.loadAssets(manager, Assets.Music);
+        //Assets.loadAssets(manager, Assets.Music);
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
 
         return false;

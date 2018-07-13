@@ -5,7 +5,6 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.Timer;
 import de.paluno.game.Assets;
@@ -119,7 +118,7 @@ public abstract class WorldHandler implements Disposable {
                     	break;
                 }
 
-                if (getReplay() != null)
+                if (getReplay() != null && weapon != WeaponType.WEAPON_TELEPORTER)
                     getReplay().setStartingTick(getCurrentGameTick(), 2.0f);
 
                 break;
