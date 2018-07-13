@@ -94,7 +94,7 @@ public class ModiScreen extends ScreenAdapter implements Loadable {
                     game.setLocalScreen();
                 }else if (modi == 2) {
                     Dialog connectionDialog = showConnectionDialog();
-                    client = new NetworkClient("localhost");
+                    client = new NetworkClient(Config.serverAddress);
                     client.setConnectionListener(new NetworkClient.ConnectionListener() {
                         @Override
                         public void onConnectionResult(NetworkClient client, int result) {

@@ -3,14 +3,12 @@ package de.paluno.game;
 import com.badlogic.gdx.Game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.scenes.scene2d.actions.AddListenerAction;
 import com.badlogic.gdx.utils.Array;
 import de.paluno.game.interfaces.UserName;
 import de.paluno.game.screens.*;
@@ -27,7 +25,7 @@ public class SEPGame extends Game {
                 setGameOver((String) data);
                 break;
             case ClickSound:
-            	clickSound.play(5f);
+            	clickSound.play(1f);
             	break;
         }
     };

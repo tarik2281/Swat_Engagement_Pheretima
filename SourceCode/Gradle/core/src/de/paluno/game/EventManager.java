@@ -110,7 +110,11 @@ public class EventManager {
         /**
          * data: null
          */
-        ClickSound
+        ClickSound,
+        /**
+         * data: {@link de.paluno.game.gameobjects.Player}
+         */
+        StartPlayerTurn
     }
 
     public interface Listener {

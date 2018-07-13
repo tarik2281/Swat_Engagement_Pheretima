@@ -633,9 +633,18 @@ public abstract class WorldHandler implements Disposable {
         world.forgetAfterUpdate(projectile);
 
         if (world.getCamera().getCameraFocus() == projectile) {
-            // TODO: prevent focusing mines
-            if (!projectiles.isEmpty())
-                world.getCamera().setCameraFocus(projectiles.get(0));
+            if (!projectiles.isEmpty()) {
+                loop: for (Projectile focusProjectile : projectiles) {
+                    switch (focusProjectile.getWeaponType()) {
+                        case WEAPON_TURRET:
+                        case WEAPON_MINE:
+                            break;
+                        default:
+                            world.getCamera().setCameraFocus(focusProjectile);
+                            break loop;
+                    }
+                }
+            }
         }
 
         boolean advance = true;
@@ -727,6 +736,7 @@ public abstract class WorldHandler implements Disposable {
                 equipWeapon(WeaponType.WEAPON_BAZOOKA);
 
                 createReplayPlayerTurn(playerNumber, wormNumber);
+                EventManager.getInstance().queueEvent(EventManager.Type.StartPlayerTurn, player);
             }
         }
     }

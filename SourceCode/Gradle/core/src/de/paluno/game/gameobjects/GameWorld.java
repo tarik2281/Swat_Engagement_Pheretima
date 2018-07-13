@@ -119,13 +119,12 @@ public class GameWorld implements Disposable {
 
     @Override
     public void dispose() {
+        objectRegisterQueue.clear();
+        forgetObjects();
+
         world.dispose();
         debugRenderer.dispose();
         explosionMaskRenderer.dispose();
-    }
-    
-    public WorldHandler getWorldHandler() {
-    	return worldHandler;
     }
 
     public SnapshotData makeSnapshot() {
