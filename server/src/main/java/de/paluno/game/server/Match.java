@@ -11,6 +11,7 @@ public class Match {
     private static final int STATE_TURRETS_SHOOT = 2;
     private static final int STATE_RAISE_WATER = 3;
     private static final int STATE_AIRDROP = 4;
+    private static final int STATE_GAME_OVER = 5;
 
     private int currentTick;
 
@@ -22,6 +23,7 @@ public class Match {
     private Lobby lobby;
 
     private int state;
+    private int simulatingUserId = -1;
 
     public Match(Lobby lobby) {
         currentTick = 0;
@@ -49,7 +51,7 @@ public class Match {
                 for (Worm worm : player.getWorms())
                     worm.setDead(true);
 
-                if (!sendGameOver() && currentPlayerIndex == player.getNumber()) {
+                if (!sendGameOver() && (simulatingUserId == player.getControllingUser().getId() || (state == STATE_PLAYER_TURN && currentPlayerIndex == player.getNumber()))) {
                     lobby.broadcastData(user, new GameEvent(currentTick, GameEvent.Type.END_TURN));
                 }
 
@@ -63,15 +65,10 @@ public class Match {
             if (player.getControllingUser() == user) {
                 System.out.println("Setting user ready (id: " + user.getId() + ")");
                 player.setReady(true);
-
-                if (player.getNumber() == currentPlayerIndex) {
-                    System.out.println("broadcasting end turn event");
-                    //lobby.broadcastData(user, new GameEvent(currentTick, GameEvent.Type.END_TURN));
-                }
                 break;
             }
 
-        if (allClientsReady()) {
+        if (allClientsReady() && !sendGameOver()) {
             if (isRoundEnded()) {
                 Player simulatingPlayer = null;
                 for (Player player : players) {
@@ -82,10 +79,12 @@ public class Match {
                 }
 
                 state = STATE_TURRETS_SHOOT;
-                lobby.broadcastData(null, new TurretsShootRequest(simulatingPlayer.getControllingUser().getId()));
+                simulatingUserId = simulatingPlayer.getControllingUser().getId();
+                lobby.broadcastData(null, new TurretsShootRequest(simulatingUserId));
             }
             else if (state == STATE_TURRETS_SHOOT) {
                 state = STATE_RAISE_WATER;
+                simulatingUserId = -1;
                 lobby.broadcastData(null, new RaiseWaterEvent());
             }
             else if (state == STATE_RAISE_WATER) {
@@ -98,9 +97,11 @@ public class Match {
                 }
 
                 state = STATE_AIRDROP;
+                simulatingUserId = simulatingPlayer.getControllingUser().getId();
                 lobby.broadcastData(null, new SpawnAirdropRequest(simulatingPlayer.getControllingUser().getId()));
             }
             else {
+                simulatingUserId = -1;
                 startTurn();
             }
         }
@@ -159,7 +160,7 @@ public class Match {
         return players.get(currentPlayerIndex);
     }
 
-    public Worm getWorm(WormEvent event) {
+    private Worm getWorm(WormEvent event) {
         return players.get(event.getPlayerNumber()).getWormByNumber(event.getWormNumber());
     }
 
@@ -187,8 +188,13 @@ public class Match {
         }
     }
 
-    public boolean sendGameOver() {
+    private boolean sendGameOver() {
+        if (state == STATE_GAME_OVER)
+            return true;
+
         if (numPlayersAlive < Constants.NUM_MIN_PLAYERS) {
+            state = STATE_GAME_OVER;
+
             int winningPlayer = -1;
             for (Player player : players) {
                 if (!player.isDefeated()) {
@@ -208,24 +214,23 @@ public class Match {
 
     private void startTurn() {
         state = STATE_PLAYER_TURN;
+
         shiftTurn(true);
 
-        if (!sendGameOver()) {
-            applyWormInfectionDamage();
+        applyWormInfectionDamage();
 
-            StartTurnEvent startTurnEvent = new StartTurnEvent();
+        StartTurnEvent startTurnEvent = new StartTurnEvent();
 
-            Player currentPlayer = getCurrentPlayer();
-            startTurnEvent.playerNumber = currentPlayer.getNumber();
-            startTurnEvent.wormNumber = currentPlayer.getCurrentWorm().getWormNumber();
-            startTurnEvent.wind = windRandomizer.nextInt(Constants.WIND_RANGE + 1) + Constants.WIND_START;
+        Player currentPlayer = getCurrentPlayer();
+        startTurnEvent.playerNumber = currentPlayer.getNumber();
+        startTurnEvent.wormNumber = currentPlayer.getCurrentWorm().getWormNumber();
+        startTurnEvent.wind = windRandomizer.nextInt(Constants.WIND_RANGE + 1) + Constants.WIND_START;
 
-            for (Player player : players) {
-                player.getControllingUser().getConnection().sendTCP(startTurnEvent);
-            }
-
-            System.out.println("Starting turn for player: " + startTurnEvent.playerNumber + ", worm: " + startTurnEvent.wormNumber + ", wormDead: " + currentPlayer.getCurrentWorm().isDead());
+        for (Player player : players) {
+            player.getControllingUser().send(startTurnEvent, false);
         }
+
+        System.out.println("Starting turn for player: " + startTurnEvent.playerNumber + ", worm: " + startTurnEvent.wormNumber + ", wormDead: " + currentPlayer.getCurrentWorm().isDead());
     }
 
     private void shiftTurn(boolean shiftWorms) {

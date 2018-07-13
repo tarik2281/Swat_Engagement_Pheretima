@@ -14,9 +14,11 @@ public class WorldData extends GameData {
         super();
     }
 
-    public WorldData(int tick, boolean usingTCP) {
+    public WorldData(int tick) {
         super(tick);
+    }
 
+    public void setUsingTCP(boolean usingTCP) {
         this.usingTCP = usingTCP;
     }
 

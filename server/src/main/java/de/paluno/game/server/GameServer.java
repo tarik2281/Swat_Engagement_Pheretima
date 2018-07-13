@@ -35,7 +35,7 @@ public class GameServer {
 
             if (object instanceof UserLoginRequest) {
                 UserLoginRequest request = (UserLoginRequest)object;
-                loginUser(connection, request.getName(), request.getWormNames());
+                loginUser(connection, request);
 
                 connection.sendTCP(new UserLoginRequest.Result(true));
             }
@@ -194,8 +194,8 @@ public class GameServer {
         return lobbyMap.get(id);
     }
 
-    private User loginUser(Connection connection, String name, String[] wormNames) {
-        User user = new User(connection, name, wormNames);
+    private User loginUser(Connection connection, UserLoginRequest request) {
+        User user = new User(connection, request.getName(), request.getWormNames(), request.isUdpEnabled());
         loggedInUsers.put(connection.getID(), user);
 
         System.out.printf("User logged in (id: %d, name: %s, worms: %s, udpEnabled: %b)\n", user.getId(), user.getName(), Arrays.toString(user.getWormNames()), connection.getRemoteAddressUDP() != null);

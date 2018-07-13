@@ -65,9 +65,8 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
             else if (data instanceof GameOverEvent) {
                 GameOverEvent event = (GameOverEvent)data;
                 String winningPlayer = null;
-                Player player = getPlayers().get(event.winningPlayer);
-                if (player != null)
-                    winningPlayer = player.getName();
+                if (event.winningPlayer >= 0)
+                    winningPlayer = getPlayers().get(event.winningPlayer).getName();
                 EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
             }
             else if (data instanceof WorldData) {
@@ -77,8 +76,15 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
             }
             else if (data instanceof GameEvent) {
                 GameEvent event = (GameEvent)data;
-                if (event.getType() == GameEvent.Type.END_TURN)
-                    System.out.println("End turn received");
+                if (event.getType() == GameEvent.Type.WORM_TOOK_DAMAGE) {
+                    WormDamageEvent damageEvent = (WormDamageEvent)event;
+                    if (damageEvent.getDamageType() == Constants.DAMAGE_TYPE_VIRUS) {
+                        Player player = getPlayers().get(damageEvent.getPlayerNumber());
+                        Worm worm = player.getWormByNumber(damageEvent.getWormNumber());
+                        worm.takeDamage(damageEvent.getDamage(), Constants.DAMAGE_TYPE_VIRUS);
+                        return;
+                    }
+                }
                 event.setReceivingTimeStamp(event.getTick() * Constants.UPDATE_FREQUENCY);// + getIdleTime());
                 receivedGameEvents.add(event);
             }
@@ -148,6 +154,11 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
             GameEvent event = new GameEvent(getCurrentGameTick(), GameEvent.Type.END_TURN);
             if (getReplay() != null)
                 getReplay().addGameData(event);
+
+            WorldData endingSnapshot = makeWorldSnapshot();
+            endingSnapshot.setUsingTCP(true);
+            client.send(endingSnapshot);
+
             client.send(event);
         }
 
@@ -245,10 +256,7 @@ public class NetworkWorldHandler extends InterpolationWorldHandler {
 
     @Override
     protected void onEmitGameData(GameData gameData) {
-        if (gameData instanceof WorldData)
-            client.sendUDP(gameData);
-        else
-            client.send(gameData);
+        client.send(gameData, gameData instanceof WorldData);
     }
 
     @Override

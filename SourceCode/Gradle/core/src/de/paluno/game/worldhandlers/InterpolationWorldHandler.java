@@ -356,7 +356,7 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
 
         for (Iterator<GameEvent> it = pendingEvents.iterator(); it.hasNext(); ) {
             GameEvent event = it.next();
-            if (shiftedTime >= event.getReceivingTimeStamp()) {
+            if (shiftedTime > event.getReceivingTimeStamp()) {
                 it.remove();
                 return event;
             }

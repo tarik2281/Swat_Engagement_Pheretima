@@ -313,7 +313,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         Gdx.input.setInputProcessor(stage);
 
         setSelectedMapButton(buttonMap1);
-        mapNumber = 1;
+        mapNumber = 0;
         setSelectedWormButton(buttonWorm1);
         numWorms = 1;
     }

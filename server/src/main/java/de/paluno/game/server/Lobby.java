@@ -47,7 +47,7 @@ public class Lobby {
             UserMessage message = UserMessage.joined(joiningUser.getId(), joiningUser.getName());
 
             for (User user : users)
-                user.getConnection().sendTCP(message);
+                user.send(message, false);
 
             users.add(joiningUser);
             joiningUser.setCurrentLobbyId(getId());
@@ -85,7 +85,7 @@ public class Lobby {
             leavingUser.setCurrentLobbyId(ID_NONE);
 
             for (User user : users)
-                user.getConnection().sendTCP(message);
+                user.send(message, false);
 
             System.out.println("User(name: " + leavingUser.getName()  + ") left lobby(id: " + id + ")");
 
@@ -98,17 +98,14 @@ public class Lobby {
     public void broadcastData(User exception, Object data) {
         for (User user : users) {
             if (user != exception) {
-                if (data instanceof WorldData)
-                    user.getConnection().sendUDP(data);
-                else
-                    user.getConnection().sendTCP(data);
+                user.send(data, data instanceof WorldData && !((WorldData) data).isUsingTCP());
             }
         }
     }
 
     public void broadcastChatMessage(ChatMessage message) {
         for (User user : users) {
-            user.getConnection().sendTCP(message);
+            user.send(message, false);
         }
     }
 
@@ -124,6 +121,7 @@ public class Lobby {
             players[index++] = new GameSetupRequest.Player(user.getId(), user.getUserName());
 
         GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
+        creatingUser.send(request, false);
         creatingUser.getConnection().sendTCP(request);
 
         System.out.printf("Starting match for lobby(id:%d, name:%s)\n", id, name);
@@ -134,14 +132,13 @@ public class Lobby {
 
         for (User user : users)
             if (user.getId() != creatingUser.getId())
-                user.getConnection().sendTCP(data);
+                user.send(data, false);
 
         for (PlayerData playerData : data.getPlayerData()) {
             Player player = match.addPlayer(getUserById(playerData.getClientId()), playerData.getPlayerNumber());
 
             for (WormData wormData : playerData.getWorms()) {
-                Worm worm = player.addWorm(wormData.getWormNumber());
-
+                player.addWorm(wormData.getWormNumber());
             }
         }
     }

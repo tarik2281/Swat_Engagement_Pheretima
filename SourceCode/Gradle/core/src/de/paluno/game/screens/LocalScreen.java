@@ -13,11 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
-import de.paluno.game.DataHandler;
 import de.paluno.game.EventManager;
-import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
-import de.paluno.game.interfaces.UserLoginRequest;
 import de.paluno.game.interfaces.UserName;
 
 import java.util.*;
@@ -31,24 +28,13 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
     private TextButton textButtonMenu, textButtonSpielen, textButtonAutoFill,textButtonAdd,textButtonDelete;;
     private Table tableBackground, tableTextField, tableTextButtonPlayer;
     private Image imageBackground;
-    private NetworkClient client;
     public ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4,
             buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
     //libgdx Array
     private Array<UserName> names = new Array<>();
-    private int mapNumber, numWorms = 1;
-    int playerNum = 1;
+    private int mapNumber = 0, numWorms = 1;
     private ScrollPane scrollPane;
     private List<UserName> list;
-
-    private DataHandler dataHandler = new DataHandler() {
-        @Override
-        public void handleData(NetworkClient client, Object data) {
-            if (data instanceof UserLoginRequest.Result) {
-                game.setLobbyScreen(client);
-            }
-        }
-    };
 
     private ArrayList<String> randomPlayerNames = new ArrayList<>(Arrays.asList("Julian", "Tarik", "Ibo", "Jan", "Steve",
             "Messi", "Ronaldo", "Kroos", "Neuer", "Ibrahimovic",
@@ -97,9 +83,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
         tableBackground = new Table();
         tableTextField = new Table();
-        if (client != null) {
-            client.registerDataHandler(dataHandler);
-        }
         tableBackground = new Table(elementGUI.getSkin());
         imageBackground = elementGUI.createBackground(game.getAssetManager().get(Assets.menuBackground));
         tableBackground.setBackground(imageBackground.getDrawable());
@@ -198,13 +181,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             @Override
             public void clicked(InputEvent event, float x, float y) {
             	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
-                if (client != null) {
-                    client.send(new UserLoginRequest(textFieldUsername.getText(), new String[]{textFieldWorm1.getText(),
-                            textFieldWorm2.getText(), textFieldWorm3.getText(), textFieldWorm4.getText(), textFieldWorm5.getText()}));
-                    //game.setLobbyScreen();
-                } else {
                     game.setPlayScreen(mapNumber, numWorms, names);
-                }
             }
         });
 
@@ -458,9 +435,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void hide() {
-        if (client != null) {
-            client.unregisterDataHandler(dataHandler);
-        }
         stage.dispose();
     }
 

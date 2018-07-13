@@ -20,14 +20,16 @@ public class UserLoginRequest {
 
     private String name;
     private String[] wormNames;
+    private boolean udpEnabled;
 
     public UserLoginRequest() {
 
     }
 
-    public UserLoginRequest(String userName, String[] wormNames) {
+    public UserLoginRequest(String userName, String[] wormNames, boolean udpEnabled) {
         this.name = userName;
         this.wormNames = wormNames;
+        this.udpEnabled = udpEnabled;
     }
 
     public String getName() {
@@ -36,5 +38,9 @@ public class UserLoginRequest {
 
     public String[] getWormNames() {
         return wormNames;
+    }
+
+    public boolean isUdpEnabled() {
+        return udpEnabled;
     }
 }

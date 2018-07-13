@@ -1094,8 +1094,8 @@ public abstract class WorldHandler implements Disposable {
         raiseLimitSound.loop();
     }
 
-    private WorldData makeWorldSnapshot() {
-        WorldData data = new WorldData(currentGameTick, false);
+    protected WorldData makeWorldSnapshot() {
+        WorldData data = new WorldData(currentGameTick);
         if (getWeaponIndicator() != null)
             data.setIndicatorData(getWeaponIndicator().makeSnapshot());
 

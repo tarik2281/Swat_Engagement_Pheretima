@@ -127,11 +127,14 @@ public class NetworkClient {
     }
 
     public void send(Object object) {
-        client.sendTCP(object);
+        send(object, false);
     }
 
-    public void sendUDP(Object object) {
-        client.sendUDP(object);
+    public void send(Object object, boolean preferUdp) {
+        if (Config.udpEnabled && preferUdp)
+            client.sendUDP(object);
+        else
+            client.sendTCP(object);
     }
 
     public void registerDataHandler(DataHandler handler) {

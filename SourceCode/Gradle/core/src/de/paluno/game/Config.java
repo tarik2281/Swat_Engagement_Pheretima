@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.XmlReader;
 public class Config {
 
     public static String serverAddress;
+    public static boolean udpEnabled;
     public static boolean fullscreen;
 
     public static void loadConfig(FileHandle fileHandle) {
@@ -13,6 +14,7 @@ public class Config {
         XmlReader.Element root = reader.parse(fileHandle);
 
         serverAddress = root.get("ServerAddress");
+        udpEnabled = root.getBoolean("UDPEnabled");
         fullscreen = root.getBoolean("Fullscreen");
     }
 }
