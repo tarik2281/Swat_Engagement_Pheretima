@@ -170,7 +170,6 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
             }
         });
         textButtonMenu = elementGUI.createTextButton("Menu");
-        //textButtonMenu.setVisible(false);
 
 
         textButtonMenu.addListener(new ClickListener() {

@@ -10,16 +10,13 @@ import de.paluno.game.screens.PlayScreen;
 
 public class CollisionHandler implements ContactListener {
 
-    // TODO: 11.06.2018 explodeOnCollision Bazooka ? , preSolve, postSolve?
-    // Weapon Special on hit
-    // Weapon Special close by
+    private PlayScreen playScreen;
 
     private boolean listenForCollisions; // TODO: CollisionHandler listenForCollisions
 
     public CollisionHandler() {
     }
 
-    private PlayScreen playScreen;
 
     public CollisionHandler(PlayScreen playScreen) {
         this.playScreen = playScreen;
