@@ -98,7 +98,19 @@ public class EventManager {
         /**
          * data: null
          */
-        CrateFall
+        CrateFall,
+        /**
+         * data: null
+         */
+        TurretShot,
+        /**
+         * data: null
+         */
+        TeleporterUse,
+        /**
+         * data: null
+         */
+        ClickSound
     }
 
     public interface Listener {

@@ -77,6 +77,10 @@ public abstract class WorldHandler implements Disposable {
     private Sound lootEquipSound;
     private Sound raiseLimitSound;
     private Sound landSound;
+    private Sound minePlace;
+    private Sound turretPlace;
+    private Sound teleporterUse;
+    private Sound clickSound;
 
     private Timer.Task endTurnTimer = new Timer.Task() {
 
@@ -91,6 +95,9 @@ public abstract class WorldHandler implements Disposable {
             case WeaponShoot: {
                 WeaponType weapon = (WeaponType) data;
                 switch (weapon) {
+                	case WEAPON_TURRET:
+                		turretPlace.play();
+                		break;
                     case WEAPON_GUN:
                         gunShotSound.play();
                         break;
@@ -107,6 +114,9 @@ public abstract class WorldHandler implements Disposable {
                         targetSound.play();
                         airstrikeSound.play();
                         break;
+                    case WEAPON_MINE:
+                    	minePlace.play();
+                    	break;
                 }
 
                 if (getReplay() != null)
@@ -121,6 +131,8 @@ public abstract class WorldHandler implements Disposable {
                     case WEAPON_BAZOOKA:
                         gunRelease.play(0.5f);
                         break;
+                    case WEAPON_MINE:
+                    case WEAPON_TELEPORTER:
                     case WEAPON_AIRSTRIKE:
                         airstrikeUse.play();
                         break;
@@ -229,6 +241,7 @@ public abstract class WorldHandler implements Disposable {
                     case WEAPON_BAZOOKA:
                         destroySound.play();
                         break;
+                    case WEAPON_MINE:
                     case WEAPON_GRENADE:
                         destroySound.play();
                         grenadeExplosionSound.play();
@@ -335,6 +348,15 @@ public abstract class WorldHandler implements Disposable {
             case CrateFall:
             	airDropFall.play();
             	break;
+            case TurretShot:
+            	gunShotSound.play(3f);
+            	break;
+            case TeleporterUse:
+            	teleporterUse.play();
+            	break;
+            case ClickSound:
+            	clickSound.play();
+            	break;
         }
     };
 
@@ -390,7 +412,11 @@ public abstract class WorldHandler implements Disposable {
         lootEquipSound = screen.getAssetManager().get(Assets.lootEquip);
         raiseLimitSound = screen.getAssetManager().get(Assets.raiseLimitSound);
         landSound = screen.getAssetManager().get(Assets.landSound);
-
+        minePlace = screen.getAssetManager().get(Assets.minePlaceSound);
+        turretPlace = screen.getAssetManager().get(Assets.turretUse);
+        teleporterUse = screen.getAssetManager().get(Assets.teleporterUse);
+        clickSound = screen.getAssetManager().get(Assets.clickSound);
+        
         windHandler = new WindHandler();
         windHandler.setProjectiles(projectiles);
 
@@ -433,7 +459,10 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.RemoveCrate,
                 EventManager.Type.RemoveChute,
                 EventManager.Type.CratePickup,
-                EventManager.Type.CrateFall);
+                EventManager.Type.CrateFall,
+                EventManager.Type.TurretShot,
+                EventManager.Type.TeleporterUse,
+                EventManager.Type.ClickSound);
 
         for (Player player : players)
             player.show();
@@ -462,7 +491,10 @@ public abstract class WorldHandler implements Disposable {
                 EventManager.Type.RemoveCrate,
                 EventManager.Type.RemoveChute,
                 EventManager.Type.CratePickup,
-                EventManager.Type.CrateFall);
+                EventManager.Type.CrateFall,
+                EventManager.Type.TurretShot,
+                EventManager.Type.TeleporterUse,
+                EventManager.Type.ClickSound);
     }
 
     @Override

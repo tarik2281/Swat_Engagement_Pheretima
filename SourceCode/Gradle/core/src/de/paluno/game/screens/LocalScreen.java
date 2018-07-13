@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Assets;
 import de.paluno.game.DataHandler;
+import de.paluno.game.EventManager;
 import de.paluno.game.NetworkClient;
 import de.paluno.game.SEPGame;
 import de.paluno.game.interfaces.UserLoginRequest;
@@ -73,6 +74,8 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
+    //  Assets.loadAssets(manager, Assets.PlayerMenuScreenAssets);
+        Assets.loadAssets(manager, Assets.Music);
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
 
         return false;
@@ -157,6 +160,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            		EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                     UserName name = list.getSelected();
                     name.getWormNames()[0] = randomPlayerNames.get(0 + i);
                     name.getWormNames()[1] = randomPlayerNames.get(1 + i);
@@ -175,6 +179,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 game.setModiScreen();
             }
         });
@@ -184,6 +189,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 super.clicked(event, x, y);
             }
         });
@@ -191,6 +197,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         textButtonSpielen.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (client != null) {
                     client.send(new UserLoginRequest(textFieldUsername.getText(), new String[]{textFieldWorm1.getText(),
                             textFieldWorm2.getText(), textFieldWorm3.getText(), textFieldWorm4.getText(), textFieldWorm5.getText()}));
@@ -206,6 +213,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap1);
                 mapNumber = 0;
                 System.out.println("Map1 Clicked");
@@ -218,6 +226,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap2);
                 mapNumber = 1;
                 System.out.println("Map2 Clicked");
@@ -230,6 +239,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap3);
 
                 mapNumber = 2;
@@ -246,6 +256,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 elementGUI.setSelectedImageButton(buttonMap4);
 
                 mapNumber = 3;
@@ -258,6 +269,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         buttonWorm1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 textFieldWorm1.setVisible(true);
                 textFieldWorm2.setVisible(false);
                 textFieldWorm3.setVisible(false);
@@ -276,6 +288,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 textFieldWorm1.setVisible(true);
                 textFieldWorm2.setVisible(true);
                 textFieldWorm3.setVisible(false);
@@ -294,6 +307,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 textFieldWorm1.setVisible(true);
                 textFieldWorm2.setVisible(true);
                 textFieldWorm3.setVisible(true);
@@ -311,6 +325,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 textFieldWorm1.setVisible(true);
                 textFieldWorm2.setVisible(true);
                 textFieldWorm3.setVisible(true);
@@ -328,6 +343,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 textFieldWorm1.setVisible(true);
                 textFieldWorm2.setVisible(true);
                 textFieldWorm3.setVisible(true);
@@ -365,6 +381,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         textButtonAdd.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (names.size < 5) {
                     names.add(new UserName("Spieler " + (names.size + 1), new String[] { "Wurm 1", "Wurm 2", "Wurm 3", "Wurm 4", "Wurm 5"}));
                     list.setItems(names);
@@ -376,6 +393,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         textButtonDelete.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 if (names.size > 2) {
                     names.removeIndex(list.getSelectedIndex());
                     list.setItems(names);
@@ -391,6 +409,7 @@ public class LocalScreen extends ScreenAdapter implements Loadable {
         list.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 updateTextFields();
             }
         });

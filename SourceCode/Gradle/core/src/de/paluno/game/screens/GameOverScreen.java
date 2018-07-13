@@ -23,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 
 import de.paluno.game.Assets;
+import de.paluno.game.EventManager;
 import de.paluno.game.SEPGame;
 import de.paluno.game.gameobjects.Worm;
 
@@ -85,6 +86,7 @@ public class GameOverScreen extends com.badlogic.gdx.ScreenAdapter implements Lo
         restartButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 game.setModiScreen();
             }
         });

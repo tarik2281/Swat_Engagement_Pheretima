@@ -7,7 +7,10 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.scenes.scene2d.actions.AddListenerAction;
 import com.badlogic.gdx.utils.Array;
 import de.paluno.game.interfaces.UserName;
 import de.paluno.game.screens.*;
@@ -15,12 +18,17 @@ import de.paluno.game.screens.*;
 public class SEPGame extends Game {
 
     private AssetManager assetManager;
+    private Music menuMusic;
+    private Sound clickSound;
 
     private EventManager.Listener listener = (type, data) -> {
         switch (type) {
             case GameOver:
                 setGameOver((String) data);
                 break;
+            case ClickSound:
+            	clickSound.play(5f);
+            	break;
         }
     };
 
@@ -32,6 +40,8 @@ public class SEPGame extends Game {
 
     @Override
     public void create() {
+    	EventManager.getInstance().addListener(listener, EventManager.Type.GameOver, EventManager.Type.ClickSound);
+    	
         FileHandle configFileHandle = Gdx.files.local("config.xml");
         if (!configFileHandle.exists())
             Gdx.files.internal("config.xml").copyTo(configFileHandle);
@@ -40,8 +50,8 @@ public class SEPGame extends Game {
         if (Config.fullscreen)
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
-        EventManager.getInstance().addListener(listener, EventManager.Type.GameOver);
-
+        menuMusic = Gdx.audio.newMusic(Gdx.files.internal("MenuScreen_ThemeSong.mp3"));
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("TickSound.mp3"));
         setStartScreen();
     }
 
@@ -56,12 +66,9 @@ public class SEPGame extends Game {
         setNextScreen(new ModiScreen(this));
     }
 
-
     public void setLoginScreen(NetworkClient client){
         setNextScreen(new LoginScreen(this, client));
     }
-
-
 
     public void setPlayScreen(int mapNumber, int numWorms, Array<UserName> names) {
         setNextScreen(new PlayScreen(this, mapNumber, numWorms, names));
@@ -70,8 +77,6 @@ public class SEPGame extends Game {
     public void setLocalScreen() {
         setNextScreen(new LocalScreen(this));
     }
-
-
 
     public void setLobbyScreen(NetworkClient client){
         setNextScreen(new LobbyScreen(this, client));
@@ -97,7 +102,13 @@ public class SEPGame extends Game {
     public void setNextScreen(Screen screen) {
         // TODO: maybe loading screen
         assetManager.clear();
-
+        
+        if(screen instanceof PlayScreen)
+        	menuMusic.stop();
+        else if (!(screen instanceof GameOverScreen))
+        	menuMusic.play();
+        	
+        
         if (screen instanceof Loadable) {
             ((Loadable) screen).load(assetManager);
             assetManager.finishLoading();
