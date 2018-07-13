@@ -1,52 +1,29 @@
 package de.paluno.game.screens;
 
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import de.paluno.game.Assets;
 import de.paluno.game.gameobjects.WeaponType;
-import de.paluno.game.gameobjects.Player;
 import de.paluno.game.worldhandlers.WorldHandler;
-
-import java.util.ArrayList;
 
 public class WeaponUI {
 
-    private PlayScreen playScreen;
-    private ElementGUI elementGUI;
     //takes the whole screen
-    private Stage stage;
-    // Icons
-    private ImageButton buttonGun, buttonGrenade, buttonBazooka, buttonWeaponSpecial,
-            buttonAirStrike, buttonTeleport, buttonMine, buttonArtillery, weaponMenuButton;
     // Is implemented into the stage
     private Table table, table2, tableMain;
 
-    // Background of the table
-    private Image image, image2;
     private WorldHandler worldHandler;
 
+    public WeaponUI(AssetManager manager, ElementGUI elementGUI) {
 
-    public WeaponUI(PlayScreen playScreen) {
-        this.playScreen = playScreen;
-        this.elementGUI = new ElementGUI();
-        stage = new Stage();
-        tableMain = new Table();
-        tableMain.setFillParent(true);
-
-        // Tables Background
-        image = new Image((new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI)))));
-        image2 = new Image(new TextureRegionDrawable(new TextureRegion(playScreen.getAssetManager().get(Assets.weaponUI2))));
+        // Table Background
+        Image image = elementGUI.createBackground(manager.get(Assets.weaponUI));
+        Image image2 = elementGUI.createBackground(manager.get(Assets.weaponUI2));
 
         //Gun
-        buttonGun = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconGun));
+        ImageButton buttonGun = elementGUI.createWeaponButton(manager.get(Assets.iconGun));
         buttonGun.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -54,13 +31,12 @@ public class WeaponUI {
                 worldHandler.applyEquipWeapon(WeaponType.WEAPON_GUN);
                 table.setVisible(false);
                 table2.setVisible(false);
-
             }
         }));
 
 
         // Grenade
-        buttonGrenade = elementGUI.createWeaponButton((playScreen.getAssetManager().get(Assets.iconGrenade)));
+        ImageButton buttonGrenade = elementGUI.createWeaponButton((manager.get(Assets.iconGrenade)));
         buttonGrenade.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -73,7 +49,7 @@ public class WeaponUI {
         }));
 
         // Bazooka
-        buttonBazooka = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconBazooka));
+        ImageButton buttonBazooka = elementGUI.createWeaponButton(manager.get(Assets.iconBazooka));
         buttonBazooka.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -85,7 +61,7 @@ public class WeaponUI {
         }));
 
         // SpecialWeapon
-        buttonWeaponSpecial = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconSpecial));
+        ImageButton buttonWeaponSpecial = elementGUI.createWeaponButton(manager.get(Assets.iconSpecial));
         buttonWeaponSpecial.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -96,20 +72,20 @@ public class WeaponUI {
             }
         }));
 
-
         // Airstrike
-        buttonAirStrike = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconAirStrike));
+        ImageButton buttonAirStrike = elementGUI.createWeaponButton(manager.get(Assets.iconAirStrike));
         buttonAirStrike.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Airstrike ElementGUI Clicked");
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_AIRSTRIKE);
                 table.setVisible(false);
                 table2.setVisible(false);
             }
         }));
 
         // Teleport
-        buttonTeleport = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconTeleport));
+        ImageButton buttonTeleport = elementGUI.createWeaponButton(manager.get(Assets.iconTeleport));
         buttonTeleport.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -123,43 +99,43 @@ public class WeaponUI {
 
 
         // Mine
-        buttonMine = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconMine));
+        ImageButton buttonMine = elementGUI.createWeaponButton(manager.get(Assets.iconMine));
         buttonMine.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Mine ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_MINE);
             }
         }));
 
         // SpecialWeapon
-        buttonArtillery = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.iconArtillery));
+        ImageButton buttonArtillery = elementGUI.createWeaponButton(manager.get(Assets.iconArtillery));
         buttonArtillery.addListener((new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 System.out.println("Artillery ElementGUI Clicked");
                 table.setVisible(false);
                 table2.setVisible(false);
+                worldHandler.applyEquipWeapon(WeaponType.WEAPON_TURRET);
             }
         }));
 
         //WeaponMenu
-        weaponMenuButton = elementGUI.createWeaponButton(playScreen.getAssetManager().get(Assets.weaponMenuButton));
+        ImageButton weaponMenuButton = elementGUI.createWeaponButton(manager.get(Assets.weaponMenuButton));
         weaponMenuButton.addListener(new ClickListener() {
-            int weaponClick = 0;
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                if (weaponClick == 0) {
+                if (!table.isVisible()) {
                     table.setVisible(true);
                     table2.setVisible(true);
-                    weaponClick = 1;
                 } else {
                     table.setVisible(false);
                     table2.setVisible(false);
-                    weaponClick = 0;
                 }
+
                 System.out.println("Weapon Menu Clicked");
             }
         });
@@ -176,6 +152,7 @@ public class WeaponUI {
         table.row();
         table.add(buttonWeaponSpecial);
 
+
         table2 = new Table().padTop(35);
         table2.setBackground(image2.getDrawable());
         table2.add(buttonAirStrike.pad(5));
@@ -183,30 +160,19 @@ public class WeaponUI {
         table2.add(buttonArtillery.pad(5));
         table2.add(buttonMine.pad(5));
 
-
+        tableMain = new Table();
+        tableMain.setFillParent(true);
         tableMain.right();
         tableMain.add(weaponMenuButton).right().row();
         tableMain.add(table.right()).size(92, 150).right().padTop(10).row();
         tableMain.add(table2).padTop(10).size(166,75);
 
-
-        stage.addActor(tableMain);
-        table2.setVisible(false);
         table.setVisible(false);
-
-
+        table2.setVisible(false);
     }
 
-
-    public void render(SpriteBatch batch, float delta) {
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
-
-    }
-
-    // Listener for Buttons
-    public Stage getInputProcessor() {
-        return stage;
+    public Table getTable() {
+        return tableMain;
     }
 
     public void setWorldHandler(WorldHandler worldHandler) {

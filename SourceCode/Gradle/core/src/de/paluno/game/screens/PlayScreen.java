@@ -22,19 +22,13 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private SEPGame game;
     private SpriteBatch spriteBatch;
 
-	//private World replayWorld;
-	private boolean disposeReplayAfterUpdate;
-    //private World.SnapshotData worldSnapshot;
     private WorldHandler worldHandler;
     private ReplayWorldHandler replayWorldHandler;
     private UserWorldController worldController;
 
-    private int winningPlayer = -2;
-
     private int mapNumber;
     private int numWorms;
     private PlayUILayer uiLayer;
-    private WeaponUI weaponUI;
     private Array<UserName> names;
 
     private Sound mapSound;
@@ -42,7 +36,6 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     private GameSetupData gameSetupData;
     private GameSetupRequest gameSetupRequest;
     private NetworkClient client;
-    private ChatWindow chatWindow;
 
     private PlayScreen(SEPGame game, int mapNumber) {
         this.game = game;
@@ -50,19 +43,26 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         spriteBatch = new SpriteBatch();
     }
 
+    /**
+     * Constructor to start a local game.
+     * @param game
+     * @param mapNumber
+     * @param numWorms
+     * @param userNames
+     */
     public PlayScreen(SEPGame game, int mapNumber, int numWorms, Array<UserName> userNames) {
-//    public PlayScreen(SEPGame game, int mapNumber, int numWorms,int playerNumber, int modi, List<String> names) {
         this(game, mapNumber);
 
         this.numWorms = numWorms;
         this.names = userNames;
-//        this.modi = modi;
-//        this.names = names;
-//        this.playerNumber = playerNumber;
-
-
     }
 
+    /**
+     * Constructor to handle the setup request and start an online match.
+     * @param game
+     * @param client
+     * @param request
+     */
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupRequest request) {
         this(game, request.getMapNumber());
 
@@ -71,6 +71,12 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         this.gameSetupRequest = request;
     }
 
+    /**
+     * Constructor to start an online match with the setup created by another client.
+     * @param game
+     * @param client
+     * @param data
+     */
     public PlayScreen(SEPGame game, NetworkClient client, GameSetupData data) {
         this(game, data.mapNumber);
 
@@ -101,6 +107,8 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void resize(int width, int height) {
+        uiLayer.resize(width, height);
+
         if (worldHandler != null)
             worldHandler.updateViewport(width, height);
         if (replayWorldHandler != null)
@@ -109,20 +117,15 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void show() {
-        float screenWidth = Gdx.graphics.getWidth();
-        float screenHeight = Gdx.graphics.getHeight();
-
-        uiLayer = new PlayUILayer(screenWidth, screenHeight);
+        uiLayer = new PlayUILayer(game.getAssetManager());
 
         if (gameSetupRequest != null) {
             worldHandler = new NetworkWorldHandler(this, client, gameSetupRequest);
-            chatWindow = new ChatWindow(client);
-            chatWindow.initialize();
+            uiLayer.addChatWindow(client);
         }
         else if (gameSetupData != null) {
             worldHandler = new NetworkWorldHandler(this, client, gameSetupData);
-            chatWindow = new ChatWindow(client);
-            chatWindow.initialize();
+            uiLayer.addChatWindow(client);
         }
         else {
             worldHandler = new LocalWorldHandler(this, mapNumber, numWorms, names);
@@ -153,51 +156,17 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         //chatWindow = new ChatWindow(client);
         //chatWindow.initialize();
 
-
-        /*if (gameSetupRequest != null) {
-            world.initializeRequest(mapNumber, numWorms, gameSetupRequest);
-
-            int[] clientIds = new int[world.getPlayers().length];
-            PlayerData[] players = new PlayerData[world.getPlayers().length];
-            for (int i = 0; i < world.getPlayers().length; i++) {
-                Player player = world.getPlayers()[i];
-                WormData[] worms = new WormData[player.getCharacters().length];
-
-                for (int j = 0; j < player.getCharacters().length; j++) {
-                    Worm worm = player.getCharacters()[j];
-                    WormData wormData = new WormData();
-                    wormData.playerNumber = player.getPlayerNumber();
-                    wormData.wormNumber = worm.getCharacterNumber();
-                    wormData
-                            .setOrientation(worm.getOrientation())
-                            .setMovement(0)
-                            .setPhysicsData(new PhysicsData().setPositionX(worm.spawnPosition.x).setPositionY(worm.spawnPosition.y));
-                    worms[j] = wormData;
-                }
-
-                clientIds[i] = player.getClientId();
-                players[i] = new PlayerData(player.getPlayerNumber(), worms);
-            }
-
-            GameSetupData data = new GameSetupData(clientIds, players);
-
-            client.sendObject(data);
-        }
-        else if (gameSetupData != null) {
-            world.initializeData(mapNumber, gameSetupData);
-        }
-        else {
-            world.initializeNew(mapNumber, numWorms, names);
-        }
-*/
-        weaponUI = new WeaponUI(this);
-        weaponUI.setWorldHandler(worldHandler);
+        //weaponUI = new WeaponUI(this);
+        //weaponUI.setWorldHandler(worldHandler);
         //weaponUI.setPlayer(world.getCurrentPlayer());
 
+        uiLayer.getWeaponUI().setWorldHandler(worldHandler);
+
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        if (chatWindow != null)
-            inputMultiplexer.addProcessor(chatWindow.getInputProcessor());
-        inputMultiplexer.addProcessor(weaponUI.getInputProcessor());
+        //if (chatWindow != null)
+         //   inputMultiplexer.addProcessor(chatWindow.getInputProcessor());
+        inputMultiplexer.addProcessor(uiLayer.getInputProcessor());
+        //inputMultiplexer.addProcessor(weaponUI.getInputProcessor());
         inputMultiplexer.addProcessor(worldController.getInputProcessor());
         Gdx.input.setInputProcessor(inputMultiplexer);
 
@@ -224,10 +193,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         renderPhase(delta);
 
-        weaponUI.render(spriteBatch, delta);
+        //weaponUI.render(spriteBatch, delta);
 
-        if (chatWindow != null)
-        chatWindow.render(delta);
+        //if (chatWindow != null)
+        //chatWindow.render(delta);
 
         /*if (disposeReplayAfterUpdate) {
             replayWorld.dispose();
@@ -241,7 +210,7 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
     }
 
     public void renderPhase(float delta) {
-        uiLayer.render(spriteBatch, delta);
+        uiLayer.render(delta);
     }
 
     @Override
@@ -250,8 +219,10 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
 
         worldHandler.dispose();
 
-        if (chatWindow != null)
-            chatWindow.dispose();
+        uiLayer.dispose();
+
+        //if (chatWindow != null)
+          //  chatWindow.dispose();
 
         if (client != null)
             client.disconnect();
@@ -274,30 +245,5 @@ public class PlayScreen extends ScreenAdapter implements Loadable {
         manager.load(Assets.getMapByIndex(mapNumber));
 
         return false;
-    }
-
-    public void setGameState(GameWorld world, GameState gameState, int currentPlayer) {
-        uiLayer.setGameState(gameState, currentPlayer);
-
-        //if (this.world == world && gameState == GameState.SHOOTING)
-        //	worldSnapshot = world.makeSnapshot();
-
-        //if (this.replayWorld == world && gameState == GameState.REPLAY_ENDED) {
-            disposeReplayAfterUpdate = true;
-        //}
-
-        /*if (this.world == world && (gameState == GameState.PLAYERTURN || gameState == GameState.GAMEOVERPLAYERONEWON || gameState == GameState.GAMEOVERPLAYERTWOWON)) {
-            if (world.isWormDied() && worldSnapshot != null) {
-                //replayWorld = new World(this);
-                //replayWorld.initializeFromSnapshot(worldSnapshot);
-            }
-
-            weaponUI.setPlayer(this.world.getCurrentPlayer());
-            worldSnapshot = null;
-        }*/
-    }
-
-    public void setGameOver(int winningPlayer) {
-        this.winningPlayer = winningPlayer;
     }
 }

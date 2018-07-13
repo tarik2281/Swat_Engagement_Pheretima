@@ -1,66 +1,95 @@
 package de.paluno.game.screens;
 
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.DelayAction;
+import com.badlogic.gdx.scenes.scene2d.actions.RemoveActorAction;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.paluno.game.Constants;
+import de.paluno.game.EventManager;
 import de.paluno.game.GameState;
+import de.paluno.game.NetworkClient;
 
-public class PlayUILayer {
+public class PlayUILayer implements Disposable {
 
-    private static final int MESSAGE_POSITION_Y = 100;
+    private Stage stage;
+    private Table messageTable;
+    private ElementGUI elementGUI;
+    private WeaponUI weaponUI;
+    private ChatWindow chatWindow;
 
-    private OrthographicCamera camera;
-    private BitmapFont font;
-    // messageDisplayTime is used as a timer for how long the message should be shown
-    private float messageDisplayTime;
+    private EventManager.Listener eventListener = new EventManager.Listener() {
+        @Override
+        public void handleEvent(EventManager.Type eventType, Object data) {
 
-    private GlyphLayout messageLayout;
+        }
+    };
 
-    private float viewportWidth;
-    private float viewportHeight;
-    // TODO: use scene2d to build up UI
 
-    public PlayUILayer(float viewportWidth, float viewportHeight) {
-        this.viewportWidth = viewportWidth;
-        this.viewportHeight = viewportHeight;
+    public PlayUILayer(AssetManager manager) {
+        stage = new Stage(new ScreenViewport());
 
-        // setup separate ui camera which does not move with the game world
-        camera = new OrthographicCamera();
-        camera.setToOrtho(true, viewportWidth, viewportHeight);
-        camera.position.set(viewportWidth / 2, viewportHeight / 2, 0);
-        camera.update();
+        messageTable = new Table();
+        stage.addActor(messageTable);
 
-        font = new BitmapFont(true);
-        messageDisplayTime = Constants.MESSAGE_DURATION;
-
-        messageLayout = new GlyphLayout();
+        elementGUI = new ElementGUI();
+        weaponUI = new WeaponUI(manager, elementGUI);
+        stage.addActor(weaponUI.getTable());
     }
 
-    public void render(SpriteBatch batch, float delta) {
-        // apply the ui camera to the SpriteBatch
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-
-        if (messageDisplayTime < Constants.MESSAGE_DURATION) {
-            // message should be displayed for as long as our given duration
-            messageDisplayTime += delta;
-            font.draw(batch, messageLayout, viewportWidth / 2, MESSAGE_POSITION_Y);
+    public void addChatWindow(NetworkClient client) {
+        if (client != null) {
+            chatWindow = new ChatWindow(client);
+            chatWindow.initialize(elementGUI.getSkin());
+            chatWindow.addToStage(stage, null);
         }
+    }
 
-        batch.end();
+    public WeaponUI getWeaponUI() {
+        return weaponUI;
+    }
+
+    @Override
+    public void dispose() {
+        if (chatWindow != null)
+            chatWindow.dispose();
+
+        elementGUI.getSkin().dispose();
+        stage.dispose();
+    }
+
+    public void render(float delta) {
+        // apply the ui camera to the SpriteBatch
+        stage.act(delta);
+        stage.draw();
+    }
+
+    public InputProcessor getInputProcessor() {
+        return stage;
+    }
+
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
 
     public void showMessage(String message, Color color) {
         if (message == null)
             return;
 
-        // setup the new message
-        messageDisplayTime = 0.0f;
-        messageLayout.setText(font, message, color, 0, Align.center, false);
+        Label label = new Label(message, elementGUI.getSkin(), "title", color);
+        RemoveActorAction removeActorAction = new RemoveActorAction();
+        removeActorAction.setActor(label);
+        DelayAction delayAction = new DelayAction(Constants.MESSAGE_DURATION);
+        delayAction.setAction(removeActorAction);
+        label.addAction(delayAction);
+
+        messageTable.add(label);
     }
 
     public void setGameState(GameState gameState, int currentPlayer) {

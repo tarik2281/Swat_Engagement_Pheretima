@@ -1,6 +1,5 @@
 package de.paluno.game.screens;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetDescriptor;
@@ -10,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -49,6 +49,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
                 usersArray.clear();
                 usersArray.addAll(result.users);
                 list.setItems(usersArray);
+                list.setSelectedIndex(-1);
 
                 AssetDescriptor<Texture> mapTexture = null;
                 switch (result.lobbyData.mapNumber) {
@@ -99,10 +100,12 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
                     case UserJoined:
                         usersArray.add(message.getName());
                         list.setItems(usersArray);
+                        list.setSelectedIndex(-1);
                         break;
                     case UserLeft:
                         usersArray.removeValue(message.getName(), false);
                         list.setItems(usersArray);
+                        list.setSelectedIndex(-1);
                         break;
                 }
 
@@ -147,16 +150,17 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
 
         stage = new Stage(new ScreenViewport());
         table = new Table(skin);
-        chatWindowContainer = new Container<>();
-        chatWindow.initialize();
-        chatWindowContainer.setActor(chatWindow.getTable());
+
+        //chatWindowContainer = new Container<>();
+        //chatWindowContainer.setActor(chatWindow.getTable());
         table.setFillParent(true);
         table.setBackground(new Image(game.getAssetManager().get(Assets.menuBackground)).getDrawable());
 
         skin = elementGUI.getSkin();
-        textButtonMenu = new TextButton("Lobby", skin);
-        textButtonMenu.setPosition(380, 190);
-        textButtonMenu.setSize(200, 60);
+        chatWindow.initialize(skin);
+        textButtonMenu = new TextButton("Verlassen", skin);
+        //textButtonMenu.setPosition(380, 190);
+        //textButtonMenu.setSize(200, 60);
         textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -165,7 +169,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
         });
 
         textButtonPlay = elementGUI.createTextButton("Spielen");
-        textButtonPlay.setPosition(380, 85);
+        //textButtonPlay.setPosition(380, 85);
         textButtonPlay.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -173,42 +177,59 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
             }
         });
 
-        list = new List<String>(skin);
-        String[] strings = new String[5];
-        for (int i = 1, k = 0; i <= strings.length; i++) {
-            strings[k++] = "Player: " + i;
-
-        }
-        list.setItems(strings);
+        list = new List<>(skin);
+        list.setSelectedIndex(-1);
+        list.setTouchable(Touchable.disabled);
         scrollPane = new ScrollPane(list, skin);
 
-        scrollPane.setBounds(360, 380, 300, 280);
+        //scrollPane.setBounds(360, 380, 300, 280);
         scrollPane.setSmoothScrolling(false);
         scrollPane.setTransform(true);
-        scrollPane.setScale(1f);
+        //scrollPane.setScale(1f);
 
 
         imageMap = new Image(game.getAssetManager().get(Assets.map1Thumbnail));
         imageNumWorms = new Image(game.getAssetManager().get(Assets.worms1Button));
-        imageMap.setPosition(860, 500);
-        imageNumWorms.setPosition(960, 400);
-        chatWindowContainer.setPosition(980, 200);
+        //imageMap.setPosition(860, 500);
+        //imageNumWorms.setPosition(960, 400);
+        //chatWindowContainer.setPosition(980, 200);
 
 
-        textField = new TextField("Chat", skin);
-        textField.setDisabled(true);
-        textField.setSize(506, 50);
-        textField.setPosition(727, 318);
+        //textField = new TextField("Chat", skin);
+        //textField.setDisabled(true);
+        //textField.setSize(506, 50);
+        //textField.setPosition(727, 318);
 
 
         stage.addActor(table);
-        stage.addActor(textButtonPlay);
-        stage.addActor(textButtonMenu);
-        stage.addActor(scrollPane);
-        stage.addActor(imageMap);
-        stage.addActor(imageNumWorms);
-        stage.addActor(chatWindowContainer);
-        stage.addActor(textField);
+
+        table.center();
+
+        table.add(scrollPane).size(300, 280).pad(30);
+
+        Table infoTable = new Table();
+        infoTable.add(imageMap);
+        infoTable.row();
+        infoTable.add(imageNumWorms);
+        table.add(infoTable).pad(30);
+        table.row();
+
+        Table buttonsTable = new Table();
+        buttonsTable.add(textButtonMenu).pad(30).size(200, 60);
+        buttonsTable.row();
+        buttonsTable.add(textButtonPlay).pad(30).size(200, 60);
+        table.add(buttonsTable);
+
+        chatWindow.addToStage(stage, table).pad(30);
+        chatWindow.setBackgroundAlwaysEnabled(true);
+
+        //stage.addActor(textButtonPlay);
+        //stage.addActor(textButtonMenu);
+        //stage.addActor(scrollPane);
+        //stage.addActor(imageMap);
+        //stage.addActor(imageNumWorms);
+        //stage.addActor(chatWindowContainer);
+        //stage.addActor(textField);
 
 
         list.addListener(new ClickListener() {
@@ -218,6 +239,7 @@ public class PlayerLobbyScreen extends ScreenAdapter implements Loadable {
                 System.out.println(list.getSelectedIndex());
             }
         });
+
         Gdx.input.setInputProcessor(stage);
 
     }

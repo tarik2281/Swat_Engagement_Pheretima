@@ -1,7 +1,7 @@
 package de.paluno.game.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -23,12 +23,11 @@ public class ChatWindow implements Disposable {
     private NetworkClient client;
     private Stage stage;
     private Table table;
-    private Skin skin;
 
     private Table chatTable;
     private ScrollPane chatScrollPane;
-    private ElementGUI elementGUI;
     private Drawable background;
+    private boolean backgroundAlwaysEnabled;
 
     private DataHandler messageHandler = (client, data) -> {
         if (data instanceof ChatMessage) {
@@ -39,10 +38,10 @@ public class ChatWindow implements Disposable {
             UserMessage message = (UserMessage)data;
             switch (message.getType()) {
                 case UserJoined:
-                    addMessage("User " + message.getName() + " joined the lobby.");
+                    addMessage(message.getName() + " ist der Lobby beigetreten.");
                     break;
                 case UserLeft:
-                    addMessage("User " + message.getName() + " left the lobby.");
+                    addMessage(message.getName() + " hat die Lobby verlassen.");
                     break;
             }
         }
@@ -60,7 +59,7 @@ public class ChatWindow implements Disposable {
         String outMessage = userName + ": " + message;
 
         chatTable.row();
-        chatTable.add(outMessage).left();
+        chatTable.add(outMessage, "font", Color.WHITE).left();
         Timer.post(new Timer.Task() {
             @Override
             public void run() {
@@ -77,7 +76,7 @@ public class ChatWindow implements Disposable {
     public void addMessage(String message) {
         chatTable.row();
         chatTable.add(message, "small", Color.FIREBRICK).left();
-        Timer.post(new Timer.Task() {
+        Gdx.app.postRunnable(new Timer.Task() {
             @Override
             public void run() {
                 chatScrollPane.scrollTo(0, 0, 0, 0);
@@ -85,18 +84,12 @@ public class ChatWindow implements Disposable {
         });
     }
 
-    public void initialize() {
+    public void initialize(Skin skin) {
         client.registerDataHandler(messageHandler);
-        elementGUI = new ElementGUI();
 
-        skin = elementGUI.getSkin();
-
-        stage = new Stage();
         table = new Table(skin);
         table.setFillParent(true);
         table.align(Align.bottomLeft);
-
-        stage.addActor(table);
 
         TextField input = new TextField("", skin);
         input.addListener(new FocusListener() {
@@ -128,7 +121,6 @@ public class ChatWindow implements Disposable {
         chatTable = new Table(skin);
         chatScrollPane = new ScrollPane(chatTable, skin);
         background = chatScrollPane.getStyle().background;
-        chatScrollPane.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         table.add(chatScrollPane).size(500, 200);
         table.row();
@@ -139,12 +131,31 @@ public class ChatWindow implements Disposable {
     }
 
     public void disableBackground() {
-        chatScrollPane.getStyle().background = null;
+        if (!backgroundAlwaysEnabled)
+            chatScrollPane.getStyle().background = null;
     }
 
     public void enableBackground() {
         stage.setScrollFocus(chatScrollPane);
         chatScrollPane.getStyle().background = background;
+    }
+
+    public void setBackgroundAlwaysEnabled(boolean alwaysEnabled) {
+        this.backgroundAlwaysEnabled = alwaysEnabled;
+
+        if (chatScrollPane.getStyle().background == null)
+            enableBackground();
+    }
+
+    public Cell<Table> addToStage(Stage stage, Table parent) {
+        this.stage = stage;
+
+        if (parent != null)
+            return parent.add(table);
+        else
+            stage.addActor(table);
+
+        return null;
     }
 
     public void render(float delta) {
@@ -155,12 +166,5 @@ public class ChatWindow implements Disposable {
     @Override
     public void dispose() {
         client.unregisterDataHandler(messageHandler);
-
-        stage.dispose();
-        skin.dispose();
-    }
-
-    public InputProcessor getInputProcessor() {
-        return stage;
     }
 }
