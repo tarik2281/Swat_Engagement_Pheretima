@@ -325,7 +325,7 @@ public abstract class WorldHandler implements Disposable {
                 if (currentGameState == GameState.DROPPING)
                     setWaiting();
                 
-                landSound.play(1.5f);
+                landSound.play();
 
                 if (shouldWorldStep()) {
                     GameEvent event = new GameEvent(getCurrentGameTick(), GameEvent.Type.CRATE_LANDED);
@@ -357,13 +357,16 @@ public abstract class WorldHandler implements Disposable {
             	airDropFall.play();
             	break;
             case TurretShot:
-            	gunShotSound.play(3f);
+            	gunShotSound.play();
+
+            	if (shouldWorldStep())
+            	    emitGameEvent(GameEvent.Type.TURRET_SHOT);
             	break;
             case TeleporterUse:
             	teleporterUse.play();
-            	break;
-            case ClickSound:
-            	clickSound.play();
+
+                if (shouldWorldStep())
+                    emitGameEvent(GameEvent.Type.TELEPORTER_USE);
             	break;
         }
     };
@@ -812,8 +815,15 @@ public abstract class WorldHandler implements Disposable {
 
     protected Vector2 getRandomAirdropPosition() {
         Random random = new Random();
-        float x = random.nextFloat() * map.getWorldWidth();
-        return new Vector2(x, map.getWorldHeight()- (700 * Constants.WORLD_SCALE));
+
+        float x, y;
+
+        do {
+            x = random.nextFloat() * map.getWorldWidth();
+            y = random.nextFloat() * map.getWorldHeight() / 2.0f + map.getWorldHeight() / 2.0f;
+        } while (!world.isPositionValid(new Vector2(x, y), Constants.CRATE_RADIUS * 2.0f, Constants.CRATE_RADIUS * 2.0f));
+
+        return new Vector2(x, y);
     }
 
     public int getNumPlayersAlive() {
@@ -833,6 +843,7 @@ public abstract class WorldHandler implements Disposable {
         for (WeaponType type : WeaponType.values()) {
             Weapon weapon = new Weapon(type);
             weapon.setAirstrikeSpawnPosition(map.getWorldWidth(), map.getWorldHeight());
+            weapon.setWorld(getWorld());
             weapon.setupAssets(getAssetManager());
             player.addWeapon(weapon);
         }
@@ -1063,7 +1074,7 @@ public abstract class WorldHandler implements Disposable {
         getWorld().getCamera().setCameraFocus(turrets.get(0));
 
         if (shouldWorldStep()) {
-            Timer.schedule(turretsShootTimer, 2.0f);
+            Timer.schedule(turretsShootTimer, 1.0f);
         }
 
         return true;

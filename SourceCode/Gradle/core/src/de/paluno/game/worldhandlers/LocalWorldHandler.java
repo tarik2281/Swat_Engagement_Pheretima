@@ -26,27 +26,37 @@ public class LocalWorldHandler extends WorldHandler {
     private Timer.Task turnTimer = new Timer.Task() {
         @Override
         public void run() {
-            if (isRoundEnded()) {
-                if (shootTurrets())
-                    state = STATE_TURRETS_SHOOTING;
-                else {
-                    raiseWaterLevel();
-                    state = STATE_RAISE_WATER;
+            if (getNumPlayersAlive() <= 1) {
+                String winningPlayer = null;
+                for (Player player : getPlayers()) {
+                    if (!player.isDefeated()) {
+                        winningPlayer = player.getName();
+                        break;
+                    }
                 }
-            }
-            else if (state == STATE_TURRETS_SHOOTING) {
-                raiseWaterLevel();
-                state = STATE_RAISE_WATER;
-            }
-            else if (state == STATE_RAISE_WATER) {
-                randomAirdrop();
-                state = STATE_AIRDROP;
+
+                EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
             }
             else {
-                state = STATE_PLAYER_TURN;
-                shiftTurn(true);
+                if (isRoundEnded()) {
+                    if (shootTurrets())
+                        state = STATE_TURRETS_SHOOTING;
+                    else {
+                        raiseWaterLevel();
+                        state = STATE_RAISE_WATER;
+                    }
+                } else if (state == STATE_TURRETS_SHOOTING) {
+                    raiseWaterLevel();
+                    state = STATE_RAISE_WATER;
+                } else if (state == STATE_RAISE_WATER) {
+                    randomAirdrop();
+                    state = STATE_AIRDROP;
+                } else {
+                    state = STATE_PLAYER_TURN;
+                    shiftTurn(true);
 
-                startTurn();
+                    startTurn();
+                }
             }
         }
     };
@@ -70,46 +80,33 @@ public class LocalWorldHandler extends WorldHandler {
     }
 
     private void startTurn() {
-        if (getNumPlayersAlive() <= 1) {
-            String winningPlayer = null;
-            for (Player player : getPlayers()) {
-                if (!player.isDefeated()) {
-                    winningPlayer = player.getName();
-                    break;
-                }
+        Player currentPlayer = getCurrentPlayer();
+        Worm worm = currentPlayer.getCurrentWorm();
+
+        if (worm.isInfected()) {
+            worm.takeDamage(de.paluno.game.Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
+
+            if (worm.isDead()) {
+                Timer.schedule(new Timer.Task() {
+                    @Override
+                    public void run() {
+                        if (!currentPlayer.isDefeated())
+                            currentPlayer.shiftTurn();
+                        else
+                            shiftTurn(false);
+
+                        startTurn();
+                    }
+                }, 0.05f);
+                return;
             }
-
-            EventManager.getInstance().queueEvent(EventManager.Type.GameOver, winningPlayer);
         }
-        else {
-            Player currentPlayer = getCurrentPlayer();
-            Worm worm = currentPlayer.getCurrentWorm();
 
-            if (worm.isInfected()) {
-                worm.takeDamage(de.paluno.game.Constants.VIRUS_DAMAGE, Constants.DAMAGE_TYPE_VIRUS);
-
-                if (worm.isDead()) {
-                    Timer.schedule(new Timer.Task() {
-                        @Override
-                        public void run() {
-                            if (!currentPlayer.isDefeated())
-                                currentPlayer.shiftTurn();
-                            else
-                                shiftTurn(false);
-
-                            startTurn();
-                        }
-                    }, 0.05f);
-                    return;
-                }
-            }
-
-            setCurrentPlayerTurn(currentPlayer.getPlayerNumber(),
-                    currentPlayer.getCurrentWorm().getCharacterNumber());
-            getWindHandler().nextWind();
-            getReplay().setWind(getWindHandler().getWind());
-            wormDied = false;
-        }
+        setCurrentPlayerTurn(currentPlayer.getPlayerNumber(),
+                currentPlayer.getCurrentWorm().getCharacterNumber());
+        getWindHandler().nextWind();
+        getReplay().setWind(getWindHandler().getWind());
+        wormDied = false;
     }
 
     private void shiftTurn(boolean shiftWorms) {

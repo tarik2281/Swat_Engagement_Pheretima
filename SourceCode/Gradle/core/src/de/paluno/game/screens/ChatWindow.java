@@ -60,12 +60,7 @@ public class ChatWindow implements Disposable {
 
         chatTable.row();
         chatTable.add(outMessage, "font", Color.WHITE).left();
-        Timer.post(new Timer.Task() {
-            @Override
-            public void run() {
-                chatScrollPane.scrollTo(0, 0, 0, 0);
-            }
-        });
+        Gdx.app.postRunnable(() -> chatScrollPane.scrollTo(0, 0, 0, 0));
     }
 
     private void sendMessage(String message) {
@@ -76,12 +71,7 @@ public class ChatWindow implements Disposable {
     public void addMessage(String message) {
         chatTable.row();
         chatTable.add(message, "small", Color.FIREBRICK).left();
-        Gdx.app.postRunnable(new Timer.Task() {
-            @Override
-            public void run() {
-                chatScrollPane.scrollTo(0, 0, 0, 0);
-            }
-        });
+        Gdx.app.postRunnable(() -> chatScrollPane.scrollTo(0, 0, 0, 0));
     }
 
     public void initialize(Skin skin) {

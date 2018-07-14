@@ -198,7 +198,7 @@ public class GameServer {
         User user = new User(connection, request.getName(), request.getWormNames(), request.isUdpEnabled());
         loggedInUsers.put(connection.getID(), user);
 
-        System.out.printf("User logged in (id: %d, name: %s, worms: %s, udpEnabled: %b)\n", user.getId(), user.getName(), Arrays.toString(user.getWormNames()), connection.getRemoteAddressUDP() != null);
+        System.out.printf("User logged in (id: %d, name: %s, worms: %s, udpEnabled: %b)\n", user.getId(), user.getName(), Arrays.toString(user.getWormNames()), request.isUdpEnabled());
         return user;
     }
 
@@ -249,8 +249,6 @@ public class GameServer {
 
         int tcpPort = Constants.TCP_PORT;
         int udpPort = Constants.UDP_PORT;
-
-        System.out.println(Arrays.toString(args));
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-tcp_port")) {

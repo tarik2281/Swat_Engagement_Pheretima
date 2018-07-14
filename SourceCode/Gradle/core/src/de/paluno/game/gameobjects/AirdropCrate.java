@@ -143,7 +143,7 @@ public class AirdropCrate extends WorldObject {
 		def.gravityScale = 0.0f;
 		def.fixedRotation = false;
 		def.position.set(getPosition());
-		def.linearVelocity.set(0, -1.5f);
+		def.linearVelocity.set(0, -3.0f);
 
 		if (fromSnapshot) {
 			def.gravityScale = 1.0f;

@@ -28,7 +28,7 @@ public class SEPGame extends Game {
                 setGameOver((String) data);
                 break;
             case ClickSound:
-            	clickSound.play(1f);
+            	clickSound.play();
             	break;
         }
     };
@@ -47,6 +47,10 @@ public class SEPGame extends Game {
         if (!configFileHandle.exists())
             Gdx.files.internal("config.xml").copyTo(configFileHandle);
         Config.loadConfig(configFileHandle);
+
+        FileHandle licenseFileHandle = Gdx.files.local("LICENSE");
+        if (!licenseFileHandle.exists())
+            Gdx.files.internal("LICENSE").copyTo(licenseFileHandle);
 
         if (Config.fullscreen)
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());

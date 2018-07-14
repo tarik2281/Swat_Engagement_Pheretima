@@ -27,6 +27,7 @@ public class Weapon {
 	private Vector2 airstrikeSpawnPosition;
 	private Vector2 airstrikeSpawnPosition2;
 	private Vector2 airstrikeSpawnPosition3;
+	private GameWorld world;
 	//private Vector2 curserPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 
 	private AnimationData animationSet;
@@ -50,6 +51,10 @@ public class Weapon {
 		airstrikeSpawnPosition = new Vector2(x, y);
 		airstrikeSpawnPosition2 = new Vector2(x - 0.2f, y);
 		airstrikeSpawnPosition3 = new Vector2(x - 0.4f, y);
+	}
+
+	public void setWorld(GameWorld world) {
+		this.world = world;
 	}
 
 	/**
@@ -94,9 +99,14 @@ public class Weapon {
 				output.add(turret);
 			}
 			// setTransform Method spawns the current Worm to the selected position
-			else if (type == WeaponType.WEAPON_TELEPORTER){
-				EventManager.getInstance().queueEvent(EventManager.Type.TeleporterUse, type);
-                worm.setPosition(indicator.getPosition());
+			else if (type == WeaponType.WEAPON_TELEPORTER) {
+				if (world.isPositionValid(indicator.getPosition(), Constants.WORM_HEIGHT, Constants.WORM_HEIGHT)) {
+					EventManager.getInstance().queueEvent(EventManager.Type.TeleporterUse, type);
+					worm.setPosition(indicator.getPosition());
+				}
+				else {
+					currentAmmo++;
+				}
             }
 			else {
 				Vector2 direction;
