@@ -13,6 +13,16 @@ import com.badlogic.gdx.utils.Array;
 import de.paluno.game.interfaces.UserName;
 import de.paluno.game.screens.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+
 public class SEPGame extends Game {
 
     private AssetManager assetManager;
@@ -41,16 +51,35 @@ public class SEPGame extends Game {
 
     @Override
     public void create() {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                handleUncaughtException(thread, ex);
+            }
+        });
+
     	EventManager.getInstance().addListener(listener, EventManager.Type.GameOver, EventManager.Type.ClickSound, EventManager.Type.LeaveMatch);
     	
         FileHandle configFileHandle = Gdx.files.local("config.xml");
-        if (!configFileHandle.exists())
-            Gdx.files.internal("config.xml").copyTo(configFileHandle);
+        if (!configFileHandle.exists()) {
+            try {
+                Gdx.files.internal("config.xml").copyTo(configFileHandle);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         Config.loadConfig(configFileHandle);
 
         FileHandle licenseFileHandle = Gdx.files.local("LICENSE");
-        if (!licenseFileHandle.exists())
-            Gdx.files.internal("LICENSE").copyTo(licenseFileHandle);
+        if (!licenseFileHandle.exists()) {
+            try {
+                Gdx.files.internal("LICENSE").copyTo(licenseFileHandle);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         if (Config.fullscreen)
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
@@ -118,5 +147,35 @@ public class SEPGame extends Game {
         }
 
         setScreen(screen);
+    }
+
+    private void handleUncaughtException(Thread thread, Throwable ex) {
+        ex.printStackTrace();
+        LocalDateTime time = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy__HH_mm_ss");
+        String fileName = "Crash_" + formatter.format(time) + ".txt";
+
+        File logsDir = Gdx.files.local("logs").file();
+        logsDir.mkdir();
+
+        if (logsDir.exists()) {
+            PrintStream stream = null;
+
+            File file = new File(logsDir, fileName);
+            if (!file.exists()) {
+                try {
+                    stream = new PrintStream(new FileOutputStream(file));
+
+                    ex.printStackTrace(stream);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (stream != null)
+                        stream.close();
+                }
+            }
+        }
+
+        System.exit(1);
     }
 }
