@@ -48,6 +48,10 @@ public class SEPGame extends Game {
             Gdx.files.internal("config.xml").copyTo(configFileHandle);
         Config.loadConfig(configFileHandle);
 
+        FileHandle licenseFileHandle = Gdx.files.local("LICENSE");
+        if (!licenseFileHandle.exists())
+            Gdx.files.internal("LICENSE").copyTo(licenseFileHandle);
+
         if (Config.fullscreen)
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 

@@ -1074,7 +1074,7 @@ public abstract class WorldHandler implements Disposable {
         getWorld().getCamera().setCameraFocus(turrets.get(0));
 
         if (shouldWorldStep()) {
-            Timer.schedule(turretsShootTimer, 2.0f);
+            Timer.schedule(turretsShootTimer, 1.0f);
         }
 
         return true;

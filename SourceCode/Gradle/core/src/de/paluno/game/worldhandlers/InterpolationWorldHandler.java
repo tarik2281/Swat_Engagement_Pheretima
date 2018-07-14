@@ -63,22 +63,17 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                     case EXPLOSION: {
                         ExplosionEvent ex = (ExplosionEvent) currentEvent;
                         Projectile projectile = getProjectileById(ex.projectileId);
-                        if (projectile == null)
-                            System.out.println("Could not find projectile for id: " + ex.projectileId + " (" + toString() + ")");
-                        getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
-                                ex.getRadius(), ex.getBlastPower()));
-                        EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, projectile);
+                        if (projectile != null) {
+                            getWorld().addExplosion(new Explosion(new Vector2(ex.getCenterX(), ex.getCenterY()),
+                                    ex.getRadius(), ex.getBlastPower()));
+                            EventManager.getInstance().queueEvent(EventManager.Type.ProjectileExploded, projectile);
+                        }
                         break;
                     }
                     case SHOOT: {
                         for (ProjectileData data : ((ShootEvent) currentEvent).projectiles) {
                             Projectile projectile;
                             Worm shootingWorm = getPlayers().get(data.getPlayerNumber()).getWormByNumber(data.getWormNumber());
-                            if (shootingWorm == null) {
-                                System.out.println("Could not find worm for id: " + data.getPlayerNumber() + ", " + data.getWormNumber() + " (" + toString() + ")");
-                            } else {
-                                System.out.println("Could find worm for id: " + data.getPlayerNumber() + ", " + data.getWormNumber() + " (" + toString() + ")");
-                            }
                             if (data.getType() == WeaponType.WEAPON_TURRET.ordinal())
                                 projectile = new Turret(shootingWorm, WeaponType.values()[data.getType()],
                                         new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
@@ -166,7 +161,6 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                     case SPAWN_AIRDROP: {
                         SpawnAirdropEvent event = (SpawnAirdropEvent) currentEvent;
 
-                        System.out.println("Received event crateId: " + event.getCrateId() + ", chuteId: " + event.getChuteId());
                         AirdropCrate crate = new AirdropCrate(new Vector2(event.getPositionX(), event.getPositionY()), WeaponType.values()[event.getDropType()]);
                         crate.setId(event.getCrateId());
                         addCrate(crate);

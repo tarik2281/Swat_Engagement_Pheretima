@@ -48,6 +48,8 @@ public class Match {
     public void userDisconnected(User user) {
         for (Player player : players) {
             if (player.getControllingUser() == user) {
+                player.setDisconnected(true);
+
                 for (Worm worm : player.getWorms())
                     worm.setDead(true);
 
@@ -72,7 +74,7 @@ public class Match {
             if (isRoundEnded()) {
                 Player simulatingPlayer = null;
                 for (Player player : players) {
-                    if (player.getControllingUser().getConnection().isConnected()) {
+                    if (!player.isDisconnected()) {
                         simulatingPlayer = player;
                         break;
                     }
@@ -90,7 +92,7 @@ public class Match {
             else if (state == STATE_RAISE_WATER) {
                 Player simulatingPlayer = null;
                 for (Player player : players) {
-                    if (player.getControllingUser().getConnection().isConnected()) {
+                    if (!player.isDisconnected()) {
                         simulatingPlayer = player;
                         break;
                     }
@@ -249,7 +251,7 @@ public class Match {
         boolean roundEnded = true;
 
         for (Player player : players) {
-            if (!player.isRoundEnded()) {
+            if (!player.isDisconnected() && !player.isRoundEnded()) {
                 roundEnded = false;
                 break;
             }

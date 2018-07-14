@@ -25,6 +25,7 @@ public class Player {
         this.number = number;
         currentWormIndex = -1;
         roundEnded = false;
+        disconnected = false;
 
         worms = new ArrayList<>();
     }
@@ -33,10 +34,12 @@ public class Player {
         this.defeatedListener = listener;
     }
 
-    public void disconnected() {
-        this.disconnected = true;
+    public void setDisconnected(boolean disconnected) {
+        this.disconnected = disconnected;
+    }
 
-        worms.forEach(worm -> worm.setDead(true));
+    public boolean isDisconnected() {
+        return disconnected;
     }
 
     public Worm addWorm(int wormNumber) {
