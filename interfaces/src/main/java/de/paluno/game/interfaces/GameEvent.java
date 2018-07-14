@@ -19,6 +19,8 @@ public class GameEvent extends GameData {
         DESTROY_CHUTE,
         REMOVE_CHUTE,
         CRATE_LANDED,
+        TELEPORTER_USE,
+        TURRET_SHOT,
         GAME_STATE_CHANGED
     }
 

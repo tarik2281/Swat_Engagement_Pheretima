@@ -28,7 +28,7 @@ public class SEPGame extends Game {
                 setGameOver((String) data);
                 break;
             case ClickSound:
-            	clickSound.play(1f);
+            	clickSound.play();
             	break;
         }
     };

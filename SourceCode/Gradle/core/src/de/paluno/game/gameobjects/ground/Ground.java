@@ -5,6 +5,7 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import de.paluno.game.Constants;
 import de.paluno.game.Map;
@@ -108,6 +109,25 @@ public class Ground extends WorldObject {
 
     ArrayList<Explosion> getExplosions() {
         return explosions;
+    }
+
+    public boolean isValidPosition(Vector2 position, float width, float height) {
+        boolean valid = true;
+
+        width /= 2.0f;
+        height /= 2.0f;
+
+        for (CollisionObject collisionObject : collisionObjects) {
+            if (collisionObject.contains(position.x - width, position.y - height) ||
+                    collisionObject.contains(position.x - width, position.y + height) ||
+                    collisionObject.contains(position.x + width, position.y - height) ||
+                    collisionObject.contains(position.x + width, position.y + height)) {
+                valid = false;
+                break;
+            }
+        }
+
+        return valid;
     }
 
     @Override

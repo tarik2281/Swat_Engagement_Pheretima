@@ -3,8 +3,10 @@ package de.paluno.game.gameobjects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.ContactFilter;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.utils.Disposable;
 import de.paluno.game.*;
 import de.paluno.game.gameobjects.ground.ExplosionMaskRenderer;
@@ -194,6 +196,10 @@ public class GameWorld implements Disposable {
 
     public Rectangle getWorldBounds() {
         return worldBounds;
+    }
+
+    public boolean isPositionValid(Vector2 position, float width, float height) {
+        return ground.isValidPosition(position, width, height);
     }
 
     public ArrayList<Worm> addExplosion(Explosion explosion) {

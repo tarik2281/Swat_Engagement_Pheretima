@@ -1,5 +1,7 @@
 package de.paluno.game.gameobjects.ground;
 
+import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.ChainShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
@@ -11,10 +13,12 @@ class CollisionObject {
 		private float[] vertices;
 	}
 
+	private Polygon polygon;
     private float[] vertices;
     private Fixture fixture;
 
     CollisionObject(float[] vertices) {
+        polygon = new Polygon(vertices);
         this.vertices = vertices;
     }
 
@@ -47,6 +51,10 @@ class CollisionObject {
 
     Fixture getFixture() {
         return fixture;
+    }
+
+    public boolean contains(float x, float y) {
+        return polygon.contains(x, y);
     }
 
     SnapshotData makeSnapshot() {

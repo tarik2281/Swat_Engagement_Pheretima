@@ -76,8 +76,7 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                             Worm shootingWorm = getPlayers().get(data.getPlayerNumber()).getWormByNumber(data.getWormNumber());
                             if (shootingWorm == null) {
                                 System.out.println("Could not find worm for id: " + data.getPlayerNumber() + ", " + data.getWormNumber() + " (" + toString() + ")");
-                            }
-                            else {
+                            } else {
                                 System.out.println("Could find worm for id: " + data.getPlayerNumber() + ", " + data.getWormNumber() + " (" + toString() + ")");
                             }
                             if (data.getType() == WeaponType.WEAPON_TURRET.ordinal())
@@ -85,7 +84,7 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                                         new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
                             else
                                 projectile = new Projectile(shootingWorm, WeaponType.values()[data.getType()],
-                                    new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
+                                        new Vector2(data.getPhysicsData().getPositionX(), data.getPhysicsData().getPositionY()), new Vector2());
                             addProjectile(projectile);
                             projectile.setId(data.getId());
                         }
@@ -125,22 +124,35 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                         break;
                     }
                     case AIR_BALL:
-                        EventManager.getInstance().queueEvent(EventManager.Type.AirBall, null);
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.AirBall, null);
                         break;
                     case HEADSHOT:
-                        EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.Headshot, null);
                         break;
                     case GRENADE_COLLISION:
-                        EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.GrenadeCollision, null);
                         break;
                     case FEET_COLLISION:
-                        EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.FeetCollision, null);
                         break;
                     case CRATE_LANDED:
-                        EventManager.getInstance().queueEvent(EventManager.Type.CrateLanded, null);
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.CrateLanded, null);
+                        break;
+                    case TELEPORTER_USE:
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.TeleporterUse, null);
+                        break;
+                    case TURRET_SHOT:
+                        if (currentTime - currentEvent.getReceivingTimeStamp() <= 2.0f)
+                            EventManager.getInstance().queueEvent(EventManager.Type.TurretShot, null);
                         break;
                     case CRATE_PICKUP: {
-                        CratePickupEvent event = (CratePickupEvent)currentEvent;
+                        CratePickupEvent event = (CratePickupEvent) currentEvent;
 
                         AirdropCrate crate = getCrateById(event.getCrateId());
                         Worm worm = getPlayers().get(event.getPlayerNumber()).getWormByNumber(event.getWormNumber());
@@ -152,7 +164,7 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                         break;
                     }
                     case SPAWN_AIRDROP: {
-                        SpawnAirdropEvent event = (SpawnAirdropEvent)currentEvent;
+                        SpawnAirdropEvent event = (SpawnAirdropEvent) currentEvent;
 
                         System.out.println("Received event crateId: " + event.getCrateId() + ", chuteId: " + event.getChuteId());
                         AirdropCrate crate = new AirdropCrate(new Vector2(event.getPositionX(), event.getPositionY()), WeaponType.values()[event.getDropType()]);
@@ -169,27 +181,27 @@ public abstract class InterpolationWorldHandler extends WorldHandler {
                         break;
                     }
                     case REMOVE_CRATE: {
-                        RemoveCrateEvent event = (RemoveCrateEvent)currentEvent;
+                        RemoveCrateEvent event = (RemoveCrateEvent) currentEvent;
 
                         AirdropCrate crate = getCrateById(event.getCrateId());
                         if (crate != null)
-                        crate.removeCrate();
+                            crate.removeCrate();
                         break;
                     }
                     case REMOVE_CHUTE: {
-                        DestroyChuteEvent event = (DestroyChuteEvent)currentEvent;
+                        DestroyChuteEvent event = (DestroyChuteEvent) currentEvent;
 
                         AirdropChute chute = getChuteById(event.getChuteId());
                         if (chute != null)
-                        chute.remove();
+                            chute.remove();
                         break;
                     }
                     case DESTROY_CHUTE: {
-                        DestroyChuteEvent event = (DestroyChuteEvent)currentEvent;
+                        DestroyChuteEvent event = (DestroyChuteEvent) currentEvent;
 
                         AirdropChute chute = getChuteById(event.getChuteId());
                         if (chute != null)
-                        chute.destroy();
+                            chute.destroy();
                         break;
                     }
                 }
