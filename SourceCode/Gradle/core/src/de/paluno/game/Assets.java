@@ -236,7 +236,7 @@ public class Assets {
     public static final AssetDescriptor<Sound> turretUse =
     		new AssetDescriptor<Sound>("TailNailImpact.mp3", Sound.class);
     public static final AssetDescriptor<Sound> teleporterUse =
-    		new AssetDescriptor<Sound>("TELEPORT.wav", Sound.class);
+    		new AssetDescriptor<Sound>("TELEPORT.WAV", Sound.class);
     public static final AssetDescriptor<Sound> clickSound =
     		new AssetDescriptor<Sound>("TickSound.mp3", Sound.class);
 
