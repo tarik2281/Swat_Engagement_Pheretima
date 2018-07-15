@@ -37,8 +37,8 @@ public class Match {
         state = 0;
     }
 
-    public Player addPlayer(User user, int number) {
-        Player player = new Player(user, number);
+    public Player addPlayer(int userId, User user, int number) {
+        Player player = new Player(userId, user, number);
         player.setDefeatedListener(() -> numPlayersAlive--);
         players.add(player);
         numPlayersAlive++;
@@ -47,29 +47,36 @@ public class Match {
 
     public void userDisconnected(User user) {
         for (Player player : players) {
-            if (player.getControllingUser() == user) {
+            if (player.getControllingUserId() == user.getId()) {
                 player.setDisconnected(true);
 
                 for (Worm worm : player.getWorms())
                     worm.setDead(true);
 
-                if (!sendGameOver() && (simulatingUserId == player.getControllingUser().getId() || (state == STATE_PLAYER_TURN && currentPlayerIndex == player.getNumber()))) {
+                if (!sendGameOver() && (simulatingUserId == player.getControllingUserId() || (state == STATE_PLAYER_TURN && currentPlayerIndex == player.getNumber()))) {
                     lobby.broadcastData(user, new GameEvent(currentTick, GameEvent.Type.END_TURN));
                 }
 
                 break;
             }
         }
+
+        handleAllUsersReady();
     }
 
     public void userReady(User user) {
-        for (Player player : players)
-            if (player.getControllingUser() == user) {
+        for (Player player : players) {
+            if (player.getControllingUserId() == user.getId()) {
                 System.out.println("Setting user ready (id: " + user.getId() + ")");
                 player.setReady(true);
                 break;
             }
+        }
 
+        handleAllUsersReady();
+    }
+
+    private void handleAllUsersReady() {
         if (allClientsReady() && !sendGameOver()) {
             if (isRoundEnded()) {
                 Player simulatingPlayer = null;
@@ -81,7 +88,7 @@ public class Match {
                 }
 
                 state = STATE_TURRETS_SHOOT;
-                simulatingUserId = simulatingPlayer.getControllingUser().getId();
+                simulatingUserId = simulatingPlayer.getControllingUserId();
                 lobby.broadcastData(null, new TurretsShootRequest(simulatingUserId));
             }
             else if (state == STATE_TURRETS_SHOOT) {
@@ -99,7 +106,7 @@ public class Match {
                 }
 
                 state = STATE_AIRDROP;
-                simulatingUserId = simulatingPlayer.getControllingUser().getId();
+                simulatingUserId = simulatingPlayer.getControllingUserId();
                 lobby.broadcastData(null, new SpawnAirdropRequest(simulatingPlayer.getControllingUser().getId()));
             }
             else {
@@ -145,7 +152,7 @@ public class Match {
         boolean ready = true;
 
         for (Player player : players) {
-            if (player.getControllingUser().getConnection().isConnected() && !player.isReady()) {
+            if (!player.isDisconnected() && !player.isReady()) {
                 System.out.println("Not ready: " + player.getControllingUser().getId() + " " + player.getControllingUser().getName());
                 ready = false;
                 break;
@@ -251,7 +258,7 @@ public class Match {
         boolean roundEnded = true;
 
         for (Player player : players) {
-            if (!player.isDisconnected() && !player.isRoundEnded()) {
+            if (!player.isDisconnected() && !player.isDefeated() && !player.isRoundEnded()) {
                 roundEnded = false;
                 break;
             }

@@ -187,7 +187,7 @@ public class LocalWorldHandler extends WorldHandler {
         boolean roundEnded = true;
 
         for (Player player : getPlayers()) {
-            if (!player.isRoundEnded()) {
+            if (!player.isDefeated() && !player.isRoundEnded()) {
                 roundEnded = false;
                 break;
             }

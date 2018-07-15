@@ -9,6 +9,10 @@ public class Lobby {
 
     public static final int ID_NONE = -1;
 
+    private static final int STATE_IN_MENU = 0;
+    private static final int STATE_MATCH_STARTING = 1;
+    private static final int STATE_MATCH_STARTED = 2;
+
     private final int id;
     private final String name;
     private List<User> users;
@@ -16,8 +20,11 @@ public class Lobby {
     private final byte numWorms;
     private Match match;
     private Runnable destroyListener;
+    private int currentState;
 
     private final User creatingUser;
+
+    private List<User> pendingLeavingUsers;
 
     public Lobby(int id, String name, int mapNumber, int numWorms, User creatingUser) {
         this.id = id;
@@ -25,8 +32,10 @@ public class Lobby {
         this.mapNumber = (byte)mapNumber;
         this.numWorms = (byte)numWorms;
         this.creatingUser = creatingUser;
+        currentState = STATE_IN_MENU;
 
         users = new ArrayList<>();
+        pendingLeavingUsers = new ArrayList<>();
 
         joinUser(creatingUser);
     }
@@ -40,6 +49,9 @@ public class Lobby {
     }
 
     public boolean joinUser(User joiningUser) {
+        if (currentState != STATE_IN_MENU)
+            return false;
+
         if (joiningUser.getCurrentLobbyId() != ID_NONE)
             return joiningUser.getCurrentLobbyId() == id;
 
@@ -65,6 +77,9 @@ public class Lobby {
             match.userDisconnected(leavingUser);
 
         if (leavingUser.getCurrentLobbyId() == id) {
+            if (currentState == STATE_MATCH_STARTING)
+                pendingLeavingUsers.add(leavingUser);
+
             users.remove(leavingUser);
 
             Message message;
@@ -116,6 +131,7 @@ public class Lobby {
 
     public void startMatch() {
         if (users.size() >= Constants.NUM_MIN_PLAYERS) {
+            currentState = STATE_MATCH_STARTING;
             GameSetupRequest.Player[] players = new GameSetupRequest.Player[users.size()];
             int index = 0;
             for (User user : users)
@@ -123,7 +139,6 @@ public class Lobby {
 
             GameSetupRequest request = new GameSetupRequest(players, mapNumber, numWorms);
             creatingUser.send(request, false);
-            creatingUser.getConnection().sendTCP(request);
 
             System.out.printf("Starting match for lobby(id:%d, name:%s)\n", id, name);
         }
@@ -131,18 +146,23 @@ public class Lobby {
 
     public void setupMatch(GameSetupData data) {
         match = new Match(this);
+        currentState = STATE_MATCH_STARTED;
 
         for (User user : users)
             if (user.getId() != creatingUser.getId())
                 user.send(data, false);
 
         for (PlayerData playerData : data.getPlayerData()) {
-            Player player = match.addPlayer(getUserById(playerData.getClientId()), playerData.getPlayerNumber());
+            Player player = match.addPlayer(playerData.getClientId(), getUserById(playerData.getClientId()), playerData.getPlayerNumber());
 
             for (WormData wormData : playerData.getWorms()) {
                 player.addWorm(wormData.getWormNumber());
             }
         }
+
+        for (User user : pendingLeavingUsers)
+            match.userDisconnected(user);
+        pendingLeavingUsers.clear();
     }
 
     public void userReady(User user) {

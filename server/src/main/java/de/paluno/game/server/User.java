@@ -23,10 +23,6 @@ public class User {
         return connection.getID();
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
     public UserName getUserName() {
         return userName;
     }

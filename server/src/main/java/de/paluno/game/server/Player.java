@@ -8,6 +8,7 @@ import java.util.List;
 
 public class Player {
 
+    private int controllingUserId;
     private User controllingUser;
 
     private Runnable defeatedListener;
@@ -19,7 +20,8 @@ public class Player {
     private boolean roundEnded;
     private boolean disconnected;
 
-    public Player(User user, int number) {
+    public Player(int userId, User user, int number) {
+        this.controllingUserId = userId;
         this.controllingUser = user;
 
         this.number = number;
@@ -109,6 +111,10 @@ public class Player {
 
     public boolean isDefeated() {
         return numWormsAlive <= 0;
+    }
+
+    public int getControllingUserId() {
+        return controllingUserId;
     }
 
     public User getControllingUser() {
