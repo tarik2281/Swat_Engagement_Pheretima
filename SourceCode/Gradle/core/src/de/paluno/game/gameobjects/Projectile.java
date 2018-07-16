@@ -96,10 +96,11 @@ public class Projectile extends WorldObject {
 
         // check if the projectile is inside our world - if not, destroy it
 
-        if ((weaponType == WeaponType.WEAPON_GUN && !getWorld().getWorldBounds().contains(getBody().getPosition())) ||
+        if (((weaponType == WeaponType.WEAPON_GUN || weaponType == WeaponType.WEAPON_AIRSTRIKE || weaponType == WeaponType.WEAPON_TURRET_PROJECTILE)
+                && !getWorld().getWorldBounds().contains(getBody().getPosition())) ||
                 (weaponType.getExplosionTime() > 0.0f && explosionTimer >= weaponType.getExplosionTime()))
             explode(null, true, false);
-            
+
         if(getWorld().isUnderWater(this)) {
         	explode(null, false, false);
         }
