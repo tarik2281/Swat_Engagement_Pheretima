@@ -566,7 +566,7 @@ public abstract class WorldHandler implements Disposable {
         switch (projectileData.getWeaponType()) {
             case WEAPON_TURRET:
                 Turret turret = new Turret(projectileData);
-                projectiles.add(turret);
+                turrets.add(turret);
                 world.registerAfterUpdate(turret);
                 break;
             default:

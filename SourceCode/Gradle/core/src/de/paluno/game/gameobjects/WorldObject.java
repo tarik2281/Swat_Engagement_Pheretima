@@ -32,10 +32,11 @@ public class WorldObject {
     }
 
     public void addChild(WorldObject object) {
-        if (object.parent != null)
-            throw new IllegalStateException("Adding an object as a child which already belongs to another object");
-
-        if (getWorld() != null)
+        if (object.parent != null) {
+            //System.out.println("Adding an object as a child which already belongs to another object");
+            object.parent.children.remove(object);
+        }
+        else if (getWorld() != null)
             getWorld().registerAfterUpdate(object);
         children.add(object);
         object.parent = this;
@@ -43,13 +44,17 @@ public class WorldObject {
 
     public void removeChild(WorldObject object) {
         if (object.parent != this) {
-            System.out.println("Trying to remove a child which does not belong to this object (" + toString() + ").");
-            return;
+            object.parent.children.remove(object);
+
+            //System.out.println("Trying to remove a child which does not belong to this object (" + toString() + ").");
+            //return;
         }
+        else
+            children.remove(object);
 
         if (getWorld() != null)
             getWorld().forgetAfterUpdate(object);
-        children.remove(object);
+        //children.remove(object);
         object.parent = null;
     }
 
