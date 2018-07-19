@@ -926,26 +926,28 @@ public abstract class WorldHandler implements Disposable {
     }
 
     private void shootProjectiles(int playerNumber, int wormNumber, WeaponType type) {
-        weaponProjectileCache.forEach(this::addProjectile);
+        if (!weaponProjectileCache.isEmpty()) {
+            weaponProjectileCache.forEach(this::addProjectile);
 
-        ProjectileData[] projectilesArray = new ProjectileData[weaponProjectileCache.size()];
+            ProjectileData[] projectilesArray = new ProjectileData[weaponProjectileCache.size()];
 
-        int index = 0;
-        for (Projectile projectile : weaponProjectileCache) {
-            ProjectileData data = new ProjectileData()
-                    .setId(projectile.getId())
-                    .setPlayerNumber(playerNumber)
-                    .setWormNumber(wormNumber)
-                    .setType(projectile.getWeaponType().ordinal())
-                    .setPhysicsData(new PhysicsData()
-                            .setPositionX(projectile.getPosition().x)
-                            .setPositionY(projectile.getPosition().y));
-            projectilesArray[index++] = data;
+            int index = 0;
+            for (Projectile projectile : weaponProjectileCache) {
+                ProjectileData data = new ProjectileData()
+                        .setId(projectile.getId())
+                        .setPlayerNumber(playerNumber)
+                        .setWormNumber(wormNumber)
+                        .setType(projectile.getWeaponType().ordinal())
+                        .setPhysicsData(new PhysicsData()
+                                .setPositionX(projectile.getPosition().x)
+                                .setPositionY(projectile.getPosition().y));
+                projectilesArray[index++] = data;
+            }
+
+            ShootEvent event = new ShootEvent(currentGameTick, type.ordinal(), projectilesArray);
+            emitGameData(event);
+            weaponProjectileCache.clear();
         }
-
-        ShootEvent event = new ShootEvent(currentGameTick, type.ordinal(), projectilesArray);
-        emitGameData(event);
-        weaponProjectileCache.clear();
     }
 
     private Worm getNextActiveWorm() {
