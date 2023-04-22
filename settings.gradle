@@ -1,4 +1,5 @@
-include 'SourceCode/Gradle/desktop', 'SourceCode/Gradle/core'
-include 'interfaces'
-include 'server'
+include ':desktop'
+include ':core'
+include ':interfaces'
+include ':server'
 

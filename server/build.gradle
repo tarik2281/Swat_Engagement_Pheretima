@@ -10,6 +10,17 @@ repositories {
     mavenCentral()
 }
 
+jar {
+
+    manifest {
+        attributes "Main-Class": "de.paluno.game.server.GameServer"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 dependencies {
     compile project(":interfaces")
     compile "com.esotericsoftware:kryonet:2.22.0-RC1"

@@ -34,19 +34,19 @@ allprojects {
     }
 }
 
-project(":SourceCode/Gradle/desktop") {
+project(":desktop") {
     apply plugin: "java"
 
 
     dependencies {
-        compile project(":SourceCode/Gradle/core")
+        compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
     }
 }
 
-project(":SourceCode/Gradle/core") {
+project(":core") {
     apply plugin: "java"
 
     sourceSets.test.java.srcDirs = ["/test"]

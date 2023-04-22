@@ -1,8 +1,0 @@
-<AnimatedSprite>
-    <Texture>WeaponAirstrike.png</Texture>
-    <Columns>1</Columns>
-    <Rows>10</Rows>
-    <FrameInterval>0.06</FrameInterval>
-    <SpriteOffset>0</SpriteOffset>
-    <PlayMode>Normal</PlayMode>
-</AnimatedSprite>
