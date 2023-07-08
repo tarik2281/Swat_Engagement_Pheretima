@@ -81,8 +81,8 @@ public class SEPGame extends Game {
             }
         }
 
-        if (Config.fullscreen)
-            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+//        if (Config.fullscreen)
+//            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
         menuMusic = Gdx.audio.newMusic(Gdx.files.internal("MenuScreen_ThemeSong.mp3"));
         clickSound = Gdx.audio.newSound(Gdx.files.internal("TickSound.mp3"));
@@ -136,10 +136,10 @@ public class SEPGame extends Game {
     public void setNextScreen(Screen screen) {
         assetManager.clear();
         
-        if(screen instanceof PlayScreen)
-        	menuMusic.stop();
-        else if (!(screen instanceof GameOverScreen))
-        	menuMusic.play();
+//        if(screen instanceof PlayScreen)
+//        	menuMusic.stop();
+//        else if (!(screen instanceof GameOverScreen))
+//        	menuMusic.play();
 
         if (screen instanceof Loadable) {
             ((Loadable) screen).load(assetManager);

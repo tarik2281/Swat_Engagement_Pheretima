@@ -86,12 +86,13 @@ public class NettyServer extends AbstractVerticle {
 
         vertx.createDatagramSocket()
             .handler(packet -> {
-                log.debug("Received {} bytes from UDP {}", packet.data().length(), packet.sender());
+//                log.debug("Received {} bytes from UDP {}", packet.data().length(), packet.sender());
 
                 final var senderAddress = packet.sender();
                 final var netSession = udpSessionMap.get(senderAddress);
 
-                final var parsedObject = kryoNetSerializer.readObject(packet.data());
+                kryoNetSerializer.readBuffer(packet.data());
+                final var parsedObject = kryoNetSerializer.readNextObject();
 
                 if (netSession == null) {
                     if (parsedObject instanceof RegisterUdpSocket registerUdpSocket) {
@@ -115,7 +116,7 @@ public class NettyServer extends AbstractVerticle {
                         listener.connected(session);
                     }
                 } else {
-
+                    listener.received(netSession, parsedObject);
                 }
             })
             .listen(8082, "localhost")
@@ -144,10 +145,15 @@ public class NettyServer extends AbstractVerticle {
                 socket.write(kryoNetSerializer.writeObject(new RegisterTcpClient(sessionId.toString())));
 
                 socket.handler(buffer -> {
-                    log.debug("Received {} bytes from TCP {}", buffer.length(), socket.remoteAddress());
+                    log.info("Received {} bytes from session id {}", buffer.length(), sessionId);
 
-                    var parsedObject = kryoNetSerializer.readObject(buffer);
-                    listener.received(netSession, parsedObject);
+                    kryoNetSerializer.readBuffer(buffer);
+
+                    do {
+                        var parsedObject = kryoNetSerializer.readNextObject();
+                        log.info("Received object {}", parsedObject);
+                        listener.received(netSession, parsedObject);
+                    } while (kryoNetSerializer.hasData());
                 });
 
                 socket.closeHandler(v -> {
@@ -158,6 +164,8 @@ public class NettyServer extends AbstractVerticle {
                     sessionMap.remove(sessionId);
 
                     log.info("Connection closed from {}", socket.remoteAddress());
+
+                    listener.disconnected(netSession);
                 });
             })
             .listen(8081)

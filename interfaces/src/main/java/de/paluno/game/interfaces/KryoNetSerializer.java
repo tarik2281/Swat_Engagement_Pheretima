@@ -4,7 +4,9 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import io.vertx.core.buffer.Buffer;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class KryoNetSerializer {
 
     private final Kryo kryo = new Kryo();
@@ -19,14 +21,25 @@ public class KryoNetSerializer {
         KryoInterface.registerClasses(kryo);
     }
 
-    public Object readObject(Buffer buffer) {
+    public void readBuffer(Buffer buffer) {
         buffer.getBytes(input.getBuffer());
 
         input.setPosition(0);
         input.setLimit(buffer.length());
         input.setTotal(0);
+    }
 
-        return kryo.readClassAndObject(input);
+    public Object readNextObject() {
+        var parsedObject = kryo.readClassAndObject(input);
+
+        if (input.position() != input.limit())
+            log.warn("Input was not fully consumed!");
+
+        return parsedObject;
+    }
+
+    public boolean hasData() {
+        return input.position() < input.limit();
     }
 
     public Buffer writeObject(Object object) {

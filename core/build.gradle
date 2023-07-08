@@ -1,10 +1,41 @@
-apply plugin: "java"
+plugins {
+    id 'java'
+}
 
-sourceCompatibility = 1.8
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+repositories {
+    mavenCentral()
+}
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceCompatibility = 17
 
-eclipse.project {
-    name = appName + "-core"
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/']
+        }
+        resources {
+            srcDirs = ['assets/']
+        }
+    }
+}
+
+dependencies {
+    implementation "org.slf4j:slf4j-api:1.7.36"
+    implementation "ch.qos.logback:logback-core:1.4.8"
+    implementation "ch.qos.logback:logback-classic:1.4.8"
+
+    implementation project(":interfaces")
+    implementation project(":client")
+    implementation "com.esotericsoftware:kryonet:2.22.0-RC1"
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    implementation 'io.vertx:vertx-core:4.4.4'
+
+//    testCompile "junit:junit:4.12"
+//    testCompile "org.mockito:mockito-core:2.2.7"
+//    testCompile "com.badlogicgames.gdx:gdx-backend-headless:$gdxVersion"
+//    testCompile "com.badlogicgames.gdx:gdx:$gdxVersion"
+//    testCompile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+//    testCompile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+//    testCompile "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 }

@@ -2,8 +2,8 @@ package de.paluno.game.interfaces;
 
 public class Constants {
 
-    public static final int TCP_PORT = 5000;
-    public static final int UDP_PORT = 5001;
+    public static final int TCP_PORT = 8081;
+    public static final int UDP_PORT = 8082;
 
     public static final int WORM_MAX_HEALTH = 100;
 

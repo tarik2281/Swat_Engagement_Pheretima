@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Configuration>
-    <ServerAddress>sepheretima.ddns.net</ServerAddress>
-    <ServerTCPPort>5000</ServerTCPPort>
-    <ServerUDPPort>5001</ServerUDPPort>
+    <ServerAddress>localhost</ServerAddress>
+    <ServerTCPPort>8081</ServerTCPPort>
+    <ServerUDPPort>8082</ServerUDPPort>
     <UDPEnabled>true</UDPEnabled>
     <Fullscreen>true</Fullscreen>
 </Configuration>

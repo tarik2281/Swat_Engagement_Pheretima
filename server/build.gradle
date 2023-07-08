@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 version '1.0'
@@ -11,13 +13,8 @@ repositories {
 }
 
 jar {
-
     manifest {
         attributes "Main-Class": "de.paluno.game.server.GameServer"
-    }
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 

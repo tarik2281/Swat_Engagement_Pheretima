@@ -18,14 +18,9 @@ application {
 }
 
 jar {
-
     manifest {
         attributes "Main-Class": "de.karaca.sep.client.ClientApplication"
     }
-//
-//    from {
-//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    }
 }
 
 dependencies {

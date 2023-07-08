@@ -137,8 +137,9 @@ public class GameServerHandler implements NetListener {
                     lobby.handleGameData(user, (GameData) object);
                 }
             }
-        } else if (object instanceof Message) {
+        } else if (object instanceof Message message) {
             User user = getUserById(netSession.getSessionId());
+            log.info("Received message '{}' from session id '{}' for user id {}", message.getType().name(), netSession.getSessionId(), user != null ? user.getId() : null);
 
             Lobby lobby = null;
             if (user != null)

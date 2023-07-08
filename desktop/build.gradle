@@ -1,37 +1,65 @@
-apply plugin: "java"
+plugins {
+    id 'java'
 
-sourceCompatibility = 1.6
-sourceSets.main.java.srcDirs = [ "src/" ]
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 17
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/']
+        }
+    }
+}
+
+dependencies {
+    implementation project(":core")
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+}
 
 project.ext.mainClassName = "com.mygdx.game.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../core/assets");
 
-task run(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
-    classpath = sourceSets.main.runtimeClasspath
-    standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
-}
-
-task debug(dependsOn: classes, type: JavaExec) {
-    main = project.mainClassName
-    classpath = sourceSets.main.runtimeClasspath
-    standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
-    debug = true
-}
-
-task dist(type: Jar) {
-    from files(sourceSets.main.output.classesDir)
-    from files(sourceSets.main.output.resourcesDir)
-    from {configurations.compile.collect {zipTree(it)}}
-    from files(project.assetsDir);
- 
+jar {
     manifest {
-        attributes 'Main-Class': project.mainClassName
+        attributes "Main-Class": project.mainClassName
     }
 }
 
-dist.dependsOn classes
+//task run(dependsOn: classes, type: JavaExec) {
+//    main = project.mainClassName
+//    classpath = sourceSets.main.runtimeClasspath
+//    standardInput = System.in
+//    workingDir = project.assetsDir
+//    ignoreExitValue = true
+//}
+//
+//task debug(dependsOn: classes, type: JavaExec) {
+//    main = project.mainClassName
+//    classpath = sourceSets.main.runtimeClasspath
+//    standardInput = System.in
+//    workingDir = project.assetsDir
+//    ignoreExitValue = true
+//    debug = true
+//}
+//
+//task dist(type: Jar) {
+//    from files(sourceSets.main.output.classes)
+//    from files(sourceSets.main.output.resources)
+//    from { configurations.compile.collect { zipTree(it) } }
+//    from files(project.assetsDir);
+//
+//    manifest {
+//        attributes 'Main-Class': project.mainClassName
+//    }
+//}
+
+//dist.dependsOn classes
