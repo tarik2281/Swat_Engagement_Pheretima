@@ -1,18 +1,18 @@
 package de.paluno.game.server;
 
-import com.esotericsoftware.kryonet.Connection;
 import de.paluno.game.interfaces.UserName;
+import de.paluno.game.server.migration.NetSession;
 
 public class User {
 
-    private Connection connection;
+    private NetSession netSession;
     private UserName userName;
     private boolean udpEnabled;
 
     private int currentLobbyId;
 
-    public User(Connection connection, String name, String[] wormNames, boolean udpEnabled) {
-        this.connection = connection;
+    public User(NetSession netSession, String name, String[] wormNames, boolean udpEnabled) {
+        this.netSession = netSession;
         this.userName = new UserName(name, wormNames);
         this.udpEnabled = udpEnabled;
 
@@ -20,7 +20,7 @@ public class User {
     }
 
     public int getId() {
-        return connection.getID();
+        return netSession.getSessionId().hashCode();
     }
 
     public UserName getUserName() {
@@ -49,8 +49,8 @@ public class User {
 
     public void send(Object object, boolean preferUdp) {
         if (preferUdp && udpEnabled)
-            connection.sendUDP(object);
+            netSession.sendUDP(object);
         else
-            connection.sendTCP(object);
+            netSession.sendTCP(object);
     }
 }

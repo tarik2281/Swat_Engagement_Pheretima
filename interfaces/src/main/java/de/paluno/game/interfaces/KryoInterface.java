@@ -65,5 +65,9 @@ public class KryoInterface {
         kryo.register(GameSetupRequest.Player[].class);
         kryo.register(TurretsShootRequest.class);
         kryo.register(SpawnAirdropRequest.class);
+
+        kryo.register(PingMessage.class);
+        kryo.register(RegisterTcpClient.class);
+        kryo.register(RegisterUdpSocket.class);
     }
 }

@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    id 'application'
+
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 version '1.0'
@@ -10,15 +13,19 @@ repositories {
     mavenCentral()
 }
 
+application {
+    mainClass = 'de.karaca.sep.client.ClientApplication'
+}
+
 jar {
 
     manifest {
-        attributes "Main-Class": "de.paluno.game.server.GameServer"
+        attributes "Main-Class": "de.karaca.sep.client.ClientApplication"
     }
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+//
+//    from {
+//        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
 }
 
 dependencies {
@@ -31,6 +38,10 @@ dependencies {
     implementation 'io.vertx:vertx-config-yaml:4.4.4'
     implementation 'io.vertx:vertx-web:4.4.4'
     implementation 'io.vertx:vertx-tcp-eventbus-bridge:4.4.4'
+    implementation 'io.vertx:vertx-shell:4.4.4'
+
+    implementation "org.jline:jline:3.23.0"
+    implementation "org.jline:jline-terminal-jansi:3.23.0"
 
     compileOnly "org.projectlombok:lombok:1.18.24"
     annotationProcessor "org.projectlombok:lombok:1.18.24"

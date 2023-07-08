@@ -1,5 +1,6 @@
-include ':desktop'
-include ':core'
+//include ':desktop'
+//include ':core'
 include ':interfaces'
 include ':server'
+include ':client'
 
