@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 17
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.slf4j:slf4j-api:1.7.36"
+
+    implementation "io.vertx:vertx-core:${vertxVersion}"
+    implementation "io.vertx:vertx-config:${vertxVersion}"
+    implementation "io.vertx:vertx-config-yaml:${vertxVersion}"
+
+    compileOnly "org.projectlombok:lombok:1.18.24"
+    annotationProcessor "org.projectlombok:lombok:1.18.24"
+
+    implementation "com.esotericsoftware:kryo:5.5.0"
+
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.13.3"
+}

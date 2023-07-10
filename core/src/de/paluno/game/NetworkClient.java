@@ -2,19 +2,16 @@ package de.paluno.game;
 
 import com.badlogic.gdx.Gdx;
 import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.FrameworkMessage;
-import com.esotericsoftware.kryonet.Listener;
+import de.karaca.net.core.*;
 import de.karaca.sep.client.NetClientVerticle;
 import de.karaca.sep.client.NetListener;
 import de.paluno.game.interfaces.*;
-import de.paluno.game.interfaces.Constants;
 import de.paluno.game.interfaces.GameEvent;
 import io.vertx.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class NetworkClient {
@@ -32,7 +29,9 @@ public class NetworkClient {
     public static final int RESULT_CONNECTION_SUCCESS = 0;
 
     private String remoteAddress;
-    private Client client;
+//    private Client client;
+    private NetSystem netSystem;
+    private NetSessionClient sessionClient;
     private NetClientVerticle netClientVerticle;
     private ConnectionListener connectionListener;
     private DisconnectionListener disconnectionListener;
@@ -93,6 +92,10 @@ public class NetworkClient {
         }
     };
 
+    private void handleMessage(NetMessage netMessage) {
+
+    }
+
     public NetworkClient(String remoteAddress) {
         this.remoteAddress = remoteAddress;
 
@@ -117,36 +120,37 @@ public class NetworkClient {
             vertx.deployVerticle(netClientVerticle);
         }
 
-//        if (client == null) {
-//            client = new Client();
+//        var connectionConfig = NetConnectionConfig.builder()
+//            .host("localhost")
+//            .tcpPort(8081)
+//            .udpPort(8082)
+//            .build();
 //
-//            client.start();
+//        netSystem = NetSystem.create();
 //
-//            KryoInterface.registerClasses(client.getKryo());
+//        sessionClient = NetSessionClient.create(netSystem);
 //
-//            client.addListener(networkListener);
+//        var messageHandler = new NetMessageRouter().route(NetMessage.class, this::handleMessage);
 //
-//            new Thread(() -> {
-//                try {
-//                    client.connect(5000, remoteAddress, Constants.TCP_PORT, Constants.UDP_PORT);
-//                } catch (IOException e) {
-//                    Gdx.app.postRunnable(() -> {
-//                        if (connectionListener != null)
-//                            connectionListener.onConnectionResult(NetworkClient.this, RESULT_CONNECTION_FAILED);
-//                    });
-//
-//                    e.printStackTrace();
-//                }
-//            }).start();
-//        }
+//        sessionClient
+//            .onConnect(netListener::connected)
+//            .onDisconnect(netListener::disconnected)
+//            .onReceive(messageHandler)
+//            .connect(connectionConfig)
+//            .thenAccept(client -> sessionClient = client)
+//            .exceptionally(throwable -> {
+//                netListener.connectionFailed();
+//                return null;
+//            });
     }
 
     public void updateRTT() {
-        client.updateReturnTripTime();
+//        client.updateReturnTripTime();
     }
 
     public int getRTT() {
-        return client.getReturnTripTime();
+        return 0;
+//        return client.getReturnTripTime();
     }
 
     public void disconnect() {
