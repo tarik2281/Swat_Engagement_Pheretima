@@ -49,7 +49,7 @@ public class NetMessageSerializer {
         return input.limit() - HEADER_LENGTH - lastPosition >= payloadLength;
     }
 
-    public NetMessage deserialize() {
+    public NetMessage<Object> deserialize() {
         int lastPosition = input.position();
         int payloadLength = input.readInt();
 
@@ -86,7 +86,7 @@ public class NetMessageSerializer {
             .build();
     }
 
-    public void serialize(NetMessage netMessage) {
+    public <T> void serialize(NetMessage<T> netMessage) {
         output.reset();
 
         output.setPosition(4);

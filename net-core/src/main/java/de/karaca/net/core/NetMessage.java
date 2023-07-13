@@ -3,16 +3,16 @@ package de.karaca.net.core;
 import lombok.Getter;
 
 @Getter
-public class NetMessage {
-    private final NetMessageType<?> type;
-    private final Object payload;
+public class NetMessage<T> {
+    private final NetMessageType<T> type;
+    private final T payload;
 
-    private NetMessage(NetMessageType<?> type, Object payload) {
+    private NetMessage(NetMessageType<T> type, T payload) {
         this.type = type;
         this.payload = payload;
     }
 
-    public boolean isOfType(NetMessageType<?> type) {
+    public <R> boolean isOfType(NetMessageType<R> type) {
         return this.type == type;
     }
 
@@ -33,8 +33,8 @@ public class NetMessage {
             return this;
         }
 
-        public NetMessage build() {
-            return new NetMessage(type, payload);
+        public NetMessage<T> build() {
+            return new NetMessage<>(type, payload);
         }
     }
 }

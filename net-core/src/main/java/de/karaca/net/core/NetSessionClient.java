@@ -8,11 +8,11 @@ import java.util.function.Consumer;
 public interface NetSessionClient {
     NetSession getNetSession();
 
-    NetSessionClient send(NetMessage message);
+    NetSessionClient send(NetMessage<Object> message);
     NetSessionClient onConnect(Runnable handler);
     NetSessionClient onDisconnect(Runnable handler);
     NetSessionClient onError(Consumer<Throwable> handler);
-    NetSessionClient onReceive(Consumer<NetMessage> handler);
+    NetSessionClient onReceive(NetMessageConsumer<Object> handler);
 
     CompletionStage<NetSessionClient> connect(NetConnectionConfig config);
     void disconnect();

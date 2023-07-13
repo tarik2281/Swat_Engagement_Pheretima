@@ -2,6 +2,7 @@ package de.karaca.net.core.vertx;
 
 import de.karaca.net.core.KryoNetPayloadSerializer;
 import de.karaca.net.core.NetMessage;
+import de.karaca.net.core.NetMessageConsumer;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramPacket;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +14,12 @@ public class NetDataHandlerVertx {
 
     private final NetMessageSerializerVertx serializer = new NetMessageSerializerVertx(new KryoNetPayloadSerializer());
 
-    public void handleDatagramPacket(DatagramPacket packet, Consumer<NetMessage> messageConsumer) {
+    public void handleDatagramPacket(DatagramPacket packet, Consumer<NetMessage<Object>> messageConsumer) {
         serializer.resetInputBuffer();
         serializer.readFromBuffer(packet.data());
 
         while (serializer.hasData() && serializer.canDeserialize()) {
-            NetMessage message = serializer.deserialize();
+            NetMessage<Object> message = serializer.deserialize();
 
             messageConsumer.accept(message);
         }
@@ -28,7 +29,7 @@ public class NetDataHandlerVertx {
         }
     }
 
-    public void handleNetData(NetSessionVertx netSession, Buffer buffer, Consumer<NetMessage> messageConsumer) {
+    public void handleNetData(NetSessionVertx netSession, Buffer buffer, NetMessageConsumer<Object> messageConsumer) {
         serializer.resetInputBuffer();
 
         if (netSession.hasPendingData()) {
@@ -42,9 +43,9 @@ public class NetDataHandlerVertx {
         serializer.readFromBuffer(buffer);
 
         while (serializer.hasData() && serializer.canDeserialize()) {
-            NetMessage message = serializer.deserialize();
+            NetMessage<Object> message = serializer.deserialize();
 
-            messageConsumer.accept(message);
+            messageConsumer.accept(netSession, message);
         }
 
         if (serializer.hasData()) {
@@ -52,12 +53,12 @@ public class NetDataHandlerVertx {
         }
     }
 
-    public Buffer toBuffer(NetMessage netMessage) {
+    public <T> Buffer toBuffer(NetMessage<T> netMessage) {
         serializer.serialize(netMessage);
         return serializer.flushToBuffer();
     }
 
-    public void send(NetSessionVertx netSession, NetMessage netMessage) {
+    public <T> void send(NetSessionVertx netSession, NetMessage<T> netMessage) {
         var buffer = toBuffer(netMessage);
 
         switch (netMessage.getType().getProtocol()) {

@@ -3,16 +3,15 @@ package de.karaca.net.core;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 @Slf4j
-public class NetMessageRouter implements Consumer<NetMessage> {
-    protected final HashMap<Integer, Consumer<Object>> routes = new HashMap<>();
+public class NetMessageRouter implements NetMessageConsumer<Object> {
+    protected final HashMap<Integer, NetMessageConsumer<Object>> routes = new HashMap<>();
 
-    private Consumer<NetMessage> nextHandler;
+    private NetMessageConsumer<Object> nextHandler;
 
-    public <T> NetMessageRouter route(NetMessageType<T> messageType, Consumer<T> handler) {
-        var previousHandler = routes.put(messageType.getNameHash(), (Consumer<Object>) handler);
+    public <T> NetMessageRouter route(NetMessageType<T> messageType, NetMessageConsumer<T> handler) {
+        var previousHandler = routes.put(messageType.getNameHash(), (NetMessageConsumer<Object>) handler);
 
         if (previousHandler != null) {
             log.warn("Overriding handler for message type {}", messageType.getName());
@@ -21,18 +20,18 @@ public class NetMessageRouter implements Consumer<NetMessage> {
         return this;
     }
 
-    public NetMessageRouter chain(Consumer<NetMessage> handler) {
+    public NetMessageRouter chain(NetMessageConsumer<Object> handler) {
         nextHandler = handler;
         return this;
     }
 
     @Override
-    public void accept(NetMessage netMessage) {
-        Consumer<Object> handler = routes.get(netMessage.getType().getNameHash());
+    public void accept(NetSession netSession, NetMessage<Object> netMessage) {
+        var handler = routes.get(netMessage.getType().getNameHash());
         if (handler != null) {
-            handler.accept(netMessage.getPayload());
+            handler.accept(netSession, netMessage);
         } else if (nextHandler != null) {
-            nextHandler.accept(netMessage);
+            nextHandler.accept(netSession, netMessage);
         } else {
             log.warn("No handler for message type {}", netMessage.getType());
         }

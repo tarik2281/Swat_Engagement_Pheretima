@@ -28,7 +28,7 @@ public class NetSessionClientVertx implements NetSessionClient {
     private NetClient netClient;
     private DatagramSocket datagramSocket;
 
-    private final NetDataHandlerVertx messageHandler = new NetDataHandlerVertx();
+    private final NetDataHandlerVertx dataHandler = new NetDataHandlerVertx();
 
     private CompletableFuture<NetSessionClient> connectFuture;
 
@@ -40,15 +40,16 @@ public class NetSessionClientVertx implements NetSessionClient {
         }
 
         messageRouter = new NetMessageRouter()
-            .route(ASSIGN_SESSION_ID, sessionId -> {
+            .route(ASSIGN_SESSION_ID, (session, message) -> {
+                final var sessionId = message.getPayload();
                 netSession.setSessionId(UUID.fromString(sessionId));
 
-                messageHandler.send(netSession, NetMessage.builder(ASSIGN_UDP_ADDRESS)
+                dataHandler.send(netSession, NetMessage.builder(ASSIGN_UDP_ADDRESS)
                     .payload(sessionId)
                     .build());
                 // TODO: repeat this until we get a response
             })
-            .route(CONFIRM_UDP_ADDRESS, v -> connectFuture.complete(this));
+            .route(CONFIRM_UDP_ADDRESS, (session, message) -> connectFuture.complete(this));
     }
 
     @Override
@@ -57,12 +58,12 @@ public class NetSessionClientVertx implements NetSessionClient {
     }
 
     @Override
-    public NetSessionClient send(NetMessage message) {
+    public NetSessionClient send(NetMessage<Object> message) {
         // TODO: check if this is correct and the message is sent on the event loop thread
         if (!Context.isOnEventLoopThread()) {
-            netSystem.getVertx().runOnContext(v -> messageHandler.send(netSession, message));
+            netSystem.getVertx().runOnContext(v -> dataHandler.send(netSession, message));
         } else {
-            messageHandler.send(netSession, message);
+            dataHandler.send(netSession, message);
         }
 
         return this;
@@ -77,7 +78,7 @@ public class NetSessionClientVertx implements NetSessionClient {
                 netClient = netSystem.getVertx().createNetClient();
                 datagramSocket = netSystem.getVertx().createDatagramSocket()
                     .handler(packet -> {
-                        messageHandler.handleDatagramPacket(packet, messageRouter);
+                        dataHandler.handleDatagramPacket(packet, message -> messageRouter.accept(netSession, message));
                     });
             }
 
@@ -88,7 +89,7 @@ public class NetSessionClientVertx implements NetSessionClient {
                     netSession.setUdpSocket(datagramSocket);
                     netSession.setRemoteUdpAddress(SocketAddress.inetSocketAddress(config.getUdpPort(), config.getHost()));
 
-                    netSocket.handler(buffer -> messageHandler.handleNetData(netSession, buffer, messageRouter));
+                    netSocket.handler(buffer -> dataHandler.handleNetData(netSession, buffer, messageRouter));
 
                     netSocket.closeHandler(v -> {
                         if (disconnectHandler != null) {
@@ -140,7 +141,7 @@ public class NetSessionClientVertx implements NetSessionClient {
     }
 
     @Override
-    public NetSessionClient onReceive(Consumer<NetMessage> handler) {
+    public NetSessionClient onReceive(NetMessageConsumer<Object> handler) {
         messageRouter.chain(handler);
         return this;
     }
