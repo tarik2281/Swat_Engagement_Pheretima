@@ -1,5 +1,8 @@
 package de.paluno.game.interfaces;
 
+import de.karaca.net.core.NetPayload;
+
+@NetPayload
 public class ExplosionEvent extends GameEvent {
 
     private float centerX, centerY;

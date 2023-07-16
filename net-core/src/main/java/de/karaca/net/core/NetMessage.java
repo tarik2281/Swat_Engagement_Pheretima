@@ -20,6 +20,14 @@ public class NetMessage<T> {
         return new Builder<>(type);
     }
 
+    public static <T> Builder<T> builder(Class<T> type) {
+        return new Builder<>(NetMessageType.getByClass(type));
+    }
+
+    public static <T> NetMessage<T> from(T payload) {
+        return new Builder<>(NetMessageType.getByClass((Class<T>)payload.getClass())).payload(payload).build();
+    }
+
     public static class Builder<T> {
         private final NetMessageType<T> type;
         private T payload;

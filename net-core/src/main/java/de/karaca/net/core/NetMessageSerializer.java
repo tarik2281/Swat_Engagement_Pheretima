@@ -15,8 +15,8 @@ public class NetMessageSerializer {
 
     private final NetPayloadSerializer payloadSerializer;
 
-    protected final Input input = new Input(4096);
-    protected final Output output = new Output(4096);
+    protected final Input input = new Input(8192);
+    protected final Output output = new Output(8192);
 
     public NetMessageSerializer(NetPayloadSerializer payloadSerializer) {
         this.payloadSerializer = payloadSerializer;
@@ -29,13 +29,16 @@ public class NetMessageSerializer {
     }
 
     public void copyFrom(ByteBuffer buffer) {
-        buffer.get(input.getBuffer(), input.limit(), buffer.limit());
+        buffer.flip();
+        buffer.get(input.getBuffer(), input.limit(), buffer.remaining());
 
         input.setLimit(input.limit() + buffer.limit());
+
+        buffer.clear();
     }
 
     public void copyTo(ByteBuffer buffer) {
-        buffer.put(input.getBuffer(), 0, input.position());
+        buffer.put(input.getBuffer(), input.position(), input.limit() - input.position());
     }
 
     public boolean hasData() {

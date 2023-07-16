@@ -1,7 +1,11 @@
 package de.paluno.game.interfaces;
 
+import de.karaca.net.core.NetPayload;
+
+@NetPayload
 public class LobbyCreateRequest {
 
+    @NetPayload
     public static class Result {
         public int lobbyId;
     }

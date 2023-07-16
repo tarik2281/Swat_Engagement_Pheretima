@@ -1,5 +1,6 @@
 package de.karaca.net.core.vertx;
 
+import de.karaca.net.core.JacksonNetPayloadSerializer;
 import de.karaca.net.core.KryoNetPayloadSerializer;
 import de.karaca.net.core.NetMessage;
 import de.karaca.net.core.NetMessageConsumer;
@@ -15,6 +16,8 @@ public class NetDataHandlerVertx {
     private final NetMessageSerializerVertx serializer = new NetMessageSerializerVertx(new KryoNetPayloadSerializer());
 
     public void handleDatagramPacket(DatagramPacket packet, Consumer<NetMessage<Object>> messageConsumer) {
+        log.debug("Received {} bytes of data: {}", packet.data().length(), packet.data().toString());
+
         serializer.resetInputBuffer();
         serializer.readFromBuffer(packet.data());
 
@@ -30,6 +33,7 @@ public class NetDataHandlerVertx {
     }
 
     public void handleNetData(NetSessionVertx netSession, Buffer buffer, NetMessageConsumer<Object> messageConsumer) {
+        log.debug("Received {} bytes of data: {}", buffer.length(), buffer.toString());
         serializer.resetInputBuffer();
 
         if (netSession.hasPendingData()) {
@@ -60,6 +64,8 @@ public class NetDataHandlerVertx {
 
     public <T> void send(NetSessionVertx netSession, NetMessage<T> netMessage) {
         var buffer = toBuffer(netMessage);
+
+        log.debug("Sending {} bytes of data: {}", buffer.length(), buffer.toString());
 
         switch (netMessage.getType().getProtocol()) {
             case TCP -> netSession.getTcpSocket().write(buffer);

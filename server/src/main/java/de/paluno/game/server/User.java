@@ -1,18 +1,22 @@
 package de.paluno.game.server;
 
+import de.karaca.net.core.NetMessage;
+import de.karaca.net.core.NetSession;
+import de.karaca.net.core.NetSessionServer;
 import de.paluno.game.interfaces.UserName;
-import de.paluno.game.server.migration.NetSession;
 
 public class User {
 
     private NetSession netSession;
+    private NetSessionServer netSessionServer;
     private UserName userName;
     private boolean udpEnabled;
 
     private int currentLobbyId;
 
-    public User(NetSession netSession, String name, String[] wormNames, boolean udpEnabled) {
+    public User(NetSession netSession, NetSessionServer netSessionServer, String name, String[] wormNames, boolean udpEnabled) {
         this.netSession = netSession;
+        this.netSessionServer = netSessionServer;
         this.userName = new UserName(name, wormNames);
         this.udpEnabled = udpEnabled;
 
@@ -48,9 +52,11 @@ public class User {
     }
 
     public void send(Object object, boolean preferUdp) {
-        if (preferUdp && udpEnabled)
-            netSession.sendUDP(object);
-        else
-            netSession.sendTCP(object);
+        this.netSessionServer.send(netSession, NetMessage.from(object));
+
+//        if (preferUdp && udpEnabled)
+//            netSession.sendUDP(object);
+//        else
+//            netSession.sendTCP(object);
     }
 }

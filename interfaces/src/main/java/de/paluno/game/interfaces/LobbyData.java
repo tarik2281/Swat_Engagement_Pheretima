@@ -1,5 +1,10 @@
 package de.paluno.game.interfaces;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class LobbyData {
 
     public int id;

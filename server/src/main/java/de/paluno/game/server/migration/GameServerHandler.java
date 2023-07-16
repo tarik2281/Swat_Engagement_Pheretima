@@ -167,11 +167,12 @@ public class GameServerHandler implements NetListener {
     }
 
     private User loginUser(NetSession netSession, UserLoginRequest request) {
-        User user = new User(netSession, request.getName(), request.getWormNames(), request.isUdpEnabled());
-        loggedInUsers.put(netSession.getSessionId(), user);
-
-        log.info("User logged in (id: {}, name: {}, worms: {}, udpEnabled: {})", user.getId(), user.getName(), Arrays.toString(user.getWormNames()), request.isUdpEnabled());
-        return user;
+        return null;
+//        User user = new User(netSession, request.getName(), request.getWormNames(), request.isUdpEnabled());
+//        loggedInUsers.put(netSession.getSessionId(), user);
+//
+//        log.info("User logged in (id: {}, name: {}, worms: {}, udpEnabled: {})", user.getId(), user.getName(), Arrays.toString(user.getWormNames()), request.isUdpEnabled());
+//        return user;
     }
 
     private void logoutUser(UUID sessionId) {

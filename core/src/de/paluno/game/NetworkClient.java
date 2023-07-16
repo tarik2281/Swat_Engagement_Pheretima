@@ -32,7 +32,7 @@ public class NetworkClient {
 //    private Client client;
     private NetSystem netSystem;
     private NetSessionClient sessionClient;
-    private NetClientVerticle netClientVerticle;
+//    private NetClientVerticle netClientVerticle;
     private ConnectionListener connectionListener;
     private DisconnectionListener disconnectionListener;
     private boolean userDisconnect = false;
@@ -92,8 +92,17 @@ public class NetworkClient {
         }
     };
 
-    private void handleMessage(NetMessage netMessage) {
+    private void handleMessage(NetSession netSession, NetMessage<Object> netMessage) {
+        Gdx.app.postRunnable(() -> {
+            dataHandlers.addAll(addQueue);
+            dataHandlers.removeAll(removeQueue);
 
+            addQueue.clear();
+            removeQueue.clear();
+
+            for (DataHandler dataHandler : dataHandlers)
+                dataHandler.handleData(NetworkClient.this, netMessage.getPayload());
+        });
     }
 
     public NetworkClient(String remoteAddress) {
@@ -113,35 +122,37 @@ public class NetworkClient {
     }
 
     public void connect() {
-        if (netClientVerticle == null) {
-            Vertx vertx = Vertx.vertx();
+//        if (netClientVerticle == null) {
+//            Vertx vertx = Vertx.vertx();
+//
+//            netClientVerticle = new NetClientVerticle(netListener);
+//            vertx.deployVerticle(netClientVerticle);
+//        }
 
-            netClientVerticle = new NetClientVerticle(netListener);
-            vertx.deployVerticle(netClientVerticle);
-        }
+        var connectionConfig = NetConnectionConfig.builder()
+            .host("localhost")
+            .tcpPort(8081)
+            .udpPort(8082)
+            .build();
 
-//        var connectionConfig = NetConnectionConfig.builder()
-//            .host("localhost")
-//            .tcpPort(8081)
-//            .udpPort(8082)
-//            .build();
-//
-//        netSystem = NetSystem.create();
-//
-//        sessionClient = NetSessionClient.create(netSystem);
-//
-//        var messageHandler = new NetMessageRouter().route(NetMessage.class, this::handleMessage);
-//
-//        sessionClient
-//            .onConnect(netListener::connected)
-//            .onDisconnect(netListener::disconnected)
-//            .onReceive(messageHandler)
-//            .connect(connectionConfig)
-//            .thenAccept(client -> sessionClient = client)
-//            .exceptionally(throwable -> {
-//                netListener.connectionFailed();
-//                return null;
-//            });
+        NetMessageType.scan("de.paluno.game.interfaces");
+
+        netSystem = NetSystem.create();
+
+        sessionClient = NetSessionClient.create(netSystem);
+
+//        var messageHandler = new NetMessageRouter().fallback();
+
+        sessionClient
+            .onConnect(netListener::connected)
+            .onDisconnect(netListener::disconnected)
+            .onReceive(this::handleMessage)
+            .connect(connectionConfig)
+            .thenAccept(client -> sessionClient = client)
+            .exceptionally(throwable -> {
+                netListener.connectionFailed();
+                return null;
+            });
     }
 
     public void updateRTT() {
@@ -157,12 +168,13 @@ public class NetworkClient {
         userDisconnect = true;
 //        client.stop();
 
-        netClientVerticle.getVertx().close();
-        netClientVerticle = null;
+//        netClientVerticle.getVertx().close();
+//        netClientVerticle = null;
     }
 
     public int getClientId() {
-        return netClientVerticle.getSessionId().hashCode();
+        return sessionClient.getNetSession().getSessionId().hashCode();
+//        return netClientVerticle.getSessionId().hashCode();
     }
 
     public void send(Object object) {
@@ -170,24 +182,26 @@ public class NetworkClient {
     }
 
     public void send(Object object, boolean preferUdp) {
-        if (netClientVerticle == null)
-            return;
+        sessionClient.send(NetMessage.from(object));
 
-
-        if (!(object instanceof WorldData)) {
-            log.info("Sending data: " + object.toString());
-
-            if (object instanceof GameEvent gameEvent) {
-                log.info("Sending GameEvent: " + gameEvent.getType().name());
-            } else if (object instanceof Message message) {
-                log.info("Sending Message: " + message.getType().name());
-            }
-        }
-
-        if (Config.udpEnabled && preferUdp)
-            netClientVerticle.sendUdp(object);
-        else
-            netClientVerticle.sendTcp(object);
+//        if (netClientVerticle == null)
+//            return;
+//
+//
+//        if (!(object instanceof WorldData)) {
+//            log.info("Sending data: " + object.toString());
+//
+//            if (object instanceof GameEvent gameEvent) {
+//                log.info("Sending GameEvent: " + gameEvent.getType().name());
+//            } else if (object instanceof Message message) {
+//                log.info("Sending Message: " + message.getType().name());
+//            }
+//        }
+//
+//        if (Config.udpEnabled && preferUdp)
+//            netClientVerticle.sendUdp(object);
+//        else
+//            netClientVerticle.sendTcp(object);
     }
 
     public void registerDataHandler(DataHandler handler) {

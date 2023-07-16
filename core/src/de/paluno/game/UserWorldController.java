@@ -164,9 +164,9 @@ public class UserWorldController {
         }
 
         @Override
-        public boolean scrolled(int amount) {
-            worldHandler.getWorld().getCamera().setZoom(worldHandler.getWorld().getCamera().getZoom() + amount * 0.05f);
-            return super.scrolled(amount);
+        public boolean scrolled(float amountX, float amountY) {
+            worldHandler.getWorld().getCamera().setZoom(worldHandler.getWorld().getCamera().getZoom() + amountY * 0.05f);
+            return super.scrolled(amountX, amountY);
         }
     };
 

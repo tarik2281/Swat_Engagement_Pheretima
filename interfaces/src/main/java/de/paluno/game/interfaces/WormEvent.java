@@ -1,5 +1,8 @@
 package de.paluno.game.interfaces;
 
+import de.karaca.net.core.NetPayload;
+
+@NetPayload
 public class WormEvent extends GameEvent {
 
     private int playerNumber;

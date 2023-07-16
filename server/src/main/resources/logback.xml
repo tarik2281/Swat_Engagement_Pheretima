@@ -8,6 +8,7 @@
     </appender>
 
     <logger name="de.paluno.game" level="DEBUG"/>
+    <logger name="de.karaca.net" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

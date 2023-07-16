@@ -3,6 +3,8 @@ package de.karaca.net.core;
 import de.karaca.net.core.util.FNV1a;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -11,7 +13,8 @@ import java.util.Objects;
 @Getter
 @Slf4j
 public final class NetMessageType<T> {
-    private static final HashMap<Integer, NetMessageType<Object>> messageTypeMap = new HashMap<>();
+    private static final HashMap<Integer, NetMessageType<?>> messageTypeByHash = new HashMap<>();
+    private static final HashMap<Class<?>, NetMessageType<?>> messageTypeByClass = new HashMap<>();
 
     private final String name;
     private final int nameHash;
@@ -40,6 +43,57 @@ public final class NetMessageType<T> {
         return nameHash;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> NetMessageType<T> getByClass(Class<T> type) {
+        if (type == null) {
+            throw new IllegalArgumentException("type must not be null");
+        }
+
+        var messageType = messageTypeByClass.get(type);
+
+        if (messageType == null) {
+            throw new IllegalArgumentException("No NetMessageType registered by class for " + type.getName());
+        }
+
+        return (NetMessageType<T>) messageType;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static NetMessageType<Object> getByHash(int nameHash) {
+        return (NetMessageType<Object>) messageTypeByHash.get(nameHash);
+    }
+
+    public static void scan(Class<?> basePackage) {
+        Reflections reflections = new Reflections(ConfigurationBuilder.build(basePackage));
+        reflections.getTypesAnnotatedWith(NetPayload.class).forEach(NetMessageType::create);
+    }
+
+    public static void scan(String basePackage) {
+        Reflections reflections = new Reflections(ConfigurationBuilder.build(basePackage));
+        reflections.getTypesAnnotatedWith(NetPayload.class).forEach(NetMessageType::create);
+    }
+
+    public static <T> NetMessageType<T> create(Class<T> type) {
+        NetPayload payload = type.getAnnotation(NetPayload.class);
+        NetProtocol protocol = NetProtocol.TCP;
+
+        if (payload != null) {
+            protocol = payload.protocol();
+        } else {
+            log.warn("No @NetPayload annotation found for type {}", type.getName());
+        }
+
+        return create(type, protocol);
+    }
+
+    public static <T> NetMessageType<T> create(Class<T> type, NetProtocol protocol) {
+        var messageType = create(type.getName(), type, protocol);
+
+        messageTypeByClass.put(type, messageType);
+
+        return messageType;
+    }
+
     public static <T> NetMessageType<T> create(String name, Class<T> type, NetProtocol protocol) {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
@@ -53,7 +107,19 @@ public final class NetMessageType<T> {
 
         var messageType = new NetMessageType<>(name, type, protocol);
 
-        var oldMessageType = messageTypeMap.put(messageType.getNameHash(), (NetMessageType<Object>) messageType);
+        log.debug("Created NetMessageType with name '{}' and hash '{}' for type '{}' using protocol '{}'",
+            messageType.getName(),
+            messageType.getNameHash(),
+            messageType.getType().getName(),
+            messageType.getProtocol());
+
+        addMessageType(messageType);
+
+        return messageType;
+    }
+
+    private static void addMessageType(NetMessageType<?> messageType) {
+        var oldMessageType = messageTypeByHash.put(messageType.getNameHash(), messageType);
 
         if (oldMessageType != null) {
             if (oldMessageType.equals(messageType)) {
@@ -68,11 +134,5 @@ public final class NetMessageType<T> {
                     oldMessageType.getName());
             }
         }
-
-        return messageType;
-    }
-
-    public static NetMessageType<Object> getByHash(int nameHash) {
-        return messageTypeMap.get(nameHash);
     }
 }

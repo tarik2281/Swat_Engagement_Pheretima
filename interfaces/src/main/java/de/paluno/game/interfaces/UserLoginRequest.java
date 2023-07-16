@@ -1,7 +1,11 @@
 package de.paluno.game.interfaces;
 
+import de.karaca.net.core.NetPayload;
+
+@NetPayload
 public class UserLoginRequest {
 
+    @NetPayload
     public static class Result {
         private boolean success;
 

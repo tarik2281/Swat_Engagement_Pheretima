@@ -49,7 +49,13 @@ public class NetSessionClientVertx implements NetSessionClient {
                     .build());
                 // TODO: repeat this until we get a response
             })
-            .route(CONFIRM_UDP_ADDRESS, (session, message) -> connectFuture.complete(this));
+            .route(CONFIRM_UDP_ADDRESS, (session, message) -> {
+                if (connectHandler != null) {
+                    connectHandler.run();
+                }
+
+                connectFuture.complete(this);
+            });
     }
 
     @Override

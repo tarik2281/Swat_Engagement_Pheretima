@@ -1,5 +1,9 @@
 package de.paluno.game.interfaces;
 
+import de.karaca.net.core.NetPayload;
+import de.karaca.net.core.NetProtocol;
+
+@NetPayload(protocol = NetProtocol.UDP)
 public class WorldData extends GameData {
 
     private boolean usingTCP;
