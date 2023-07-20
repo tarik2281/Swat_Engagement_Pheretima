@@ -1,6 +1,5 @@
 package de.paluno.game.server.migration;
 
-import com.google.protobuf.CodedOutputStream;
 import de.paluno.game.interfaces.*;
 import de.paluno.game.server.Lobby;
 import de.paluno.game.server.User;
