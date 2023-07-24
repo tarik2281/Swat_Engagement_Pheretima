@@ -3,6 +3,7 @@ package de.karaca.net.core;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 @Slf4j
 public class NetMessageRouter implements NetMessageConsumer<Object> {
@@ -23,6 +24,20 @@ public class NetMessageRouter implements NetMessageConsumer<Object> {
         }
 
         return this;
+    }
+
+    public <T, R> NetMessageRouter request(NetRequestType<T, R> requestType, NetRequestHandler<T, Optional<R>> handler) {
+        return route(requestType.getRequestMessageType(), (netSession, netMessage) -> {
+            var request = netMessage.getPayload();
+            var response = handler.apply(netSession, request);
+
+            response.ifPresent(r -> netSession.send(
+                NetMessage
+                    .builder(requestType.getResponseMessageType())
+                    .payload(r)
+                    .build()
+            ));
+        });
     }
 
     public NetMessageRouter chain(NetMessageConsumer<Object> handler) {

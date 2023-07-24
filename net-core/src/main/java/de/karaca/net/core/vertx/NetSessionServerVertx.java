@@ -92,6 +92,10 @@ public class NetSessionServerVertx implements NetSessionServer {
                     if (remoteUdpAddress != null) {
                         udpSessionMap.remove(remoteUdpAddress);
                     }
+
+                    if (disconnectHandler != null) {
+                        disconnectHandler.accept(netSession);
+                    }
                 });
             })
             .listen(8081)
@@ -116,6 +120,10 @@ public class NetSessionServerVertx implements NetSessionServer {
                                 session.setRemoteUdpAddress(remoteAddress);
                                 udpSessionMap.put(remoteAddress, session);
                                 dataHandler.send(session, NetMessage.builder(CONFIRM_UDP_ADDRESS).build());
+
+                                if (connectHandler != null) {
+                                    connectHandler.accept(session);
+                                }
                             } else {
                                 log.warn("Received UDP address assignment for unknown session {}", sessionId);
                             }

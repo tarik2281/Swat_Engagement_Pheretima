@@ -87,6 +87,16 @@ public final class NetMessageType<T> {
     }
 
     public static <T> NetMessageType<T> create(Class<T> type, NetProtocol protocol) {
+        var existingMessageType = messageTypeByClass.get(type);
+
+        if (existingMessageType != null) {
+            if (existingMessageType.getProtocol() == protocol) {
+                return (NetMessageType<T>) existingMessageType;
+            } else {
+                throw new IllegalArgumentException("NetMessageType already exists for type " + type.getName() + " with different protocol");
+            }
+        }
+
         var messageType = create(type.getName(), type, protocol);
 
         messageTypeByClass.put(type, messageType);

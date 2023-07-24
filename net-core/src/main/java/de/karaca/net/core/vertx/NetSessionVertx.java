@@ -1,5 +1,6 @@
 package de.karaca.net.core.vertx;
 
+import de.karaca.net.core.NetMessage;
 import de.karaca.net.core.NetSession;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.net.NetSocket;
@@ -42,5 +43,14 @@ public class NetSessionVertx implements NetSession {
             messageBuffer = ByteBuffer.allocate(4096);
 
         return messageBuffer;
+    }
+
+    @Override
+    public <T> void send(NetMessage<T> netMessage) {
+        if (tcpSocket != null) {
+            tcpSocket.write(netMessage.getBuffer());
+        } else if (udpSocket != null) {
+            udpSocket.send(netMessage.getBuffer(), remoteUdpAddress);
+        }
     }
 }

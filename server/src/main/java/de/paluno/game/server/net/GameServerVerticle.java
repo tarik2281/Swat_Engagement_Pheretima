@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -26,6 +27,17 @@ public class GameServerVerticle extends AbstractVerticle {
             loginUser(netSession, message.getPayload());
             netSessionServer.send(netSession, NetMessage.from(new UserLoginRequest.Result(true)));
         })
+        .request(LobbyCreateRequest.TYPE, (netSession, message) ->
+            findUserById(netSession.getSessionId())
+                .map(user -> {
+                    Lobby lobby = createLobby(message.getName(), message.getMapNumber(), message.getNumWorms(), user);
+
+                    LobbyCreateRequest.Result result = new LobbyCreateRequest.Result();
+                    result.lobbyId = lobby.getId();
+
+                    return result;
+                })
+        )
         .route(LobbyCreateRequest.class, (netSession, message) -> {
             User user = getUserById(netSession.getSessionId());
             if (user != null) {
@@ -36,6 +48,16 @@ public class GameServerVerticle extends AbstractVerticle {
                 netSessionServer.send(netSession, NetMessage.from(result));
             }
         })
+        .request(LobbyJoinRequest.TYPE, (netSession, message) ->
+            findUserById(netSession.getSessionId())
+                .flatMap(user ->
+                    findLobbyById(message.lobbyId)
+                        .map(lobby -> lobby.joinUser(user))
+                        .map(joined ->
+                            new LobbyJoinRequest.Result().setSuccess(joined)
+                        )
+                )
+        )
         .route(LobbyJoinRequest.class, (netSession, message) -> {
             boolean joined = false;
             User user = getUserById(netSession.getSessionId());
@@ -55,30 +77,42 @@ public class GameServerVerticle extends AbstractVerticle {
                 netSessionServer.send(netSession, NetMessage.from(result));
             }
         })
-        .route(LobbyListRequest.class, (netSession, message) -> {
-            var lobbies = lobbyMap.values()
-                .stream()
-                .filter(Lobby::isOpen)
-                .map(l -> new LobbyData()
-                    .setId(l.getId())
-                    .setName(l.getName()))
-                .toList();
-
-            LobbyListRequest.Result result = new LobbyListRequest.Result();
-            result.lobbies = lobbies.toArray(new LobbyData[0]);
-
-            netSessionServer.send(netSession, NetMessage.from(result));
-        })
+        .request(LobbyListRequest.TYPE, (netSession, message) ->
+            Optional.of(new LobbyListRequest.Result()
+                .setLobbies(lobbyMap.values()
+                    .stream()
+                    .filter(Lobby::isOpen)
+                    .map(l -> new LobbyData()
+                        .setId(l.getId())
+                        .setName(l.getName()))
+                    .toList()
+                )
+            )
+        )
+//        .route(LobbyListRequest.class, (netSession, message) -> {
+//            var lobbies = lobbyMap.values()
+//                .stream()
+//                .filter(Lobby::isOpen)
+//                .map(l -> new LobbyData()
+//                    .setId(l.getId())
+//                    .setName(l.getName()))
+//                .toList();
+//
+//            LobbyListRequest.Result result = new LobbyListRequest.Result();
+//            result.lobbies = lobbies.toArray(new LobbyData[0]);
+//
+//            netSessionServer.send(netSession, NetMessage.from(result));
+//        })
         .route(LobbyDataRequest.class, (netSession, message) -> {
             Lobby lobby = getLobbyById(message.getPayload().lobbyId);
             LobbyData data = null;
             if (lobby != null) {
-                data = new LobbyData();
-                data.setId(lobby.getId());
-                data.setName(lobby.getName());
-                data.setMapNumber(lobby.getMapNumber());
-                data.setNumWorms(lobby.getNumWorms());
-                data.setCreatingUserId(lobby.getCreatingUser().getId());
+                data = new LobbyData()
+                    .setId(lobby.getId())
+                    .setName(lobby.getName())
+                    .setMapNumber(lobby.getMapNumber())
+                    .setNumWorms(lobby.getNumWorms())
+                    .setCreatingUserId(lobby.getCreatingUser().getId());
             }
 
             LobbyDataRequest.Result result = new LobbyDataRequest.Result();
@@ -155,8 +189,16 @@ public class GameServerVerticle extends AbstractVerticle {
         return loggedInUsers.get(id);
     }
 
+    private Optional<User> findUserById(UUID id) {
+        return Optional.ofNullable(getUserById(id));
+    }
+
     private Lobby getLobbyById(int id) {
         return lobbyMap.get(id);
+    }
+
+    private Optional<Lobby> findLobbyById(int id) {
+        return Optional.ofNullable(getLobbyById(id));
     }
 
     private User loginUser(NetSession netSession, UserLoginRequest request) {
@@ -171,9 +213,8 @@ public class GameServerVerticle extends AbstractVerticle {
         User user = loggedInUsers.remove(sessionId);
 
         if (user != null) {
-            Lobby lobby = getLobbyById(user.getCurrentLobbyId());
-            if (lobby != null)
-                lobby.leaveUser(user);
+            findLobbyById(user.getCurrentLobbyId())
+                .ifPresent(lobby -> lobby.leaveUser(user));
 
             log.info("User logged out (id: {}, name: {})", user.getId(), user.getName());
         }

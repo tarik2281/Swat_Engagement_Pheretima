@@ -1,9 +1,12 @@
 package de.paluno.game.interfaces;
 
 import de.karaca.net.core.NetPayload;
+import de.karaca.net.core.NetRequestType;
 
 @NetPayload
 public class LobbyCreateRequest {
+
+    public static final NetRequestType<LobbyCreateRequest, LobbyCreateRequest.Result> TYPE = NetRequestType.create(LobbyCreateRequest.class, LobbyCreateRequest.Result.class);
 
     @NetPayload
     public static class Result {

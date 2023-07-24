@@ -155,6 +155,10 @@ public class NetworkClient {
             });
     }
 
+    public NetSessionClient getSessionClient() {
+        return sessionClient;
+    }
+
     public void updateRTT() {
 //        client.updateReturnTripTime();
     }

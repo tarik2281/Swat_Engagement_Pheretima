@@ -43,7 +43,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
     };
 
     public ImageButton buttonMap1, buttonMap2, buttonMap3, buttonMap4,
-            buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
+        buttonWorm1, buttonWorm2, buttonWorm3, buttonWorm4, buttonWorm5;
 
     private ImageButton selectedWormButton;
     private ImageButton selectedMapButton;
@@ -84,7 +84,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
     public class LobbyDialog extends Dialog {
 
 
-
         public LobbyDialog(String title, Skin skin) {
             super(title, skin);
         }
@@ -113,6 +112,13 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public void show() {
+
+        client.getSessionClient().getNetSession().request(
+            LobbyListRequest.TYPE,
+            result -> {
+
+            });
+
         client.send(new LobbyListRequest());
         client.registerDataHandler(dataHandler);
 
@@ -127,7 +133,6 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         TextButton createButton = new TextButton("Erstellen", skin);
 
 
-
         lobbyDialog.getButtonTable().add(cancelButton).size(200, 60).padBottom(10.0f);
         lobbyDialog.getButtonTable().add(createButton).size(200, 60).padBottom(10.0f);
         lobbyDialog.setObject(cancelButton, "cancel");
@@ -139,7 +144,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedMapButton(buttonMap1);
                 mapNumber = 0;
                 //System.out.println("Map1 Clicked");
@@ -151,7 +156,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedMapButton(buttonMap2);
                 mapNumber = 1;
                 //System.out.println("Map2 Clicked");
@@ -164,7 +169,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedMapButton(buttonMap3);
 
                 mapNumber = 2;
@@ -179,7 +184,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedMapButton(buttonMap4);
                 mapNumber = 3;
             }
@@ -191,7 +196,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm1);
                 numWorms = 1;
             }
@@ -203,7 +208,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm2);
                 numWorms = 2;
             }
@@ -214,7 +219,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm3);
                 numWorms = 3;
             }
@@ -225,7 +230,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm4);
                 numWorms = 4;
             }
@@ -236,7 +241,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 setSelectedWormButton(buttonWorm5);
                 numWorms = 5;
             }
@@ -260,7 +265,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         textButtonMenu.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 game.setModiScreen();
             }
         });
@@ -271,7 +276,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 lobbyDialog.setVisible(true);
                 lobbyDialog.show(stage);
             }
@@ -282,7 +287,7 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
         textButtonJoinLobby.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-            	EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
+                EventManager.getInstance().queueEvent(EventManager.Type.ClickSound, null);
                 LobbyData data = list.getSelected();
                 if (data != null) {
                     LobbyJoinRequest request = new LobbyJoinRequest();
@@ -369,10 +374,10 @@ public class LobbyScreen extends ScreenAdapter implements Loadable {
 
     @Override
     public boolean load(AssetManager manager) {
-     // Assets.loadAssets(manager, Assets.LobbyScreenAssets);
+        // Assets.loadAssets(manager, Assets.LobbyScreenAssets);
         //Assets.loadAssets(manager, Assets.Music);
         Assets.loadAssets(manager, Assets.MenuScreenAssets);
-        
+
         return false;
     }
 }
